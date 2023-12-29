@@ -21,8 +21,9 @@ export default function CardWrapper(props: Props) {
           <CardTitle>{title}</CardTitle>
           <CardDescription>{description}</CardDescription>
         </div>
-        <div className="flex-none">
-          <Plus className="h-6 w-6 cursor-pointer text-blue-500" />
+        <div className="flex-none flex items-center space-x-4">
+          <p className="text-xs text-gray-600 underline cursor-pointer">View All</p>
+          <Plus className="h-5 w-5 cursor-pointer text-blue-500" />
         </div>
       </CardHeader>
       <CardContent className="py-6">

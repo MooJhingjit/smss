@@ -18,13 +18,13 @@ export default function HomePage() {
         </div>
         <div className="col-span-6">
           <CardWrapper
-            title="All Quotations"
+            title="Quotations"
             description="Recents to 5 quotations ordered by date"
           />
         </div>
         <div className="col-span-6">
           <CardWrapper
-            title="All Purchase orders "
+            title="Purchase orders "
             description="Recents to 5 purchase orders ordered by date"
           />
         </div>
