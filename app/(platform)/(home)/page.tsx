@@ -1,5 +1,6 @@
 import React from "react";
 import CardWrapper from "./_components/CardWrapper";
+import QuotationCard from "./_components/QuotationCard";
 
 export default function HomePage() {
   return (
@@ -8,19 +9,14 @@ export default function HomePage() {
         <div className="col-span-4">
           <div className="relative h-full p-6 grid grid-cols-3 rounded-xl overflow-hidden">
             <div className="absolute inset-0 bg-gray-700 opacity-10 z-10 h-full"></div>
-            <div className="h-full">
-            </div>
-            
+            <div className="h-full"></div>
           </div>
         </div>
         <div className="col-span-8">
           <CardWrapper title="Tasks" description="Tasks you need to do" />
         </div>
         <div className="col-span-6">
-          <CardWrapper
-            title="Quotations"
-            description="Recents to 5 quotations ordered by date"
-          />
+          <QuotationCard />
         </div>
         <div className="col-span-6">
           <CardWrapper
