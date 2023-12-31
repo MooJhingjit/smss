@@ -1,4 +1,5 @@
 import React from "react";
+import { Lock } from "lucide-react";
 
 export default function QuotationStatus() {
   return (
@@ -9,6 +10,9 @@ export default function QuotationStatus() {
         </span>
         <span className="inline-flex font-semibold items-center rounded-md bg-blue-100 px-2 py-1 text-xs text-blue-700">
           Service
+        </span>
+        <span className="inline-flex font-semibold items-center rounded-md bg-gray-100 px-2 py-1 text-xs text-gray-700">
+          <Lock className="w-4 h-4 text-red-" />
         </span>
       </div>
       {Array.from({ length: 6 }).map((_, index) => (

@@ -8,3 +8,4 @@ export function cn(...inputs: ClassValue[]) {
 export function classNames(...classes: ClassValue[]) {
   return classes.filter(Boolean).join(' ')
 }
+

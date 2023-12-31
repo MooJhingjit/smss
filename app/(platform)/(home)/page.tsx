@@ -1,6 +1,6 @@
 import React from "react";
-import CardWrapper from "./_components/CardWrapper";
-import QuotationCard from "./_components/QuotationCard";
+import CardWrapper from "./_components/card-wrapper";
+import QuotationCard from "./_components/quotation-card";
 
 export default function HomePage() {
   return (

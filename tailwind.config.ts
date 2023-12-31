@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss"
+const colors = require("tailwindcss/colors");
 
 const config = {
   darkMode: ["class"],
@@ -16,6 +17,10 @@ const config = {
       screens: {
         "2xl": "1400px",
       },
+    },
+    colors: {
+      ...colors,
+      primary: colors.blue,
     },
     extend: {
       colors: {
