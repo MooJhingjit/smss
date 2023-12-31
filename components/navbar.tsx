@@ -30,10 +30,11 @@ export default function MainNavbar(props: { showMenu?: boolean }) {
           SmartSolution
         </h1>
         {showMenu && <MenuItems />}
-        <div className="space-x-4 md:block md:w-auto flex items-center justify-between w-full">
+        <div className="space-x-2 md:w-auto flex items-center justify-between">
+          <p className="text-xs">Admin</p>
           <Button
             asChild
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-gray-500"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-gray-500 cursor-pointer"
           >
             {/* <Link href="/sign-in">Login</Link> */}
             <span className="text-xs font-medium leading-none text-white">

@@ -32,10 +32,10 @@ export default function QuotationDetails() {
         <div className="col-span-5">
           <QuotationItems />
         </div>
-        <div className="col-span-2">
+        <div className="col-span-5 md:col-span-2">
           <DocumentItems />
         </div>
-        <div className="col-span-3">
+        <div className="col-span-5 md:col-span-3">
           <PurchaseOrders />
         </div>
       </div>

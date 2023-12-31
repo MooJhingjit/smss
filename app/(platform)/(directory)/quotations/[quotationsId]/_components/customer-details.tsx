@@ -12,11 +12,11 @@ export default function CustomerInfo() {
             Edit
           </span>
         </div>
-        <div className="mt-2 text-sm text-yellow-700 grid grid-cols-3 gap-2">
+        <div className="mt-2 text-sm text-yellow-700 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
           <Item label="Tax ID" value="1029939948938" />
           <Item label="Tel." value="0938847789" />
           <Item label="Email" value="m.jhingjit@gmail.com" />
-          <div className="col-span-3">
+          <div className="md:col-span-3">
             <Item
               label="Address"
               value="28/15 Soi Sukhumvit 36 Sukhumvit Road Klongton, Bangkok 39449"
