@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { NewQuotationModal } from "@/components/modals/new-quotation-modal";
+import { NewPurchaseModal } from "@/components/modals/new-purchase-modal";
 
 export const ModalProvider = () => {
   const [isMounted, setIsMounted] = useState(false);
@@ -18,6 +19,7 @@ export const ModalProvider = () => {
   return (
     <>
       <NewQuotationModal />
+      <NewPurchaseModal />
     </>
   )
 }

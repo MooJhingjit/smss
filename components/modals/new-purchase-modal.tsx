@@ -11,7 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useQuotationModal } from "@/hooks/use-quotation-modal";
+import { usePurchaseModal } from "@/hooks/use-po-modal";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
@@ -19,8 +19,8 @@ import { Label } from "../ui/label";
 // import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-export const NewQuotationModal = () => {
-  const quotationModal = useQuotationModal();
+export const NewPurchaseModal = () => {
+  const modal = usePurchaseModal();
 
   // const { execute, isLoading } = useAction(createQuotation, {
   //   onSuccess: (data) => {
@@ -36,31 +36,19 @@ export const NewQuotationModal = () => {
   // };
 
   const execute = () => {
-    window.location.href = "/quotations/1";
+    window.location.href = "/purchase-order/1";
   };
 
   return (
-    <Dialog open={quotationModal.isOpen} onOpenChange={quotationModal.onClose}>
+    <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>New Quotation</DialogTitle>
-          <DialogDescription>Please select the customer.</DialogDescription>
+          <DialogTitle>New Purchase order</DialogTitle>
+          {/* <DialogDescription>Please select the vender.</DialogDescription> */}
         </DialogHeader>
         <div className="pb-4 space-y-2">
-          <Tabs defaultValue="account" className="w-full">
-            <Label>Type</Label>
-            <TabsList className="w-full flex">
-              <TabsTrigger className="flex-1" value="product">
-                Product
-              </TabsTrigger>
-              <TabsTrigger className="flex-1" value="service">
-                Service
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-
           <div className="">
-            <Label>Customer</Label>
+            <Label>Vender</Label>
             <Input id="name" value="Pedro Duarte" className="col-span-3" />
           </div>
           <div className="">

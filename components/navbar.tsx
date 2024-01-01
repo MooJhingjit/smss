@@ -21,14 +21,15 @@ export default function MainNavbar(props: { showMenu?: boolean }) {
 
       <div className="relative z-20 mx-auto max-w-6xl flex items-center w-full justify-between">
         {/* <div className="w-8 h-8 bg-white"></div> */}
-        <h1
+        <Link
+          href="/"
           className={classNames(
             "font-semibold text-lg",
             showMenu ? "text-gray-700" : "text-white"
           )}
         >
           SmartSolution
-        </h1>
+        </Link>
         {showMenu && <MenuItems />}
         <div className="space-x-2 md:w-auto flex items-center justify-between">
           <p className="text-xs">Admin</p>
@@ -63,9 +64,7 @@ function MenuItems() {
   };
   return (
     <div className="hidden md:flex items-center space-x-4 text-sm text-slate-700">
-      <Link href="/" >
-        Home
-      </Link>
+      <Link href="/">Home</Link>
       <Link
         href="/quotation"
         className={classNames(
