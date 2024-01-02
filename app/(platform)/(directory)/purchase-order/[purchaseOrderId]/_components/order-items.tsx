@@ -12,24 +12,24 @@ export default function QuotationItems() {
         <table className="w-full text-gray-500 ">
           <thead className="text-left text-sm text-gray-500 ">
             <tr>
-              <th scope="col" className="w-10">
-                #
+              <th scope="col" className="w-10 text-xs font-normal">
+                Code
               </th>
               <th
                 scope="col"
                 className="py-3 pr-8 text-xs sm:w-2/5 lg:w-1/2 font-normal"
               >
-                Product
+                Description
               </th>
 
               <th scope="col" className=" w-1/12 py-3 pr-8 text-xs font-normal">
+                Quantity
+              </th>
+              <th scope="col" className=" w-1/8 py-3 pr-8 text-xs font-normal">
                 Unit
               </th>
               <th scope="col" className=" w-1/8 py-3 pr-8 text-xs font-normal">
-                Price
-              </th>
-              <th scope="col" className=" w-1/8 py-3 pr-8 text-xs font-normal">
-                Percent/Cost
+                Unit Price
               </th>
               <th scope="col" className=" w-1/12 py-3 pr-8 text-xs font-normal">
                 Amount
@@ -46,28 +46,16 @@ export default function QuotationItems() {
                   <Input id="product-name" />
                 </td>
                 <td>
-                  <Input id="unit" type="number" className="w-14" />
-                </td>
-                <td className="pr-2">
-                  <Input id="price" />
+                  <Input id="unit" type="number" className="w-20" />
                 </td>
                 <td>
-                  <div className="flex space-x-2">
-                    <div className="relative rounded-md shadow-sm">
-                      <Input name="percent" className="bg-gray-100" />
-                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                        <span
-                          className="text-gray-500 sm:text-sm"
-                          id="price-currency"
-                        >
-                          %
-                        </span>
-                      </div>
-                    </div>
-                    <Input id="cost" className="bg-gray-100" />
-                  </div>
+                  <Input id="unit" type="number" className="w-20" />
                 </td>
-                <td>??????</td>
+
+                <td>
+                  <Input id="price" className="w-40" />
+                </td>
+                <td>???? </td>
                 <td>
                   <Trash2
                     onClick={() => setItemCount(itemCount - 1)}
@@ -135,9 +123,65 @@ const BillingInfo = () => {
 
 const Remarks = () => {
   return (
-    <textarea
-      className="w-full h-full border p-2 rounded-lg"
-      placeholder="Remarks"
-    ></textarea>
+    <div className="space-y-4">
+      <div className="w-full">
+        <textarea
+          className="w-full min-h-44 border p-2 rounded-lg"
+          placeholder="Remarks"
+        ></textarea>
+      </div>
+      <div className=" grid grid-cols-3 gap-2">
+        <div>
+          <label
+            htmlFor="price"
+            className="block text-sm font-medium leading-6 text-gray-900"
+          >
+            ราคาก่อนหักภาษี
+          </label>
+          <div className="relative mt-2 rounded-md shadow-sm">
+            <Input type="text" name="price" id="price" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+              <span className="text-gray-500 sm:text-sm" id="price-currency">
+                บาท
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label
+            htmlFor="price"
+            className="block text-sm font-medium leading-6 text-gray-900"
+          >
+            หัก ณ ที่จ่าย 3%
+          </label>
+          <div className="relative mt-2 rounded-md shadow-sm">
+            <Input type="text" name="price" id="price" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+              <span className="text-gray-500 sm:text-sm" id="price-currency">
+                บาท
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label
+            htmlFor="price"
+            className="block text-sm font-medium leading-6 text-gray-900"
+          >
+            ราคาหลังจากหัก ณ ที่จ่าย
+          </label>
+          <div className="relative mt-2 rounded-md shadow-sm">
+            <Input type="text" name="price" id="price" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+              <span className="text-gray-500 sm:text-sm" id="price-currency">
+                บาท
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
