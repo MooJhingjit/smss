@@ -64,7 +64,7 @@ function MenuItems() {
   };
   return (
     <div className="hidden md:flex items-center space-x-4 text-sm text-slate-700">
-      <Link href="/">Home</Link>
+
       <Link
         href="/quotation"
         className={classNames(
@@ -73,7 +73,9 @@ function MenuItems() {
       >
         Quotations
       </Link>
-      <Link href="/orders">Orders</Link>
+      <Link href="/orders">
+        Purchase Orders
+      </Link>
       <Link href="/products"
         className={classNames(
           isActive("/products") ? "text-primary-700 font-semibold" : ""
