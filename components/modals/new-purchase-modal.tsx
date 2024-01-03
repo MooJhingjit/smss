@@ -36,7 +36,7 @@ export const NewPurchaseModal = () => {
   // };
 
   const execute = () => {
-    window.location.href = "/purchase-order/1";
+    window.location.href = "/purchase-orders/1";
   };
 
   return (

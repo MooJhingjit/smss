@@ -74,7 +74,11 @@ function MenuItems() {
         Quotations
       </Link>
       <Link href="/orders">Orders</Link>
-      <Link href="/directory">Store</Link>
+      <Link href="/products"
+        className={classNames(
+          isActive("/products") ? "text-primary-700 font-semibold" : ""
+        )}
+      >Products</Link>
       <Link href="/">Users</Link>
     </div>
   );
