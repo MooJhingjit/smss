@@ -4,7 +4,7 @@ import { DataTable } from '@/components/ui/data-table'
 import {
   ColumnDef,
 } from "@tanstack/react-table"
-import TableFilter from '@/components/data-table/data-table.filters'
+// import TableFilter from '@/components/data-table/data-table.filters'
 
 
 interface DataTableProps<TData, TValue> {
