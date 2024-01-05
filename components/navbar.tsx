@@ -4,6 +4,8 @@ import { Button } from "./ui/button";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { classNames } from "@/lib/utils";
+import Image from 'next/image'
+import LOGO from '@/public/logo.png'
 
 export default function MainNavbar(props: { showMenu?: boolean }) {
   const { showMenu = false } = props;
@@ -12,7 +14,7 @@ export default function MainNavbar(props: { showMenu?: boolean }) {
     <div
       className={classNames(
         "fixed top-0 w-full h-14 px-4 shadow  flex items-center ",
-        showMenu ? "bg-white" : ""
+        showMenu ? "bg-gradient-to-tr from-blue-400 via-blue-200 to-blue-400 shadow-lg" : ""
       )}
     >
       {!showMenu && (
@@ -28,7 +30,12 @@ export default function MainNavbar(props: { showMenu?: boolean }) {
             showMenu ? "text-gray-700" : "text-white"
           )}
         >
-          SmartSolution
+          <Image
+            src={LOGO}
+            width={80}
+            height={80}
+            alt="Logo"
+          />
         </Link>
         {showMenu && <MenuItems />}
         <div className="space-x-2 md:w-auto flex items-center justify-between">
@@ -73,26 +80,26 @@ function MenuItems() {
       <Link
         href="/quotations"
         className={classNames(
-          isActive("/quotations") ? "text-primary-700 font-semibold" : ""
+          isActive("/quotations") ? "text-white font-semibold" : "text-gray-500 font-semibold"
         )}
       >
         Quotations
       </Link>
       <Link href="/purchases"
         className={classNames(
-          isActive("/purchases") ? "text-primary-700 font-semibold" : ""
+          isActive("/purchases") ? "text-white font-semibold" : "text-gray-500 font-semibold"
         )}
       >
         Purchase Orders
       </Link>
       <Link href="/products"
         className={classNames(
-          isActive("/products") ? "text-primary-700 font-semibold" : ""
+          isActive("/products") ? "text-white font-semibold" : "text-gray-500 font-semibold"
         )}
       >Products</Link>
       <Link href="/users"
         className={classNames(
-          isActive("/users") ? "text-primary-700 font-semibold" : ""
+          isActive("/users") ? "text-white font-semibold" : "text-gray-500 font-semibold"
         )}>Users</Link>
 
     </div>

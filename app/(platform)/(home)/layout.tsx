@@ -9,7 +9,7 @@ export default function HomeLayout(props: Props) {
   return (
     <div className="bg-gradient-to-tl from-transparent via-blue-300 to-blue-500">
       <MainNavbar/>
-      <div className="pt-28 pb-20">{children}</div>
+      <div className="pt-20 pb-20">{children}</div>
     </div>
   );
 }
