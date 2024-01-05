@@ -8,7 +8,7 @@ import AssociateOrders from "./_components/associate-orders";
 const pages = [
   {
     name: "Purchase Orders",
-    href: "/purchase-orders",
+    href: "/purchases",
     current: false,
   },
   {

@@ -1,15 +1,18 @@
 import React from "react";
 import CardWrapper from "./_components/card-wrapper";
 import QuotationCard from "./_components/quotation-card";
+import ShortcutMenus from "./_components/shortcut-menus";
 
 export default function HomePage() {
   return (
     <div className="mx-auto max-w-6xl">
       <div className="grid grid-cols-12 gap-6">
         <div className="col-span-4">
-          <div className="relative h-full p-6 grid grid-cols-3 rounded-xl overflow-hidden">
+          <div className="relative h-full p-6 rounded-xl overflow-hidden">
             <div className="absolute inset-0 bg-gray-700 opacity-10 z-10 h-full"></div>
-            <div className="h-full"></div>
+            <div className="h-full w-full">
+              <ShortcutMenus />
+            </div>
           </div>
         </div>
         <div className="col-span-8">

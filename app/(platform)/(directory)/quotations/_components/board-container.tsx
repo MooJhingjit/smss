@@ -17,36 +17,38 @@ export default function BoardContainer(props: Props) {
     <DragDropContext onDragEnd={onDragEnd}>
       <Droppable droppableId="lists" type="list" >
         {(provided) => (
-          <ol
+          <div
             {...provided.droppableProps}
             ref={provided.innerRef}
             className="flex gap-x-3 h-full"
           >
 
-            <BoardColumn idx={1} />
-            <BoardColumn idx={2} />
-            <BoardColumn idx={3} />
-            <BoardColumn idx={4} />
+            <BoardColumn label="Quotation Open" idx={1} itemCount={20} />
+            <BoardColumn label="Quotation Sent" idx={2} itemCount={8} />
+            <BoardColumn label="Quotation Approved" idx={3} itemCount={5} />
+            <BoardColumn label="Order Sent" idx={4} itemCount={7} />
+            <BoardColumn label="Order Received" idx={5} itemCount={3} />
+            <BoardColumn label="Delivered/Done" idx={6} itemCount={6} />
             {provided.placeholder}
             <div className="flex-shrink-0 w-1" />
-          </ol>
+          </div>
         )}
       </Droppable>
     </DragDropContext>
   )
 }
 
-const BoardColumn = ({ idx }: { idx: number }) => {
+const BoardColumn = ({ label, idx, itemCount }: { label: string, idx: number, itemCount: number }) => {
   return (
-    <li
-      className="shrink-0 h-full w-[272px] select-none"
+    <div
+      className="h-full min-w-[210px] select-none"
     >
       <div
-        className="w-full rounded-md bg-gray-50 shadow-md pb-2"
+        className="w-full rounded-md bg-gray-50 shadow-md pb-2 h-full"
       >
         <div className="flex justify-between items-center px-3 pt-2 pb-4">
-          <div className="text-sm font-semibold text-[#4a4a4a]">To Do</div>
-          <div className="text-sm font-semibold text-[#4a4a4a]">0/0</div>
+          <div className="text-sm font-semibold text-[#4a4a4a] whitespace-nowrap">{label}</div>
+          <div className="text-xs font-semibold text-[#4a4a4a]">0/0</div>
         </div>
         <div className="h-full px-3">
           <Droppable droppableId={`list-${idx}`} type="card">
@@ -56,17 +58,21 @@ const BoardColumn = ({ idx }: { idx: number }) => {
                 ref={provided.innerRef}
                 className="h-full"
               >
-                <BoardCard idx={`${idx}-1`} id={1} />
-                <BoardCard idx={`${idx}-2`} id={2} />
-                <BoardCard idx={`${idx}-3`} id={3} />
-                <BoardCard idx={`${idx}-4`} id={4} />
+                {
+                  [...Array(itemCount)].map((_, i) => {
+                    return (
+                      <BoardCard idx={`${idx}-${i}`} id={i} />
+                    )
+                  })
+                }
+               
                 {provided.placeholder}
               </ul>
             )}
           </Droppable>
         </div>
       </div>
-    </li>
+    </div>
   )
 }
 
@@ -80,9 +86,9 @@ const BoardCard = ({ idx, id }: { idx: string, id: number }) => {
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           ref={provided.innerRef}
-          className="w-full rounded-md bg-white shadow-md mb-3"
+          className="w-full rounded-md bg-white shadow mb-3"
         >
-          <div className="px-3 py-2 h-40">
+          <div className="px-3 py-2 h-20">
 
           </div>
         </li>

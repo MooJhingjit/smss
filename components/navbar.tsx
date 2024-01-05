@@ -32,7 +32,12 @@ export default function MainNavbar(props: { showMenu?: boolean }) {
         </Link>
         {showMenu && <MenuItems />}
         <div className="space-x-2 md:w-auto flex items-center justify-between">
-          <p className="text-xs">Admin</p>
+          <p className={
+            classNames(
+              "hidden md:block text-xs text-gray-500",
+              showMenu ? "text-gray-700" : "text-white"
+            )
+          }>Admin</p>
           <Button
             asChild
             className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-gray-500 cursor-pointer"
@@ -66,14 +71,14 @@ function MenuItems() {
     <div className="hidden md:flex items-center space-x-4 text-sm text-slate-700">
 
       <Link
-        href="/quotation"
+        href="/quotations"
         className={classNames(
-          isActive("/quotation") ? "text-primary-700 font-semibold" : ""
+          isActive("/quotations") ? "text-primary-700 font-semibold" : ""
         )}
       >
         Quotations
       </Link>
-      <Link href="/orders">
+      <Link href="/purchases">
         Purchase Orders
       </Link>
       <Link href="/products"
@@ -81,7 +86,7 @@ function MenuItems() {
           isActive("/products") ? "text-primary-700 font-semibold" : ""
         )}
       >Products</Link>
-      <Link href="/">Users</Link>
+      <Link href="/users">Users</Link>
     </div>
   );
 }
