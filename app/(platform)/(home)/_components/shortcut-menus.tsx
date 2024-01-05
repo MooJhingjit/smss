@@ -12,7 +12,7 @@ export default function ShortcutMenus() {
       />
       <MenuItem
         icon={<Receipt className='w-12 h-12 text-white' strokeWidth={1.5} />}
-        label="PO"
+        label="POs"
         link="/purchases"
       />
       <MenuItem
@@ -47,22 +47,22 @@ const MenuItem = (props: {
 
 const Stats = () => {
   return (
-    <div className="col-span-3 grid grid-cols-2 relative p-6">
+    <div className="col-span-3 flex justify-between relative p-6">
       <div className="absolute inset-0 bg-gray-100  rounded-lg opacity-10 z-10 h-full"></div>
 
       <div className="border-t border-gray-900/5 lg:border-t-0 ">
-        <dt className="text font-medium leading-6 text-green-400 flex space-x-1 ">
+        <dt className="text font-medium leading-6 flex space-x-1 text-slate-700 ">
           {/* <CircleDollarSign className='w-5 h-5' strokeWidth={1.5} /> */}
           <p>Sales</p>
         </dt>
-        <dd className="mt-2 w-full flex-none text-xl font-medium  text-gray-50 ">฿405,091.00</dd>
+        <dd className="mt-2 w-full flex-none text-xl font-medium  text-slate-700 ">฿405,091.00</dd>
       </div>
       <div className="justify-center  border-t border-gray-900/5 lg:border-t-0 ">
-        <dt className="text font-medium leading-6 text-orange-300 flex space-x-1">
+        <dt className="text font-medium leading-6  flex space-x-1 text-slate-700">
           {/* <CircleDollarSign className='w-5 h-5 ' strokeWidth={1.5} /> */}
           <p>Orders</p>
         </dt>
-        <dd className="mt-2 w-full flex-none text-xl font-medium text-gray-50 ">฿305,091.00</dd>
+        <dd className="mt-2 w-full flex-none text-xl font-medium text-slate-700 ">฿305,091.00</dd>
       </div>
 
       {/* <div className="absolute top-2 right-2">

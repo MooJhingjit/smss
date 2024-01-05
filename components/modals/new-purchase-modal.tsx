@@ -36,7 +36,7 @@ export const NewPurchaseModal = () => {
   // };
 
   const execute = () => {
-    window.location.href = "/purchase-orders/1";
+    window.location.href = "/purchases/1";
   };
 
   return (
@@ -44,9 +44,13 @@ export const NewPurchaseModal = () => {
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>New Purchase order</DialogTitle>
-          {/* <DialogDescription>Please select the vender.</DialogDescription> */}
+          {/* <DialogDescription>QT-0001</DialogDescription> */}
         </DialogHeader>
         <div className="pb-4 space-y-2">
+          <div className="">
+            <Label>Quotation</Label>
+            <Input id="name" value="QT-0001" className="col-span-3" disabled />
+          </div>
           <div className="">
             <Label>Vender</Label>
             <Input id="name" value="Pedro Duarte" className="col-span-3" />
@@ -67,8 +71,8 @@ export const NewPurchaseModal = () => {
 
 const CustomerInfo = () => {
   return (
-    <div className="rounded-2xl bg-gray-50 p-2">
-      <dl className="mt-3 space-y-1 text-xs leading-6 text-gray-600">
+    <div className="rounded-lg bg-gray-50 p-2">
+      <dl className="space-y-1 text-xs leading-6 text-gray-600">
         <div className="flex space-x-2">
           <dt>Tax Number:</dt>
           <dd className="font-semibold">3938827738493</dd>

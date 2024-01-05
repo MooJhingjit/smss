@@ -1,6 +1,7 @@
 'use client'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import TableFilter from './data-table.filters';
+import Link from 'next/link';
 
 interface Props {
   data: any[];
@@ -51,9 +52,9 @@ export default function TableView(props: Props) {
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{item.cost}</td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{item.percentage}</td>
                     <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
-                      <a href="#" className="text-primary-600 hover:text-primary-900">
-                        Edit<span className="sr-only">, {item.name}</span>
-                      </a>
+                      <Link href="/products/1" className="text-primary-600 hover:text-primary-900">
+                        View
+                      </Link>
                     </td>
                   </tr>
                 ))}

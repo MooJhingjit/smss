@@ -78,7 +78,11 @@ function MenuItems() {
       >
         Quotations
       </Link>
-      <Link href="/purchases">
+      <Link href="/purchases"
+        className={classNames(
+          isActive("/purchases") ? "text-primary-700 font-semibold" : ""
+        )}
+      >
         Purchase Orders
       </Link>
       <Link href="/products"
@@ -86,7 +90,11 @@ function MenuItems() {
           isActive("/products") ? "text-primary-700 font-semibold" : ""
         )}
       >Products</Link>
-      <Link href="/users">Users</Link>
+      <Link href="/users"
+        className={classNames(
+          isActive("/users") ? "text-primary-700 font-semibold" : ""
+        )}>Users</Link>
+
     </div>
   );
 }

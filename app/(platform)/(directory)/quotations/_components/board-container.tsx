@@ -14,27 +14,39 @@ export default function BoardContainer(props: Props) {
   }
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <Droppable droppableId="lists" type="list" >
-        {(provided) => (
-          <div
-            {...provided.droppableProps}
-            ref={provided.innerRef}
-            className="flex gap-x-3 h-full"
-          >
+    <div className="">
+      <BoardFilters/>
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Droppable droppableId="lists" type="list" >
+          {(provided) => (
+            <div
+              {...provided.droppableProps}
+              ref={provided.innerRef}
+              className="flex gap-x-3 h-full"
+            >
 
-            <BoardColumn label="Quotation Open" idx={1} itemCount={20} />
-            <BoardColumn label="Quotation Sent" idx={2} itemCount={8} />
-            <BoardColumn label="Quotation Approved" idx={3} itemCount={5} />
-            <BoardColumn label="Order Sent" idx={4} itemCount={7} />
-            <BoardColumn label="Order Received" idx={5} itemCount={3} />
-            <BoardColumn label="Delivered/Done" idx={6} itemCount={6} />
-            {provided.placeholder}
-            <div className="flex-shrink-0 w-1" />
-          </div>
-        )}
-      </Droppable>
-    </DragDropContext>
+              <BoardColumn label="Quotation Open" idx={1} itemCount={20} />
+              <BoardColumn label="Quotation Sent" idx={2} itemCount={8} />
+              <BoardColumn label="Quotation Approved" idx={3} itemCount={5} />
+              <BoardColumn label="Order Sent" idx={4} itemCount={7} />
+              <BoardColumn label="Order Received" idx={5} itemCount={3} />
+              <BoardColumn label="Delivered/Done" idx={6} itemCount={6} />
+              {provided.placeholder}
+              <div className="flex-shrink-0 w-1" />
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
+    </div>
+  )
+}
+
+const BoardFilters = () => {
+
+  return (
+    <div className="flex items-center gap-x-2 mb-3 border border-gray-100 text-gray-300 px-4 py-4 justify-center rounded-lg bg-gray-50">
+      <p>Filter Area</p>
+    </div>
   )
 }
 
@@ -65,7 +77,7 @@ const BoardColumn = ({ label, idx, itemCount }: { label: string, idx: number, it
                     )
                   })
                 }
-               
+
                 {provided.placeholder}
               </ul>
             )}
