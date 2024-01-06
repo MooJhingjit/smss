@@ -1,5 +1,5 @@
-"use client"
-import React from "react"
+"use client";
+import React from "react";
 import {
   Table as ITable,
   ColumnDef,
@@ -8,8 +8,8 @@ import {
   useReactTable,
   getPaginationRowModel,
   getFilteredRowModel,
-  ColumnFiltersState
-} from "@tanstack/react-table"
+  ColumnFiltersState,
+} from "@tanstack/react-table";
 
 import {
   Table,
@@ -18,15 +18,22 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Button } from "./button"
+} from "@/components/ui/table";
+import { Button } from "./button";
 
-import { ChevronRight, ChevronLeft, ChevronsLeft, ChevronsRight, Plus } from 'lucide-react'
-import { Input } from "./input"
+import {
+  ChevronRight,
+  ChevronLeft,
+  ChevronsLeft,
+  ChevronsRight,
+  Plus,
+} from "lucide-react";
+import { Input } from "./input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select";
 
 interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
 }
 
 export function DataTable<TData, TValue>({
@@ -35,7 +42,7 @@ export function DataTable<TData, TValue>({
 }: Readonly<DataTableProps<TData, TValue>>) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
-  )
+  );
 
   const table = useReactTable({
     data,
@@ -47,7 +54,7 @@ export function DataTable<TData, TValue>({
     state: {
       columnFilters,
     },
-  })
+  });
 
   return (
     <div className="space-y-4">
@@ -61,7 +68,9 @@ export function DataTable<TData, TValue>({
             }
             className="max-w-sm"
           />
-          <Button variant="secondary" className='h-[36px]'
+          <Button
+            variant="secondary"
+            className="h-[36px]"
             // onClick={onCreate}
           >
             <Plus size={20} />
@@ -71,19 +80,21 @@ export function DataTable<TData, TValue>({
       <Table className="min-w-full divide-y divide-gray-300">
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}
-            >
+            <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 return (
-                  <TableHead key={header.id} className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0">
+                  <TableHead
+                    key={header.id}
+                    className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0"
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                   </TableHead>
-                )
+                );
               })}
             </TableRow>
           ))}
@@ -96,7 +107,8 @@ export function DataTable<TData, TValue>({
                 data-state={row.getIsSelected() && "selected"}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}
+                  <TableCell
+                    key={cell.id}
                     className="whitespace-nowrap px-3 py-4 text-sm text-gray-500"
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -115,11 +127,11 @@ export function DataTable<TData, TValue>({
       </Table>
       <DataTablePagination table={table} />
     </div>
-  )
+  );
 }
 
 interface DataTablePaginationProps<TData> {
-  table: ITable<TData>
+  table: ITable<TData>;
 }
 
 function DataTablePagination<TData>({
@@ -134,13 +146,13 @@ function DataTablePagination<TData>({
       <div className="flex items-center space-x-6 lg:space-x-8">
         <div className="flex items-center space-x-2">
           <p className="text-sm">Rows per page</p>
-          <select
+          <Select
             value={`${table.getState().pagination.pageSize}`}
-            onChange={(value) => {
-              table.setPageSize(Number(value))
+            onValueChange={(value) => {
+              table.setPageSize(Number(value));
             }}
           >
-            {/* <SelectTrigger className="h-8 w-[70px]">
+            <SelectTrigger className="h-8 w-[70px]">
               <SelectValue placeholder={table.getState().pagination.pageSize} />
             </SelectTrigger>
             <SelectContent side="top">
@@ -149,8 +161,8 @@ function DataTablePagination<TData>({
                   {pageSize}
                 </SelectItem>
               ))}
-            </SelectContent> */}
-          </select>
+            </SelectContent>
+          </Select>
         </div>
         <div className="flex w-[100px] items-center justify-center text-sm">
           Page {table.getState().pagination.pageIndex + 1} of{" "}
@@ -195,7 +207,6 @@ function DataTablePagination<TData>({
           </Button>
         </div>
       </div>
-
     </div>
-  )
+  );
 }

@@ -12,14 +12,14 @@ const docs = [
     name: "inv.pdf",
     created_at: "2023/12/25",
   },
-  {
-    name: "PO1.pdf",
-    created_at: "2023/12/5",
-  },
-  {
-    name: "PO4.pdf",
-    created_at: "2023/12/5",
-  },
+  // {
+  //   name: "PO1.pdf",
+  //   created_at: "2023/12/5",
+  // },
+  // {
+  //   name: "PO4.pdf",
+  //   created_at: "2023/12/5",
+  // },
 ];
 
 export default function DocumentItems() {

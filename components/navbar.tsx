@@ -14,7 +14,7 @@ export default function MainNavbar(props: { showMenu?: boolean }) {
     <div
       className={classNames(
         "fixed top-0 w-full h-14 px-4 shadow  flex items-center ",
-        showMenu ? "bg-gradient-to-tr from-blue-400 via-blue-200 to-blue-400 shadow-lg" : ""
+        showMenu ? "bg-primary-50 bg-gradient-to-r  from-primary-400 via-primary-100  to-primary-50 shadow-lg" : ""
       )}
     >
       {!showMenu && (
@@ -80,26 +80,26 @@ function MenuItems() {
       <Link
         href="/quotations"
         className={classNames(
-          isActive("/quotations") ? "text-white font-semibold" : "text-gray-500 font-semibold"
+          isActive("/quotations") ? "text-primary-600 font-semibold" : "text-gray-500 font-semibold"
         )}
       >
         Quotations
       </Link>
       <Link href="/purchases"
         className={classNames(
-          isActive("/purchases") ? "text-white font-semibold" : "text-gray-500 font-semibold"
+          isActive("/purchases") ? "text-primary-600 font-semibold" : "text-gray-500 font-semibold"
         )}
       >
         Purchase Orders
       </Link>
       <Link href="/products"
         className={classNames(
-          isActive("/products") ? "text-white font-semibold" : "text-gray-500 font-semibold"
+          isActive("/products") ? "text-primary-600 font-semibold" : "text-gray-500 font-semibold"
         )}
       >Products</Link>
       <Link href="/users"
         className={classNames(
-          isActive("/users") ? "text-white font-semibold" : "text-gray-500 font-semibold"
+          isActive("/users") ? "text-primary-600 font-semibold" : "text-gray-500 font-semibold"
         )}>Users</Link>
 
     </div>

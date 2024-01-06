@@ -59,7 +59,7 @@ export default function PurchaseOrders() {
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200 border-b border-gray-200 text-sm sm:border-t">
-          {Array.from({ length: 2 }).map((_, index) => (
+          {Array.from({ length: 1 }).map((_, index) => (
             <tr className="border-b border-gray-200 ">
               <td className="py-6">{index + 1}</td>
               <td>?????</td>
