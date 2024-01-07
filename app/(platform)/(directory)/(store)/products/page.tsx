@@ -1,6 +1,6 @@
 import Breadcrumbs from "@/components/breadcrumbs"
-import { Product, columns } from "./columns"
-import ProductTable from "./data-table"
+import { Product, columns } from "./_components/columns"
+import ProductTable from "./_components/data-table"
 
 const pages = [
   {

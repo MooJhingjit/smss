@@ -3,8 +3,10 @@ import React, { useState } from "react";
 import { Trash2, PackagePlus } from "lucide-react";
 import PageComponentWrapper from "@/components/page-component-wrapper";
 import { Input } from "@/components/ui/input";
+import { useItemModal } from "@/hooks/use-item-modal";
 export default function QuotationItems() {
   const [itemCount, setItemCount] = useState(1);
+  const modal = useItemModal();
 
   return (
     <PageComponentWrapper headerTitle="Quotation Items">
@@ -58,7 +60,10 @@ export default function QuotationItems() {
                 <td>???? </td>
                 <td>
                   <div className="flex space-x-4 items-center">
-                    <PackagePlus className="w-4 h-4 text-green-500 cursor-pointer hover:text-green-700" />
+                    <PackagePlus
+                    
+                    onClick={modal.onOpen}
+                    className="w-4 h-4 text-green-500 cursor-pointer hover:text-green-700" />
                     <Trash2
                       onClick={() => setItemCount(itemCount - 1)}
                       className="w-4 h-4 text-red-300 cursor-pointer hover:text-red-700"
