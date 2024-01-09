@@ -1,0 +1,29 @@
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum UserRole {
+  buyer
+  vender
+  admin
+}
+
+model User {
+  id      Int      @id @default(autoincrement())
+  name    String
+  email   String   @unique
+  phone   String?
+  address   String?
+  contact   String?
+  fax   String?
+  role    UserRole     @default(buyer)
+  isProtected    Boolean     @default(false)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}

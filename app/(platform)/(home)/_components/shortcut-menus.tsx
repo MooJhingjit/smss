@@ -1,8 +1,12 @@
 import React from 'react'
 import { KanbanSquare, Receipt, Box, CircleDollarSign } from 'lucide-react'
 import Link from 'next/link'
+import { create } from '@/actions/create-user'
 
 export default function ShortcutMenus() {
+
+
+
   return (
     <div className='grid grid-cols-3 gap-4'>
       <MenuItem
@@ -20,6 +24,13 @@ export default function ShortcutMenus() {
         label="Products"
         link="/products"
       />
+      <div className="py-10">
+        <form action={create}>
+          <input type="text" name="name" className="bg-transparent border-b-2 border-gray-700 w-full text-lg text-gray-100 focus:outline-none focus:border-gray-500" placeholder="Search" />
+          <input type="text" name="email" className="bg-transparent border-b-2 border-gray-700 w-full text-lg text-gray-100 focus:outline-none focus:border-gray-500" placeholder="Search" />
+          <button type="submit">submit</button>
+        </form>
+      </div>
       <Stats />
     </div>
   )
