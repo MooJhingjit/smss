@@ -23,6 +23,7 @@ model User {
   contact   String?
   fax   String?
   role    UserRole     @default(buyer)
+  password    String?
   isProtected    Boolean     @default(false)
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
