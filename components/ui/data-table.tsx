@@ -29,16 +29,24 @@ import {
   Plus,
 } from "lucide-react";
 import { Input } from "./input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./select";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  onCreate?: () => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  onCreate,
 }: Readonly<DataTableProps<TData, TValue>>) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -68,13 +76,11 @@ export function DataTable<TData, TValue>({
             }
             className="max-w-sm"
           />
-          <Button
-            variant="secondary"
-            className="h-[36px]"
-            // onClick={onCreate}
-          >
-            <Plus size={20} />
-          </Button>
+          {onCreate && (
+            <Button variant="secondary" className="h-[36px]" onClick={onCreate}>
+              <Plus size={20} />
+            </Button>
+          )}
         </div>
       </div>
       <Table className="min-w-full divide-y divide-gray-300">
