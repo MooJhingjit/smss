@@ -1,6 +1,6 @@
 'use client';
 import React from "react";
-import { KanbanSquare, Receipt, Box } from "lucide-react";
+import { KanbanSquare, Receipt, Box, Users } from "lucide-react";
 import Link from "next/link";
 // import { create } from '@/actions/create-user'
 
@@ -15,7 +15,7 @@ export default function ShortcutMenus() {
   // }
 
   return (
-    <div className="grid grid-cols-3 gap-4">
+    <div className="grid grid-cols-4 gap-4">
       <MenuItem
         icon={
           <KanbanSquare
@@ -45,6 +45,16 @@ export default function ShortcutMenus() {
         }
         label="Products"
         link="/products"
+      />
+      <MenuItem
+        icon={
+          <Users
+            className="w-6 h-6 lg:w-12 lg:h-12  text-white"
+            strokeWidth={1.5}
+          />
+        }
+        label="Users"
+        link="/users"
       />
       {/* <div className="py-10">
         <form action={create} className="pb-4 space-y-2">
@@ -81,7 +91,7 @@ const MenuItem = (props: {
       <div className="absolute inset-0 bg-gray-700  rounded-lg opacity-10 z-10 h-full"></div>
 
       <div className="flex items-center justify-center">{icon}</div>
-      <div className="mt-2 text-sm text-gray-100 group-hover:text-white hidden lg:block ">
+      <div className="mt-2 text-xs text-gray-100 group-hover:text-white hidden lg:block ">
         {label}
       </div>
     </Link>

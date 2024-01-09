@@ -41,7 +41,7 @@ export const NewUserModal = () => {
 
   return (
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="max-w-sm sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>New User</DialogTitle>
         </DialogHeader>
