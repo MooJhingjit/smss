@@ -1,13 +1,19 @@
+import { User } from "@prisma/client";
 import { create } from "zustand";
 
 type Store = {
   isOpen: boolean;
-  onOpen: () => void;
+  data: User | null;
+  onOpen: (data?: User) => void;
   onClose: () => void;
 };
 
 export  const useUserModal = create<Store>((set) => ({
   isOpen: false,
-  onOpen: () => set({ isOpen: true }),
+  data: null,
+  onOpen: (data) => set({ 
+    isOpen: true,
+    data: data || null,
+  }),
   onClose: () => set({ isOpen: false }),
 }));

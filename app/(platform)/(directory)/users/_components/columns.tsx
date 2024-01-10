@@ -1,23 +1,25 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
+import { User } from "@prisma/client"
 import { ColumnDef } from "@tanstack/react-table"
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
-export type User = {
-  id: string
-  name: string
-  phone: string
-  email: string
-  address: string
-  type: "admin" | "user" | "vender"
-}
+// export type User = {
+//   id: number
+//   name: string
+//   phone: string
+//   email: string
+//   address: string
+//   type: "admin" | "user" | "vender"
+// }
 
 export const columns: ColumnDef<User>[] = [
   {
     accessorKey: "id",
     header: "#",
+    enableColumnFilter: true,
   },
   {
     accessorKey: "name",
@@ -39,9 +41,9 @@ export const columns: ColumnDef<User>[] = [
     accessorKey: "type",
     header: "Type",
     cell: ({ row }) => {
-      const { type } = row.original
+      const { role } = row.original
       return (
-        <p className="capitalize">{type}</p>
+        <p className="capitalize">{role}</p>
       )
 
     }
@@ -50,7 +52,6 @@ export const columns: ColumnDef<User>[] = [
     id: "actions",
     cell: ({ row }) => {
       const { id } = row.original
-
       return (
         <Button className="text-xs h-8" variant="secondary"> Manage</Button>
       )

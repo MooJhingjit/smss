@@ -3,7 +3,7 @@ import { User } from "@prisma/client";
 
 import { ActionState } from "@/lib/create-safe-action";
 
-import { CreateUser } from "./schema";
+import { UserSchema } from "./schema";
 
-export type InputType = z.infer<typeof CreateUser>;
+export type InputType = z.infer<typeof UserSchema>;
 export type ReturnType = ActionState<InputType, User>;

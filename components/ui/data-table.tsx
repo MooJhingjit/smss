@@ -70,7 +70,7 @@ export function DataTable<TData, TValue>({
         <div className="flex items-center justify-end py-4 space-x-2">
           <Input
             placeholder=""
-            value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
+            // value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
             onChange={(event) =>
               table.getColumn("email")?.setFilterValue(event.target.value)
             }
