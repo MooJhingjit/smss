@@ -19,6 +19,8 @@ import { Label } from "../ui/label";
 // import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProductModal } from "@/hooks/use-product-modal";
+import { FormInput } from "../form/form-input";
+import { FormSubmit } from "../form/form-submit";
 
 export const NewProductModal = () => {
   const modal = useProductModal();
@@ -36,9 +38,12 @@ export const NewProductModal = () => {
   //   execute({});
   // };
 
-  const execute = () => {
-    window.location.href = "/";
-  };
+  // const execute = () => {
+  //   window.location.href = "/";
+  // };
+
+  const onSubmit = (formData: FormData) => {
+  }
 
   return (
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
@@ -47,32 +52,49 @@ export const NewProductModal = () => {
           <DialogTitle>New Product</DialogTitle>
           {/* <DialogDescription>Please select the vender.</DialogDescription> */}
         </DialogHeader>
-        <div className="pb-4 space-y-2">
-          <div className="">
-            <Label>Vender</Label>
-            <Input id="name" value="Pedro Duarte" className="col-span-3" />
-          </div>
-          <div className="">
-            <Label>Name</Label>
-            <Input id="name" value="" className="col-span-3" />
-          </div>
-          <div className="flex space-x-4">
-            <div className="">
-              <Label>Cost</Label>
-              <Input id="name" value="" className="col-span-3" />
-            </div>
-            <div className="">
-              <Label>Percentage</Label>
-              <Input id="name" value="" className="col-span-3" />
-            </div>
-          </div>
+        <form action={onSubmit} className="grid grid-cols-2 gap-3">
 
-        </div>
-        <DialogFooter>
-          <Button type="button" onClick={execute}>
-            Create
-          </Button>
-        </DialogFooter>
+          <div className="">
+            <FormInput
+              id="vender"
+              label="Vender"
+              type="text"
+            // defaultValue={user?.name}
+            // errors={fieldErrors}
+            />
+          </div>
+          <div className="">
+            <FormInput
+              id="name"
+              label="Name"
+              type="text"
+            // defaultValue={user?.name}
+            // errors={fieldErrors}
+            />
+          </div>
+          <div className="">
+            <FormInput
+              id="cost"
+              label="Cost"
+              type="text"
+            // defaultValue={user?.name}
+            // errors={fieldErrors}
+            />
+          </div>
+          <div className="">
+            <FormInput
+              id="percentage"
+              label="Percentage"
+              type="text"
+            // defaultValue={user?.name}
+            // errors={fieldErrors}
+            />
+          </div>
+          <div className="col-start-2 col-span-1 flex justify-end">
+            <FormSubmit>{false ? "Update Product" : "Create Product"}</FormSubmit>
+          </div>
+        </form>
+
       </DialogContent>
     </Dialog>
   );
