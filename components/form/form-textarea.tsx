@@ -51,7 +51,7 @@ export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
             {label ? (
               <Label
                 htmlFor={id}
-                className="text-xs font-semibold text-neutral-700 capitalize"
+                className="text-xs  capitalize"
               >
                 {label}
               </Label>
@@ -70,7 +70,7 @@ export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
             rows={rows}
             disabled={pending || disabled}
             className={cn(
-              "resize-none focus-visible:ring-0 focus-visible:ring-offset-0 ring-0 focus:ring-0 outline-none shadow-sm",
+              "resize-none focus-visible:ring-0 focus-visible:ring-offset-0 ring-0 focus:ring-0 outline-none shadow-sm text-xs",
               className
             )}
             aria-describedby={`${id}-error`}

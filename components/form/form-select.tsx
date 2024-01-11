@@ -2,39 +2,35 @@
 
 import { forwardRef } from "react";
 import { useFormStatus } from "react-dom";
-
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-
 import { FormErrors } from "./form-errors";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
 interface FormInputProps {
   id: string;
   label?: string;
-  type?: string;
-  placeholder?: string;
   required?: boolean;
   disabled?: boolean;
   errors?: Record<string, string[] | undefined>;
   className?: string;
   defaultValue?: string;
   onBlur?: () => void;
+  options: { id: string; title: string; }[]
 }
 
-export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
+export const FormSelect = forwardRef<HTMLInputElement, FormInputProps>(
   (
     {
       id,
       label,
-      type,
-      placeholder,
       required,
       disabled,
       errors,
       className,
       defaultValue = "",
       onBlur,
+      options
     },
     ref
   ) => {
@@ -54,24 +50,24 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
             ) : null}
             <FormErrors id={id} errors={errors} />
           </div>
-          <Input
-            autoComplete="off"
-            onBlur={onBlur}
-            defaultValue={defaultValue}
-            ref={ref}
-            required={required}
-            name={id}
-            id={id}
-            placeholder={placeholder}
-            type={type}
-            disabled={pending || disabled}
-            className={cn("text-xs", className)}
-            aria-describedby={`${id}-error`}
-          />
+          <Select name={id} disabled={pending} >
+            <SelectTrigger className="w-[180px] text-xs">
+              <SelectValue placeholder={
+                defaultValue ? options.find(({ id }) => id === defaultValue)?.title : "Select"
+              } />
+            </SelectTrigger>
+            <SelectContent>
+              {
+                options.map(({ id, title }) => (
+                  <SelectItem key={id} value={id}>{title}</SelectItem>
+                ))
+              }
+            </SelectContent>
+          </Select>
         </div>
       </div>
     );
   }
 );
 
-FormInput.displayName = "FormInput";
+FormSelect.displayName = "FormSelect";

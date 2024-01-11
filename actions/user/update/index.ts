@@ -9,19 +9,18 @@ import { InputType, ReturnType } from "./types";
 import { UserSchema } from "./schema";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-  const { id, name, email, phone, contact, fax, address } = data;
+  const { id, role, name, email, phone, contact, fax, address } = data;
   let user;
   try {
     user = await db.user.update({
       where: {
         id,
       },
-      data: { name, email, phone, contact, fax, address },
+      data: { role, name, email, phone, contact, fax, address },
     });
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       // The .code property can be accessed in a type-safe manner
-      console.log('Error code: ', e.code)
       if (e.code === 'P2002') { // https://www.prisma.io/docs/orm/reference/error-reference#error-codes
         return {
           error: 'There is a unique constraint violation, a new user cannot be created with this email'

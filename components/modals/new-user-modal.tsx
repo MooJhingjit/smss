@@ -13,6 +13,9 @@ import { createUser } from "@/actions/user/create/index";
 import { updateUser } from "@/actions/user/update/index";
 import { useAction } from "@/hooks/use-action";
 import { FormTextarea } from "../form/form-textarea";
+import { Label } from "../ui/label";
+import { Input } from "../ui/input";
+import { FormSelect } from "../form/form-select";
 
 export const NewUserModal = () => {
   const modal = useUserModal();
@@ -41,6 +44,7 @@ export const NewUserModal = () => {
   });
 
   const onSubmit = (formData: FormData) => {
+    const role = formData.get("role") as string;
     const name = formData.get("name") as string;
     const email = formData.get("email") as string;
     const phone = formData.get("phone") as string;
@@ -52,6 +56,7 @@ export const NewUserModal = () => {
       // update user
       handleUpdate.execute({
         id: user.id,
+        role,
         name,
         email,
         phone,
@@ -61,7 +66,7 @@ export const NewUserModal = () => {
       });
       return;
     }
-    handleCreate.execute({ name, email, phone, fax, contact, address });
+    handleCreate.execute({ role, name, email, phone, fax, contact, address });
   };
 
   const fieldErrors = (user?.id ? handleUpdate : handleCreate).fieldErrors;
@@ -72,7 +77,20 @@ export const NewUserModal = () => {
         <DialogHeader>
           <DialogTitle>{user ? "Update User" : "Create User"}</DialogTitle>
         </DialogHeader>
-        <form action={onSubmit} className="pb-4 grid grid-cols-2 gap-3">
+        <form action={onSubmit} className="grid grid-cols-2 gap-3 mt-3">
+          <div className="col-span-2">
+            <FormSelect
+              id="role"
+              label="Role"
+              defaultValue={user?.role ?? undefined}
+              options={[
+                { id: 'buyer', title: 'Buyer' },
+                { id: 'vender', title: 'Vender' },
+                { id: 'sale', title: 'Sale' },
+                { id: 'admin', title: 'Admin' },
+              ]}
+            />
+          </div>
           <FormInput
             id="name"
             label="name"

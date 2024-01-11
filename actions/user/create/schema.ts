@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const UserSchema = z.object({
+  role: z.enum(['buyer', 'vender', 'sale', 'admin']),
   name: z
     .string({
       required_error: "Name is required",
