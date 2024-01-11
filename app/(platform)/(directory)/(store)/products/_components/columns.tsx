@@ -40,14 +40,6 @@ export const columns: ColumnDef<Product>[] = [
     header: "Percentage",
   },
   {
-    id: "actions",
-    cell: ({ row }) => {
-      const { id } = row.original
-
-      return (
-        <Button className="text-xs h-8" variant="secondary"> Manage</Button>
-      )
-
-    }
+    id: "actions"
   },
 ]

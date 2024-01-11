@@ -1,49 +1,63 @@
 "use client";
-import { redirect } from "next/navigation";
-// import Image from "next/image";
-// import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
-import { usePurchaseModal } from "@/hooks/use-po-modal";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
-// import { stripeRedirect } from "@/actions/stripe-redirect";
-// import { toast } from "sonner";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProductModal } from "@/hooks/use-product-modal";
 import { FormInput } from "../form/form-input";
 import { FormSubmit } from "../form/form-submit";
+import { useAction } from "@/hooks/use-action";
+import { createProduct } from "@/actions/product/create";
+import { toast } from "sonner";
+import { updateProduct } from "@/actions/product/update";
 
 export const NewProductModal = () => {
   const modal = useProductModal();
+  const product = modal.data;
 
-  // const { execute, isLoading } = useAction(createQuotation, {
-  //   onSuccess: (data) => {
-  //     window.location.href = data;
-  //   },
-  //   onError: (error) => {
-  //     toast.error(error);
-  //   }
-  // });
 
-  // const onClick = () => {
-  //   execute({});
-  // };
+  const handleCreate = useAction(createProduct, {
+    onSuccess: (data) => {
+      toast.success("New product created");
+      modal.onClose();
+    },
+    onError: (error) => {
+      toast.error(error);
+      console.log("error", error);
+    },
+  });
 
-  // const execute = () => {
-  //   window.location.href = "/";
-  // };
+  const handleUpdate = useAction(updateProduct, {
+    onSuccess: (data) => {
+      toast.success("Product updated");
+      modal.onClose();
+    },
+    onError: (error) => {
+      toast.error(error);
+      console.log("error", error);
+    },
+  });
 
   const onSubmit = (formData: FormData) => {
-  }
+    const name = formData.get("name") as string;
+    const cost = formData.get("cost") as string;
+    const percentage = formData.get("percentage") as string;
+
+    if (product?.id) {
+      handleUpdate.execute({
+        id: product.id,
+        name,
+        cost,
+        percentage
+      });
+      return;
+    }
+    handleCreate.execute({ name, cost, percentage });
+  };
+
+  const fieldErrors = (product?.id ? handleUpdate : handleCreate).fieldErrors;
 
   return (
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
@@ -59,8 +73,8 @@ export const NewProductModal = () => {
               id="vender"
               label="Vender"
               type="text"
-            // defaultValue={user?.name}
-            // errors={fieldErrors}
+              defaultValue={product?.name}
+              errors={fieldErrors}
             />
           </div>
           <div className="">
@@ -68,8 +82,8 @@ export const NewProductModal = () => {
               id="name"
               label="Name"
               type="text"
-            // defaultValue={user?.name}
-            // errors={fieldErrors}
+              defaultValue={product?.name}
+              errors={fieldErrors}
             />
           </div>
           <div className="">
@@ -77,8 +91,8 @@ export const NewProductModal = () => {
               id="cost"
               label="Cost"
               type="text"
-            // defaultValue={user?.name}
-            // errors={fieldErrors}
+              defaultValue={product?.name}
+              errors={fieldErrors}
             />
           </div>
           <div className="">
@@ -86,12 +100,12 @@ export const NewProductModal = () => {
               id="percentage"
               label="Percentage"
               type="text"
-            // defaultValue={user?.name}
-            // errors={fieldErrors}
+              defaultValue={product?.name}
+              errors={fieldErrors}
             />
           </div>
           <div className="col-start-2 col-span-1 flex justify-end">
-            <FormSubmit>{false ? "Update Product" : "Create Product"}</FormSubmit>
+            <FormSubmit>{product ? "Update" : "Create"}</FormSubmit>
           </div>
         </form>
 
