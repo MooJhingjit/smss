@@ -50,12 +50,12 @@ export const columns: ColumnDef<User>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => {
-      const { id } = row.original
-      return (
-        <Button className="text-xs h-8" variant="secondary"> Manage</Button>
-      )
+    // cell: ({ row }) => {
+    //   const { id } = row.original
+    //   return (
+    //     <Button className="text-xs h-8" variant="secondary"> Manage</Button>
+    //   )
 
-    }
+    // }
   },
 ]
