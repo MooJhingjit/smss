@@ -2,14 +2,14 @@
 
 // import { auth } from "@clerk/nextjs";
 import { revalidatePath } from "next/cache";
-import { Prisma } from '@prisma/client'
+import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { createSafeAction } from "@/lib/create-safe-action";
 import { InputType, ReturnType } from "./types";
 import { ProductSchema } from "./schema";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-  const { id, name, cost, percentage } = data;
+  const { id, venderId, name, cost, percentage } = data;
   let product;
   try {
     product = await db.product.update({
@@ -17,6 +17,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         id,
       },
       data: {
+        venderId,
         name,
         cost: cost ? parseFloat(cost) : null,
         percentage: percentage ? parseFloat(percentage) : null,
@@ -24,7 +25,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     });
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
-      console.log('Error code: ', e.code)
+      console.log("Error code: ", e.code);
     }
     return {
       error: "Failed to update.",

@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const ProductSchema = z.object({
+  venderId: z.number(),
   name: z
     .string({
       required_error: "Name is required",

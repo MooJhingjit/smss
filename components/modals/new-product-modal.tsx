@@ -17,7 +17,6 @@ export const NewProductModal = () => {
   const modal = useProductModal();
   const product = modal.data;
 
-
   const handleCreate = useAction(createProduct, {
     onSuccess: (data) => {
       toast.success("New product created");
@@ -48,13 +47,14 @@ export const NewProductModal = () => {
     if (product?.id) {
       handleUpdate.execute({
         id: product.id,
+        venderId: 1,
         name,
         cost,
-        percentage
+        percentage,
       });
       return;
     }
-    handleCreate.execute({ name, cost, percentage });
+    handleCreate.execute({ venderId: 1, name, cost, percentage });
   };
 
   const fieldErrors = (product?.id ? handleUpdate : handleCreate).fieldErrors;
@@ -67,13 +67,12 @@ export const NewProductModal = () => {
           {/* <DialogDescription>Please select the vender.</DialogDescription> */}
         </DialogHeader>
         <form action={onSubmit} className="grid grid-cols-2 gap-3">
-
           <div className="">
             <FormInput
               id="vender"
               label="Vender"
               type="text"
-              defaultValue={product?.name}
+              defaultValue={product?.vender?.name}
               errors={fieldErrors}
             />
           </div>
@@ -90,8 +89,8 @@ export const NewProductModal = () => {
             <FormInput
               id="cost"
               label="Cost"
-              type="text"
-              defaultValue={product?.name}
+              type="number"
+              defaultValue={product?.cost}
               errors={fieldErrors}
             />
           </div>
@@ -99,8 +98,8 @@ export const NewProductModal = () => {
             <FormInput
               id="percentage"
               label="Percentage"
-              type="text"
-              defaultValue={product?.name}
+              type="number"
+              defaultValue={product?.percentage}
               errors={fieldErrors}
             />
           </div>
@@ -108,9 +107,7 @@ export const NewProductModal = () => {
             <FormSubmit>{product ? "Update" : "Create"}</FormSubmit>
           </div>
         </form>
-
       </DialogContent>
     </Dialog>
   );
 };
-

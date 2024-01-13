@@ -26,6 +26,7 @@ model User {
   role    UserRole     @default(buyer)
   password    String?
   isProtected    Boolean     @default(false)
+  products   Product[]
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
 }
@@ -33,6 +34,8 @@ model User {
 model Product {
   id      Int      @id @default(autoincrement())
   name    String
+  vender      User      @relation(fields: [venderId], references: [id])
+  venderId      Int
   description   String?
   cost   Float?
   percentage   Decimal?

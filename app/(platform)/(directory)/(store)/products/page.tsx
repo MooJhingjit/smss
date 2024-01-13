@@ -14,12 +14,21 @@ const pages = [
 async function getData(): Promise<any[]> {
   // findMany returns an array of 10 users
   const items = await db.product.findMany({
+    include: {
+      vender: {
+        select: {
+          name: true,
+        },
+      },
+    },
     // take: 10,
     // skip: 0,
     orderBy: {
       id: "asc",
     },
   });
+
+ console.log(items);
   return items;
 }
 

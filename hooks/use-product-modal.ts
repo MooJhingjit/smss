@@ -1,10 +1,10 @@
-import { Product } from "@prisma/client";
+import { ProductWithVender } from "@/types";
 import { create } from "zustand";
 
 type Store = {
   isOpen: boolean;
-  data: Product | null;
-  onOpen: (data?: Product) => void;
+  data: ProductWithVender | null;
+  onOpen: (data?: ProductWithVender) => void;
   onClose: () => void;
 };
 

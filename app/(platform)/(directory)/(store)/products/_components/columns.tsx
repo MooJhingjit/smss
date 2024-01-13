@@ -24,12 +24,12 @@ export const columns: ColumnDef<Product>[] = [
     header: "Name",
   },
   {
-    accessorKey: "vender",
+    accessorKey: "vender.name",
     header: "Vender",
   },
   {
     accessorKey: "itemCount",
-    header: "Item Count",
+    header: "Balance",
   },
   {
     accessorKey: "cost",

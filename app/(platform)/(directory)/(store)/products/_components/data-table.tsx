@@ -5,7 +5,7 @@ import {
   ColumnDef,
 } from "@tanstack/react-table"
 import { useProductModal } from '@/hooks/use-product-modal'
-import { Product } from '@prisma/client'
+import { ProductWithVender } from '@/types'
 import { Button } from '@/components/ui/button'
 // import TableFilter from '@/components/data-table/data-table.filters'
 
@@ -24,7 +24,7 @@ export default function ProductTable<TData, TValue>(props: DataTableProps<TData,
     modal.onOpen();
   };
 
-  const onManage = (product: Product) => {
+  const onManage = (product: ProductWithVender) => {
     modal.onOpen(product);
   };
 
