@@ -17,6 +17,7 @@ async function getData(): Promise<any[]> {
     include: {
       vender: {
         select: {
+          id: true,
           name: true,
         },
       },
@@ -24,11 +25,10 @@ async function getData(): Promise<any[]> {
     // take: 10,
     // skip: 0,
     orderBy: {
-      id: "asc",
+      id: "desc",
     },
   });
 
- console.log(items);
   return items;
 }
 

@@ -3,19 +3,10 @@ import AsyncSelect from 'react-select/async';
 import { StylesConfig } from "react-select";
 import { useSearchAsync } from "@/hooks/use-search-async";
 
-// export interface InputProps
-//   extends React.InputHTMLAttributes<HTMLInputElement> { }
-
-// const promiseOptions = (inputValue: string, endpoint: string) =>
-//   new Promise<any[]>((resolve) => {
-//     setTimeout(() => {
-//       resolve([
-//         { value: 'chocolate', label: 'Chocolate' },
-//         { value: 'strawberry', label: 'Strawberry' },
-//         { value: 'vanilla', label: 'Vanilla' }
-//       ]);
-//     }, 1000);
-//   });
+export type Config = {
+  endpoint: string;
+  params: Record<string, any>;
+}
 
 const customStyles: StylesConfig = {
   control: (base: any) => ({
@@ -51,9 +42,9 @@ const customStyles: StylesConfig = {
 };
 
 const SearchAsync = React.forwardRef<any, any>(
-  ({ className, id, defaultValue, ...props }, ref) => {
+  ({ className, id, defaultValue, config, ...props }, ref) => {
 
-    const { search } = useSearchAsync(id)
+    const { search } = useSearchAsync(config.endpoint, config.params)
     const onChange = (option: any) => {
       console.log("option", option)
     }

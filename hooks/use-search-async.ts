@@ -1,31 +1,38 @@
-import { useState } from "react";
+import { use, useCallback } from "react";
 
-export const useSearchAsync = (endpoint: string) => {
+export const useSearchAsync = (endpoint: string, defaultQuery: Record<string, string>) => {
 
-  const [data, setData] = useState<any[]>([]);
+  const mapData = useCallback((data: any[]) => {
+    return data.map((item) => {
+      return {
+        value: item.id,
+        label: item.name
+      }
+    })
+  }, []);
 
+
+  const getSearchURL = (searchValue: string) => {
+    const allParams = { ...defaultQuery, search: searchValue }
+    const params = new URLSearchParams(allParams);
+    return `api/${endpoint}?${params.toString()}`
+  };
 
   const search = async (searchValue: string) => {
-
-    // const response = await fetch(`${endpoint}?search=${searchValue}`);
-    // const data = await response.json();
-    // setData(data);
-
-    const res = await new Promise<any[]>((resolve) => {
-      setTimeout(() => {
-        resolve([
-          { value: 'chocolate', label: 'Chocolate' },
-          { value: 'strawberry', label: 'Strawberry' },
-          { value: 'vanilla', label: 'Vanilla' }
-        ]);
-      }, 1000);
-    })
-
-    return res;
+    const response = await fetch(
+      getSearchURL(searchValue),
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    const data = await response.json();
+    return mapData(data);
   }
-  
-
   return {
     search
   };
 }
+

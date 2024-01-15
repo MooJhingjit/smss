@@ -45,21 +45,19 @@ export const NewProductModal = () => {
     const cost = formData.get("cost") as string;
     const percentage = formData.get("percentage") as string;
     const vender = formData.get("vender") as string;
-    console.log("vender", vender)
 
-    return;
 
-    // if (product?.id) {
-    //   handleUpdate.execute({
-    //     id: product.id,
-    //     venderId: 1,
-    //     name,
-    //     cost,
-    //     percentage,
-    //   });
-    //   return;
-    // }
-    // handleCreate.execute({ venderId: 1, name, cost, percentage });
+    if (product?.id) {
+      handleUpdate.execute({
+        id: product.id,
+        venderId: parseInt(vender),
+        name,
+        cost,
+        percentage,
+      });
+      return;
+    }
+    handleCreate.execute({ venderId: parseInt(vender), name, cost, percentage });
   };
 
   const fieldErrors = (product?.id ? handleUpdate : handleCreate).fieldErrors;
@@ -76,7 +74,13 @@ export const NewProductModal = () => {
             <FormSearchAsync
               id="vender"
               label="vender"
-              // defaultValue={{ value: 'chocolate', label: 'Chocolate' }}
+              config={{
+                endpoint: "/users",
+                params: {
+                  role: "vender",
+                },
+              }}
+              defaultValue={product?.vender ? { value: product.vender.id, label: product.vender.name } : null}
               errors={fieldErrors}
             />
           </div>
