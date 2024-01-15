@@ -12,6 +12,7 @@ import { useAction } from "@/hooks/use-action";
 import { createProduct } from "@/actions/product/create";
 import { toast } from "sonner";
 import { updateProduct } from "@/actions/product/update";
+import { FormSearchAsync } from "../form/form-search-async";
 
 export const NewProductModal = () => {
   const modal = useProductModal();
@@ -43,18 +44,22 @@ export const NewProductModal = () => {
     const name = formData.get("name") as string;
     const cost = formData.get("cost") as string;
     const percentage = formData.get("percentage") as string;
+    const vender = formData.get("vender") as string;
+    console.log("vender", vender)
 
-    if (product?.id) {
-      handleUpdate.execute({
-        id: product.id,
-        venderId: 1,
-        name,
-        cost,
-        percentage,
-      });
-      return;
-    }
-    handleCreate.execute({ venderId: 1, name, cost, percentage });
+    return;
+
+    // if (product?.id) {
+    //   handleUpdate.execute({
+    //     id: product.id,
+    //     venderId: 1,
+    //     name,
+    //     cost,
+    //     percentage,
+    //   });
+    //   return;
+    // }
+    // handleCreate.execute({ venderId: 1, name, cost, percentage });
   };
 
   const fieldErrors = (product?.id ? handleUpdate : handleCreate).fieldErrors;
@@ -68,11 +73,10 @@ export const NewProductModal = () => {
         </DialogHeader>
         <form action={onSubmit} className="grid grid-cols-2 gap-3">
           <div className="">
-            <FormInput
+            <FormSearchAsync
               id="vender"
-              label="Vender"
-              type="text"
-              defaultValue={product?.vender?.name}
+              label="vender"
+              // defaultValue={{ value: 'chocolate', label: 'Chocolate' }}
               errors={fieldErrors}
             />
           </div>
