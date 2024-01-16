@@ -1,4 +1,4 @@
-import { use, useCallback } from "react";
+import { useCallback } from "react";
 
 export const useSearchAsync = (endpoint: string, defaultQuery: Record<string, string>) => {
 
@@ -6,7 +6,8 @@ export const useSearchAsync = (endpoint: string, defaultQuery: Record<string, st
     return data.map((item) => {
       return {
         value: item.id,
-        label: item.name
+        label: item.name,
+        data: item
       }
     })
   }, []);

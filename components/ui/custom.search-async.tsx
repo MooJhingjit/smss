@@ -42,19 +42,16 @@ const customStyles: StylesConfig = {
 };
 
 const SearchAsync = React.forwardRef<any, any>(
-  ({ className, id, defaultValue, config, ...props }, ref) => {
+  ({ className, id, defaultValue, onSelected, config, ...props }, ref) => {
 
     const { search } = useSearchAsync(config.endpoint, config.params)
-    const onChange = (option: any) => {
-      console.log("option", option)
-    }
     return (
       <AsyncSelect
         loadOptions={search}
         cacheOptions
         id={id}
         name={id}
-        // onChange={onChange}
+        onChange={onSelected}
         styles={customStyles}
         defaultValue={defaultValue}
         className="text-xs w-full h-[36px]"

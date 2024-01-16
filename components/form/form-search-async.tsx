@@ -18,6 +18,7 @@ interface FormInputProps {
   className?: string;
   defaultValue?: any;
   onBlur?: () => void;
+  onSelected?: (item: any) => void;
   config: Config;
 }
 
@@ -26,6 +27,7 @@ export const FormSearchAsync = forwardRef<any, FormInputProps>(
     {
       id,
       label,
+      onSelected,
       placeholder,
       required,
       disabled,
@@ -57,6 +59,7 @@ export const FormSearchAsync = forwardRef<any, FormInputProps>(
             ref={ref}
             config={config}
             defaultValue={defaultValue}
+            onSelected={onSelected}
           />
 
         </div>

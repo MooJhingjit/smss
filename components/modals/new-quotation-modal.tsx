@@ -1,5 +1,4 @@
 "use client";
-import { redirect } from "next/navigation";
 // import Image from "next/image";
 // import { Button } from "@/components/ui/button";
 import {
@@ -18,66 +17,103 @@ import { Label } from "../ui/label";
 // import { stripeRedirect } from "@/actions/stripe-redirect";
 // import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useRef, useState } from "react";
+import { FormSearchAsync } from "../form/form-search-async";
+import { FormSubmit } from "../form/form-submit";
+import { useAction } from "@/hooks/use-action";
+import { toast } from "sonner";
+// import { createProduct } from "@/actions/quotation/create";
+import { User } from "@prisma/client";
 
 export const NewQuotationModal = () => {
-  const quotationModal = useQuotationModal();
+  const modal = useQuotationModal();
+  const typeRef = useRef<'product' | 'service'>('product');
+  const [customerDetails, setCustomerDetails] = useState<User | null>(null)
 
-  // const { execute, isLoading } = useAction(createQuotation, {
+  // const handleCreate = useAction(createProduct, {
   //   onSuccess: (data) => {
-  //     window.location.href = data;
+  //     toast.success("New quotation created");
+  //     modal.onClose();
   //   },
   //   onError: (error) => {
   //     toast.error(error);
-  //   }
+  //     console.log("error", error);
+  //   },
   // });
 
-  // const onClick = () => {
-  //   execute({});
-  // };
 
-  const execute = () => {
-    window.location.href = "/quotations/1";
+  const onSubmit = (formData: FormData) => {
+    const customer = formData.get("customer") as string;
+
+    const payload = {
+      type: typeRef.current,
+      customer
+    };
+
+    console.log("payload", payload)
+
+    // handleCreate.execute({ ...payload });
   };
 
+  const onTypeChange = (value: 'product' | 'service') => {
+    typeRef.current = value;
+  }
+
   return (
-    <Dialog open={quotationModal.isOpen} onOpenChange={quotationModal.onClose}>
+    <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>New Quotation</DialogTitle>
           <DialogDescription>Please select the customer.</DialogDescription>
         </DialogHeader>
-        <div className="pb-4 space-y-2">
-          <Tabs defaultValue="account" className="w-full">
+        <form action={onSubmit} className="pb-4 space-y-2">
+          <Tabs defaultValue="product" className="w-full">
             <Label>Type</Label>
             <TabsList className="w-full flex">
-              <TabsTrigger className="flex-1" value="product">
+              <TabsTrigger className="flex-1" value="product" onClick={() => onTypeChange('product')}>
                 Product
               </TabsTrigger>
-              <TabsTrigger className="flex-1" value="service">
+              <TabsTrigger className="flex-1" value="service" onClick={() => onTypeChange('service')}>
                 Service
               </TabsTrigger>
             </TabsList>
           </Tabs>
 
           <div className="">
-            <Label>Customer</Label>
-            <Input id="name" value="Pedro Duarte" className="col-span-3" />
+            <FormSearchAsync
+              id="customer"
+              label="Customer"
+              config={{
+                endpoint: "/users",
+                params: {
+                  role: "buyer",
+                },
+              }}
+              onSelected={(item) => {
+                setCustomerDetails(item.data);
+              }}
+            // errors={fieldErrors}
+            />
           </div>
-          <div className="">
-            <CustomerInfo />
+          {
+            customerDetails && (
+              <div className="">
+                <CustomerInfo data={customerDetails} />
+              </div>
+            )
+          }
+          <div className="col-start-2 col-span-1 flex justify-end">
+            <FormSubmit>Create</FormSubmit>
           </div>
-        </div>
-        <DialogFooter>
-          <Button type="button" onClick={execute}>
-            Create
-          </Button>
-        </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
 };
 
-const CustomerInfo = () => {
+const CustomerInfo = (props: { data: User }) => {
+  const { data } = props;
+
   return (
     <div className="rounded-2xl bg-gray-50 p-2">
       <dl className="mt-3 space-y-1 text-xs leading-6 text-gray-600">
@@ -87,23 +123,22 @@ const CustomerInfo = () => {
         </div>
         <div className="flex space-x-2">
           <dt>Email:</dt>
-          <dd className="font-semibold">hello@example.com</dd>
+          <dd className="font-semibold">{data.email}</dd>
         </div>
         <div className="flex space-x-2">
           <dt>Phone number:</dt>
-          <dd className="font-semibold">+1 (555) 905-5678</dd>
+          <dd className="font-semibold">{data.phone}</dd>
         </div>
         <div className="flex space-x-2">
           <dt>Fax:</dt>
           <dd className="font-semibold">
-            <span className="block">+1 (555) 905-5679</span>
+            <span className="block">{data.fax}</span>
           </dd>
         </div>
         <div className="flex space-x-2">
           <dt>Address:</dt>
           <dd className="font-semibold">
-            <span className="block">1234 North 1st Street</span>
-            <span className="block">Springfield, IL 12345</span>
+            <span className="block">{data.address}</span>
           </dd>
         </div>
       </dl>
