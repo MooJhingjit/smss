@@ -1,9 +1,9 @@
 import { z } from "zod";
-import { Product } from "@prisma/client";
+import { Quotation } from "@prisma/client";
 
 import { ActionState } from "@/lib/create-safe-action";
 
-import { ProductSchema } from "./schema";
+import { schema } from "./schema";
 
-export type InputType = z.infer<typeof ProductSchema>;
-export type ReturnType = ActionState<InputType, Product>;
+export type InputType = z.infer<typeof schema>;
+export type ReturnType = ActionState<InputType, Quotation>;

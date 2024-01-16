@@ -22,37 +22,39 @@ import { FormSearchAsync } from "../form/form-search-async";
 import { FormSubmit } from "../form/form-submit";
 import { useAction } from "@/hooks/use-action";
 import { toast } from "sonner";
-// import { createProduct } from "@/actions/quotation/create";
+import { createQuotation } from "@/actions/quotation/create";
 import { User } from "@prisma/client";
+import { useRouter } from "next/navigation";
 
 export const NewQuotationModal = () => {
+  const router = useRouter()
   const modal = useQuotationModal();
   const typeRef = useRef<'product' | 'service'>('product');
   const [customerDetails, setCustomerDetails] = useState<User | null>(null)
 
-  // const handleCreate = useAction(createProduct, {
-  //   onSuccess: (data) => {
-  //     toast.success("New quotation created");
-  //     modal.onClose();
-  //   },
-  //   onError: (error) => {
-  //     toast.error(error);
-  //     console.log("error", error);
-  //   },
-  // });
+  const handleCreate = useAction(createQuotation, {
+    onSuccess: (data) => {
+      toast.success("New quotation created");
+      modal.onClose();
+      router.push(`quotations/${data.id}`)
 
+    },
+    onError: (error) => {
+      toast.error(error);
+      console.log("error", error);
+    },
+  });
 
-  const onSubmit = (formData: FormData) => {
+  const onSubmit = async (formData: FormData) => {
     const customer = formData.get("customer") as string;
 
     const payload = {
       type: typeRef.current,
-      customer
+      buyerId: parseInt(customer),
     };
 
-    console.log("payload", payload)
+    handleCreate.execute({ ...payload });
 
-    // handleCreate.execute({ ...payload });
   };
 
   const onTypeChange = (value: 'product' | 'service') => {

@@ -1,15 +1,7 @@
 import { z } from "zod";
-
+// import { QuotationType } from "@prisma/client";
+// get data from QuotationType enum
 export const schema = z.object({
-  vendorId: z.number(),
-  name: z
-    .string({
-      required_error: "Name is required",
-    })
-    .min(3, {
-      message: "Name is too short.",
-    }),
-  cost: z.string().optional(),
-  percentage: z.string().optional(),
-  description: z.string().optional(),
+  buyerId: z.number(),
+  type: z.enum(['product', 'service']),
 });

@@ -7,31 +7,33 @@ import { schema } from "./schema";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
 
-  const { vendorId, name, cost, percentage, description } = data;
-  let product;
+  const { buyerId, type } = data;
+  let quotation;
   try {
-    product = await db.product.create({
+    if (!buyerId || !type) {
+      return {
+        error: "Failed to create.",
+      };
+    }
+    quotation = await db.quotation.create({
       data: {
-        vendorId,
-        name,
-        cost: cost ? parseFloat(cost) : null,
-        percentage: percentage ? parseFloat(percentage) : null,
-        description
+        type,
+        code: '',
+        buyerId,
       },
     });
   } catch (error) {
     console.log(
       "error",
       error
-    
+
     );
     return {
       error: "Failed to create.",
     };
   }
 
-  revalidatePath("/users");
-  return { data: product };
+  return { data: quotation };
 };
 
 export const createQuotation = createSafeAction(schema, handler);
