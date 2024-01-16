@@ -1,21 +1,14 @@
 "use client";
-// import Image from "next/image";
-// import { Button } from "@/components/ui/button";
+
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { useQuotationModal } from "@/hooks/use-quotation-modal";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-// import { stripeRedirect } from "@/actions/stripe-redirect";
-// import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRef, useState } from "react";
 import { FormSearchAsync } from "../form/form-search-async";

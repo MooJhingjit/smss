@@ -1,7 +1,5 @@
 "use client";
-import { redirect } from "next/navigation";
-// import Image from "next/image";
-// import { Button } from "@/components/ui/button";
+
 import {
   Dialog,
   DialogContent,
@@ -9,14 +7,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { useItemModal } from "@/hooks/use-item-modal";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { Label } from "../ui/label";
-// import { stripeRedirect } from "@/actions/stripe-redirect";
-// import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const NewItemModal = () => {
