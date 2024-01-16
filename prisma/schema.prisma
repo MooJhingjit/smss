@@ -16,33 +16,36 @@ enum UserRole {
 }
 
 model User {
-  id      Int      @id @default(autoincrement())
-  name    String
-  email   String   @unique
-  taxId   String?  @unique
-  phone   String?
-  address   String?
-  contact   String?
-  fax   String?
-  role    UserRole     @default(buyer)
-  password    String?
-  isProtected    Boolean     @default(false)
-  products   Product[]
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
+  id               Int         @id @default(autoincrement())
+  name             String
+  email            String      @unique
+  taxId            String?     @unique
+  phone            String?
+  address          String?
+  contact          String?
+  fax              String?
+  role             UserRole    @default(buyer)
+  password         String?
+  isProtected      Boolean     @default(false)
+  products         Product[]
+  buyerQuotations  Quotation[] @relation("buyer")
+  sellerQuotations Quotation[] @relation("seller")
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
 }
 
 model Product {
-  id      Int      @id @default(autoincrement())
-  name    String
-  vender      User      @relation(fields: [venderId], references: [id])
+  id            Int             @id @default(autoincrement())
+  name          String
+  vender        User            @relation(fields: [venderId], references: [id])
   venderId      Int
   description   String?
-  cost   Float?
-  percentage   Decimal?
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
-  items   Item[]
+  cost          Float?
+  percentage    Decimal?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  items         Item[]
+  QuotationLists QuotationList[]
 }
 
 enum ItemStatus {
@@ -52,20 +55,77 @@ enum ItemStatus {
   claimed
   lost
 }
+
 model Item {
-  id      Int      @id @default(autoincrement())
-  productId      Int
-  product      Product      @relation(fields: [productId], references: [id])
-  name    String
+  id            Int             @id @default(autoincrement())
+  productId     Int
+  product       Product         @relation(fields: [productId], references: [id])
+  name          String
   description   String?
-  serial_number   String?
-  warrantyDate   DateTime?
-  cost   Float?
-  status  ItemStatus     @default(available)
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
+  serial_number String?
+  warrantyDate  DateTime?
+  cost          Float?
+  status        ItemStatus      @default(available)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  QuotationItem QuotationItem[]
 }
 
+enum QuotationType {
+  product
+  service
+}
+
+model Quotation {
+  id                    Int             @id @default(autoincrement())
+  code                  String
+  type                  QuotationType   @default(product)
+  buyerId               Int
+  buyer                 User            @relation(fields: [buyerId], references: [id], name: "buyer")
+  sellerId              Int?
+  seller                User?           @relation(fields: [sellerId], references: [id], name: "seller")
+  totalDiscount         Float?
+  totalPrice            Float?
+  totalTax              Float?
+  paymentType           String          @default("cash")
+  paymentDueDate        DateTime?
+  withholdingTax        Float?
+  withholdingTaxPercent Float?
+  status                String          @default("pending")
+  remark                String?
+  lists                 QuotationList[]
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+}
+
+model QuotationList {
+  id                    Int             @id @default(autoincrement())
+  quotationId           Int
+  quotation             Quotation       @relation(fields: [quotationId], references: [id])
+  productId             Int
+  product               Product         @relation(fields: [productId], references: [id])
+  name                  String
+  price                 Float?
+  unitPrice             Float?
+  cost                  Float?
+  percentage            Float?
+  quantity              Int?
+  withholdingTax        Float?
+  withholdingTaxPercent Float?
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+  QuotationItem         QuotationItem[]
+}
+
+model QuotationItem {
+  id              Int           @id @default(autoincrement())
+  quotationListId Int
+  quotationList   QuotationList @relation(fields: [quotationListId], references: [id])
+  itemId          Int
+  item            Item          @relation(fields: [itemId], references: [id])
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
 
 // npx prisma db push
 // npx prisma generate
