@@ -15,7 +15,7 @@ async function getData(): Promise<any[]> {
   // findMany returns an array of 10 users
   const items = await db.product.findMany({
     include: {
-      vender: {
+      vendor: {
         select: {
           id: true,
           name: true,

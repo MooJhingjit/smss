@@ -9,14 +9,14 @@ import { InputType, ReturnType } from "./types";
 import { UserSchema } from "./schema";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-  const { id, role, name, email, phone, contact, fax, address } = data;
+  const { id, taxId, role, name, email, phone, contact, fax, address } = data;
   let user;
   try {
     user = await db.user.update({
       where: {
         id,
       },
-      data: { role, name, email, phone, contact, fax, address },
+      data: { role, taxId, name, email, phone, contact, fax, address },
     });
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError) {

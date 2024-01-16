@@ -22,7 +22,7 @@ export async function GET(
     }
     console.log("role", role)
 
-    const venders = await db.user.findMany({
+    const vendors = await db.user.findMany({
       where: {
         OR: [
           {
@@ -41,8 +41,8 @@ export async function GET(
         }
       },
     })
-    // console.log('venders', venders.)
-    return NextResponse.json(venders);
+    // console.log('vendors', vendors.)
+    return NextResponse.json(vendors);
   } catch (error) {
     console.log("error", error)
     return new NextResponse("Internal Error", { status: 500 });

@@ -45,12 +45,12 @@ export const NewProductModal = () => {
     const name = formData.get("name") as string;
     const cost = formData.get("cost") as string;
     const percentage = formData.get("percentage") as string;
-    const vender = formData.get("vender") as string;
+    const vendor = formData.get("vendor") as string;
     const description = formData.get("description") as string;
 
     const payload = {
       name,
-      venderId: parseInt(vender),
+      vendorId: parseInt(vendor),
       cost: cost,
       percentage: percentage,
       description,
@@ -73,20 +73,20 @@ export const NewProductModal = () => {
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>New Product</DialogTitle>
-          {/* <DialogDescription>Please select the vender.</DialogDescription> */}
+          {/* <DialogDescription>Please select the vendor.</DialogDescription> */}
         </DialogHeader>
         <form action={onSubmit} className="grid grid-cols-2 gap-3">
           <div className="">
             <FormSearchAsync
-              id="vender"
-              label="vender"
+              id="vendor"
+              label="vendor"
               config={{
                 endpoint: "/users",
                 params: {
-                  role: "vender",
+                  role: "vendor",
                 },
               }}
-              defaultValue={product?.vender ? { value: product.vender.id, label: product.vender.name } : null}
+              defaultValue={product?.vendor ? { value: product.vendor.id, label: product.vendor.name } : null}
               errors={fieldErrors}
             />
           </div>

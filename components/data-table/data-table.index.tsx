@@ -47,7 +47,7 @@ export default function TableView(props: Props) {
                     <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">
                       {item.name}
                     </td>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{item.vender}</td>
+                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{item.vendor}</td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{item.itemCount}</td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{item.cost}</td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{item.percentage}</td>

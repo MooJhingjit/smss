@@ -8,7 +8,7 @@ import { ColumnDef } from "@tanstack/react-table"
 export type Order = {
   id: number
   quotation_id: string
-  vender: string
+  vendor: string
   itemCount: number
   cost: string
 }
@@ -23,8 +23,8 @@ export const columns: ColumnDef<Order>[] = [
     header: "QT",
   },
   {
-    accessorKey: "vender",
-    header: "Vender",
+    accessorKey: "vendor",
+    header: "Vendor",
   },
   {
     accessorKey: "itemCount",

@@ -50,9 +50,11 @@ export const NewUserModal = () => {
     const fax = formData.get("fax") as string;
     const contact = formData.get("contact") as string;
     const address = formData.get("address") as string;
+    const taxId = formData.get("taxId") as string;
 
     const payload = {
       role,
+      taxId,
       name,
       email,
       phone,
@@ -87,12 +89,19 @@ export const NewUserModal = () => {
               defaultValue={user?.role ?? undefined}
               options={[
                 { id: 'buyer', title: 'Buyer' },
-                { id: 'vender', title: 'Vender' },
+                { id: 'vendor', title: 'Vendor' },
                 { id: 'sale', title: 'Sale' },
                 { id: 'admin', title: 'Admin' },
               ]}
             />
           </div>
+          <FormInput
+            id="taxId"
+            label="Tax Number"
+            type="number"
+            defaultValue={user?.taxId}
+            errors={fieldErrors}
+          />
           <FormInput
             id="name"
             label="name"

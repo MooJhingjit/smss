@@ -2,7 +2,8 @@ import { z } from "zod";
 
 export const UserSchema = z.object({
   id: z.number(),
-  role: z.enum(['buyer', 'vender', 'sale', 'admin']),
+  role: z.enum(['buyer', 'vendor', 'sale', 'admin']),
+  taxId: z.string(),
   name: z
     .string({
       required_error: "Name is required",

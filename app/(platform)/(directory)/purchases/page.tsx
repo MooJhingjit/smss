@@ -13,8 +13,8 @@ const pages = [
 async function getData(): Promise<Order[]> {
   // Fetch data from your API here.
   return [
-    { id: 1, quotation_id: 'QT-0001', vender: 'Banana IT', itemCount: 4, cost: '3500'},
-    { id: 2, quotation_id: 'QT-0002', vender: 'TechGear', itemCount: 3, cost: '800' },
+    { id: 1, quotation_id: 'QT-0001', vendor: 'Banana IT', itemCount: 4, cost: '3500'},
+    { id: 2, quotation_id: 'QT-0002', vendor: 'TechGear', itemCount: 3, cost: '800' },
   ]
 }
 

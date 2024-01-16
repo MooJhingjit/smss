@@ -68,12 +68,12 @@ export const NewQuotationModal = () => {
         </DialogHeader>
         <form action={onSubmit} className="pb-4 space-y-2">
           <Tabs defaultValue="product" className="w-full">
-            <Label>Type</Label>
+            <Label className="text-xs">Type</Label>
             <TabsList className="w-full flex">
-              <TabsTrigger className="flex-1" value="product" onClick={() => onTypeChange('product')}>
+              <TabsTrigger className="flex-1 text-xs" value="product" onClick={() => onTypeChange('product')}>
                 Product
               </TabsTrigger>
-              <TabsTrigger className="flex-1" value="service" onClick={() => onTypeChange('service')}>
+              <TabsTrigger className="flex-1 text-xs" value="service" onClick={() => onTypeChange('service')}>
                 Service
               </TabsTrigger>
             </TabsList>
@@ -115,11 +115,11 @@ const CustomerInfo = (props: { data: User }) => {
   const { data } = props;
 
   return (
-    <div className="rounded-2xl bg-gray-50 p-2">
-      <dl className="mt-3 space-y-1 text-xs leading-6 text-gray-600">
+    <div className="rounded-md bg-yellow-50 border border-yellow-300 p-2 mt-3">
+      <dl className=" space-y-1 text-xs leading-6 text-gray-600">
         <div className="flex space-x-2">
           <dt>Tax Number:</dt>
-          <dd className="font-semibold">3938827738493</dd>
+          <dd className="font-semibold">{data.taxId}</dd>
         </div>
         <div className="flex space-x-2">
           <dt>Email:</dt>

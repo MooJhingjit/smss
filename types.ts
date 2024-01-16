@@ -1,2 +1,2 @@
 import { User, Product } from '@prisma/client';
-export type ProductWithVender = Product & { vender: User };
+export type ProductWithVender = Product & { vendor: User };

@@ -12,7 +12,7 @@ import { ColumnDef } from "@tanstack/react-table"
 //   phone: string
 //   email: string
 //   address: string
-//   type: "admin" | "user" | "vender"
+//   type: "admin" | "user" | "vendor"
 // }
 
 export const columns: ColumnDef<User>[] = [

@@ -7,12 +7,12 @@ import { ProductSchema } from "./schema";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
 
-  const { venderId, name, cost, percentage, description } = data;
+  const { vendorId, name, cost, percentage, description } = data;
   let product;
   try {
     product = await db.product.create({
       data: {
-        venderId,
+        vendorId,
         name,
         cost: cost ? parseFloat(cost) : null,
         percentage: percentage ? parseFloat(percentage) : null,

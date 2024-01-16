@@ -10,7 +10,7 @@ generator client {
 
 enum UserRole {
   buyer
-  vender
+  vendor
   sale
   admin
 }
@@ -37,8 +37,8 @@ model User {
 model Product {
   id            Int             @id @default(autoincrement())
   name          String
-  vender        User            @relation(fields: [venderId], references: [id])
-  venderId      Int
+  vendor        User            @relation(fields: [vendorId], references: [id])
+  vendorId      Int
   description   String?
   cost          Float?
   percentage    Decimal?

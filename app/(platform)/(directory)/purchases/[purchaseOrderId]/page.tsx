@@ -1,6 +1,6 @@
 import React from "react";
 import Breadcrumbs from "@/components/breadcrumbs";
-import VenderInfo from "./_components/vender-details";
+import VendorInfo from "./_components/vendor-details";
 import OrderStatus from "./_components/order-status";
 import OrderItems from "./_components/order-items";
 import AssociateOrders from "./_components/associate-orders";
@@ -23,7 +23,7 @@ export default function QuotationDetails() {
       <Breadcrumbs pages={pages} />
       <div className="grid grid-cols-5 gap-8 mt-6">
         <div className="col-span-3">
-          <VenderInfo />
+          <VendorInfo />
         </div>
         <div className="col-span-2">
           <OrderStatus />

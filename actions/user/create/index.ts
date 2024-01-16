@@ -7,13 +7,14 @@ import { UserSchema } from "./schema";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
 
-  const { role, name, email, phone, contact, fax, address } = data;
+  const { role, taxId, name, email, phone, contact, fax, address } = data;
   let user;
   try {
     user = await db.user.create({
       data: {
         role,
         name,
+        taxId,
         email,
         phone,
         contact,
