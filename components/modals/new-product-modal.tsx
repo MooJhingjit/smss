@@ -13,6 +13,7 @@ import { createProduct } from "@/actions/product/create";
 import { toast } from "sonner";
 import { updateProduct } from "@/actions/product/update";
 import { FormSearchAsync } from "../form/form-search-async";
+import { FormTextarea } from "../form/form-textarea";
 
 export const NewProductModal = () => {
   const modal = useProductModal();
@@ -45,19 +46,24 @@ export const NewProductModal = () => {
     const cost = formData.get("cost") as string;
     const percentage = formData.get("percentage") as string;
     const vender = formData.get("vender") as string;
+    const description = formData.get("description") as string;
 
+    const payload = {
+      name,
+      venderId: parseInt(vender),
+      cost: cost,
+      percentage: percentage,
+      description,
+    };
 
     if (product?.id) {
       handleUpdate.execute({
         id: product.id,
-        venderId: parseInt(vender),
-        name,
-        cost,
-        percentage,
+        ...payload
       });
       return;
     }
-    handleCreate.execute({ venderId: parseInt(vender), name, cost, percentage });
+    handleCreate.execute({ ...payload });
   };
 
   const fieldErrors = (product?.id ? handleUpdate : handleCreate).fieldErrors;
@@ -108,6 +114,14 @@ export const NewProductModal = () => {
               label="Percentage"
               type="number"
               defaultValue={product?.percentage}
+              errors={fieldErrors}
+            />
+          </div>
+          <div className="col-span-2">
+            <FormTextarea
+              id="description"
+              label="Description"
+              defaultValue={product?.description ?? ""}
               errors={fieldErrors}
             />
           </div>

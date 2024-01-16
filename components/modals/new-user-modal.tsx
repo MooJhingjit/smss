@@ -13,9 +13,8 @@ import { createUser } from "@/actions/user/create/index";
 import { updateUser } from "@/actions/user/update/index";
 import { useAction } from "@/hooks/use-action";
 import { FormTextarea } from "../form/form-textarea";
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
 import { FormSelect } from "../form/form-select";
+import { UserRole } from "@prisma/client";
 
 export const NewUserModal = () => {
   const modal = useUserModal();
@@ -44,7 +43,7 @@ export const NewUserModal = () => {
   });
 
   const onSubmit = (formData: FormData) => {
-    const role = formData.get("role") as string;
+    const role = formData.get("role") as UserRole;
     const name = formData.get("name") as string;
     const email = formData.get("email") as string;
     const phone = formData.get("phone") as string;
@@ -52,21 +51,24 @@ export const NewUserModal = () => {
     const contact = formData.get("contact") as string;
     const address = formData.get("address") as string;
 
+    const payload = {
+      role,
+      name,
+      email,
+      phone,
+      fax,
+      contact,
+      address,
+    }
     if (user?.id) {
       // update user
       handleUpdate.execute({
         id: user.id,
-        role,
-        name,
-        email,
-        phone,
-        fax,
-        contact,
-        address,
+        ...payload
       });
       return;
     }
-    handleCreate.execute({ role, name, email, phone, fax, contact, address });
+    handleCreate.execute({ ...payload });
   };
 
   const fieldErrors = (user?.id ? handleUpdate : handleCreate).fieldErrors;
@@ -109,21 +111,21 @@ export const NewUserModal = () => {
             id="phone"
             label="phone"
             type="text"
-            defaultValue={user?.phone || undefined}
+            defaultValue={user?.phone ?? undefined}
             errors={fieldErrors}
           />
           <FormInput
             id="fax"
             label="fax"
             type="text"
-            defaultValue={user?.fax || undefined}
+            defaultValue={user?.fax ?? undefined}
             errors={fieldErrors}
           />
           <FormInput
             id="contact"
             label="contact"
             type="text"
-            defaultValue={user?.contact || undefined}
+            defaultValue={user?.contact ?? undefined}
             errors={fieldErrors}
           />
           <div className="col-span-2 ...">
@@ -131,7 +133,7 @@ export const NewUserModal = () => {
               id="address"
               rows={4}
               label="address"
-              defaultValue={user?.address || undefined}
+              defaultValue={user?.address ?? undefined}
               errors={fieldErrors}
             />
           </div>
