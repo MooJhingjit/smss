@@ -1,9 +1,9 @@
 "use server";
-import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { createSafeAction } from "@/lib/create-safe-action";
 import { InputType, ReturnType } from "./types";
 import { schema } from "./schema";
+import { generateCode } from "@/lib/utils";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
 
@@ -15,6 +15,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         error: "Failed to create.",
       };
     }
+    
     quotation = await db.quotation.create({
       data: {
         type,
@@ -22,12 +23,16 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         buyerId,
       },
     });
-  } catch (error) {
-    console.log(
-      "error",
-      error
 
-    );
+    // update code based on quotation ID
+    const code = generateCode(quotation.id, "QT");
+    quotation = await db.quotation.update({
+      where: { id: quotation.id },
+      data: { code },
+    });
+
+  } catch (error) {
+    console.log("error", error);
     return {
       error: "Failed to create.",
     };
