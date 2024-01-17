@@ -7,6 +7,8 @@ import {
 import { useProductModal } from '@/hooks/use-product-modal'
 import { ProductWithVender } from '@/types'
 import { Button } from '@/components/ui/button'
+import { ExternalLink } from 'lucide-react'
+import Link from 'next/link'
 // import TableFilter from '@/components/data-table/data-table.filters'
 
 
@@ -35,13 +37,20 @@ export default function ProductTable<TData, TValue>(props: DataTableProps<TData,
         ...column,
         cell: ({ row }: any) => {
           return (
-            <Button
-              onClick={() => onManage(row.original)}
-              className="text-xs h-8"
-              variant="secondary"
-            >
-              Manage
-            </Button>
+            <div className='flex space-x-2 items-center'>
+              <Button
+                onClick={() => onManage(row.original)}
+                className="text-xs h-8"
+                variant="secondary"
+              >
+                Manage
+              </Button>
+              <Link
+                href={`/products/${row.original.id}`}
+                passHref>
+                <ExternalLink className='w-4 h-4' />
+              </Link>
+            </div>
           );
         },
       };

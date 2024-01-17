@@ -61,9 +61,9 @@ export default function QuotationItems() {
                 <td>
                   <div className="flex space-x-4 items-center">
                     <PackagePlus
-                    
-                    onClick={modal.onOpen}
-                    className="w-4 h-4 text-green-500 cursor-pointer hover:text-green-700" />
+
+                      onClick={() => modal.onOpen()}
+                      className="w-4 h-4 text-green-500 cursor-pointer hover:text-green-700" />
                     <Trash2
                       onClick={() => setItemCount(itemCount - 1)}
                       className="w-4 h-4 text-red-300 cursor-pointer hover:text-red-700"

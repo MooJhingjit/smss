@@ -1,9 +1,9 @@
 import Breadcrumbs from '@/components/breadcrumbs'
-import { Button } from '@/components/ui/button';
+
 import { Input } from '@/components/ui/input';
 import { Plus, Search } from 'lucide-react';
-import Link from 'next/link';
 import React from 'react'
+import ProductItems from './_components/product-items';
 const pages = [
   {
     name: "All Products",
@@ -17,17 +17,22 @@ const pages = [
   },
 ];
 
-const productDetails = [
+
+export type DataType = {
+  id: number,
+  poID: string,
+  name: string,
+  serialNumber: string,
+  warrantyExpires: string,
+  cost: string,
+  status: string,
+}
+const data: DataType[] = [
   { id: 1, poID: 'P-00101', name: 'CCTV 2.7-13.5mm IP Camera', serialNumber: 'SN001', warrantyExpires: '2026-12-31', cost: '3500', status: 'Pending' },
   { id: 2, poID: 'P-00101', name: 'Wireless Mouse', serialNumber: 'SN002', warrantyExpires: '2025-12-31', cost: '800', status: 'Pending' },
   { id: 3, poID: 'P-00101', name: 'Portable Hard Drive 1TB', serialNumber: 'SN003', warrantyExpires: '2027-12-31', cost: '4500', status: 'Pending' },
   { id: 4, poID: 'P-00104', name: '27-inch LED Monitor', serialNumber: 'SN004', warrantyExpires: '2026-12-31', cost: '12000', status: 'Pending' },
   { id: 5, poID: 'P-00104', name: 'USB 3.0 Flash Drive 128GB', serialNumber: 'SN005', warrantyExpires: '2025-12-31', cost: '1500', status: 'Pending' },
-  { id: 6, poID: 'P-00106', name: 'Ergonomic Keyboard', serialNumber: 'SN006', warrantyExpires: '2025-12-31', cost: '2000', status: 'Pending' },
-  { id: 7, poID: 'P-00106', name: 'Graphic Tablet', serialNumber: 'SN007', warrantyExpires: '2026-12-31', cost: '6000', status: 'Pending' },
-  { id: 8, poID: 'P-00106', name: 'Wi-Fi Router AC1200', serialNumber: 'SN008', warrantyExpires: '2025-12-31', cost: '3200', status: 'Pending' },
-  { id: 9, poID: 'P-00106', name: 'Bluetooth Speakers', serialNumber: 'SN009', warrantyExpires: '2026-12-31', cost: '2800', status: 'Pending' },
-  { id: 10, poID: 'P-00106', name: 'HD Webcam', serialNumber: 'SN010', warrantyExpires: '2026-12-31', cost: '2200', status: 'Pending' }
 ];
 
 export default function ProductDetailsPage() {
@@ -39,7 +44,7 @@ export default function ProductDetailsPage() {
         <div className="mx-auto grid max-w-2xl grid-cols-1 grid-rows-1 items-start gap-x-8 gap-y-8 lg:mx-0 lg:max-w-none lg:grid-cols-12">
           {/* Product */}
 
-          <div className="lg:col-start-10 lg:row-end-1 lg:col-end-13">
+          <div className="lg:col-start-10 lg:row-end-1 lg:col-end-13 sticky top-32">
             <div className="rounded-lg bg-gray-50 shadow-sm ring-1 ring-gray-900/5">
               <dl className="flex flex-wrap">
                 <div className="flex px-6 pt-6 items-center justify-between w-full" >
@@ -88,85 +93,15 @@ export default function ProductDetailsPage() {
                   <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                     <Search className="h-5 w-5 text-gray-400" aria-hidden="true" />
                   </div>
-                  <Input name="search" placeholder='Search by name' className='pl-10'
+                  <Input name="search" placeholder='Search by name' className='pl-10 text-xs'
                   />
                 </div>
               </div>
             </div>
-            <div className="overflow-x-scroll">
-              <table className="mt-2 w-full whitespace-nowrap text-left text-sm leading-6">
-                <thead className="border-b border-gray-200 text-gray-900">
-                  <tr>
-                    <th className="px-0 py-3 font-semibold">
-                      Purchase ID
-                    </th>
-                    <th className="px-0 py-3 font-semibold text-center">
-                      Name
-                    </th>
-                    <th className="px-0 py-3 font-semibold text-center">
-                      Serial Number
-                    </th>
-                    <th className="px-0 py-3 font-semibold text-center">
-                      Warranty
-                    </th>
-                    <th className="px-0 py-3 font-semibold text-center">
-                      Cost
-                    </th>
-                    <th className="px-0 py-3 font-semibold text-center">
-                      Status
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {productDetails.map((item) => (
-                    <tr key={item.id} className="border-b border-gray-100">
-                      <td className="px-0 py-5">
-                        <Link href={`/purchases/1`} className='underline text-xs'>
-                          {item.poID}
-                        </Link>
-                      </td>
-                      <td className="pr-1 py-5">
-                        <Input className='text-xs w-42 md:w-full' value={item.name} />
-                      </td>
-                      <td className="pr-1 py-5">
-                        <Input className='text-xs w-full' value={item.serialNumber} />
-                      </td>
-                      <td className="px-0 py-5">
-                        <Input type="date" className='w-32 text-xs' value={item.warrantyExpires} />
-                      </td>
-                      <td className="px-0 py-5">
-                        <Input className='text-xs w-20' value={item.cost} />
-                      </td>
-                      <td className="px-0 py-5">
-                        <select
-                          className=" block w-20 rounded-md border-0 py-1.5 pl-3  text-gray-900 ring-0 focus:ring-0 text-xs"
-                          defaultValue="Pending"
-                        >
-                          <option>Pending</option>
-                          <option>Claim</option>
-                        </select>
-                      </td>
-
-                    </tr>
-                  ))}
-                  {/* add button */}
-                  <tr>
-                    <td colSpan={6} className="px-0 py-5">
-                      <Button className='w-full flex space-x-2 items-center group' variant='secondary'>
-                        <Plus
-                          className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-700"
-                        />
-                        <span className='text-gray-400 group-hover:text-gray-700 '>Wireless Mouse (Banana IT)</span>
-                      </Button>
-                    </td>
-                  </tr>
-                </tbody>
-
-              </table>
+            <div className="overflow-x-scroll mt-3">
+              <ProductItems data={data} />
             </div>
           </div>
-
-
         </div>
       </div>
     </div>

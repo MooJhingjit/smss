@@ -13,8 +13,10 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-export const NewItemModal = () => {
+export const ItemModal = () => {
   const modal = useItemModal();
+  const data = modal.data
+  console.log("data", data)
 
   // const { execute, isLoading } = useAction(createQuotation, {
   //   onSuccess: (data) => {
@@ -49,7 +51,7 @@ export const NewItemModal = () => {
             </div>
           </DialogDescription>
         </DialogHeader>
-        <ItemLists />
+        
         <DialogFooter>
           <Button type="button" onClick={execute}>
             Confirm
@@ -60,43 +62,3 @@ export const NewItemModal = () => {
   );
 };
 
-const ItemLists = () => {
-  return (
-    <table className="w-full text-gray-500 ">
-      <thead className="text-left text-sm text-gray-500 ">
-        <tr>
-          <th>
-            
-          </th>
-          <th scope="col" className="text-xs font-normal">
-            Serial Number
-          </th>
-          <th scope="col" className="py-3 pr-8 text-xs  font-normal">
-            Warranty
-          </th>
-          <th scope="col" className="py-3 pr-8 text-xs  font-normal">
-            Cost
-          </th>
-
-          {/* <th scope="col" className=" w-1/12 py-3 pr-8 text-xs font-normal">
-            Note
-          </th> */}
-        </tr>
-      </thead>
-      <tbody className="divide-y divide-gray-200 border-b border-gray-200 text-sm sm:border-t">
-        {Array.from({ length: 2 }).map((_, index) => (
-          <tr className="border-b border-gray-200 ">
-            <td>{index + 1}</td>
-            <td>
-              <Input id="serial-number" className="my-2" />
-            </td>
-            <td>
-              <Input type="date" id="warranty" />
-            </td>
-            <td>฿1,000</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  );
-};

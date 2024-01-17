@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { NewQuotationModal } from "@/components/modals/new-quotation-modal";
 import { NewPurchaseModal } from "@/components/modals/new-purchase-modal";
 import { NewProductModal } from "../modals/new-product-modal";
-import { NewItemModal } from "../modals/new-item-modal";
+import { ProductItemModal } from "../modals/product-items-modal";
 import { NewUserModal } from "../modals/new-user-modal";
 
 export const ModalProvider = () => {
@@ -22,7 +22,7 @@ export const ModalProvider = () => {
   return (
     <>
       <NewUserModal />
-      <NewItemModal />
+      <ProductItemModal />
       <NewProductModal />
       <NewQuotationModal />
       <NewPurchaseModal />
