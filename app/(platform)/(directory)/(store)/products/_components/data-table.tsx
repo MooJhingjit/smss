@@ -5,7 +5,7 @@ import {
   ColumnDef,
 } from "@tanstack/react-table"
 import { useProductModal } from '@/hooks/use-product-modal'
-import { ProductWithVender } from '@/types'
+import { ProductWithRelations } from '@/types'
 import { Button } from '@/components/ui/button'
 import { ExternalLink } from 'lucide-react'
 import Link from 'next/link'
@@ -26,7 +26,7 @@ export default function ProductTable<TData, TValue>(props: DataTableProps<TData,
     modal.onOpen();
   };
 
-  const onManage = (product: ProductWithVender) => {
+  const onManage = (product: ProductWithRelations) => {
     modal.onOpen(product);
   };
 

@@ -21,6 +21,8 @@ import { ItemStatus } from "@prisma/client";
 export const ItemModal = () => {
   const modal = useItemModal();
   const item = modal.data;
+  const refs = modal.refs;
+  const productRef = refs?.productRef;
 
   const handleCreate = useAction(createItem, {
     onSuccess: (data) => {
@@ -45,6 +47,12 @@ export const ItemModal = () => {
   });
 
   const onSubmit = (formData: FormData) => {
+
+    if (productRef?.id === undefined) {
+      toast.error("Product not found");
+      return;
+    }
+
     const name = formData.get("name") as string;
     const serialNumber = formData.get("serialNumber") as string;
     const warrantyDate = formData.get("warranty") as string;
@@ -53,7 +61,7 @@ export const ItemModal = () => {
 
 
     const payload = {
-      productId: 10,
+      productId: productRef?.id,
       name,
       serialNumber,
       warrantyDate,
@@ -73,14 +81,20 @@ export const ItemModal = () => {
   };
 
   const fieldErrors = (item?.id ? handleUpdate : handleCreate).fieldErrors;
-console.log(item?.status)
   return (
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
 
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>New Item</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="flex space-x-2 items-center">
+            <p>Add</p>
+
+
+            <span className="inline-flex items-center rounded-md bg-primary-50 px-2 py-1 text-sm font-medium text-primary-700 ring-1 ring-inset ring-blue-700/10">
+              {productRef?.name}
+            </span>
+          </DialogTitle>
+          {/* <DialogDescription>
             <div className="flex space-x-3">
               <span className="inline-flex items-center rounded-md bg-primary-50 px-2 py-1 text-xs font-medium text-primary-700 ring-1 ring-inset ring-blue-700/10">
                 PO-0001
@@ -89,7 +103,7 @@ console.log(item?.status)
                 Wireless Mouse
               </span>
             </div>
-          </DialogDescription>
+          </DialogDescription> */}
         </DialogHeader>
 
         <form action={onSubmit} className="grid grid-cols-2 gap-3 mt-3">
@@ -123,7 +137,7 @@ console.log(item?.status)
           <FormInput
             id="cost"
             label="Cost"
-            type="text"
+            type="number"
             defaultValue={item?.cost}
             errors={fieldErrors}
           />

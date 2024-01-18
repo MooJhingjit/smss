@@ -1,10 +1,10 @@
-import { ProductWithVender } from "@/types";
+import { ProductWithRelations } from "@/types";
 import { create } from "zustand";
 
 type Store = {
   isOpen: boolean;
-  data: ProductWithVender | null;
-  onOpen: (data?: ProductWithVender) => void;
+  data: ProductWithRelations | null;
+  onOpen: (data?: ProductWithRelations) => void;
   onClose: () => void;
 };
 
