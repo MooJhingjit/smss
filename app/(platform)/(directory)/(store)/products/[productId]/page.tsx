@@ -1,9 +1,11 @@
 import Breadcrumbs from '@/components/breadcrumbs'
 
 import { Input } from '@/components/ui/input';
-import { Plus, Search } from 'lucide-react';
+
 import React from 'react'
 import ProductItems from './_components/product-items';
+import Toolbar from './_components/toolsbar';
+import { db } from '@/lib/db';
 const pages = [
   {
     name: "All Products",
@@ -18,24 +20,43 @@ const pages = [
 ];
 
 
-export type DataType = {
-  id: number,
-  poID: string,
-  name: string,
-  serialNumber: string,
-  warrantyExpires: string,
-  cost: string,
-  status: string,
-}
-const data: DataType[] = [
-  { id: 1, poID: 'P-00101', name: 'CCTV 2.7-13.5mm IP Camera', serialNumber: 'SN001', warrantyExpires: '2026-12-31', cost: '3500', status: 'Pending' },
-  { id: 2, poID: 'P-00101', name: 'Wireless Mouse', serialNumber: 'SN002', warrantyExpires: '2025-12-31', cost: '800', status: 'Pending' },
-  { id: 3, poID: 'P-00101', name: 'Portable Hard Drive 1TB', serialNumber: 'SN003', warrantyExpires: '2027-12-31', cost: '4500', status: 'Pending' },
-  { id: 4, poID: 'P-00104', name: '27-inch LED Monitor', serialNumber: 'SN004', warrantyExpires: '2026-12-31', cost: '12000', status: 'Pending' },
-  { id: 5, poID: 'P-00104', name: 'USB 3.0 Flash Drive 128GB', serialNumber: 'SN005', warrantyExpires: '2025-12-31', cost: '1500', status: 'Pending' },
-];
+// export type DataType = {
+//   id: number,
+//   poID: string,
+//   name: string,
+//   serialNumber: string,
+//   warrantyExpires: string,
+//   cost: string,
+//   status: string,
+// }
+// const data: DataType[] = [
+//   { id: 1, poID: 'P-00101', name: 'CCTV 2.7-13.5mm IP Camera', serialNumber: 'SN001', warrantyExpires: '2026-12-31', cost: '3500', status: 'Pending' },
+//   { id: 2, poID: 'P-00101', name: 'Wireless Mouse', serialNumber: 'SN002', warrantyExpires: '2025-12-31', cost: '800', status: 'Pending' },
+//   { id: 3, poID: 'P-00101', name: 'Portable Hard Drive 1TB', serialNumber: 'SN003', warrantyExpires: '2027-12-31', cost: '4500', status: 'Pending' },
+//   { id: 4, poID: 'P-00104', name: '27-inch LED Monitor', serialNumber: 'SN004', warrantyExpires: '2026-12-31', cost: '12000', status: 'Pending' },
+//   { id: 5, poID: 'P-00104', name: 'USB 3.0 Flash Drive 128GB', serialNumber: 'SN005', warrantyExpires: '2025-12-31', cost: '1500', status: 'Pending' },
+// ];
 
-export default function ProductDetailsPage() {
+async function getData(): Promise<any[]> {
+  // findMany returns an array of 10 users
+  const users = await db.item.findMany({
+    where: {
+      productId: 10,
+    },
+    // take: 10,
+    // skip: 0,
+    orderBy: {
+      id: "asc",
+    },
+  });
+  return users
+}
+
+export default async function ProductItemsPage() {
+
+  const data = await getData();
+
+
   return (
     <div>
       <Breadcrumbs pages={pages} />
@@ -88,15 +109,7 @@ export default function ProductDetailsPage() {
           {/* Items */}
           <div className="-mx-4 px-4 py-4 shadow-sm ring-1 ring-gray-900/5 sm:mx-0 sm:rounded-lg sm:pb-14 lg:col-span-9 lg:row-span-2 lg:row-end-2  ">
             <div className="flex justify-end">
-              <div className="w-[300px] flex rounded-md shadow-sm">
-                <div className="relative flex flex-grow items-stretch focus-within:z-10">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                    <Search className="h-5 w-5 text-gray-400" aria-hidden="true" />
-                  </div>
-                  <Input name="search" placeholder='Search by name' className='pl-10 text-xs'
-                  />
-                </div>
-              </div>
+             <Toolbar />
             </div>
             <div className="overflow-x-scroll mt-3">
               <ProductItems data={data} />

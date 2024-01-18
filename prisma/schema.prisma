@@ -62,7 +62,7 @@ model Item {
   product       Product         @relation(fields: [productId], references: [id])
   name          String
   description   String?
-  serial_number String?
+  serialNumber String?
   warrantyDate  DateTime?
   cost          Float?
   status        ItemStatus      @default(available)

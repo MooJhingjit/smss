@@ -50,7 +50,7 @@ export const FormSelect = forwardRef<HTMLInputElement, FormInputProps>(
             ) : null}
             <FormErrors id={id} errors={errors} />
           </div>
-          <Select name={id} disabled={pending} >
+          <Select name={id} disabled={pending} defaultValue={defaultValue} >
             <SelectTrigger className="w-[180px] text-xs">
               <SelectValue placeholder={
                 defaultValue ? options.find(({ id }) => id === defaultValue)?.title : "Select"
