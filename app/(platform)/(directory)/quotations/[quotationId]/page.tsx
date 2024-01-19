@@ -2,7 +2,7 @@ import React from "react";
 import Breadcrumbs from "@/components/breadcrumbs";
 import CustomerInfo from "./_components/customer-details";
 import QuotationStatus from "./_components/quotation-status";
-import QuotationItems from "./_components/quotation-items";
+import QuotationLists from "./_components/quotation-lists";
 import DocumentItems from "./_components/document-lists";
 import PurchaseOrders from "./_components/purchase-orders";
 import { db } from "@/lib/db";
@@ -57,16 +57,14 @@ export default async function QuotationDetails(props: Readonly<QuotationIdPagePr
       <div className="grid grid-cols-5 gap-8 mt-6">
         <div className="col-span-3">
           {
-            (data?.buyer) && (
-              <CustomerInfo data={data?.buyer} />
-            )
+            (data?.buyer) && <CustomerInfo data={data?.buyer} />
           }
         </div>
         <div className="col-span-2">
           <QuotationStatus status={data.status} type={data.type} />
         </div>
         <div className="col-span-5">
-          <QuotationItems />
+          <QuotationLists data={data.lists} />
         </div>
         <div className="col-span-5 md:col-span-2">
           <DocumentItems />

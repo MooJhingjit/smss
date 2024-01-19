@@ -1,0 +1,50 @@
+"use server";
+import { db } from "@/lib/db";
+import { createSafeAction } from "@/lib/create-safe-action";
+import { InputType, ReturnType } from "./types";
+import { schema } from "./schema";
+
+const handler = async (data: InputType): Promise<ReturnType> => {
+
+  const {
+    quotationId,
+    productId,
+    name,
+    price,
+    unitPrice,
+    cost,
+    percentage,
+    quantity,
+    withholdingTax,
+    withholdingTaxPercent,
+  } = data;
+  
+  let quotationList;
+  try {
+
+    quotationList = await db.quotationList.create({
+      data: {
+        quotationId,
+        productId,
+        name,
+        price,
+        unitPrice,
+        cost,
+        percentage,
+        quantity,
+        withholdingTax,
+        withholdingTaxPercent,
+      },
+    });
+  } catch (error) {
+    console.log("error", error);
+    return {
+      error: "Failed to create.",
+    };
+  }
+
+  return { data: quotationList };
+
+};
+
+export const createQuotationList = createSafeAction(schema, handler);

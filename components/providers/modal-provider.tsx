@@ -8,6 +8,7 @@ import { NewProductModal } from "../modals/new-product-modal";
 import { ProductItemModal } from "../modals/product-items-modal";
 import { NewUserModal } from "../modals/new-user-modal";
 import { ItemModal } from "../modals/item-modal";
+import { QuotationListModal } from "../modals/quotation-list-modal";
 
 export const ModalProvider = () => {
   const [isMounted, setIsMounted] = useState(false);
@@ -24,6 +25,7 @@ export const ModalProvider = () => {
     <>
       <NewUserModal />
       <ItemModal />
+      <QuotationListModal />
       {/* <ProductItemModal /> */}
       <NewProductModal />
       <NewQuotationModal />
