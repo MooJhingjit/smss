@@ -1,18 +1,22 @@
 import React from "react";
 import { Lock } from "lucide-react";
+import { QuotationType } from "@prisma/client";
 
-export default function QuotationStatus() {
+type Props = {
+  type: QuotationType;
+  status: string
+}
+
+export default function QuotationStatus(props: Props) {
+  const { status, type } = props;
   return (
     <div className="space-y-2">
       <div className="flex space-x-3">
-        <span className="inline-flex font-semibold items-center rounded-md bg-yellow-100 px-2 py-1 text-xs text-yellow-700">
-          Draft
-        </span>
-        <span className="inline-flex font-semibold items-center rounded-md bg-blue-100 px-2 py-1 text-xs text-blue-700">
-          Service
-        </span>
-        <span className="inline-flex font-semibold items-center rounded-md bg-gray-100 px-2 py-1 text-xs text-gray-700">
-          <Lock className="w-4 h-4 text-red-" />
+        <div className="inline-flex capitalize font-semibold items-center rounded-md bg-gray-100 px-2 py-1 text-xs text-gray-700 items-center">
+          <Lock className="w-3.5 h-3.5 mr-1" /><span>{type}</span>
+        </div>
+        <span className="inline-flex capitalize font-semibold items-center rounded-md bg-yellow-100 px-2 py-1 text-xs text-yellow-700">
+          {status}
         </span>
       </div>
       {Array.from({ length: 6 }).map((_, index) => (
