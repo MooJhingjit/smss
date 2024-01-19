@@ -9,7 +9,7 @@ import { QuotationWithBuyer } from "@/types";
 async function getData(): Promise<[QuotationWithBuyer[]]> {
   const quotations = db.quotation.findMany({
     include: {
-      buyer: true
+      buyer: true,
     },
     take: 5,
     orderBy: {
@@ -22,9 +22,8 @@ async function getData(): Promise<[QuotationWithBuyer[]]> {
   return allData;
 }
 
-export default async function  HomePage() {
-  const data = await getData()
-
+export default async function HomePage() {
+  const data = await getData();
 
   return (
     <div className="mx-auto max-w-6xl px-2 xl:px-0">
@@ -41,7 +40,7 @@ export default async function  HomePage() {
           <CardWrapper title="Tasks" description="Tasks you need to do" />
         </div>
         <div className="lg:col-span-6 col-span-12">
-          <QuotationCard data={data[0]}/>
+          <QuotationCard data={data[0]} />
         </div>
         <div className="lg:col-span-6 col-span-12">
           <PurchaseOrders />

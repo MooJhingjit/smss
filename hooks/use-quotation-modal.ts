@@ -6,7 +6,7 @@ type Store = {
   onClose: () => void;
 };
 
-export  const useQuotationModal = create<Store>((set) => ({
+export const useQuotationModal = create<Store>((set) => ({
   isOpen: false,
   onOpen: () => set({ isOpen: true }),
   onClose: () => set({ isOpen: false }),

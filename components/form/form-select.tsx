@@ -5,7 +5,13 @@ import { useFormStatus } from "react-dom";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { FormErrors } from "./form-errors";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
 interface FormInputProps {
   id: string;
@@ -16,7 +22,7 @@ interface FormInputProps {
   className?: string;
   defaultValue?: string;
   onBlur?: () => void;
-  options: { id: string; title: string; }[]
+  options: { id: string; title: string }[];
 }
 
 export const FormSelect = forwardRef<HTMLInputElement, FormInputProps>(
@@ -30,9 +36,9 @@ export const FormSelect = forwardRef<HTMLInputElement, FormInputProps>(
       className,
       defaultValue = "",
       onBlur,
-      options
+      options,
     },
-    ref
+    ref,
   ) => {
     const { pending } = useFormStatus();
 
@@ -41,33 +47,34 @@ export const FormSelect = forwardRef<HTMLInputElement, FormInputProps>(
         <div className="space-y-1">
           <div className="flex justify-between">
             {label ? (
-              <Label
-                htmlFor={id}
-                className="text-xs capitalize"
-              >
+              <Label htmlFor={id} className="text-xs capitalize">
                 {label}
               </Label>
             ) : null}
             <FormErrors id={id} errors={errors} />
           </div>
-          <Select name={id} disabled={pending} defaultValue={defaultValue} >
+          <Select name={id} disabled={pending} defaultValue={defaultValue}>
             <SelectTrigger className="w-[180px] text-xs">
-              <SelectValue placeholder={
-                defaultValue ? options.find(({ id }) => id === defaultValue)?.title : "Select"
-              } />
+              <SelectValue
+                placeholder={
+                  defaultValue
+                    ? options.find(({ id }) => id === defaultValue)?.title
+                    : "Select"
+                }
+              />
             </SelectTrigger>
             <SelectContent>
-              {
-                options.map(({ id, title }) => (
-                  <SelectItem key={id} value={id}>{title}</SelectItem>
-                ))
-              }
+              {options.map(({ id, title }) => (
+                <SelectItem key={id} value={id}>
+                  {title}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
       </div>
     );
-  }
+  },
 );
 
 FormSelect.displayName = "FormSelect";

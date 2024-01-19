@@ -6,7 +6,6 @@ import { schema } from "./schema";
 import { generateCode } from "@/lib/utils";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-
   const { buyerId, type } = data;
   let quotation;
   try {
@@ -15,11 +14,11 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         error: "Failed to create.",
       };
     }
-    
+
     quotation = await db.quotation.create({
       data: {
         type,
-        code: '',
+        code: "",
         buyerId,
       },
     });
@@ -30,7 +29,6 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       where: { id: quotation.id },
       data: { code },
     });
-
   } catch (error) {
     console.log("error", error);
     return {

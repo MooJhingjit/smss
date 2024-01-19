@@ -14,14 +14,15 @@ const columns = [
   { name: "Buyer", key: "buyer.name" },
   { name: "Payment", key: "paymentType" },
   {
-    name: "Status", key: "status",
+    name: "Status",
+    key: "status",
     render: (item: QuotationWithBuyer) => {
       return (
         <span className="inline-flex items-center rounded-md bg-yellow-100 px-2 py-0.5 text-xs text-yellow-700">
           {item.status}
         </span>
-      )
-    }
+      );
+    },
   },
 ];
 

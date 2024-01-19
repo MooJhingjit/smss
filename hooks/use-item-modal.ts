@@ -2,7 +2,6 @@ import { ItemRefs, ItemWithRefs } from "@/types";
 import { Item } from "@prisma/client";
 import { create } from "zustand";
 
-
 type Store = {
   isOpen: boolean;
   data: Item | null;
@@ -15,10 +14,11 @@ export const useItemModal = create<Store>((set) => ({
   isOpen: false,
   data: null,
   refs: undefined,
-  onOpen: (data, refs) => set({
-    isOpen: true,
-    data: data ?? null,
-    refs: refs ?? undefined,
-  }),
+  onOpen: (data, refs) =>
+    set({
+      isOpen: true,
+      data: data ?? null,
+      refs: refs ?? undefined,
+    }),
   onClose: () => set({ isOpen: false }),
 }));

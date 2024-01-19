@@ -1,18 +1,18 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { ColumnDef } from "@tanstack/react-table"
+import { Button } from "@/components/ui/button";
+import { ColumnDef } from "@tanstack/react-table";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
 export type Product = {
-  id: number
-  name: string
-  vendor: string
-  itemCount: number
-  cost: string
-  percentage: string
-}
+  id: number;
+  name: string;
+  vendor: string;
+  itemCount: number;
+  cost: string;
+  percentage: string;
+};
 
 export const columns: ColumnDef<Product>[] = [
   {
@@ -40,6 +40,6 @@ export const columns: ColumnDef<Product>[] = [
     header: "Percentage",
   },
   {
-    id: "actions"
+    id: "actions",
   },
-]
+];

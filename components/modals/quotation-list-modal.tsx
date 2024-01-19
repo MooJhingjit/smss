@@ -20,8 +20,8 @@ import { Product } from "@prisma/client";
 export const QuotationListModal = () => {
   const [defaultProduct, setDefaultProduct] = useState<Product | null>(null);
   const modal = useQuotationListModal();
-  const data = modal.data
-  const refs = modal.refs
+  const data = modal.data;
+  const refs = modal.refs;
 
   // useEffect(() => {
   //   console.log(defaultProduct)
@@ -35,7 +35,6 @@ export const QuotationListModal = () => {
     onSuccess: (data) => {
       toast.success("New list created");
       modal.onClose();
-
     },
     onError: (error) => {
       toast.error(error);
@@ -55,9 +54,6 @@ export const QuotationListModal = () => {
   });
 
   const onSubmit = async (formData: FormData) => {
-
-
-
     const productId = formData.get("productId") as string;
     // const name = formData.get("name") as string;
     const price = formData.get("price") as string;
@@ -66,9 +62,13 @@ export const QuotationListModal = () => {
     const percentage = formData.get("percentage") as string;
     const quantity = formData.get("quantity") as string;
     const withholdingTax = formData.get("withholdingTax") as string;
-    const withholdingTaxPercent = formData.get("withholdingTaxPercent") as string;
+    const withholdingTaxPercent = formData.get(
+      "withholdingTaxPercent",
+    ) as string;
 
-    const product = productId ? parseInt(productId) : refs?.productRef?.id ?? null
+    const product = productId
+      ? parseInt(productId)
+      : refs?.productRef?.id ?? null;
 
     if (!refs?.quotationRef?.id || !product) {
       toast.error("Quotation not found");
@@ -91,24 +91,28 @@ export const QuotationListModal = () => {
     if (data?.id) {
       handleUpdate.execute({
         id: data.id,
-        ...payload
+        ...payload,
       });
       return;
     }
 
     handleCreate.execute({ ...payload });
-
   };
 
   const fieldErrors = (data?.id ? handleUpdate : handleCreate).fieldErrors;
   const defaultPrice = useMemo(() => {
-    if (data?.price) return data?.price
+    if (data?.price) return data?.price;
 
     if (defaultProduct?.cost && defaultProduct?.percentage) {
-      return defaultProduct.cost + (defaultProduct.cost * parseFloat(defaultProduct.percentage.toString()) / 100);
+      return (
+        defaultProduct.cost +
+        (defaultProduct.cost *
+          parseFloat(defaultProduct.percentage.toString())) /
+          100
+      );
     }
 
-    return ""
+    return "";
   }, [defaultProduct, data?.price]);
 
   return (
@@ -162,7 +166,9 @@ export const QuotationListModal = () => {
               id="percentage"
               label="Percentage"
               type="number"
-              defaultValue={data?.percentage ?? defaultProduct?.percentage ?? ""}
+              defaultValue={
+                data?.percentage ?? defaultProduct?.percentage ?? ""
+              }
               errors={fieldErrors}
             />
           </div>

@@ -1,6 +1,6 @@
-import Breadcrumbs from "@/components/breadcrumbs"
-import { Product, columns } from "./_components/columns"
-import ProductTable from "./_components/data-table"
+import Breadcrumbs from "@/components/breadcrumbs";
+import { Product, columns } from "./_components/columns";
+import ProductTable from "./_components/data-table";
 import { db } from "@/lib/db";
 
 const pages = [
@@ -33,12 +33,12 @@ async function getData(): Promise<any[]> {
 }
 
 export default async function ProductPage() {
-  const data = await getData()
+  const data = await getData();
 
   return (
     <>
       <Breadcrumbs pages={pages} />
       <ProductTable columns={columns} data={data} />
     </>
-  )
+  );
 }

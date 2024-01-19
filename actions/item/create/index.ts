@@ -6,7 +6,6 @@ import { InputType, ReturnType } from "./types";
 import { Schema } from "./schema";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-
   const { productId, name, cost, warrantyDate, serialNumber, status } = data;
   let item;
   try {
@@ -21,11 +20,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       },
     });
   } catch (error) {
-    console.log(
-      "error",
-      error
-
-    );
+    console.log("error", error);
     return {
       error: "Failed to create.",
     };

@@ -24,17 +24,19 @@ const getData = async (quotationId: string) => {
     },
   });
   return data;
-}
+};
 
 interface QuotationIdPageProps {
   params: {
     quotationId: string;
   };
-};
+}
 
-export default async function QuotationDetails(props: Readonly<QuotationIdPageProps>) {
+export default async function QuotationDetails(
+  props: Readonly<QuotationIdPageProps>,
+) {
   const { params } = props;
-  const data = await getData(params.quotationId)
+  const data = await getData(params.quotationId);
   const pages = [
     {
       name: "Quotations",
@@ -61,15 +63,13 @@ export default async function QuotationDetails(props: Readonly<QuotationIdPagePr
       <Breadcrumbs pages={pages} />
       <div className="grid grid-cols-5 gap-8 mt-6">
         <div className="col-span-3">
-          {
-            (data?.buyer) && <CustomerInfo data={data?.buyer} />
-          }
+          {data?.buyer && <CustomerInfo data={data?.buyer} />}
         </div>
         <div className="col-span-2">
           <QuotationStatus status={data.status} type={data.type} />
         </div>
         <div className="col-span-5">
-          <QuotationLists data={data.lists as QuotationListWithRelations[]} />
+          <QuotationLists quotationId={data.id} data={data.lists as QuotationListWithRelations[]} />
         </div>
         <div className="col-span-5 md:col-span-2">
           <DocumentItems />

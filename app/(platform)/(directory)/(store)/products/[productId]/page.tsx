@@ -1,36 +1,34 @@
-import Breadcrumbs from '@/components/breadcrumbs'
-import React from 'react'
-import ProductItems from './_components/product-items';
-import { db } from '@/lib/db';
-import ProductView from './_components/product-view';
-import { ProductWithRelations } from '@/types';
+import Breadcrumbs from "@/components/breadcrumbs";
+import React from "react";
+import ProductItems from "./_components/product-items";
+import { db } from "@/lib/db";
+import ProductView from "./_components/product-view";
+import { ProductWithRelations } from "@/types";
 
-async function getData(productId: string): Promise<ProductWithRelations | null> {
-  const product = await db.product.findUnique(
-    {
-      where: {
-        id: parseInt(productId),
-      },
-      include: {
-        items: true,
-        vendor: true,
-      },
-    }
-  )
+async function getData(
+  productId: string,
+): Promise<ProductWithRelations | null> {
+  const product = await db.product.findUnique({
+    where: {
+      id: parseInt(productId),
+    },
+    include: {
+      items: true,
+      vendor: true,
+    },
+  });
 
-  return product
+  return product;
 }
 
 interface ProductIdPageProps {
   params: {
     productId: string;
   };
-};
-
+}
 
 export default async function ProductItemsPage(props: ProductIdPageProps) {
   const { params } = props;
-
 
   const product = await getData(params.productId);
 
@@ -48,7 +46,7 @@ export default async function ProductItemsPage(props: ProductIdPageProps) {
   ];
 
   if (!product) {
-    return <div>Not found</div>
+    return <div>Not found</div>;
   }
 
   return (
@@ -70,5 +68,5 @@ export default async function ProductItemsPage(props: ProductIdPageProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }

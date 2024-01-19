@@ -21,7 +21,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         name,
         cost: cost ? parseFloat(cost) : null,
         percentage: percentage ? parseFloat(percentage) : null,
-        description
+        description,
       },
     });
   } catch (e) {

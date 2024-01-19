@@ -29,17 +29,17 @@ export async function GET(
           {
             description: {
               contains: search,
-            }
-          }
+            },
+          },
         ],
         // xxx: {
         //   equals: xxx
         // }
       },
-    })
+    });
     return NextResponse.json(product);
   } catch (error) {
-    console.log("error", error)
+    console.log("error", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }

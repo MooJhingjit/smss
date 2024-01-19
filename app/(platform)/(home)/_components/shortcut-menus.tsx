@@ -1,11 +1,10 @@
-'use client';
+"use client";
 import React from "react";
 import { KanbanSquare, Receipt, Box, Users } from "lucide-react";
 import Link from "next/link";
 // import { create } from '@/actions/create-user'
 
 export default function ShortcutMenus() {
-
   // async function create(formData: FormData) {
   //   "use server";
   //   // window.location.href = "/quotations/1";

@@ -9,7 +9,7 @@ export async function GET(
 ) {
   try {
     const search = req.nextUrl.searchParams.get("search");
-    const role = req.nextUrl.searchParams.get("role") as UserRole
+    const role = req.nextUrl.searchParams.get("role") as UserRole;
 
     // const { userId, orgId } = auth();
 
@@ -20,7 +20,7 @@ export async function GET(
     if (!search || !role) {
       return new NextResponse("Bad Request", { status: 400 });
     }
-    console.log("role", role)
+    console.log("role", role);
 
     const vendors = await db.user.findMany({
       where: {
@@ -33,18 +33,18 @@ export async function GET(
           {
             name: {
               contains: search,
-            }
-          }
+            },
+          },
         ],
         role: {
-          equals: role
-        }
+          equals: role,
+        },
       },
-    })
+    });
     // console.log('vendors', vendors.)
     return NextResponse.json(vendors);
   } catch (error) {
-    console.log("error", error)
+    console.log("error", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }

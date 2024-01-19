@@ -59,7 +59,7 @@ export const NewProductModal = () => {
     if (product?.id) {
       handleUpdate.execute({
         id: product.id,
-        ...payload
+        ...payload,
       });
       return;
     }
@@ -86,7 +86,11 @@ export const NewProductModal = () => {
                   role: "vendor",
                 },
               }}
-              defaultValue={product?.vendor ? { value: product.vendor.id, label: product.vendor.name } : null}
+              defaultValue={
+                product?.vendor
+                  ? { value: product.vendor.id, label: product.vendor.name }
+                  : null
+              }
               errors={fieldErrors}
             />
           </div>

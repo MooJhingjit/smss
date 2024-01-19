@@ -40,7 +40,7 @@ export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
       rows,
       defaultValue,
     },
-    ref
+    ref,
   ) => {
     const { pending } = useFormStatus();
 
@@ -49,10 +49,7 @@ export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
         <div className="space-y-1">
           <div className="flex justify-between">
             {label ? (
-              <Label
-                htmlFor={id}
-                className="text-xs  capitalize"
-              >
+              <Label htmlFor={id} className="text-xs  capitalize">
                 {label}
               </Label>
             ) : null}
@@ -71,7 +68,7 @@ export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
             disabled={pending || disabled}
             className={cn(
               "resize-none focus-visible:ring-0 focus-visible:ring-offset-0 ring-0 focus:ring-0 outline-none shadow-sm text-xs",
-              className
+              className,
             )}
             aria-describedby={`${id}-error`}
             defaultValue={defaultValue}
@@ -79,7 +76,7 @@ export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
         </div>
       </div>
     );
-  }
+  },
 );
 
 FormTextarea.displayName = "FormTextarea";

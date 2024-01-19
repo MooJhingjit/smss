@@ -1,13 +1,12 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
+
 html,
 body,
 :root {
   height: 100vh;
 }
-
 
 @layer base {
   :root {
@@ -55,7 +54,7 @@ body,
     --ring: 224.3 76.3% 48%;
   }
 }
- 
+
 @layer base {
   * {
     @apply border-border;

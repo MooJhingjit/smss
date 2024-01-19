@@ -1,7 +1,7 @@
-'use client'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
-import TableFilter from './data-table.filters';
-import Link from 'next/link';
+"use client";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import TableFilter from "./data-table.filters";
+import Link from "next/link";
 
 interface Props {
   data: any[];
@@ -22,23 +22,40 @@ export default function TableView(props: Props) {
             <table className="min-w-full divide-y divide-gray-300">
               <thead>
                 <tr>
-                  <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0">
+                  <th
+                    scope="col"
+                    className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0"
+                  >
                     Name
                   </th>
-                  <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                  <th
+                    scope="col"
+                    className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                  >
                     Vender
                   </th>
-                  <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                  <th
+                    scope="col"
+                    className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                  >
                     items
                   </th>
-                  <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                  <th
+                    scope="col"
+                    className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                  >
                     Cost
                   </th>
-                  <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                  <th
+                    scope="col"
+                    className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                  >
                     Percentage
                   </th>
-                  <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-0">
-                  </th>
+                  <th
+                    scope="col"
+                    className="relative py-3.5 pl-3 pr-4 sm:pr-0"
+                  ></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -47,12 +64,23 @@ export default function TableView(props: Props) {
                     <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">
                       {item.name}
                     </td>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{item.vendor}</td>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{item.itemCount}</td>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{item.cost}</td>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{item.percentage}</td>
+                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                      {item.vendor}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                      {item.itemCount}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                      {item.cost}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                      {item.percentage}
+                    </td>
                     <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
-                      <Link href="/products/1" className="text-primary-600 hover:text-primary-900">
+                      <Link
+                        href="/products/1"
+                        className="text-primary-600 hover:text-primary-900"
+                      >
                         View
                       </Link>
                     </td>
@@ -68,9 +96,8 @@ export default function TableView(props: Props) {
         <TablePagination />
       </div>
     </div>
-  )
+  );
 }
-
 
 const TablePagination = () => {
   return (
@@ -92,12 +119,16 @@ const TablePagination = () => {
       <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
         <div>
           <p className="text-sm text-gray-700">
-            Showing <span className="font-medium">1</span> to <span className="font-medium">10</span> of{' '}
+            Showing <span className="font-medium">1</span> to{" "}
+            <span className="font-medium">10</span> of{" "}
             <span className="font-medium">97</span> results
           </p>
         </div>
         <div>
-          <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+          <nav
+            className="isolate inline-flex -space-x-px rounded-md shadow-sm"
+            aria-label="Pagination"
+          >
             <a
               href="#"
               className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
@@ -157,5 +188,5 @@ const TablePagination = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};

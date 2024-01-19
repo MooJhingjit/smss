@@ -6,7 +6,6 @@ import { schema } from "./schema";
 import { revalidatePath } from "next/cache";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-
   const {
     quotationId,
     productId,
@@ -19,10 +18,9 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     withholdingTax,
     withholdingTaxPercent,
   } = data;
-  
+
   let quotationList;
   try {
-
     quotationList = await db.quotationList.create({
       data: {
         quotationId,
@@ -46,7 +44,6 @@ const handler = async (data: InputType): Promise<ReturnType> => {
 
   revalidatePath("/quotations/[id]");
   return { data: quotationList };
-
 };
 
 export const createQuotationList = createSafeAction(schema, handler);

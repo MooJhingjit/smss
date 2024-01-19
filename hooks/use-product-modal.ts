@@ -11,9 +11,10 @@ type Store = {
 export const useProductModal = create<Store>((set) => ({
   isOpen: false,
   data: null,
-  onOpen: (data) => set({
-    isOpen: true,
-    data: data || null,
-  }),
+  onOpen: (data) =>
+    set({
+      isOpen: true,
+      data: data || null,
+    }),
   onClose: () => set({ isOpen: false }),
 }));

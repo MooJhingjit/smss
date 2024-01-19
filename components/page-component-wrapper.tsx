@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import React from "react";
 import { classNames } from "@/lib/utils";
 
@@ -15,12 +15,12 @@ export default function PageComponentWrapper(props: Props) {
         <p className="text-sm">{headerTitle}</p>
         <div className="">{headerIcon}</div>
       </div>
-      <div className={
-        classNames(
+      <div
+        className={classNames(
           "mt-2 text-sm text-gray-900 sm:col-span-2 sm:mt-0 p-2 rounded-md",
-          children ? 'border border-gray-200 ' : ''
-        )
-      }>
+          children ? "border border-gray-200 " : "",
+        )}
+      >
         {children}
       </div>
     </div>

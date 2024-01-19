@@ -2,7 +2,7 @@
 
 // import { auth } from "@clerk/nextjs";
 import { revalidatePath } from "next/cache";
-import { PrismaClient, Prisma } from '@prisma/client'
+import { PrismaClient, Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { createSafeAction } from "@/lib/create-safe-action";
 import { InputType, ReturnType } from "./types";
@@ -21,10 +21,12 @@ const handler = async (data: InputType): Promise<ReturnType> => {
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       // The .code property can be accessed in a type-safe manner
-      if (e.code === 'P2002') { // https://www.prisma.io/docs/orm/reference/error-reference#error-codes
+      if (e.code === "P2002") {
+        // https://www.prisma.io/docs/orm/reference/error-reference#error-codes
         return {
-          error: 'There is a unique constraint violation, a new user cannot be created with this email'
-        }
+          error:
+            "There is a unique constraint violation, a new user cannot be created with this email",
+        };
       }
     }
     return {

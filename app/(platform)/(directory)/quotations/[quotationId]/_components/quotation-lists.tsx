@@ -9,43 +9,54 @@ import { useQuotationListModal } from "@/hooks/use-quotation-list";
 import { QuotationListWithRelations } from "@/types";
 
 type Props = {
+  quotationId: number;
   data: QuotationListWithRelations[];
 };
 const columns = [
-  { name: 'name', key: 'name' },
-  { name: 'Price', key: 'price' },
-  { name: 'Unit Price', key: 'unitPrice' },
-  { name: 'Cost', key: 'cost' },
-  { name: 'Percentage', key: 'percentage' },
-  { name: 'Quantity', key: 'quantity' },
+  { name: "name", key: "name" },
+  { name: "Price", key: "price" },
+  { name: "Unit Price", key: "unitPrice" },
+  { name: "Cost", key: "cost" },
+  { name: "Percentage", key: "percentage" },
+  { name: "Quantity", key: "quantity" },
   {
-    name: 'Updated', key: 'quantity',
+    name: "Updated",
+    key: "quantity",
     render: (item: QuotationListWithRelations) => {
       const date = new Date(item.updatedAt);
-      return date.toLocaleDateString('th-TH',);
-    }
+      return date.toLocaleDateString("th-TH");
+    },
   },
 ];
 
 export default function QuotationLists(props: Props) {
-  const { data } = props;
+  const { data, quotationId } = props;
   const modal = useQuotationListModal();
 
   return (
-    <PageComponentWrapper headerTitle="Quotation Items" headerIcon={<Plus
-      onClick={() => modal.onOpen(undefined, {
-        quotationRef: { id: data[0].quotationId }
-      })}
-      className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-700"
-    />}>
+    <PageComponentWrapper
+      headerTitle="Quotation Items"
+      headerIcon={
+        <Plus
+          onClick={() =>
+            modal.onOpen(undefined, {
+              quotationRef: { id: quotationId },
+            })
+          }
+          className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-700"
+        />
+      }
+    >
       <div className="overflow-x-scroll md:overflow-auto">
         <TableLists<QuotationListWithRelations>
           columns={columns}
           data={data}
-          onManage={(item) => modal.onOpen(item, {
-            quotationRef: { id: item.quotationId },
-            productRef: { id: item.productId, name: item.product.name },
-          })}
+          onManage={(item) =>
+            modal.onOpen(item, {
+              quotationRef: { id: item.quotationId },
+              productRef: { id: item.productId, name: item.product.name },
+            })
+          }
         />
       </div>
       {data.length > 0 && (
@@ -61,7 +72,6 @@ export default function QuotationLists(props: Props) {
     </PageComponentWrapper>
   );
 }
-
 
 const BillingInfo = () => {
   return (

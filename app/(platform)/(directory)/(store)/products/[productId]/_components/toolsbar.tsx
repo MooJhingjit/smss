@@ -1,15 +1,15 @@
-'use client'
-import React from 'react'
-import { Plus, Search } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { useItemModal } from '@/hooks/use-item-modal';
-import { ProductWithRelations } from '@/types';
+"use client";
+import React from "react";
+import { Plus, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useItemModal } from "@/hooks/use-item-modal";
+import { ProductWithRelations } from "@/types";
 
 type Props = {
   onFilter: (value: string) => void;
-  data: ProductWithRelations
-}
+  data: ProductWithRelations;
+};
 
 export default function Toolbar(props: Props) {
   const { data, onFilter } = props;
@@ -19,16 +19,21 @@ export default function Toolbar(props: Props) {
     modal.onOpen(null, {
       productRef: { id: data.id, name: data.name },
     });
-  }
+  };
 
   return (
-    <div className='space-x-1 flex items-center'>
+    <div className="space-x-1 flex items-center">
       <div className="w-[300px] flex rounded-md shadow-sm">
         <div className="relative flex flex-grow items-stretch focus-within:z-10">
           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
             <Search className="h-5 w-5 text-gray-400" aria-hidden="true" />
           </div>
-          <Input type='search' name="search" placeholder='' onChange={(e) => onFilter(e.target.value)} className='pl-10 text-xs'
+          <Input
+            type="search"
+            name="search"
+            placeholder=""
+            onChange={(e) => onFilter(e.target.value)}
+            className="pl-10 text-xs"
           />
         </div>
       </div>
@@ -36,5 +41,5 @@ export default function Toolbar(props: Props) {
         <Plus size={20} />
       </Button>
     </div>
-  )
+  );
 }

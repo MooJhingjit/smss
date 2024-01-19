@@ -13,7 +13,7 @@ interface DataTableProps<TData, TValue> {
 }
 
 export default function UserTable<TData, TValue>(
-  props: DataTableProps<TData, TValue>
+  props: DataTableProps<TData, TValue>,
 ) {
   const { columns, data } = props;
 

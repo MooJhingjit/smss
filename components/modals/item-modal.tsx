@@ -47,7 +47,6 @@ export const ItemModal = () => {
   });
 
   const onSubmit = (formData: FormData) => {
-
     if (productRef?.id === undefined) {
       toast.error("Product not found");
       return;
@@ -58,7 +57,6 @@ export const ItemModal = () => {
     const warrantyDate = formData.get("warranty") as string;
     const cost = formData.get("cost") as string;
     const status = formData.get("status") as ItemStatus;
-
 
     const payload = {
       productId: productRef?.id,
@@ -73,7 +71,7 @@ export const ItemModal = () => {
       // update user
       handleUpdate.execute({
         id: item.id,
-        ...payload
+        ...payload,
       });
       return;
     }
@@ -83,12 +81,10 @@ export const ItemModal = () => {
   const fieldErrors = (item?.id ? handleUpdate : handleCreate).fieldErrors;
   return (
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
-
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="flex space-x-2 items-center">
             <p>Add</p>
-
 
             <span className="inline-flex items-center rounded-md bg-primary-50 px-2 py-1 text-sm font-medium text-primary-700 ring-1 ring-inset ring-blue-700/10">
               {productRef?.name}
@@ -120,7 +116,6 @@ export const ItemModal = () => {
             type="text"
             defaultValue={item?.serialNumber}
             errors={fieldErrors}
-
           />
           <FormInput
             id="warranty"
@@ -132,7 +127,6 @@ export const ItemModal = () => {
                 : undefined
             }
             errors={fieldErrors}
-
           />
           <FormInput
             id="cost"
@@ -145,9 +139,7 @@ export const ItemModal = () => {
             id="status"
             label="Status"
             defaultValue={item?.status ?? undefined}
-            options={[
-              { id: 'pending', title: 'Pending' },
-            ]}
+            options={[{ id: "pending", title: "Pending" }]}
           />
           <div className="col-span-2  flex justify-end">
             <FormSubmit>{item ? "Update Item" : "Create Item"}</FormSubmit>
@@ -157,4 +149,3 @@ export const ItemModal = () => {
     </Dialog>
   );
 };
-

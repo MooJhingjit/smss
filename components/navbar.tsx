@@ -4,8 +4,8 @@ import { Button } from "./ui/button";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { classNames } from "@/lib/utils";
-import Image from 'next/image'
-import LOGO from '@/public/logo.png'
+import Image from "next/image";
+import LOGO from "@/public/logo.png";
 
 export default function MainNavbar(props: { showMenu?: boolean }) {
   const { showMenu = false } = props;
@@ -14,7 +14,9 @@ export default function MainNavbar(props: { showMenu?: boolean }) {
     <div
       className={classNames(
         "fixed top-0 w-full h-14 px-4 shadow  flex items-center ",
-        showMenu ? "bg-primary-50 bg-gradient-to-r  from-primary-400 via-primary-100  to-primary-50 shadow-lg" : ""
+        showMenu
+          ? "bg-primary-50 bg-gradient-to-r  from-primary-400 via-primary-100  to-primary-50 shadow-lg"
+          : "",
       )}
     >
       {!showMenu && (
@@ -27,24 +29,21 @@ export default function MainNavbar(props: { showMenu?: boolean }) {
           href="/"
           className={classNames(
             "font-semibold text-lg",
-            showMenu ? "text-gray-700" : "text-white"
+            showMenu ? "text-gray-700" : "text-white",
           )}
         >
-          <Image
-            src={LOGO}
-            width={80}
-            height={80}
-            alt="Logo"
-          />
+          <Image src={LOGO} width={80} height={80} alt="Logo" />
         </Link>
         {showMenu && <MenuItems />}
         <div className="space-x-2 md:w-auto flex items-center justify-between">
-          <p className={
-            classNames(
+          <p
+            className={classNames(
               "hidden md:block text-xs text-gray-500",
-              showMenu ? "text-gray-700" : "text-white"
-            )
-          }>Admin</p>
+              showMenu ? "text-gray-700" : "text-white",
+            )}
+          >
+            Admin
+          </p>
           <Button
             asChild
             className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-gray-500 cursor-pointer"
@@ -76,32 +75,46 @@ function MenuItems() {
   };
   return (
     <div className="hidden md:flex items-center space-x-4 text-sm text-slate-700">
-
       <Link
         href="/quotations"
         className={classNames(
-          isActive("/quotations") ? "text-primary-600 font-semibold" : "text-gray-500 font-semibold"
+          isActive("/quotations")
+            ? "text-primary-600 font-semibold"
+            : "text-gray-500 font-semibold",
         )}
       >
         Quotations
       </Link>
-      <Link href="/purchases"
+      <Link
+        href="/purchases"
         className={classNames(
-          isActive("/purchases") ? "text-primary-600 font-semibold" : "text-gray-500 font-semibold"
+          isActive("/purchases")
+            ? "text-primary-600 font-semibold"
+            : "text-gray-500 font-semibold",
         )}
       >
         Purchase Orders
       </Link>
-      <Link href="/products"
+      <Link
+        href="/products"
         className={classNames(
-          isActive("/products") ? "text-primary-600 font-semibold" : "text-gray-500 font-semibold"
+          isActive("/products")
+            ? "text-primary-600 font-semibold"
+            : "text-gray-500 font-semibold",
         )}
-      >Products</Link>
-      <Link href="/users"
+      >
+        Products
+      </Link>
+      <Link
+        href="/users"
         className={classNames(
-          isActive("/users") ? "text-primary-600 font-semibold" : "text-gray-500 font-semibold"
-        )}>Users</Link>
-
+          isActive("/users")
+            ? "text-primary-600 font-semibold"
+            : "text-gray-500 font-semibold",
+        )}
+      >
+        Users
+      </Link>
     </div>
   );
 }

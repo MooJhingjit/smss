@@ -35,9 +35,9 @@ export const FormSearchAsync = forwardRef<any, FormInputProps>(
       className,
       defaultValue = "",
       onBlur,
-      config
+      config,
     },
-    ref
+    ref,
   ) => {
     const { pending } = useFormStatus();
     return (
@@ -45,10 +45,7 @@ export const FormSearchAsync = forwardRef<any, FormInputProps>(
         <div className="space-y-1">
           <div className="flex justify-between">
             {label ? (
-              <Label
-                htmlFor={id}
-                className="text-xs capitalize"
-              >
+              <Label htmlFor={id} className="text-xs capitalize">
                 {label}
               </Label>
             ) : null}
@@ -61,11 +58,10 @@ export const FormSearchAsync = forwardRef<any, FormInputProps>(
             defaultValue={defaultValue}
             onSelected={onSelected}
           />
-
         </div>
       </div>
     );
-  }
+  },
 );
 
 FormSearchAsync.displayName = "FormSearchAsync";

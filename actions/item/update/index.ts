@@ -11,7 +11,7 @@ import { Schema } from "./schema";
 const handler = async (data: InputType): Promise<ReturnType> => {
   const { id, name, cost, warrantyDate, serialNumber, status } = data;
 
-  let item
+  let item;
   try {
     item = await db.item.update({
       where: {

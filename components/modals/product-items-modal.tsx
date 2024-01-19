@@ -15,8 +15,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const ProductItemModal = () => {
   const modal = useItemModal();
-  const data = modal.data
-  console.log("data", data)
+  const data = modal.data;
+  console.log("data", data);
 
   // const { execute, isLoading } = useAction(createQuotation, {
   //   onSuccess: (data) => {
@@ -67,9 +67,7 @@ const ItemLists = () => {
     <table className="w-full text-gray-500 ">
       <thead className="text-left text-sm text-gray-500 ">
         <tr>
-          <th>
-            
-          </th>
+          <th></th>
           <th scope="col" className="text-xs font-normal">
             Serial Number
           </th>

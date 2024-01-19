@@ -3,5 +3,5 @@ import { z } from "zod";
 // get data from QuotationType enum
 export const schema = z.object({
   buyerId: z.number(),
-  type: z.enum(['product', 'service']),
+  type: z.enum(["product", "service"]),
 });

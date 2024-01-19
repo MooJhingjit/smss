@@ -61,12 +61,12 @@ export const NewUserModal = () => {
       fax,
       contact,
       address,
-    }
+    };
     if (user?.id) {
       // update user
       handleUpdate.execute({
         id: user.id,
-        ...payload
+        ...payload,
       });
       return;
     }
@@ -88,10 +88,10 @@ export const NewUserModal = () => {
               label="Role"
               defaultValue={user?.role ?? undefined}
               options={[
-                { id: 'buyer', title: 'Buyer' },
-                { id: 'vendor', title: 'Vendor' },
-                { id: 'sale', title: 'Sale' },
-                { id: 'admin', title: 'Admin' },
+                { id: "buyer", title: "Buyer" },
+                { id: "vendor", title: "Vendor" },
+                { id: "sale", title: "Sale" },
+                { id: "admin", title: "Admin" },
               ]}
             />
           </div>

@@ -20,7 +20,7 @@ async function getData(): Promise<any[]> {
       id: "asc",
     },
   });
-  return users
+  return users;
 }
 
 export default async function UserPage() {

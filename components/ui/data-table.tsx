@@ -49,10 +49,9 @@ export function DataTable<TData, TValue>({
   onCreate,
 }: Readonly<DataTableProps<TData, TValue>>) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
+    [],
   );
   const [globalFilter, setGlobalFilter] = React.useState("");
-
 
   const table = useReactTable({
     data,
@@ -65,7 +64,7 @@ export function DataTable<TData, TValue>({
     getFilteredRowModel: getFilteredRowModel(),
     state: {
       // columnFilters,
-      globalFilter
+      globalFilter,
     },
     getColumnCanGlobalFilter: () => true,
   });
@@ -82,7 +81,7 @@ export function DataTable<TData, TValue>({
             placeholder=""
             value={globalFilter}
             onChange={(e) => {
-              setGlobalFilter(e.target.value)
+              setGlobalFilter(e.target.value);
             }}
             className="max-w-sm"
           />
@@ -106,9 +105,9 @@ export function DataTable<TData, TValue>({
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
                   </TableHead>
                 );
               })}
@@ -154,7 +153,6 @@ function DataTablePagination<TData>({
 }: DataTablePaginationProps<TData>) {
   return (
     <div className="flex items-center space-x-2">
-
       <div className="flex items-center space-x-2">
         <Button
           variant="outline"
@@ -193,8 +191,7 @@ function DataTablePagination<TData>({
           <ChevronsRight className="h-4 w-4" />
         </Button>
         <div className="flex items-center justify-center text-sm">
-          {table.getState().pagination.pageIndex + 1} of{" "}
-          {table.getPageCount()}
+          {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
         </div>
       </div>
       <div className="flex items-center space-x-2">
@@ -218,6 +215,5 @@ function DataTablePagination<TData>({
         </Select>
       </div>
     </div>
-
   );
 }

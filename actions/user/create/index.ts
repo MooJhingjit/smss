@@ -6,7 +6,6 @@ import { InputType, ReturnType } from "./types";
 import { UserSchema } from "./schema";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-
   const { role, taxId, name, email, phone, contact, fax, address } = data;
   let user;
   try {

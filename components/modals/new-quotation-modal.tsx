@@ -20,17 +20,16 @@ import { User } from "@prisma/client";
 import { useRouter } from "next/navigation";
 
 export const NewQuotationModal = () => {
-  const router = useRouter()
+  const router = useRouter();
   const modal = useQuotationModal();
-  const typeRef = useRef<'product' | 'service'>('product');
-  const [customerDetails, setCustomerDetails] = useState<User | null>(null)
+  const typeRef = useRef<"product" | "service">("product");
+  const [customerDetails, setCustomerDetails] = useState<User | null>(null);
 
   const handleCreate = useAction(createQuotation, {
     onSuccess: (data) => {
       toast.success("New quotation created");
       modal.onClose();
-      router.push(`quotations/${data.id}`)
-
+      router.push(`quotations/${data.id}`);
     },
     onError: (error) => {
       toast.error(error);
@@ -47,12 +46,11 @@ export const NewQuotationModal = () => {
     };
 
     handleCreate.execute({ ...payload });
-
   };
 
-  const onTypeChange = (value: 'product' | 'service') => {
+  const onTypeChange = (value: "product" | "service") => {
     typeRef.current = value;
-  }
+  };
 
   return (
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
@@ -65,10 +63,18 @@ export const NewQuotationModal = () => {
           <Tabs defaultValue="product" className="w-full">
             <Label className="text-xs">Type</Label>
             <TabsList className="w-full flex">
-              <TabsTrigger className="flex-1 text-xs" value="product" onClick={() => onTypeChange('product')}>
+              <TabsTrigger
+                className="flex-1 text-xs"
+                value="product"
+                onClick={() => onTypeChange("product")}
+              >
                 Product
               </TabsTrigger>
-              <TabsTrigger className="flex-1 text-xs" value="service" onClick={() => onTypeChange('service')}>
+              <TabsTrigger
+                className="flex-1 text-xs"
+                value="service"
+                onClick={() => onTypeChange("service")}
+              >
                 Service
               </TabsTrigger>
             </TabsList>
@@ -87,16 +93,14 @@ export const NewQuotationModal = () => {
               onSelected={(item) => {
                 setCustomerDetails(item.data);
               }}
-            // errors={fieldErrors}
+              // errors={fieldErrors}
             />
           </div>
-          {
-            customerDetails && (
-              <div className="">
-                <CustomerInfo data={customerDetails} />
-              </div>
-            )
-          }
+          {customerDetails && (
+            <div className="">
+              <CustomerInfo data={customerDetails} />
+            </div>
+          )}
           <div className="col-start-2 col-span-1 flex justify-end">
             <FormSubmit>Create</FormSubmit>
           </div>

@@ -1,7 +1,5 @@
-import React from 'react'
+import React from "react";
 
 export default function ItemLists() {
-  return (
-    <div>item-lists</div>
-  )
+  return <div>item-lists</div>;
 }

@@ -31,11 +31,10 @@ export default function QuotationDetails() {
         <div className="col-span-5">
           <OrderItems />
         </div>
-        
+
         <div className="col-span-5">
-          <AssociateOrders/>
+          <AssociateOrders />
         </div>
-        
       </div>
     </>
   );

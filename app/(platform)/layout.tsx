@@ -8,7 +8,7 @@ const PlatformLayout = ({ children }: { children: React.ReactNode }) => {
     // <ClerkProvider>
     // <QueryProvider>
     <>
-      <Toaster position="top-center" richColors/>
+      <Toaster position="top-center" richColors />
       <ModalProvider />
       {children}
     </>

@@ -36,7 +36,7 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
       defaultValue = "",
       onBlur,
     },
-    ref
+    ref,
   ) => {
     const { pending } = useFormStatus();
 
@@ -45,10 +45,7 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
         <div className="space-y-1">
           <div className="flex justify-between">
             {label ? (
-              <Label
-                htmlFor={id}
-                className="text-xs capitalize"
-              >
+              <Label htmlFor={id} className="text-xs capitalize">
                 {label}
               </Label>
             ) : null}
@@ -71,7 +68,7 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
         </div>
       </div>
     );
-  }
+  },
 );
 
 FormInput.displayName = "FormInput";

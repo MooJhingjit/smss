@@ -6,7 +6,6 @@ import { schema } from "./schema";
 import { revalidatePath } from "next/cache";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-
   const {
     id,
     quotationId,
@@ -23,7 +22,6 @@ const handler = async (data: InputType): Promise<ReturnType> => {
 
   let quotationList;
   try {
-
     quotationList = await db.quotationList.update({
       where: {
         id,
@@ -51,7 +49,6 @@ const handler = async (data: InputType): Promise<ReturnType> => {
   revalidatePath("/quotations/[id]");
 
   return { data: quotationList };
-
 };
 
 export const updateQuotationList = createSafeAction(schema, handler);

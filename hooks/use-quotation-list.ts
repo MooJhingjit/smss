@@ -1,7 +1,9 @@
 import { QuotationListWithRelations } from "@/types";
 import { create } from "zustand";
 
-export type ItemRefs = undefined | { productRef?: { id: number, name: string }, quotationRef: { id: number } };
+export type ItemRefs =
+  | undefined
+  | { productRef?: { id: number; name: string }; quotationRef: { id: number } };
 
 type Store = {
   isOpen: boolean;
@@ -15,10 +17,11 @@ export const useQuotationListModal = create<Store>((set) => ({
   isOpen: false,
   data: null,
   refs: null,
-  onOpen: (data, refs) => set({
-    isOpen: true,
-    data: data ?? null,
-    refs: refs ?? null,
-  }),
+  onOpen: (data, refs) =>
+    set({
+      isOpen: true,
+      data: data ?? null,
+      refs: refs ?? null,
+    }),
   onClose: () => set({ isOpen: false }),
 }));

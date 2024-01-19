@@ -34,25 +34,19 @@ export default function PurchaseOrders() {
             <th scope="col" className="w-1/12">
               #
             </th>
-            <th scope="col" className="py-3 pr-8 text-xs sm:w-2/5 lg:w-1/12 font-normal">
+            <th
+              scope="col"
+              className="py-3 pr-8 text-xs sm:w-2/5 lg:w-1/12 font-normal"
+            >
               Vender
             </th>
-            <th
-              scope="col"
-              className="w-1/12 py-3 pr-8 text-xs font-normal"
-            >
+            <th scope="col" className="w-1/12 py-3 pr-8 text-xs font-normal">
               Unit
             </th>
-            <th
-              scope="col"
-              className="w-1/12 py-3 pr-8 text-xs font-normal"
-            >
+            <th scope="col" className="w-1/12 py-3 pr-8 text-xs font-normal">
               Amount
             </th>
-            <th
-              scope="col"
-              className="w-1/12 py-3 pr-8 text-xs font-normal"
-            >
+            <th scope="col" className="w-1/12 py-3 pr-8 text-xs font-normal">
               Created At
             </th>
             <th className="w-1/12 "></th>
@@ -63,9 +57,7 @@ export default function PurchaseOrders() {
             <tr className="border-b border-gray-200 ">
               <td className="py-6">{index + 1}</td>
               <td>?????</td>
-              <td>
-                ????
-              </td>
+              <td>????</td>
               <td>?????</td>
               <td>?????</td>
               <td>
