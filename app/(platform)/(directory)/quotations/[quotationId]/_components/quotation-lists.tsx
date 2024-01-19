@@ -6,9 +6,10 @@ import { Input } from "@/components/ui/input";
 import { QuotationItem, QuotationList } from "@prisma/client";
 import TableLists from "@/components/table-lists";
 import { useQuotationListModal } from "@/hooks/use-quotation-list";
+import { QuotationListWithRelations } from "@/types";
 
 type Props = {
-  data: QuotationList[];
+  data: QuotationListWithRelations[];
 };
 const columns = [
   { name: 'name', key: 'name' },
@@ -19,80 +20,33 @@ const columns = [
   { name: 'Quantity', key: 'quantity' },
   {
     name: 'Updated', key: 'quantity',
-    render: (item: QuotationList) => {
+    render: (item: QuotationListWithRelations) => {
       const date = new Date(item.updatedAt);
       return date.toLocaleDateString('th-TH',);
-    }
-  },
-  {
-    name: '', key: 'actions',
-    render: (item: QuotationList) => {
-      return (
-        <Trash2
-          onClick={() => { }}
-          className="w-4 h-4 text-red-300 cursor-pointer hover:text-red-700"
-        />
-      )
     }
   },
 ];
 
 export default function QuotationLists(props: Props) {
   const { data } = props;
-  console.log("data", data)
   const modal = useQuotationListModal();
 
   return (
     <PageComponentWrapper headerTitle="Quotation Items" headerIcon={<Plus
-      onClick={() => modal.onOpen()}
+      onClick={() => modal.onOpen(undefined, {
+        quotationRef: { id: data[0].quotationId }
+      })}
       className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-700"
     />}>
       <div className="overflow-x-scroll md:overflow-auto">
-        <TableLists<QuotationList>
+        <TableLists<QuotationListWithRelations>
           columns={columns}
           data={data}
-        // onManage={(item) => modal.onOpen(item, {
-        //   productRef: { id: data.id, name: data.name },
-        //   vendorRef: { id: data.vendor?.id, name: data.vendor?.name },
-        // })}
+          onManage={(item) => modal.onOpen(item, {
+            quotationRef: { id: item.quotationId },
+            productRef: { id: item.productId, name: item.product.name },
+          })}
         />
-
-        {/* <table className="w-full text-gray-500 ">
-          <thead className="text-left text-sm text-gray-500 ">
-            <tr>
-              <th scope="col" className="w-10">
-                #
-              </th>
-              <th
-                scope="col"
-                className="py-3 pr-8 text-xs sm:w-2/5 lg:w-1/2 font-normal"
-              >
-                Product
-              </th>
-
-              <th scope="col" className=" w-1/12 py-3 pr-8 text-xs font-normal">
-                Unit
-              </th>
-              <th scope="col" className=" w-1/8 py-3 pr-8 text-xs font-normal">
-                Price
-              </th>
-              <th scope="col" className=" w-1/8 py-3 pr-8 text-xs font-normal">
-                Percent/Cost
-              </th>
-              <th scope="col" className=" w-1/12 py-3 pr-8 text-xs font-normal">
-                Amount
-              </th>
-
-              <th scope="col" className="w-0 py-3 text-right text-xs"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200 border-b border-gray-200 text-sm sm:border-t">
-            {data?.map((item, index) => (
-              <ItemRow key={item.id} item={item} index={index} />
-            ))}
-            
-          </tbody>
-        </table> */}
       </div>
       {data.length > 0 && (
         <div className="grid grid-cols-5 gap-4 mt-4">
@@ -108,47 +62,6 @@ export default function QuotationLists(props: Props) {
   );
 }
 
-const ItemRow = (props: { index: number, item: QuotationList }) => {
-  const { index, item } = props;
-
-  return (
-    <tr className="border-b border-gray-200 ">
-      <td className="py-6">{index + 1}</td>
-      <td>
-        <Input id="product-name" />
-      </td>
-      <td>
-        <Input id="unit" type="number" className="w-14" />
-      </td>
-      <td className="pr-2">
-        <Input id="price" />
-      </td>
-      <td>
-        <div className="flex space-x-2">
-          <div className="relative rounded-md shadow-sm">
-            <Input name="percent" className="bg-gray-100" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-              <span
-                className="text-gray-500 sm:text-sm"
-                id="price-currency"
-              >
-                %
-              </span>
-            </div>
-          </div>
-          <Input id="cost" className="bg-gray-100" />
-        </div>
-      </td>
-      <td>??????</td>
-      <td>
-        <Trash2
-          onClick={() => { }}
-          className="w-4 h-4 text-red-300 cursor-pointer hover:text-red-700"
-        />
-      </td>
-    </tr>
-  )
-}
 
 const BillingInfo = () => {
   return (

@@ -6,6 +6,7 @@ import QuotationLists from "./_components/quotation-lists";
 import DocumentItems from "./_components/document-lists";
 import PurchaseOrders from "./_components/purchase-orders";
 import { db } from "@/lib/db";
+import { QuotationListWithRelations } from "@/types";
 
 const getData = async (quotationId: string) => {
   const data = await db.quotation.findUnique({
@@ -15,7 +16,11 @@ const getData = async (quotationId: string) => {
     include: {
       buyer: true,
       seller: true,
-      lists: true,
+      lists: {
+        include: {
+          product: true,
+        },
+      },
     },
   });
   return data;
@@ -64,7 +69,7 @@ export default async function QuotationDetails(props: Readonly<QuotationIdPagePr
           <QuotationStatus status={data.status} type={data.type} />
         </div>
         <div className="col-span-5">
-          <QuotationLists data={data.lists} />
+          <QuotationLists data={data.lists as QuotationListWithRelations[]} />
         </div>
         <div className="col-span-5 md:col-span-2">
           <DocumentItems />

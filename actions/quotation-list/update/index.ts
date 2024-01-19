@@ -8,6 +8,7 @@ import { revalidatePath } from "next/cache";
 const handler = async (data: InputType): Promise<ReturnType> => {
 
   const {
+    id,
     quotationId,
     productId,
     name,
@@ -19,11 +20,14 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     withholdingTax,
     withholdingTaxPercent,
   } = data;
-  
+
   let quotationList;
   try {
 
-    quotationList = await db.quotationList.create({
+    quotationList = await db.quotationList.update({
+      where: {
+        id,
+      },
       data: {
         quotationId,
         productId,
@@ -40,13 +44,14 @@ const handler = async (data: InputType): Promise<ReturnType> => {
   } catch (error) {
     console.log("error", error);
     return {
-      error: "Failed to create.",
+      error: "Failed to update.",
     };
   }
 
   revalidatePath("/quotations/[id]");
+
   return { data: quotationList };
 
 };
 
-export const createQuotationList = createSafeAction(schema, handler);
+export const updateQuotationList = createSafeAction(schema, handler);

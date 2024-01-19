@@ -16,7 +16,7 @@ export const useSearchAsync = (endpoint: string, defaultQuery: Record<string, st
   const getSearchURL = (searchValue: string) => {
     const allParams = { ...defaultQuery, search: searchValue }
     const params = new URLSearchParams(allParams);
-    return `api/${endpoint}?${params.toString()}`
+    return `/api/${endpoint}?${params.toString()}`
   };
 
   const search = async (searchValue: string) => {
