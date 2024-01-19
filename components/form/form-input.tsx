@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
 import { FormErrors } from "./form-errors";
+import { UseFormRegister } from "react-hook-form";
 
 interface FormInputProps {
   id: string;
@@ -19,7 +20,9 @@ interface FormInputProps {
   errors?: Record<string, string[] | undefined>;
   className?: string;
   defaultValue?: any;
+  readOnly?: boolean;
   onBlur?: () => void;
+  register?: UseFormRegister<any>;
 }
 
 export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
@@ -35,6 +38,8 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
       className,
       defaultValue = "",
       onBlur,
+      register,
+      readOnly
     },
     ref,
   ) => {
@@ -59,8 +64,10 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
             required={required}
             name={id}
             id={id}
+            register={register}
             placeholder={placeholder}
             type={type}
+            readOnly={readOnly}
             disabled={pending || disabled}
             className={cn("text-xs", className)}
             aria-describedby={`${id}-error`}

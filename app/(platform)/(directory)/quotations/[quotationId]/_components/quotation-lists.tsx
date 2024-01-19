@@ -1,9 +1,7 @@
 "use client";
-import React, { useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import React from "react";
+import { Plus } from "lucide-react";
 import PageComponentWrapper from "@/components/page-component-wrapper";
-import { Input } from "@/components/ui/input";
-import { QuotationItem, QuotationList } from "@prisma/client";
 import TableLists from "@/components/table-lists";
 import { useQuotationListModal } from "@/hooks/use-quotation-list";
 import { QuotationListWithRelations } from "@/types";
@@ -13,12 +11,18 @@ type Props = {
   data: QuotationListWithRelations[];
 };
 const columns = [
-  { name: "name", key: "name" },
-  { name: "Price", key: "price" },
-  { name: "Unit Price", key: "unitPrice" },
+  { name: "No.", key: "index" },
+  {
+    name: "name", key: "name",
+    render: (item: QuotationListWithRelations) => {
+      return item.product.name;
+    },
+  },
   { name: "Cost", key: "cost" },
   { name: "Percentage", key: "percentage" },
   { name: "Quantity", key: "quantity" },
+  { name: "Unit Price", key: "unitPrice" },
+  // { name: "Price", key: "price" },
   {
     name: "Updated",
     key: "quantity",

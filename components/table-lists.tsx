@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useCallback } from "react";
 import {
   Table,
   TableBody,
@@ -33,6 +33,37 @@ export default function TableLists<T extends WithKey>(
   props: Readonly<Props<T>>,
 ) {
   const { data, columns, onManage, link } = props;
+
+  const getFormatValue = useCallback(
+    (item: T, column: Column<T>, rowIndex: number) => {
+      const { key, render } = column;
+
+      // Use render function if defined
+      if (render) {
+        return render(item);
+      }
+
+      // Handle special case for 'index'
+      if (key === "index") {
+        return rowIndex + 1;
+      }
+
+      // Get the value from the item using the key
+      const value = item[key];
+
+      // Process the value based on its type
+      if (typeof value === "boolean") {
+        return value ? "Yes" : "No";
+      } else if (typeof value === "number") {
+        return value.toLocaleString();
+      }
+
+      // Default return for other types
+      return value;
+    }
+    , []);
+
+
   return (
     <Table className="min-w-full divide-y divide-gray-300">
       <TableHeader className="">
@@ -48,14 +79,14 @@ export default function TableLists<T extends WithKey>(
         </TableRow>
       </TableHeader>
       <TableBody className="divide-y divide-gray-200 bg-white">
-        {data.map((item: T) => (
+        {data.map((item: T, rowIdx) => (
           <TableRow key={item.id} className="hover:bg-gray-50">
             {columns.map((column) => (
               <TableCell
                 key={column.key}
                 className="whitespace-nowrap px-3 py-2.5 text-xs text-gray-500 capitalize"
               >
-                {column.render ? column.render(item) : item[column.key]}
+                {getFormatValue(item, column, rowIdx)}
               </TableCell>
             ))}
 

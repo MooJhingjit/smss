@@ -14,22 +14,61 @@ import { createQuotationList } from "@/actions/quotation-list/create";
 import { updateQuotationList } from "@/actions/quotation-list/update";
 import { FormInput } from "../form/form-input";
 import { useQuotationListModal } from "@/hooks/use-quotation-list";
-import { use, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Product } from "@prisma/client";
+import { useForm } from "react-hook-form";
+
+type FormInput = {
+  productId: string;
+  name: string;
+  price: string;
+  unitPrice: string;
+  cost: string;
+  percentage: string;
+  quantity: string;
+  withholdingTax: string;
+  withholdingTaxPercent: string;
+};
 
 export const QuotationListModal = () => {
-  const [defaultProduct, setDefaultProduct] = useState<Product | null>(null);
+  const [productSelected, setProduct] = useState<Product | null>(null);
   const modal = useQuotationListModal();
-  const data = modal.data;
+  const defaultData = modal.data;
+  const p = defaultData?.percentage?.toString() ?? ""
   const refs = modal.refs;
+  const {
+    register,
+    watch,
+    reset,
+    getValues,
+    setValue,
+    // formState: { dirtyFields }
+  } = useForm<FormInput>({
+    mode: "onChange",
+  });
 
-  // useEffect(() => {
-  //   console.log(defaultProduct)
-  //   // set default value for cost and percentage
-  //   if (refs?.productRef) {
-  //     // setDefaultProduct
-  //   }
-  // }, [refs]);
+  useEffect(() => {
+    if (!defaultData) return;
+    const formData = {
+      name: defaultData?.name ?? "",
+      price: defaultData?.price ? defaultData.price.toString() : "",
+      unitPrice: defaultData?.unitPrice
+        ? defaultData.unitPrice.toString()
+        : "",
+      cost: defaultData?.cost ? defaultData.cost.toString() : "",
+      percentage: p,
+      quantity: defaultData?.quantity ? defaultData.quantity.toString() : "",
+      withholdingTax: defaultData?.withholdingTax
+        ? defaultData.withholdingTax.toString()
+        : "",
+      withholdingTaxPercent: defaultData?.withholdingTaxPercent
+        ? defaultData.withholdingTaxPercent.toString()
+        : "",
+    }
+    reset(
+      formData,
+    )
+  }, [defaultData, reset])
 
   const handleCreate = useAction(createQuotationList, {
     onSuccess: (data) => {
@@ -55,9 +94,7 @@ export const QuotationListModal = () => {
 
   const onSubmit = async (formData: FormData) => {
     const productId = formData.get("productId") as string;
-    // const name = formData.get("name") as string;
     const price = formData.get("price") as string;
-    // const unitPrice = formData.get("unitPrice") as string;
     const cost = formData.get("cost") as string;
     const percentage = formData.get("percentage") as string;
     const quantity = formData.get("quantity") as string;
@@ -79,18 +116,19 @@ export const QuotationListModal = () => {
       quotationId: refs.quotationRef.id,
       productId: product,
       name: "",
-      price: parseInt(price),
-      unitPrice: parseInt(price),
-      cost: parseInt(cost),
-      percentage: parseInt(percentage),
-      quantity: parseInt(quantity),
-      withholdingTax: parseInt(withholdingTax),
-      withholdingTaxPercent: parseInt(withholdingTaxPercent),
+      price: parseFloat(price),
+      unitPrice: parseFloat(price),
+      cost: parseFloat(cost),
+      percentage: parseFloat(percentage),
+      quantity: parseFloat(quantity),
+      withholdingTax: parseFloat(withholdingTax),
+      withholdingTaxPercent: parseFloat(withholdingTaxPercent),
     };
 
-    if (data?.id) {
+
+    if (defaultData?.id) {
       handleUpdate.execute({
-        id: data.id,
+        id: defaultData.id,
         ...payload,
       });
       return;
@@ -99,25 +137,21 @@ export const QuotationListModal = () => {
     handleCreate.execute({ ...payload });
   };
 
-  const fieldErrors = (data?.id ? handleUpdate : handleCreate).fieldErrors;
-  const defaultPrice = useMemo(() => {
-    if (data?.price) return data?.price;
+  const fieldErrors = (defaultData?.id ? handleUpdate : handleCreate).fieldErrors;
 
-    if (defaultProduct?.cost && defaultProduct?.percentage) {
-      return (
-        defaultProduct.cost +
-        (defaultProduct.cost *
-          parseFloat(defaultProduct.percentage.toString())) /
-          100
-      );
+  useEffect(() => {
+
+    const cost = watch('cost');
+    const percentage = watch('percentage');
+    if (cost && percentage) {
+      const newPrice = parseFloat(cost) + (parseFloat(cost) * parseFloat(percentage)) / 100
+      setValue('price', newPrice.toString())
     }
-
-    return "";
-  }, [defaultProduct, data?.price]);
+  }, [watch('cost'), watch('percentage')]);
 
   return (
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] md:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Quotation List</DialogTitle>
           {/* <DialogDescription>Please select the customer.</DialogDescription> */}
@@ -132,11 +166,14 @@ export const QuotationListModal = () => {
                 params: {},
               }}
               defaultValue={{
-                id: data?.product.id,
-                label: data?.product.name,
+                id: defaultData?.product.id,
+                label: defaultData?.product.name,
               }}
               onSelected={(item) => {
-                setDefaultProduct(item.data);
+                setProduct(item.data);
+                setValue("percentage", item.data.percentage);
+                setValue("cost", item.data.cost);
+
               }}
               errors={fieldErrors}
             />
@@ -147,7 +184,7 @@ export const QuotationListModal = () => {
               id="name"
               label="Name"
               type="text"
-              defaultValue={data?.name}
+              defaultValue={defaultData?.name}
               errors={fieldErrors}
             />
           </div>
@@ -156,8 +193,8 @@ export const QuotationListModal = () => {
             <FormInput
               id="cost"
               label="Cost"
+              register={register}
               type="number"
-              defaultValue={data?.cost ?? defaultProduct?.cost ?? ""}
               errors={fieldErrors}
             />
           </div>
@@ -166,9 +203,7 @@ export const QuotationListModal = () => {
               id="percentage"
               label="Percentage"
               type="number"
-              defaultValue={
-                data?.percentage ?? defaultProduct?.percentage ?? ""
-              }
+              register={register}
               errors={fieldErrors}
             />
           </div>
@@ -177,26 +212,17 @@ export const QuotationListModal = () => {
               id="price"
               label="Price"
               type="number"
-              defaultValue={defaultPrice}
+              readOnly
+              register={register}
               errors={fieldErrors}
             />
           </div>
-          {/* 
-          <div className="">
-            <FormInput
-              id="unitPrice"
-              label="Unit Price"
-              type="number"
-              defaultValue={data?.unitPrice}
-              errors={fieldErrors}
-            />
-          </div> */}
           <div className="">
             <FormInput
               id="quantity"
               label="Quantity"
               type="number"
-              defaultValue={data?.quantity}
+              defaultValue={defaultData?.quantity}
               errors={fieldErrors}
             />
           </div>
@@ -206,7 +232,7 @@ export const QuotationListModal = () => {
               id="withholdingTax"
               label="Withholding Tax"
               type="number"
-              defaultValue={data?.withholdingTax}
+              defaultValue={defaultData?.withholdingTax}
               errors={fieldErrors}
             />
           </div>
@@ -216,13 +242,15 @@ export const QuotationListModal = () => {
               id="withholdingTaxPercent"
               label="Withholding Tax Percent"
               type="number"
-              defaultValue={data?.withholdingTaxPercent}
+              defaultValue={defaultData?.withholdingTaxPercent}
               errors={fieldErrors}
             />
           </div>
 
           <div className="col-start-4 col-span-1 flex justify-end">
-            <FormSubmit>Create</FormSubmit>
+            <FormSubmit>
+              {defaultData?.id ? "Update" : "Create"}
+            </FormSubmit>
           </div>
         </form>
       </DialogContent>
