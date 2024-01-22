@@ -78,6 +78,7 @@ export function DataTable<TData, TValue>({
 
         <div className="flex flex-1 w-full items-center space-x-2 justify-end ">
           <Input
+            id="search"
             placeholder=""
             value={globalFilter}
             onChange={(e) => {
@@ -124,7 +125,7 @@ export function DataTable<TData, TValue>({
                 {row.getVisibleCells().map((cell) => (
                   <TableCell
                     key={cell.id}
-                    className="whitespace-nowrap px-3 py-4 text-sm text-gray-500"
+                    className="whitespace-nowrap px-3 py-4 text-sm text-gray-500  max-w-52 truncate"
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>

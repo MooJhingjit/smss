@@ -1,6 +1,8 @@
 "use client";
 import React from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { Quotation } from "@prisma/client";
+import { QuotationWithBuyer } from "@/types";
 
 interface Props {
   data?: any;
@@ -9,7 +11,7 @@ interface Props {
 export default function BoardContainer(props: Props) {
   const { data } = props;
 
-  const onDragEnd = (result: any) => {};
+  const onDragEnd = (result: any) => { };
 
   return (
     <div className="">
@@ -22,12 +24,12 @@ export default function BoardContainer(props: Props) {
               ref={provided.innerRef}
               className="flex gap-x-3 h-full"
             >
-              <BoardColumn label="Quotation Open" idx={1} itemCount={20} />
-              <BoardColumn label="Quotation Sent" idx={2} itemCount={8} />
-              <BoardColumn label="Quotation Approved" idx={3} itemCount={5} />
-              <BoardColumn label="Order Sent" idx={4} itemCount={7} />
-              <BoardColumn label="Order Received" idx={5} itemCount={3} />
-              <BoardColumn label="Delivered/Done" idx={6} itemCount={6} />
+              <BoardColumn label="Quotation Open" idx={1} items={data.pending} />
+              <BoardColumn label="Quotation Sent" idx={2} items={[]} />
+              <BoardColumn label="Quotation Approved" idx={3} items={[]} />
+              <BoardColumn label="Order Sent" idx={4} items={[]} />
+              <BoardColumn label="Order Received" idx={5} items={[]} />
+              <BoardColumn label="Delivered/Done" idx={6} items={[]} />
               {provided.placeholder}
               <div className="flex-shrink-0 w-1" />
             </div>
@@ -49,12 +51,13 @@ const BoardFilters = () => {
 const BoardColumn = ({
   label,
   idx,
-  itemCount,
+  items
 }: {
   label: string;
   idx: number;
-  itemCount: number;
+  items: QuotationWithBuyer[]
 }) => {
+
   return (
     <div className="h-full min-w-[210px] select-none">
       <div className="w-full rounded-md bg-gray-50 shadow-md pb-2 h-full">
@@ -72,8 +75,8 @@ const BoardColumn = ({
                 ref={provided.innerRef}
                 className="h-full"
               >
-                {[...Array(itemCount)].map((_, i) => {
-                  return <BoardCard idx={`${idx}-${i}`} id={i} />;
+                {items.map((i: QuotationWithBuyer, cardIdx) => {
+                  return <BoardCard idx={`${idx}-${cardIdx}`} key={i.id} item={i} />;
                 })}
 
                 {provided.placeholder}
@@ -86,19 +89,46 @@ const BoardColumn = ({
   );
 };
 
-const BoardCard = ({ idx, id }: { idx: string; id: number }) => {
+const BoardCard = ({ idx, item }: { idx: string; item: QuotationWithBuyer }) => {
   return (
-    <Draggable draggableId={idx.toString()} index={id}>
+    <Draggable draggableId={idx.toString()} index={item.id}>
       {(provided) => (
         <li
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           ref={provided.innerRef}
-          className="w-full rounded-md bg-white shadow mb-3"
+          className="w-full rounded-md bg-white shadow mb-3 "
         >
-          <div className="px-3 py-2 h-20"></div>
+          <div className="p-2 text-xs">
+
+            <div className="flex justify-between items-center">
+              <div className="flex space-x-1">
+                <span className="inline-flex items-center capitalize rounded bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-700">
+                  {item.code}
+                </span>
+                {/* <span className="inline-flex items-center capitalize rounded bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-600">
+                  {item.type}
+                </span> */}
+              </div>
+              <p className=" text-slate-700 capitalize">{item.paymentType}</p>
+
+            </div>
+
+            <div className="flex justify-between mt-2">
+              <div className="font-medium text-slate-900">{item.buyer.name}</div>
+            </div>
+            <div className="text-xs">
+              <p className=" text-slate-700"><span className="capitalize">{item.createdAt.toLocaleString()}</span></p>
+            </div>
+
+          </div>
         </li>
       )}
     </Draggable>
   );
 };
+
+
+{/* <p className="text-xs text-gray-400">
+                {item.createdAt.toLocaleString()}
+              </p> */}
