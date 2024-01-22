@@ -99,7 +99,7 @@ const MenuItem = (props: {
 
 const Stats = () => {
   return (
-    <div className="col-span-3 lg:flex justify-between relative lg:p-4 p-2">
+    <div className="col-span-4 lg:flex justify-between relative lg:p-4 p-2">
       <div className="absolute inset-0 bg-gray-100  rounded-lg opacity-10 z-10 h-full"></div>
 
       <div className=" lg:border-gray-900/5 lg:border-t-0 mb-4 lg:mb-0">

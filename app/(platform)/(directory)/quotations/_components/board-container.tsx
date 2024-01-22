@@ -24,12 +24,14 @@ export default function BoardContainer(props: Props) {
               ref={provided.innerRef}
               className="flex gap-x-3 h-full"
             >
-              <BoardColumn label="Quotation Open" idx={1} items={data.pending} />
-              <BoardColumn label="Quotation Sent" idx={2} items={[]} />
-              <BoardColumn label="Quotation Approved" idx={3} items={[]} />
-              <BoardColumn label="Order Sent" idx={4} items={[]} />
-              <BoardColumn label="Order Received" idx={5} items={[]} />
-              <BoardColumn label="Delivered/Done" idx={6} items={[]} />
+              <BoardColumn label="เปิด QT" idx={1} items={data.pending} />
+              <BoardColumn label="ส่ง QT (ให้ลูกค้า)" idx={2} items={[]} />
+              <BoardColumn label="อนุมัติ QT" idx={3} items={[]} />
+              <BoardColumn label="เตรียม PO (ผู้ขาย)" idx={4} items={[]} />
+              <BoardColumn label="ส่ง PO (ผู้ขาย)" idx={5} items={[]} />
+              <BoardColumn label="รับสินค้า" idx={6} items={[]} />
+              <BoardColumn label="รอส่งสินค้า" idx={7} items={[]} />
+              <BoardColumn label="ส่งสินค้า / ปิดงาน" idx={8} items={[]} />
               {provided.placeholder}
               <div className="flex-shrink-0 w-1" />
             </div>

@@ -44,10 +44,11 @@ export default function CardWrapper(props: Props) {
         </div>
       </CardHeader>
       <CardContent>
-        {children && children}
-        {/* {Array.from({ length: 5 }).map((_, index) => (
-          <div className="h-5 bg-gray-200 w-full mb-2"></div>
-        ))} */}
+        {children
+          ? children
+          : Array.from({ length: 6 }).map((_, index) => (
+              <div className="h-5 bg-gray-200 w-full mt-2"></div>
+            ))}
       </CardContent>
     </Card>
   );

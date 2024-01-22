@@ -17,6 +17,7 @@ import { useQuotationListModal } from "@/hooks/use-quotation-list";
 import { useEffect, useState } from "react";
 import { Product } from "@prisma/client";
 import { useForm } from "react-hook-form";
+import { FormTextarea } from "../form/form-textarea";
 
 type FormInput = {
   productId: string;
@@ -232,6 +233,7 @@ export const QuotationListModal = () => {
               id="withholdingTax"
               label="Withholding Tax"
               type="number"
+              readOnly
               defaultValue={defaultData?.withholdingTax}
               errors={fieldErrors}
             />
@@ -242,8 +244,18 @@ export const QuotationListModal = () => {
               id="withholdingTaxPercent"
               label="Withholding Tax Percent"
               type="number"
+              readOnly
               defaultValue={defaultData?.withholdingTaxPercent}
               errors={fieldErrors}
+            />
+          </div>
+
+          <div className="col-span-4">
+            <FormTextarea
+              id="description"
+              label="Description"
+              errors={fieldErrors}
+              rows={6}
             />
           </div>
 
