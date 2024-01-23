@@ -17,6 +17,9 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     quantity,
     withholdingTax,
     withholdingTaxPercent,
+    discount,
+    totalPrice,
+    description
   } = data;
 
   let quotationList;
@@ -33,6 +36,10 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         quantity,
         withholdingTax,
         withholdingTaxPercent,
+        discount,
+        totalPrice,
+        description
+        
       },
     });
   } catch (error) {

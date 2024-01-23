@@ -112,6 +112,9 @@ model QuotationList {
   quantity              Int?
   withholdingTax        Float?
   withholdingTaxPercent Float?
+  discount              Float?
+  totalPrice            Float?
+  description           String?
   createdAt             DateTime        @default(now())
   updatedAt             DateTime        @updatedAt
   QuotationItem         QuotationItem[]

@@ -12,4 +12,7 @@ export const schema = z.object({
   quantity: z.number().positive(),
   withholdingTax: z.number().optional(),
   withholdingTaxPercent: z.number().optional(),
+  discount: z.number().optional(),
+  totalPrice: z.number().positive(),
+  description: z.string().optional(),
 });

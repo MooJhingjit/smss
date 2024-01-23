@@ -52,7 +52,6 @@ export const QuotationListModal = () => {
   });
 
   useEffect(() => {
-    if (!defaultData) return;
     const formData = {
       name: defaultData?.name ?? "",
       price: defaultData?.price ? defaultData.price.toString() : "",
@@ -61,7 +60,7 @@ export const QuotationListModal = () => {
         : "",
       cost: defaultData?.cost ? defaultData.cost.toString() : "",
       percentage: p,
-      quantity: defaultData?.quantity ? defaultData.quantity.toString() : "",
+      quantity: defaultData?.quantity ? defaultData.quantity.toString() : "1",
       withholdingTax: defaultData?.withholdingTax
         ? defaultData.withholdingTax.toString()
         : "",
@@ -136,6 +135,9 @@ export const QuotationListModal = () => {
       quantity: parseFloat(quantity),
       withholdingTax: parseFloat(withholdingTax),
       withholdingTaxPercent: parseFloat(withholdingTaxPercent),
+      totalPrice: parseFloat(total),
+      discount: parseFloat(discount),
+      description,
     };
 
 
@@ -181,6 +183,7 @@ export const QuotationListModal = () => {
     }
   }, [watch('cost'), watch('percentage'), watch('quantity'), watch('discount')]);
 
+  console.log('quantity', getValues('quantity'))
   return (
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
       <DialogContent className="sm:max-w-[425px] md:max-w-[600px]">
@@ -299,6 +302,7 @@ export const QuotationListModal = () => {
               type="number"
               register={register}
               readOnly
+              className="bg-green-50"
               // defaultValue={defaultData?.withholdingTax}
               errors={fieldErrors}
             />
@@ -309,6 +313,7 @@ export const QuotationListModal = () => {
               id="description"
               label="Description"
               errors={fieldErrors}
+              defaultValue={defaultData?.description ?? ""}
               rows={6}
             />
           </div>
