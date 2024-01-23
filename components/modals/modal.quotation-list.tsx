@@ -29,10 +29,13 @@ type FormInput = {
   quantity: string;
   withholdingTax: string;
   withholdingTaxPercent: string;
+  totalPrice: string;
+  discount: string;
+  description: string;
 };
 
 export const QuotationListModal = () => {
-  const [productSelected, setProduct] = useState<Product | null>(null);
+  // const [productSelected, setProduct] = useState<Product | null>(null);
   const modal = useQuotationListModal();
   const defaultData = modal.data;
   const p = defaultData?.percentage?.toString() ?? ""
@@ -64,7 +67,12 @@ export const QuotationListModal = () => {
         : "",
       withholdingTaxPercent: defaultData?.withholdingTaxPercent
         ? defaultData.withholdingTaxPercent.toString()
+        : "7",
+      totalPrice: defaultData?.totalPrice
+        ? defaultData.totalPrice.toString()
         : "",
+      discount: defaultData?.discount ? defaultData.discount.toString() : "",
+      description: defaultData?.description ?? "",
     }
     reset(
       formData,
@@ -108,6 +116,10 @@ export const QuotationListModal = () => {
       ? parseInt(productId)
       : refs?.productRef?.id ?? null;
 
+    const total = formData.get("totalPrice") as string;
+    const discount = formData.get("discount") as string;
+    const description = formData.get("description") as string;
+
     if (!refs?.quotationRef?.id || !product) {
       toast.error("Quotation not found");
       return;
@@ -145,10 +157,29 @@ export const QuotationListModal = () => {
     const cost = watch('cost');
     const percentage = watch('percentage');
     if (cost && percentage) {
-      const newPrice = parseFloat(cost) + (parseFloat(cost) * parseFloat(percentage)) / 100
-      setValue('price', newPrice.toString())
+      const unitPrice = parseFloat(cost) + (parseFloat(cost) * parseFloat(percentage)) / 100
+      // multiply by quantity
+      const quantity = watch('quantity')
+      // console.log("quantity", quantity)
+      let totalPrice = unitPrice
+      if (quantity) {
+        totalPrice = unitPrice * parseFloat(quantity)
+      }
+      setValue('price', unitPrice.toString())
+
+      // calculate tax 7%
+      const tax = (totalPrice * 7) / 100
+      setValue('withholdingTax', tax.toString())
+
+      // set total price + tax - discount
+      const discount = watch('discount')
+      let total = totalPrice + tax
+      if (discount) {
+        total = total - parseFloat(discount)
+      }
+      setValue('totalPrice', total.toString())
     }
-  }, [watch('cost'), watch('percentage')]);
+  }, [watch('cost'), watch('percentage'), watch('quantity'), watch('discount')]);
 
   return (
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
@@ -171,7 +202,7 @@ export const QuotationListModal = () => {
                 label: defaultData?.product.name,
               }}
               onSelected={(item) => {
-                setProduct(item.data);
+                // setProduct(item.data);
                 setValue("percentage", item.data.percentage);
                 setValue("cost", item.data.cost);
 
@@ -211,7 +242,7 @@ export const QuotationListModal = () => {
           <div className="">
             <FormInput
               id="price"
-              label="Price"
+              label="Unit Price"
               type="number"
               readOnly
               register={register}
@@ -223,29 +254,52 @@ export const QuotationListModal = () => {
               id="quantity"
               label="Quantity"
               type="number"
+              register={register}
               defaultValue={defaultData?.quantity}
               errors={fieldErrors}
             />
           </div>
 
-          <div className="col-span-2">
+          <div className="">
             <FormInput
-              id="withholdingTax"
-              label="Withholding Tax"
+              id="withholdingTaxPercent"
+              label="Tax Percent"
               type="number"
               readOnly
-              defaultValue={defaultData?.withholdingTax}
+              register={register}
+              defaultValue="7"
               errors={fieldErrors}
             />
           </div>
 
-          <div className="col-span-2">
+          <div className="">
             <FormInput
-              id="withholdingTaxPercent"
-              label="Withholding Tax Percent"
+              id="withholdingTax"
+              label="Tax Total"
               type="number"
               readOnly
-              defaultValue={defaultData?.withholdingTaxPercent}
+              register={register}
+              errors={fieldErrors}
+            />
+          </div>
+          <div className="">
+            <FormInput
+              id="discount"
+              label="Discount"
+              type="number"
+              register={register}
+              // defaultValue={defaultData?.withholdingTax}
+              errors={fieldErrors}
+            />
+          </div>
+          <div className="">
+            <FormInput
+              id="totalPrice"
+              label="Total Price"
+              type="number"
+              register={register}
+              readOnly
+              // defaultValue={defaultData?.withholdingTax}
               errors={fieldErrors}
             />
           </div>

@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from "react";
 
-import { NewQuotationModal } from "@/components/modals/new-quotation-modal";
-import { NewPurchaseModal } from "@/components/modals/new-purchase-modal";
-import { NewProductModal } from "../modals/new-product-modal";
-import { ProductItemModal } from "../modals/product-items-modal";
-import { NewUserModal } from "../modals/new-user-modal";
+import { NewQuotationModal } from "@/components/modals/modal-quotation";
+import { NewPurchaseModal } from "@/components/modals/modal.purchase";
+import { NewProductModal } from "../modals/modal.product";
+import { ProductItemModal } from "../modals/modal.product-items";
+import { NewUserModal } from "../modals/modal.user";
 import { ItemModal } from "../modals/item-modal";
-import { QuotationListModal } from "../modals/quotation-list-modal";
+import { QuotationListModal } from "../modals/modal.quotation-list";
 
 export const ModalProvider = () => {
   const [isMounted, setIsMounted] = useState(false);
