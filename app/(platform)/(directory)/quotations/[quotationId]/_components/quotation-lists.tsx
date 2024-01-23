@@ -19,9 +19,18 @@ const columns = [
     },
   },
   { name: "Cost", key: "cost" },
-  { name: "Percentage", key: "percentage" },
+  // { name: "Percentage", key: "percentage" },
   { name: "Quantity", key: "quantity" },
   { name: "Unit Price", key: "unitPrice" },
+  {
+    name: "Total Tax", key: "withholdingTaxPercent",
+  },
+  {
+    name: "Discount", key: "discount",
+  },
+  {
+    name: "Total Price", key: "totalPrice"
+  },
   // { name: "Price", key: "price" },
   {
     name: "Updated",
@@ -69,7 +78,7 @@ export default function QuotationLists(props: Props) {
             <Remarks />
           </div>
           <div className="col-span-5 md:col-span-2">
-            <BillingInfo />
+            <BillingInfo data={data} />
           </div>
         </div>
       )}
@@ -77,29 +86,73 @@ export default function QuotationLists(props: Props) {
   );
 }
 
-const BillingInfo = () => {
+type BillingProps = {
+  data: QuotationListWithRelations[];
+};
+const BillingInfo = (props: BillingProps) => {
+
+  const { data } = props;
+
+  const summary = data.reduce(
+    (acc, item: QuotationListWithRelations) => {
+      const discount = item.discount ?? 0;
+      const price = item.price ?? 0;
+      const totalPrice = item.totalPrice ?? 0;
+      acc.subtotal += price
+      acc.discount += discount;
+      acc.vat += item.withholdingTax ?? 0;
+      acc.totalPrice += totalPrice;
+      return acc;
+    },
+    { subtotal: 0, discount: 0, total: 0, vat: 0, totalPrice: 0 },);
+    
   return (
     <div className="bg-gray-100 p-4 w-full sm:rounded-lg sm:px-6">
       <dl className="divide-y divide-gray-200 text-sm">
         <div className="flex items-center justify-between py-4">
           <dt className="text-gray-600">Subtotal</dt>
-          <dd className="font-medium text-gray-900">????</dd>
+          <dd className="font-medium text-gray-900">{
+            summary.subtotal.toLocaleString("th-TH", {
+              style: "currency",
+              currency: "THB",
+            })
+          }</dd>
         </div>
         <div className="flex items-center justify-between py-4">
           <dt className="text-gray-600">Discount</dt>
-          <dd className="font-medium text-gray-900">????</dd>
+          <dd className="font-medium text-gray-900">
+            {summary.discount.toLocaleString("th-TH", {
+              style: "currency",
+              currency: "THB",
+            })}
+          </dd>
         </div>
         <div className="flex items-center justify-between py-4">
           <dt className="text-gray-600">Total</dt>
-          <dd className="font-medium text-gray-900">????</dd>
+          <dd className="font-medium text-gray-900">
+            {(summary.subtotal - summary.discount).toLocaleString("th-TH", {
+              style: "currency",
+              currency: "THB",
+            })}
+          </dd>
         </div>
         <div className="flex items-center justify-between py-4">
           <dt className="text-gray-600">7% Vat</dt>
-          <dd className="font-medium text-gray-900">????</dd>
+          <dd className="font-medium text-gray-900">
+            {summary.vat.toLocaleString("th-TH", {
+              style: "currency",
+              currency: "THB",
+            })}
+          </dd>
         </div>
         <div className="flex items-center justify-between pt-4">
           <dt className="font-medium text-gray-900">Grand Total</dt>
-          <dd className="font-medium text-primary-600">????</dd>
+          <dd className="font-medium text-primary-600">
+            {summary.totalPrice.toLocaleString("th-TH", {
+              style: "currency",
+              currency: "THB",
+            })}
+          </dd>
         </div>
       </dl>
     </div>
