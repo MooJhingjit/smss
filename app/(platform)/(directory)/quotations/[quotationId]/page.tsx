@@ -69,7 +69,10 @@ export default async function QuotationDetails(
           <QuotationStatus status={data.status} type={data.type} />
         </div>
         <div className="col-span-5">
-          <QuotationLists quotationId={data.id} data={data.lists as QuotationListWithRelations[]} />
+          <QuotationLists
+            quotationId={data.id}
+            remark={data.remark ?? ""}
+            data={data.lists as QuotationListWithRelations[]} />
         </div>
         <div className="col-span-5 md:col-span-2">
           <DocumentItems />

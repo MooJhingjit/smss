@@ -5,10 +5,18 @@ import PageComponentWrapper from "@/components/page-component-wrapper";
 import TableLists from "@/components/table-lists";
 import { useQuotationListModal } from "@/hooks/use-quotation-list";
 import { QuotationListWithRelations } from "@/types";
+import { FormTextarea } from "@/components/form/form-textarea";
+import { useForm } from "react-hook-form";
+import { useAction } from "@/hooks/use-action";
+import { updateQuotation } from "@/actions/quotation/update";
+import { toast } from "sonner";
+import { FormSubmit } from "@/components/form/form-submit";
+import { get } from "http";
 
 type Props = {
   quotationId: number;
   data: QuotationListWithRelations[];
+  remark: string;
 };
 const columns = [
   { name: "No.", key: "index" },
@@ -43,7 +51,7 @@ const columns = [
 ];
 
 export default function QuotationLists(props: Props) {
-  const { data, quotationId } = props;
+  const { data, quotationId, remark } = props;
   const modal = useQuotationListModal();
 
   return (
@@ -75,14 +83,14 @@ export default function QuotationLists(props: Props) {
       {data.length > 0 && (
         <div className="grid grid-cols-5 gap-4 mt-4">
           <div className="col-span-5 md:col-span-3 ">
-            <Remarks />
+            <Remarks id={quotationId} remark={remark} />
           </div>
           <div className="col-span-5 md:col-span-2">
             <BillingInfo data={data} />
           </div>
         </div>
       )}
-    </PageComponentWrapper>
+    </PageComponentWrapper >
   );
 }
 
@@ -105,7 +113,7 @@ const BillingInfo = (props: BillingProps) => {
       return acc;
     },
     { subtotal: 0, discount: 0, total: 0, vat: 0, totalPrice: 0 },);
-    
+
   return (
     <div className="bg-gray-100 p-4 w-full sm:rounded-lg sm:px-6">
       <dl className="divide-y divide-gray-200 text-sm">
@@ -159,11 +167,61 @@ const BillingInfo = (props: BillingProps) => {
   );
 };
 
-const Remarks = () => {
+
+type FormRemark = {
+  id: number;
+  remark: string | null;
+};
+
+const Remarks = ({ id, remark }: { id: number, remark: string | null }) => {
+
+  // useForm
+  const {
+    register,
+    watch,
+    reset,
+    getValues,
+    setValue,
+  } = useForm<FormRemark>({
+    mode: "onChange",
+    defaultValues: {
+      remark: remark ?? "abc",
+    },
+  });
+
+  const handleUpdate = useAction(updateQuotation, {
+    onSuccess: (data) => {
+      toast.success("List updated");
+    },
+    onError: (error) => {
+      toast.error(error);
+    },
+  });
+
+
+  const onSubmit = async () => {
+    const remark = getValues("remark") ?? "";
+    handleUpdate.execute({ id, remark });
+  };
+
+
+  // not found
+  console.log(getValues("remark"));
+
   return (
-    <textarea
-      className="w-full h-full border p-2 rounded-lg"
-      placeholder="Remarks"
-    ></textarea>
+    <form action={onSubmit} className="h-full relative">
+      <FormTextarea
+        id="remarks"
+        placeholder="Remarks"
+        className="w-full h-full border p-2 rounded-lg"
+        register={register}
+        rows={16}
+      />
+      <div className="absolute bottom-2 right-2">
+        <FormSubmit variant="default" className="text-xs">
+          Update
+        </FormSubmit>
+      </div>
+    </form>
   );
 };

@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 import { FormErrors } from "./form-errors";
+import { UseFormRegister } from "react-hook-form";
 
 interface FormTextareaProps {
   id: string;
@@ -22,6 +23,7 @@ interface FormTextareaProps {
   onClick?: () => void;
   onKeyDown?: KeyboardEventHandler<HTMLTextAreaElement> | undefined;
   defaultValue?: string;
+  register?: UseFormRegister<any>;
 }
 
 export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
@@ -38,6 +40,7 @@ export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
       onKeyDown,
       className,
       rows,
+      register,
       defaultValue,
     },
     ref,
@@ -64,6 +67,7 @@ export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
             placeholder={placeholder}
             name={id}
             id={id}
+            register={register}
             rows={rows}
             disabled={pending || disabled}
             className={cn(

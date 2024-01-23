@@ -3,32 +3,24 @@ import { db } from "@/lib/db";
 import { createSafeAction } from "@/lib/create-safe-action";
 import { InputType, ReturnType } from "./types";
 import { schema } from "./schema";
-import { generateCode } from "@/lib/utils";
+import { revalidatePath } from "next/cache";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-  const { buyerId, type } = data;
+  const { id, remark } = data;
   let quotation;
   try {
-    if (!buyerId || !type) {
+    if (!id) {
       return {
         error: "Failed to create.",
       };
     }
 
-    quotation = await db.quotation.create({
-      data: {
-        type,
-        code: "",
-        buyerId,
-      },
+    quotation = await db.quotation.update({
+      where: { id },
+      data: { remark },
     });
 
-    // update code based on quotation ID
-    const code = generateCode(quotation.id, "QT");
-    quotation = await db.quotation.update({
-      where: { id: quotation.id },
-      data: { code },
-    });
+  
   } catch (error) {
     console.log("error", error);
     return {
@@ -36,7 +28,9 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     };
   }
 
+  revalidatePath("/quotations/[quotationId]")
+
   return { data: quotation };
 };
 
-export const createQuotation = createSafeAction(schema, handler);
+export const updateQuotation = createSafeAction(schema, handler);

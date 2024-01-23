@@ -183,7 +183,6 @@ export const QuotationListModal = () => {
     }
   }, [watch('cost'), watch('percentage'), watch('quantity'), watch('discount')]);
 
-  console.log('quantity', getValues('quantity'))
   return (
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
       <DialogContent className="sm:max-w-[425px] md:max-w-[600px]">
