@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { Plus } from "lucide-react";
 import PageComponentWrapper from "@/components/page-component-wrapper";
 import TableLists from "@/components/table-lists";
@@ -83,7 +83,7 @@ export default function QuotationLists(props: Props) {
       {data.length > 0 && (
         <div className="grid grid-cols-5 gap-4 mt-4">
           <div className="col-span-5 md:col-span-3 ">
-            <Remarks id={quotationId} remark={remark} />
+            <Remark id={quotationId} remark={remark} />
           </div>
           <div className="col-span-5 md:col-span-2">
             <BillingInfo data={data} />
@@ -173,7 +173,7 @@ type FormRemark = {
   remark: string | null;
 };
 
-const Remarks = ({ id, remark }: { id: number, remark: string | null }) => {
+const Remark = ({ id, remark }: { id: number, remark: string | null }) => {
 
   // useForm
   const {
@@ -181,46 +181,49 @@ const Remarks = ({ id, remark }: { id: number, remark: string | null }) => {
     watch,
     reset,
     getValues,
-    setValue,
+    formState: { errors, isValid, isDirty },
   } = useForm<FormRemark>({
     mode: "onChange",
     defaultValues: {
-      remark: remark ?? "abc",
+      remark: remark ?? "",
     },
   });
 
+  useEffect(() => {
+    reset({ remark: remark ?? "" })
+  }, [remark, reset])
+
   const handleUpdate = useAction(updateQuotation, {
     onSuccess: (data) => {
-      toast.success("List updated");
+      toast.success("Quotation Updated");
     },
     onError: (error) => {
       toast.error(error);
     },
   });
 
-
   const onSubmit = async () => {
     const remark = getValues("remark") ?? "";
     handleUpdate.execute({ id, remark });
   };
 
-
-  // not found
-  console.log(getValues("remark"));
-
   return (
     <form action={onSubmit} className="h-full relative">
       <FormTextarea
-        id="remarks"
-        placeholder="Remarks"
+        id="remark"
+        placeholder="Remark"
         className="w-full h-full border p-2 rounded-lg"
         register={register}
         rows={16}
       />
       <div className="absolute bottom-2 right-2">
-        <FormSubmit variant="default" className="text-xs">
-          Update
-        </FormSubmit>
+        {
+          isDirty && (
+            <FormSubmit variant="default" className="text-xs">
+              Update
+            </FormSubmit>
+          )
+        }
       </div>
     </form>
   );
