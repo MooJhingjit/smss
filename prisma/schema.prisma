@@ -35,16 +35,16 @@ model User {
 }
 
 model Product {
-  id            Int             @id @default(autoincrement())
-  name          String
-  vendor        User            @relation(fields: [vendorId], references: [id])
-  vendorId      Int
-  description   String?
-  cost          Float?
-  percentage    Decimal?
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  items         Item[]
+  id             Int             @id @default(autoincrement())
+  name           String
+  vendor         User            @relation(fields: [vendorId], references: [id])
+  vendorId       Int
+  description    String?
+  cost           Float?
+  percentage     Decimal?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  items          Item[]
   QuotationLists QuotationList[]
 }
 
@@ -62,7 +62,7 @@ model Item {
   product       Product         @relation(fields: [productId], references: [id])
   name          String
   description   String?
-  serialNumber String?
+  serialNumber  String?
   warrantyDate  DateTime?
   cost          Float?
   status        ItemStatus      @default(available)
@@ -74,6 +74,17 @@ model Item {
 enum QuotationType {
   product
   service
+}
+
+enum QuotationStatus {
+  open
+  offer
+  approved
+  po_preparing
+  po_sent
+  product_received
+  order_preparing
+  delivered
 }
 
 model Quotation {
@@ -91,7 +102,7 @@ model Quotation {
   paymentDueDate        DateTime?
   withholdingTax        Float?
   withholdingTaxPercent Float?
-  status                String          @default("pending")
+  status                QuotationStatus @default(open)
   remark                String?
   lists                 QuotationList[]
   createdAt             DateTime        @default(now())

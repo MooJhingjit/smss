@@ -9,7 +9,7 @@ async function getData(): Promise<QuotationWithBuyer[]> {
     // skip: 0,
     where: {
       status: {
-        equals: "pending",
+        equals: "open",
       },
     },
     include: {
@@ -25,12 +25,12 @@ async function getData(): Promise<QuotationWithBuyer[]> {
 export default async function QuotationBoard() {
   const data = await getData()
   const allQuotations = {
-    'pending': data
+    'open': data
   }
   console.log(allQuotations)
   return (
-    <div className="h-full overflow-x-auto">
-      <BoardContainer data={allQuotations}/>
+    <div className="overflow-x-auto">
+      <BoardContainer data={{}}/>
     </div>
   );
 }
