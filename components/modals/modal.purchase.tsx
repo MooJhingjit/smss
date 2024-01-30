@@ -46,7 +46,7 @@ export const NewPurchaseModal = () => {
             <Input id="name" value="QT-0001" className="col-span-3" disabled />
           </div>
           <div className="">
-            <Label>Vender</Label>
+            <Label>Vendor</Label>
             <Input id="name" value="Pedro Duarte" className="col-span-3" />
           </div>
           <div className="">

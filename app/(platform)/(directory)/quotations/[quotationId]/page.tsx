@@ -16,7 +16,11 @@ const getData = async (quotationId: string) => {
     include: {
       buyer: true,
       seller: true,
-      
+      purchaseOrders: {
+        include: {
+          vendor: true,
+        },
+      },
       lists: {
         include: {
           product: true,
@@ -38,7 +42,7 @@ export default async function QuotationDetails(
 ) {
   const { params } = props;
   const data = await getData(params.quotationId);
-  console.log("data", data)
+
   const pages = [
     {
       name: "Quotations",
@@ -60,12 +64,16 @@ export default async function QuotationDetails(
     );
   }
 
+  const {
+    buyer,
+    lists,
+  } = data;
   return (
     <>
       <Breadcrumbs pages={pages} />
       <div className="grid grid-cols-5 gap-8 mt-6">
         <div className="col-span-3">
-          {data?.buyer && <CustomerInfo data={data?.buyer} />}
+          {buyer && <CustomerInfo data={buyer} />}
         </div>
         <div className="col-span-2">
           <QuotationStatus status={data.status} type={data.type} />
@@ -74,13 +82,15 @@ export default async function QuotationDetails(
           <QuotationLists
             quotationId={data.id}
             remark={data.remark ?? ""}
-            data={data.lists as QuotationListWithRelations[]} />
+            data={lists as QuotationListWithRelations[]} />
         </div>
         <div className="col-span-5 md:col-span-2">
           <DocumentItems />
         </div>
         <div className="col-span-5 md:col-span-3">
-          <PurchaseOrders />
+          <PurchaseOrders
+            quotationId={data.id}
+          />
         </div>
       </div>
     </>

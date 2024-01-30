@@ -40,31 +40,31 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// PUT /api/quotations/:id
-export async function PUT(req: NextApiRequest) {
-  try {
-    const { id } = req.query;
-    const { status } = await req.body.json();
+// // PUT /api/quotations/:id
+// export async function PUT(req: NextApiRequest) {
+//   try {
+//     const { id } = req.query;
+//     const { status } = await req.body.json();
 
-    if (!id) {
-      return new NextResponse("Missing id", { status: 400 });
-    }
+//     if (!id) {
+//       return new NextResponse("Missing id", { status: 400 });
+//     }
 
-    if (!status) {
-      return new NextResponse("Missing status", { status: 400 });
-    }
+//     if (!status) {
+//       return new NextResponse("Missing status", { status: 400 });
+//     }
 
-    const quotation = await db.quotation.update({
-      where: {
-        id: Number(id),
-      },
-      data: {
-        status,
-      },
-    });
-    return NextResponse.json(quotation);
-  } catch (error) {
-    console.log("error", error);
-    return new NextResponse("Internal Error", { status: 500 });
-  }
-}
+//     const quotation = await db.quotation.update({
+//       where: {
+//         id: Number(id),
+//       },
+//       data: {
+//         status,
+//       },
+//     });
+//     return NextResponse.json(quotation);
+//   } catch (error) {
+//     console.log("error", error);
+//     return new NextResponse("Internal Error", { status: 500 });
+//   }
+// }

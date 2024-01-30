@@ -1,4 +1,4 @@
-import { User, Product, Quotation, Item, QuotationList } from "@prisma/client";
+import { User, Product, Quotation, Item, QuotationList, PurchaseOrder, PurchaseOrderItemStatus, PurchaseOrderItem } from "@prisma/client";
 export type ProductWithRelations = Product & { items?: Item[]; vendor?: User };
 
 export type QuotationWithBuyer = Quotation & { buyer: User };
@@ -14,5 +14,10 @@ export type ItemRefs =
     };
 export type QuotationListWithRelations = QuotationList & {
   product: Product;
+  quotation: Quotation;
+};
+export type PurchaseOrderWithRelations = PurchaseOrder & {
+  purchaseOrderItems: PurchaseOrderItem[];
+  vendor: User;
   quotation: Quotation;
 };

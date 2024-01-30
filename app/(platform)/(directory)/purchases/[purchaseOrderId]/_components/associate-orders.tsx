@@ -27,7 +27,7 @@ export default function AssociateOrders() {
                 scope="col"
                 className="py-3 pr-8 text-xs sm:w-2/5 lg:w-1/12 font-normal"
               >
-                Vender
+                Vendor
               </th>
               <th scope="col" className="w-1/12 py-3 pr-8 text-xs font-normal">
                 Unit

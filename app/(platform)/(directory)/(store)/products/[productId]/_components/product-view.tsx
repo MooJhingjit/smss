@@ -26,7 +26,7 @@ export default function ProductView(props: Props) {
       <div className="mt-4 flex w-full flex-none gap-x-4 px-6">
         <dl className=" space-y-6 border-t border-gray-200 py-6 text-xs font-medium text-gray-900 lg:block  w-full ">
           <div className="flex items-center justify-between">
-            <dt className="text-gray-600">Vender</dt>
+            <dt className="text-gray-600">Vendor</dt>
             <dd>{vendor?.name}</dd>
           </div>
 

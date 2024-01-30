@@ -30,7 +30,7 @@ model User {
   products         Product[]
   buyerQuotations  Quotation[]     @relation("buyer")
   sellerQuotations Quotation[]     @relation("seller")
-  purchaseOrder    PurchaseOrder[] @relation("vender")
+  purchaseOrders    PurchaseOrder[] @relation("vendor")
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
 }
@@ -73,7 +73,7 @@ model Item {
   status          ItemStatus      @default(available)
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
-  QuotationItem   QuotationItem[]
+  QuotationItems   QuotationItem[]
 
   @@index([productId])
   @@index([purchaseOrderId])
@@ -115,7 +115,7 @@ model Quotation {
   createdAt             DateTime        @default(now())
   updatedAt             DateTime        @updatedAt
   lists                 QuotationList[]
-  PurchaseOrder         PurchaseOrder[]
+  purchaseOrders         PurchaseOrder[]
 
   @@index([buyerId])
   @@index([sellerId])
@@ -140,7 +140,7 @@ model QuotationList {
   description           String?
   createdAt             DateTime        @default(now())
   updatedAt             DateTime        @updatedAt
-  QuotationItem         QuotationItem[]
+  QuotationItems         QuotationItem[]
 
   @@index([quotationId])
   @@index([productId])
@@ -174,8 +174,8 @@ model PurchaseOrder {
   code              String
   quotationId       Int
   quotation         Quotation                @relation(fields: [quotationId], references: [id])
-  venderId          Int
-  vender            User                     @relation(fields: [venderId], references: [id], name: "vender")
+  vendorId          Int
+  vendor            User                     @relation(fields: [vendorId], references: [id], name: "vendor")
   totalDiscount     Float?
   totalTax          Float?
   totalPrice        Float?
@@ -186,10 +186,10 @@ model PurchaseOrder {
   remark            String?
   createdAt         DateTime                 @default(now())
   updatedAt         DateTime                 @updatedAt
-  purchaseOrderItem PurchaseOrderItem[]
+  purchaseOrderItems PurchaseOrderItem[]
 
   @@index([quotationId])
-  @@index([venderId])
+  @@index([vendorId])
 }
 
 enum PurchaseOrderItemStatus {
