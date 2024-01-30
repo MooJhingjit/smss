@@ -16,6 +16,7 @@ const getData = async (quotationId: string) => {
     include: {
       buyer: true,
       seller: true,
+      
       lists: {
         include: {
           product: true,
@@ -37,6 +38,7 @@ export default async function QuotationDetails(
 ) {
   const { params } = props;
   const data = await getData(params.quotationId);
+  console.log("data", data)
   const pages = [
     {
       name: "Quotations",

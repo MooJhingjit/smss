@@ -16,22 +16,23 @@ enum UserRole {
 }
 
 model User {
-  id               Int         @id @default(autoincrement())
+  id               Int             @id @default(autoincrement())
   name             String
-  email            String      @unique
-  taxId            String?     @unique
+  email            String          @unique
+  taxId            String?         @unique
   phone            String?
   address          String?
   contact          String?
   fax              String?
-  role             UserRole    @default(buyer)
+  role             UserRole        @default(buyer)
   password         String?
-  isProtected      Boolean     @default(false)
+  isProtected      Boolean         @default(false)
   products         Product[]
-  buyerQuotations  Quotation[] @relation("buyer")
-  sellerQuotations Quotation[] @relation("seller")
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
+  buyerQuotations  Quotation[]     @relation("buyer")
+  sellerQuotations Quotation[]     @relation("seller")
+  purchaseOrder    PurchaseOrder[] @relation("vender")
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
 }
 
 model Product {
@@ -46,6 +47,8 @@ model Product {
   updatedAt      DateTime        @updatedAt
   items          Item[]
   QuotationLists QuotationList[]
+  @@index([vendorId])
+
 }
 
 enum ItemStatus {
@@ -57,18 +60,23 @@ enum ItemStatus {
 }
 
 model Item {
-  id            Int             @id @default(autoincrement())
-  productId     Int
-  product       Product         @relation(fields: [productId], references: [id])
-  name          String
-  description   String?
-  serialNumber  String?
-  warrantyDate  DateTime?
-  cost          Float?
-  status        ItemStatus      @default(available)
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  QuotationItem QuotationItem[]
+  id              Int             @id @default(autoincrement())
+  productId       Int
+  product         Product         @relation(fields: [productId], references: [id])
+  purchaseOrderId Int?
+  purchaseOrder   PurchaseOrder?   @relation(fields: [purchaseOrderId], references: [id])
+  name            String
+  description     String?
+  serialNumber    String?
+  warrantyDate    DateTime?
+  cost            Float?
+  status          ItemStatus      @default(available)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  QuotationItem   QuotationItem[]
+
+  @@index([productId])
+  @@index([purchaseOrderId])
 }
 
 enum QuotationType {
@@ -104,9 +112,13 @@ model Quotation {
   withholdingTaxPercent Float?
   status                QuotationStatus @default(open)
   remark                String?
-  lists                 QuotationList[]
   createdAt             DateTime        @default(now())
   updatedAt             DateTime        @updatedAt
+  lists                 QuotationList[]
+  PurchaseOrder         PurchaseOrder[]
+
+  @@index([buyerId])
+  @@index([sellerId])
 }
 
 model QuotationList {
@@ -129,6 +141,9 @@ model QuotationList {
   createdAt             DateTime        @default(now())
   updatedAt             DateTime        @updatedAt
   QuotationItem         QuotationItem[]
+
+  @@index([quotationId])
+  @@index([productId])
 }
 
 model QuotationItem {
@@ -139,6 +154,61 @@ model QuotationItem {
   item            Item          @relation(fields: [itemId], references: [id])
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
+
+  @@index([quotationListId])
+  @@index([itemId])
+
+}
+
+enum PurchaseOrderStatus {
+  draft
+}
+
+enum PurchaseOrderPaymentType {
+  cash
+  credit
+}
+
+model PurchaseOrder {
+  id                Int                      @id @default(autoincrement())
+  code              String
+  quotationId       Int
+  quotation         Quotation                @relation(fields: [quotationId], references: [id])
+  venderId          Int
+  vender            User                     @relation(fields: [venderId], references: [id], name: "vender")
+  totalDiscount     Float?
+  totalTax          Float?
+  totalPrice        Float?
+  status            PurchaseOrderStatus      @default(draft)
+  paymentType       PurchaseOrderPaymentType @default(cash)
+  Item              Item[]
+  paymentDueDate    DateTime?
+  remark            String?
+  createdAt         DateTime                 @default(now())
+  updatedAt         DateTime                 @updatedAt
+  purchaseOrderItem PurchaseOrderItem[]
+
+  @@index([quotationId])
+  @@index([venderId])
+}
+
+enum PurchaseOrderItemStatus {
+  pending
+  confirmed
+}
+
+model PurchaseOrderItem {
+  id              Int                     @id @default(autoincrement())
+  purchaseOrderId Int
+  purchaseOrder   PurchaseOrder           @relation(fields: [purchaseOrderId], references: [id])
+  name            String
+  price           Float?
+  quantity        Int?
+  status          PurchaseOrderItemStatus @default(pending)
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+
+  @@index([purchaseOrderId])
 }
 
 // npx prisma db push
