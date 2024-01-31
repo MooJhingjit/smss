@@ -34,7 +34,6 @@ const ItemStatus = ({ curStatus }: {
 }
 ) => {
   const allStatus = Object.keys(QuotationStatus)
-  console.log("allStatus", allStatus)
   return (
     <Select>
       <SelectTrigger className="inline-flex capitalize font-semibold items-center rounded-md bg-gray-100 px-2 py-1 text-xs text-gray-700 items-center">

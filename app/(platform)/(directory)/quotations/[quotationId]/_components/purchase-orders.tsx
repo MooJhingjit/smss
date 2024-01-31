@@ -4,23 +4,30 @@ import { Plus, FileEdit } from "lucide-react";
 import PageComponentWrapper from "@/components/page-component-wrapper";
 import PURCHASE_ORDER_SERVICES from "@/app/services/service.purchase-order";
 import { PurchaseOrderWithRelations } from "@/types";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/components/providers/query-provider";
 import TableLists from "@/components/table-lists";
 import { getDateFormat } from "@/lib/utils";
 import Link from "next/link";
+import { CircleDashed } from "lucide-react";
+import { toast } from "sonner";
 
 const columns = [
   { name: "Code", key: "code" },
   {
-    name: "name", key: "name",
+    name: "Vendor", key: "name",
     render: (item: PurchaseOrderWithRelations) => {
       return item.vendor.name;
     },
   },
-  { name: "Price", key: "totalPrice" },
-  { name: "Discount", key: "totalDiscount" },
-  { name: "Total Tax", key: "withholdingTaxPercent", },
+  // {
+  //   name: 'Units', key: 'id',
+  //   render: (item: PurchaseOrderWithRelations) => {
+  //     return item.purchaseOrderItems.length
+  //   }
+  // },
+  { name: "Total Price", key: "totalPrice" },
+  { name: "Total Discount", key: "totalDiscount" },
   {
     name: "Created", key: "createdAt",
     render: (item: PurchaseOrderWithRelations) => {
@@ -58,22 +65,39 @@ export default function PurchaseOrders(props: {
     },
   });
 
+  const mutation = useMutation(
+    {
+      mutationFn: async () => {
+        return await PURCHASE_ORDER_SERVICES.generatePOs({
+          quotationId
+        });
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey })
+        toast.success("Purchase order generated successfully");
+      },
+    }
+  );
+
   const generatePurchaseOrder = async () => {
-    await PURCHASE_ORDER_SERVICES.generatePOs({
-      quotationId
-    });
-    // invalidate query
-    queryClient.invalidateQueries({ queryKey })
+    mutation.mutate();
   };
 
   const renderActionButtons = () => {
     if (data?.length === 0) {
       return (
         <button
+          disabled={mutation.isPending}
           onClick={generatePurchaseOrder}
 
           className="flex items-center justify-center  bg-gray-50 hover:text-gray-700 border border-gray-300 rounded text-xs px-4 py-0.5">
           Generate
+          {
+            mutation.isPending && (
+              <CircleDashed className="animate-spin -mr-1 ml-2 h-3 w-3 text-gray-400" />
+
+            )
+          }
         </button>
       );
     }

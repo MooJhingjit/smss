@@ -7,7 +7,6 @@ import { generateCode } from "@/lib/utils";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    console.log("bodyKeys", body.quotationId)
 
     // get all quotation items from quotationId
     const quotationLists = await db.quotationList.findMany({
@@ -30,11 +29,24 @@ export async function POST(req: NextRequest) {
 
     // create  purchase orders for each vendor
     const purchaseOrders = await Promise.all(Object.keys(quotationListsByVendor).map(async (vendorId) => {
+
+      const vendorIdNum = Number(vendorId)
+      // get total price and discount for each vendor
+      const totalPrice = quotationListsByVendor[vendorIdNum].reduce((acc, curr) => {
+        return acc + (curr.totalPrice ?? 0)
+      }, 0)
+      const totalDiscount = quotationListsByVendor[vendorIdNum].reduce((acc, curr) => {
+        return acc + (curr?.discount ?? 0)
+      }, 0)
+
+
       const purchaseOrder = await db.purchaseOrder.create({
         data: {
           code: "DRAFT-PO-" + Math.floor(Math.random() * 1000000),
           vendorId: Number(vendorId),
           quotationId: body.quotationId,
+          totalPrice,
+          totalDiscount,
           status: "draft"
         }
       })
@@ -50,7 +62,7 @@ export async function POST(req: NextRequest) {
     }))
 
     // generate purchase order items
-    await Promise.all(purchaseOrders.map(async (purchaseOrder) => {
+    const res = await Promise.all(purchaseOrders.map(async (purchaseOrder) => {
       const quotationLists = quotationListsByVendor[purchaseOrder.vendorId]
       return Promise.all(quotationLists.map(async (quotationList: QuotationList) => {
         const purchaseOrderItem = await db.purchaseOrderItem.create({
@@ -75,13 +87,10 @@ export async function POST(req: NextRequest) {
     //     purchaseOrderItems: true
     //   }
     // })
-   
-    return new NextResponse(null, {
-      status: 200,
-      headers: {
-        "content-type": "application/json",
-      },
-    });
+
+    // return success message
+    return NextResponse.json(res);
+
   } catch (error) {
     console.log("error", error);
     return new NextResponse("Internal Error", { status: 500 });

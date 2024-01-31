@@ -26,19 +26,35 @@ const columns = [
       return item.product.name;
     },
   },
-  { name: "Cost", key: "cost" },
-  // { name: "Percentage", key: "percentage" },
+  {
+    name: "Cost", key: "cost"
+  },
+  {
+    name: "Unit Price", key: "unitPrice",
+    render: (item: QuotationListWithRelations) => {
+      return `(+${item.percentage}%) ${item.unitPrice}`;
+    },
+  },
   { name: "Quantity", key: "quantity" },
-  { name: "Unit Price", key: "unitPrice" },
+
+
+
   {
     name: "Total Tax", key: "withholdingTaxPercent",
+    render: (item: QuotationListWithRelations) => {
+      return `(+${item.withholdingTaxPercent}%) ${item.withholdingTax}`;
+    },
   },
   {
     name: "Discount", key: "discount",
   },
   {
-    name: "Total Price", key: "totalPrice"
+    name: "Total Price", key: "totalPrice",
+    render: (item: QuotationListWithRelations) => {
+      return item.totalPrice;
+    },
   },
+
   // { name: "Price", key: "price" },
   {
     name: "Updated",
@@ -104,8 +120,11 @@ const BillingInfo = (props: BillingProps) => {
   const summary = data.reduce(
     (acc, item: QuotationListWithRelations) => {
       const discount = item.discount ?? 0;
-      const price = item.price ?? 0;
+      let price = item.price ?? 0
+      const quantity = item.quantity ?? 1;
+      price = price * quantity;
       const totalPrice = item.totalPrice ?? 0;
+
       acc.subtotal += price
       acc.discount += discount;
       acc.vat += item.withholdingTax ?? 0;
@@ -135,7 +154,7 @@ const BillingInfo = (props: BillingProps) => {
             })}
           </dd>
         </div>
-        <div className="flex items-center justify-between py-4">
+        {/* <div className="flex items-center justify-between py-4">
           <dt className="text-gray-600">Total</dt>
           <dd className="font-medium text-gray-900">
             {(summary.subtotal - summary.discount).toLocaleString("th-TH", {
@@ -143,7 +162,7 @@ const BillingInfo = (props: BillingProps) => {
               currency: "THB",
             })}
           </dd>
-        </div>
+        </div> */}
         <div className="flex items-center justify-between py-4">
           <dt className="text-gray-600">7% Vat</dt>
           <dd className="font-medium text-gray-900">
@@ -214,7 +233,7 @@ const Remark = ({ id, remark }: { id: number, remark: string | null }) => {
         placeholder="Remark"
         className="w-full h-full border p-2 rounded-lg"
         register={register}
-        rows={16}
+        rows={12}
       />
       <div className="absolute bottom-2 right-2">
         {
