@@ -1,7 +1,7 @@
 import React from "react";
 import Breadcrumbs from "@/components/breadcrumbs";
 import CustomerInfo from "./_components/customer-details";
-import QuotationStatus from "./_components/quotation-status";
+import QuotationTools from "./_components/quotation-tools";
 import QuotationLists from "./_components/quotation-lists";
 import DocumentItems from "./_components/document-lists";
 import PurchaseOrders from "./_components/purchase-orders";
@@ -76,7 +76,7 @@ export default async function QuotationDetails(
           {buyer && <CustomerInfo data={buyer} />}
         </div>
         <div className="col-span-2">
-          <QuotationStatus status={data.status} type={data.type} />
+          <QuotationTools status={data.status} type={data.type} />
         </div>
         <div className="col-span-5">
           <QuotationLists
@@ -89,6 +89,7 @@ export default async function QuotationDetails(
         </div>
         <div className="col-span-5 md:col-span-3">
           <PurchaseOrders
+            hasQuotationItems={lists.length > 0}
             quotationId={data.id}
           />
         </div>

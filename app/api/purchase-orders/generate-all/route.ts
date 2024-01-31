@@ -66,17 +66,17 @@ export async function POST(req: NextRequest) {
       }))
     }))
 
-    // get all purchase orders
-    const purchaseOrdersWithItems = await db.purchaseOrder.findMany({
-      where: {
-        quotationId: body.quotationId
-      },
-      include: {
-        purchaseOrderItems: true
-      }
-    })
+    // // get all purchase orders
+    // const purchaseOrdersWithItems = await db.purchaseOrder.findMany({
+    //   where: {
+    //     quotationId: body.quotationId
+    //   },
+    //   include: {
+    //     purchaseOrderItems: true
+    //   }
+    // })
    
-    return new NextResponse(JSON.stringify(purchaseOrdersWithItems), {
+    return new NextResponse(null, {
       status: 200,
       headers: {
         "content-type": "application/json",

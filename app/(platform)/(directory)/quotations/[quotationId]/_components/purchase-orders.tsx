@@ -1,43 +1,73 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Plus, FileEdit } from "lucide-react";
 import PageComponentWrapper from "@/components/page-component-wrapper";
-import { usePurchaseModal } from "@/hooks/use-po-modal";
-import { PurchaseOrder } from "@prisma/client";
 import PURCHASE_ORDER_SERVICES from "@/app/services/service.purchase-order";
 import { PurchaseOrderWithRelations } from "@/types";
+import { useQuery } from "@tanstack/react-query";
+import { queryClient } from "@/components/providers/query-provider";
+import TableLists from "@/components/table-lists";
+import { getDateFormat } from "@/lib/utils";
+import Link from "next/link";
 
-const itemCount = 0;
-type Props = {
+const columns = [
+  { name: "Code", key: "code" },
+  {
+    name: "name", key: "name",
+    render: (item: PurchaseOrderWithRelations) => {
+      return item.vendor.name;
+    },
+  },
+  { name: "Price", key: "totalPrice" },
+  { name: "Discount", key: "totalDiscount" },
+  { name: "Total Tax", key: "withholdingTaxPercent", },
+  {
+    name: "Created", key: "createdAt",
+    render: (item: PurchaseOrderWithRelations) => {
+      return getDateFormat(item.createdAt)
+    },
+  },
+  {
+    name: "Status", key: "status",
+    render: (item: PurchaseOrderWithRelations) => {
+      return (
+        <Link
+          href={`/purchases/${item.id}`}
+          className="flex space-x-1  font-semibold items-center rounded-md bg-yellow-100 px-2 py-1 text-xs text-yellow-700">
+          <span>{item.status}</span>
+          <FileEdit className="w-3 h-3 text-orange-400 cursor-pointer hover:text-orange-700" />
+        </Link>
+      );
+    },
+  },
+];
+
+export default function PurchaseOrders(props: {
+  hasQuotationItems: boolean;
   quotationId: number;
-};
-export default function PurchaseOrders(props: Props) {
+}) {
   const { quotationId } = props;
-  const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrderWithRelations[]>([]);
+  const queryKey = ['purchase-orders', quotationId]
 
-  useEffect(() => {
-    // get purchase orders
-    const getPurchaseOrders = async () => {
-      const res = await PURCHASE_ORDER_SERVICES.get({
+  const { data } = useQuery<PurchaseOrderWithRelations[]>({
+    queryKey,
+    queryFn: async () => {
+      return await PURCHASE_ORDER_SERVICES.get({
         quotationId
       });
-
-      setPurchaseOrders(res)
-    }
-
-    getPurchaseOrders()
-  }, [])
+    },
+  });
 
   const generatePurchaseOrder = async () => {
-    const res = await PURCHASE_ORDER_SERVICES.generatePOs({
+    await PURCHASE_ORDER_SERVICES.generatePOs({
       quotationId
     });
-
-    setPurchaseOrders(res)
+    // invalidate query
+    queryClient.invalidateQueries({ queryKey })
   };
 
   const renderActionButtons = () => {
-    if (purchaseOrders?.length === 0) {
+    if (data?.length === 0) {
       return (
         <button
           onClick={generatePurchaseOrder}
@@ -55,64 +85,25 @@ export default function PurchaseOrders(props: Props) {
     );
   };
 
+  if (!props.hasQuotationItems) {
+    return (
+      <div className="bg-gray-50 w-full h-40 rounded flex items-center justify-center">
+        <p className="text-gray-500 text-sm">Required at least 1 quotations item to generate Purchase order</p>
+      </div>
+    )
+  }
+
   return (
     <PageComponentWrapper
       headerIcon={renderActionButtons()}
       headerTitle="Purchase Orders"
     >
       {
-        !!purchaseOrders.length && (
-          <table className="w-full text-gray-500">
-            <caption className="sr-only">Products</caption>
-            <thead className="sr-only text-left text-sm text-gray-500 sm:not-sr-only">
-              <tr>
-                <th scope="col" className="w-1/12">
-                  Code
-                </th>
-                <th
-                  scope="col"
-                  className="py-3 pr-8 text-xs sm:w-2/5 lg:w-1/12 font-normal"
-                >
-                  Vendor
-                </th>
-                <th scope="col" className="w-1/12 py-3 pr-8 text-xs font-normal">
-                  Total Price
-                </th>
-                <th scope="col" className="w-1/12 py-3 pr-8 text-xs font-normal">
-                  Total Discount
-                </th>
-                <th scope="col" className="w-1/12 py-3 pr-8 text-xs font-normal">
-                  Created At
-                </th>
-                <th className="w-1/12 "></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 border-b border-gray-200 text-sm sm:border-t">
-              {purchaseOrders.map((po, index) => (
-                <tr className="border-b border-gray-200 " key={po.id}>
-                  <td className="py-3">{po.code}</td>
-                  <td>{po.vendor?.name}</td>
-                  <td>{po.totalPrice}</td>
-                  <td>{po.totalDiscount}</td>
-                  <td>{
-                    new Date(po.createdAt).toLocaleDateString('th-TH', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    })
-                  }</td>
-                  <td>
-                    <div className="flex space-x-2 items-center">
-                      <span className="inline-flex font-semibold items-center rounded-md bg-yellow-100 px-2 py-1 text-xs text-yellow-700">
-                        Draft
-                      </span>
-                      <FileEdit className="w-4 h-4 text-orange-400 cursor-pointer hover:text-orange-700" />
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        !!data?.length && (
+          <TableLists<PurchaseOrderWithRelations>
+            columns={columns}
+            data={data}
+          />
         )
       }
     </PageComponentWrapper>
