@@ -1,24 +1,34 @@
+'use client';
+import { useUserModal } from "@/hooks/use-user-modal";
+import { User } from "@prisma/client";
 import React from "react";
 
-export default function CustomerInfo() {
+type Props = {
+  data: User;
+};
+
+export default function CustomerInfo(props: Readonly<Props>) {
+  const modal = useUserModal();
+  const { data } = props;
+
   return (
     <div className="rounded-md bg-blue-50 p-4 border border-blue-400">
       <div className="">
         <div className="flex space-x-2 items-center">
-          <h3 className="text-sm font-medium text-blue-800">ABC Company</h3>
-          <span className="inline-flex cursor-pointer items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+          <h3 className="text-sm font-medium text-blue-800">{data.name}</h3>
+          <button
+            className="inline-flex cursor-pointer items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10"
+            onClick={() => modal.onOpen(data)}
+          >
             Edit
-          </span>
+          </button>
         </div>
-        <div className="mt-2 text-sm  grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-          <Item label="Tax ID" value="1029939948938" />
-          <Item label="Tel." value="0938847789" />
-          <Item label="Email" value="m.jhingjit@gmail.com" />
+        <div className="mt-2 text-sm text-blue-700 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+          <Item label="Tax ID" value={data.taxId ?? ""} />
+          <Item label="Tel." value={data.phone ?? ""} />
+          <Item label="Email" value={data.email} />
           <div className="md:col-span-3">
-            <Item
-              label="Address"
-              value="28/15 Soi Sukhumvit 36 Sukhumvit Road Klongton, Bangkok 39449"
-            />
+            <Item label="Address" value={data.address ?? ""} />
           </div>
         </div>
       </div>

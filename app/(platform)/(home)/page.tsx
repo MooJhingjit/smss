@@ -4,9 +4,13 @@ import QuotationCard from "./_components/quotation-card";
 import ShortcutMenus from "./_components/shortcut-menus";
 import PurchaseOrders from "./_components/purchase-order-card";
 import { db } from "@/lib/db";
-import { QuotationWithBuyer } from "@/types";
+import { PurchaseOrderWithRelations, QuotationWithBuyer } from "@/types";
+import { PurchaseOrder, User } from "@prisma/client";
 
-async function getData(): Promise<[QuotationWithBuyer[]]> {
+
+export type PurchaseOrderWithVendor = PurchaseOrder & { vendor: User }
+
+async function getData(): Promise<[QuotationWithBuyer[], PurchaseOrderWithVendor[]]> {
   const quotations = db.quotation.findMany({
     include: {
       buyer: true,
@@ -17,13 +21,23 @@ async function getData(): Promise<[QuotationWithBuyer[]]> {
     },
   });
 
-  const allData = await Promise.all([quotations]);
+  const purchaseOrders = db.purchaseOrder.findMany({
+    include: {
+      vendor: true,
+    },
+    take: 5,
+    orderBy: {
+      updatedAt: "desc",
+    },
+  });
 
-  return allData;
+  const data = await Promise.all([quotations, purchaseOrders]);
+  return data;
+
 }
 
 export default async function HomePage() {
-  const data = await getData();
+  const [qt, po] = await getData();
 
   return (
     <div className="mx-auto max-w-6xl px-2 xl:px-0">
@@ -40,10 +54,10 @@ export default async function HomePage() {
           <CardWrapper title="Tasks" description="Tasks you need to do" />
         </div>
         <div className="lg:col-span-6 col-span-12">
-          <QuotationCard data={data[0]} />
+          <QuotationCard data={qt} />
         </div>
         <div className="lg:col-span-6 col-span-12">
-          <PurchaseOrders />
+          <PurchaseOrders data={po} />
         </div>
         <div className="col-span-12">
           <CardWrapper

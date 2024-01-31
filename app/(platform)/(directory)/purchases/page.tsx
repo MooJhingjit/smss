@@ -1,42 +1,50 @@
 import Breadcrumbs from "@/components/breadcrumbs";
 import { Order, columns } from "./_components/columns";
 import OrderTable from "./_components/data-table";
+import { db } from "@/lib/db";
 
-const pages = [
-  {
-    name: "All Orders",
-    href: "/purchases",
-    current: true,
-  },
-];
+const getData = async (id: string) => {
+  const data = await db.purchaseOrder.findUnique({
+    where: {
+      id: parseInt(id),
+    },
+    include: {
+      vendor: true,
+      quotation: true,
+      purchaseOrderItems: true
+    }
+  });
+  return data;
+};
 
-async function getData(): Promise<Order[]> {
-  // Fetch data from your API here.
-  return [
-    {
-      id: 1,
-      quotation_id: "QT-0001",
-      vendor: "Banana IT",
-      itemCount: 4,
-      cost: "3500",
-    },
-    {
-      id: 2,
-      quotation_id: "QT-0002",
-      vendor: "TechGear",
-      itemCount: 3,
-      cost: "800",
-    },
-  ];
+interface Props {
+  params: {
+    purchaseOrderId: string;
+  };
 }
 
-export default async function OrderPage() {
-  const data = await getData();
+export default async function PurchaseOrders(
+  props: Readonly<Props>,
+) {
+  const { params } = props;
+  const data = await getData(params.purchaseOrderId);
+  const pages = [
+    {
+      name: "Purchase Orders",
+      href: "/purchases",
+      current: false,
+    },
+    {
+      name: data?.code ?? "",
+      href: "",
+      current: true,
+    },
+  ];
 
   return (
     <>
       <Breadcrumbs pages={pages} />
-      <OrderTable columns={columns} data={data} />
+      {/* <OrderTable columns={columns} data={data} /> */}
     </>
   );
 }
