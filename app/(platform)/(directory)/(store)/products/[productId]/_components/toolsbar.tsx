@@ -29,6 +29,7 @@ export default function Toolbar(props: Props) {
             <Search className="h-5 w-5 text-gray-400" aria-hidden="true" />
           </div>
           <Input
+            id="search"
             type="search"
             name="search"
             placeholder=""

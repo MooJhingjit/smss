@@ -43,8 +43,8 @@ export default function PurchaseOrders(props: Readonly<Props>) {
 
   return (
     <CardWrapper
-      title="Purchase orders "
-      description="Recents to 5 purchase orders ordered by date"
+      title="ใบสั่งซื้อ"
+      description="5 รายการที่มีการเปลี่ยนแปลงล่าสุด"
       onCreate={onOpen}
     >
       <TableLists<PurchaseOrderWithVendor>

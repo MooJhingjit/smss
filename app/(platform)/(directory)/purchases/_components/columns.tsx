@@ -1,6 +1,8 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { getDateFormat } from "@/lib/utils";
+import { PurchaseOrderWithRelations } from "@/types";
+import { PurchaseOrder } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 
 // This type is used to define the shape of our data.
@@ -13,38 +15,53 @@ export type Order = {
   cost: string;
 };
 
-export const columns: ColumnDef<Order>[] = [
+export const columns: ColumnDef<PurchaseOrderWithRelations & {
+  _count: {
+    purchaseOrderItems: number;
+  };
+ }>[] = [
   {
     accessorKey: "id",
     header: "#",
   },
   {
-    accessorKey: "quotation_id",
-    header: "QT",
+    accessorKey: "code",
+    header: "Code",
   },
   {
-    accessorKey: "vendor",
+    accessorKey: "vendor.name",
     header: "Vendor",
+    cell: ({ row }) => {
+      const { vendor } = row.original;
+      return vendor.name;
+    }
   },
   {
     accessorKey: "itemCount",
-    header: "Balance",
+    header: "Item Count",
+    cell: ({ row }) => {
+      const { _count } = row.original;
+      return _count.purchaseOrderItems;
+    }
+  },
+
+  {
+    accessorKey: "totalDiscount",
+    header: "Total Discount",
   },
   {
-    accessorKey: "cost",
-    header: "total",
+    accessorKey: "totalTax",
+    header: "Total Tax",
+  },
+  {
+    accessorKey: "createdAt",
+    header: "Created",
+    cell: ({ row }) => {
+      const { createdAt } = row.original
+      return getDateFormat(createdAt);
+    }
   },
   {
     id: "actions",
-    cell: ({ row }) => {
-      const { id } = row.original;
-
-      return (
-        <Button className="text-xs h-8" variant="secondary">
-          {" "}
-          Manage
-        </Button>
-      );
-    },
   },
 ];

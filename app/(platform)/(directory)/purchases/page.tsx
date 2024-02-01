@@ -1,21 +1,29 @@
 import Breadcrumbs from "@/components/breadcrumbs";
 import { Order, columns } from "./_components/columns";
-import OrderTable from "./_components/data-table";
+import PurchaseOrderTable from "./_components/data-table";
 import { db } from "@/lib/db";
 
-const getData = async (id: string) => {
-  const data = await db.purchaseOrder.findUnique({
-    where: {
-      id: parseInt(id),
-    },
+async function getData(): Promise<any[]> {
+  // findMany returns an array of 10 users
+  const items = await db.purchaseOrder.findMany({
     include: {
-      vendor: true,
-      quotation: true,
-      purchaseOrderItems: true
-    }
+      _count: {
+        select: { purchaseOrderItems: true },
+      },
+      vendor: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+    orderBy: {
+      id: "desc",
+    },
   });
-  return data;
-};
+
+  return items;
+}
 
 interface Props {
   params: {
@@ -23,28 +31,20 @@ interface Props {
   };
 }
 
-export default async function PurchaseOrders(
-  props: Readonly<Props>,
-) {
-  const { params } = props;
-  const data = await getData(params.purchaseOrderId);
+export default async function PurchaseOrders(props: Readonly<Props>) {
+  const data = await getData();
   const pages = [
     {
       name: "Purchase Orders",
       href: "/purchases",
       current: false,
     },
-    {
-      name: data?.code ?? "",
-      href: "",
-      current: true,
-    },
   ];
 
   return (
     <>
       <Breadcrumbs pages={pages} />
-      {/* <OrderTable columns={columns} data={data} /> */}
+      <PurchaseOrderTable columns={columns} data={data} />
     </>
   );
 }

@@ -32,7 +32,7 @@ export default function CardWrapper(props: Props) {
               passHref
               className="text-xs text-gray-600 underline cursor-pointer"
             >
-              View All
+              ดูทั้งหมด
             </Link>
           )}
           {onCreate && (

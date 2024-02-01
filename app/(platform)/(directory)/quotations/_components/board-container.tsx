@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { SyntheticEvent, useEffect, useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { QuotationWithBuyer } from "@/types";
 import { QuotationStatus } from "@prisma/client";
@@ -11,23 +11,58 @@ import {
 import { toast } from "sonner";
 import QT_SERVICES from "@/app/services/service.quotation";
 import Link from "next/link";
+import { FormInput } from "@/components/form/form-input";
+import { useSearchParams } from "next/navigation";
+
 interface Props {}
 
 export default function BoardContainer(props: Props) {
   const allQuotationStatus = Object.values(QuotationStatus);
-
+  const [searchParams, setSearchParams] = useState({
+    code: "",
+    // buyer: "",
+    // vendor: "",
+  });
   const queries = useQueries({
     queries: allQuotationStatus.map((quotationStatus) => {
+
+      // combine quotationStatus and searchParams to create a unique queryKey
+      const params = [
+        'quotationKeys',
+        quotationStatus,
+        searchParams.code,
+        // searchParams.buyer,
+        // searchParams.vendor,
+      ].join("-");
       return {
-        queryKey: ["quotation-" + quotationStatus],
+        queryKey: [params],
         exact: true,
         queryFn: () =>
           QT_SERVICES.get({
             status: quotationStatus,
+            // dynamic query params from searchParams state
+            code: searchParams.code,
+            // buyer: searchParams.buyer,
+            // vendor: searchParams.vendor,
           }),
       };
     }),
   });
+
+  const invalidateQuotationQueries = () => {
+    queryClient.invalidateQueries({
+      predicate: (query) =>
+        query.queryKey.every((key: any) =>
+          key.includes("quotationKeys")
+        ),
+    });
+  };
+
+  useEffect(() => {
+    // This function will invalidate queries related to quotations
+    // whenever searchParams change
+    invalidateQuotationQueries();
+  }, [searchParams, queryClient]); // Dependency array includes searchParams to trigger effect when it changes
 
   const { mutate } = useMutation<
     MutationResponseType,
@@ -51,12 +86,13 @@ export default function BoardContainer(props: Props) {
       const { invalidateKeys, ...res } = n;
 
       // invalidate all queries with the related status
-      queryClient.invalidateQueries({
-        predicate: (query) =>
-          query.queryKey.every((key: any) =>
-            invalidateKeys?.map((k) => "quotation-" + k).includes(key)
-          ),
-      });
+      // queryClient.invalidateQueries({
+      //   predicate: (query) =>
+      //     query.queryKey.every((key: any) =>
+      //       invalidateKeys?.map((k) => "quotation-" + k).includes(key)
+      //     ),
+      // });
+      invalidateQuotationQueries()
 
       toast.success("Updated successfully");
     },
@@ -87,9 +123,27 @@ export default function BoardContainer(props: Props) {
     });
   };
 
+  const onSearch = (e: SyntheticEvent) => {
+    e.preventDefault();
+    // get all data
+    const code = (e.target as any).code.value;
+    // const buyer = (e.target as any).buyer.value;
+    // const vendor = (e.target as any).vendor.value;
+    console.log({
+      code,
+      // buyer,
+      // vendor,
+    });
+    setSearchParams({
+      code,
+      // buyer,
+      // vendor,
+    });
+  };
+
   return (
     <div className="">
-      <BoardFilters />
+      <BoardFilters onSubmit={onSearch} />
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId="lists" type="list">
           {(provided) => (
@@ -148,10 +202,25 @@ export default function BoardContainer(props: Props) {
   );
 }
 
-const BoardFilters = () => {
+type BoardFiltersProps = {
+  onSubmit: (data: any) => void;
+};
+
+const BoardFilters = (props: BoardFiltersProps) => {
+  const { onSubmit } = props;
   return (
-    <div className="flex items-center gap-x-2 mb-3 border border-gray-100 text-gray-300 px-4 py-4 justify-center rounded-lg bg-gray-50">
-      <p>Filter Area</p>
+    <div className="gap-x-2 mb-3 border border-gray-100  p-2  rounded-lg bg-gray-50 flex justify-end">
+      <form onSubmit={onSubmit} className="grid grid-cols-2 gap-2">
+        <FormInput id="code" type="search" placeholder="Code" />
+        {/* <FormInput id="buyer" placeholder="Buyer" /> */}
+        {/* <FormInput id="vendor" placeholder="Vendor" /> */}
+        <button
+          type="submit"
+          className="col-span-1 bg-gray-100 rounded-md p-1.5 text-xs text-gray-600 font-semibold"
+        >
+          Search
+        </button>
+      </form>
     </div>
   );
 };
@@ -172,7 +241,9 @@ const BoardColumn = ({
           <div className="text-sm font-semibold text-[#4a4a4a] whitespace-nowrap">
             {label}
           </div>
-          <div className="text-xs font-semibold text-[#4a4a4a]">0/0</div>
+          <div className="text-xs font-semibold text-[#4a4a4a]">
+            {items.length} รายการ
+          </div>
         </div>
         <div className="h-full px-3">
           <Droppable droppableId={columnKey} type="card">

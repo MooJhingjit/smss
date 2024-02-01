@@ -31,8 +31,8 @@ export default function Quotations(props: Readonly<Props>) {
   const { data } = props;
   return (
     <CardWrapper
-      title="Quotations"
-      description="Recent to 5 quotations ordered by date"
+      title="ใบเสนอราคา"
+      description="5 รายการที่มีการเปลี่ยนแปลงล่าสุด"
       onCreate={onOpen}
       link="/quotations"
     >

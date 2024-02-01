@@ -51,7 +51,7 @@ export default async function HomePage() {
           </div>
         </div>
         <div className="md:col-span-7 col-span-12">
-          <CardWrapper title="Tasks" description="Tasks you need to do" />
+          <CardWrapper title="งานที่ต้องตรวจสอบ" description="ตรวจสอบในเสนอราคา และอื่นๆ" />
         </div>
         <div className="lg:col-span-6 col-span-12">
           <QuotationCard data={qt} />
@@ -61,8 +61,8 @@ export default async function HomePage() {
         </div>
         <div className="col-span-12">
           <CardWrapper
-            title="Statistics"
-            description="The summary of Sales, Purchases, Expenses, and Income"
+            title="สถิติ"
+            description="สถิติการใช้งานระบบ"
           />
         </div>
       </div>

@@ -6,6 +6,8 @@ import { QuotationStatus } from "@prisma/client";
 export async function GET(req: NextRequest) {
   try {
     const status = req.nextUrl.searchParams.get("status") as QuotationStatus;
+    const code = req.nextUrl.searchParams.get("code") as string
+    // const buyerName = req.nextUrl.searchParams.get("buyer")  as string
 
     if (!status) {
       return new NextResponse("Missing status", { status: 400 });
@@ -16,18 +18,14 @@ export async function GET(req: NextRequest) {
         buyer: true,
       },
       where: {
-        // OR: [
-        //   // {
-        //   //   name: {
-        //   //     contains: search,
-        //   //   },
-        //   // },
-        //   {
-        //     status: {
-        //       equals: status,
-        //     },
+        code: {
+          contains: code,
+        },
+        // buyer: {
+        //   name: {
+        //     contains: buyerName,
         //   },
-        // ],
+        // },
         status: {
           equals: status,
         },

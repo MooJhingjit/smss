@@ -5,13 +5,6 @@ import Link from "next/link";
 // import { create } from '@/actions/create-user'
 
 export default function ShortcutMenus() {
-  // async function create(formData: FormData) {
-  //   "use server";
-  //   // window.location.href = "/quotations/1";
-
-  //   // show all data in console
-  //   console.log("formData");
-  // }
 
   return (
     <div className="grid grid-cols-4 gap-4">
@@ -22,7 +15,7 @@ export default function ShortcutMenus() {
             strokeWidth={1.5}
           />
         }
-        label="QT Board"
+        label="QT ทั้งหมด"
         link="/quotations"
       />
       <MenuItem
@@ -32,7 +25,7 @@ export default function ShortcutMenus() {
             strokeWidth={1.5}
           />
         }
-        label="POs"
+        label="PO ทั้งหมด"
         link="/purchases"
       />
       <MenuItem
@@ -42,7 +35,7 @@ export default function ShortcutMenus() {
             strokeWidth={1.5}
           />
         }
-        label="Products"
+        label="สินค้า/บริการ"
         link="/products"
       />
       <MenuItem
@@ -52,7 +45,7 @@ export default function ShortcutMenus() {
             strokeWidth={1.5}
           />
         }
-        label="Users"
+        label="ผู้ใช้งาน"
         link="/users"
       />
       {/* <div className="py-10">
@@ -85,7 +78,7 @@ const MenuItem = (props: {
   return (
     <Link
       href={link}
-      className="col-span-1 flex flex-col items-center justify-center relative rounded-lg p-2 lg:p-4 group cursor-pointer shadow-lg hover:shadow-sm "
+      className="col-span-1 flex flex-col items-center justify-center relative rounded-lg p-2 lg:py-4 px-2 group cursor-pointer shadow-lg hover:shadow-sm "
     >
       <div className="absolute inset-0 bg-gray-700  rounded-lg opacity-10 z-10 h-full"></div>
 
@@ -105,7 +98,7 @@ const Stats = () => {
       <div className=" lg:border-gray-900/5 lg:border-t-0 mb-4 lg:mb-0">
         <dt className="text font-medium leading-6 flex space-x-1 text-slate-700 ">
           {/* <CircleDollarSign className='w-5 h-5' strokeWidth={1.5} /> */}
-          <p>Sales</p>
+          <p>ยอดขาย</p>
         </dt>
         <dd className="mt-2 w-full flex-none text-xl font-medium  text-slate-700 ">
           ฿405,091.00
@@ -114,7 +107,7 @@ const Stats = () => {
       <div className="justify-center border-gray-900/5 lg:border-t-0 ">
         <dt className="text font-medium leading-6  flex space-x-1 text-slate-700">
           {/* <CircleDollarSign className='w-5 h-5 ' strokeWidth={1.5} /> */}
-          <p>Orders</p>
+          <p>ยอดสั่งซื้อ</p>
         </dt>
         <dd className="mt-2 w-full flex-none text-xl font-medium text-slate-700 ">
           ฿305,091.00
