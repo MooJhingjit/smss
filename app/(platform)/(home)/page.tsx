@@ -4,8 +4,9 @@ import QuotationCard from "./_components/quotation-card";
 import ShortcutMenus from "./_components/shortcut-menus";
 import PurchaseOrders from "./_components/purchase-order-card";
 import { db } from "@/lib/db";
-import { PurchaseOrderWithRelations, QuotationWithBuyer } from "@/types";
+import { QuotationWithBuyer } from "@/types";
 import { PurchaseOrder, User } from "@prisma/client";
+import StatisticCard from "./_components/statistic-card";
 
 
 export type PurchaseOrderWithVendor = PurchaseOrder & { vendor: User }
@@ -38,6 +39,7 @@ async function getData(): Promise<[QuotationWithBuyer[], PurchaseOrderWithVendor
 
 export default async function HomePage() {
   const [qt, po] = await getData();
+  console.log("qt", qt)
 
   return (
     <div className="mx-auto max-w-6xl px-2 xl:px-0">
@@ -60,10 +62,7 @@ export default async function HomePage() {
           <PurchaseOrders data={po} />
         </div>
         <div className="col-span-12">
-          <CardWrapper
-            title="สถิติ"
-            description="สถิติการใช้งานระบบ"
-          />
+          <StatisticCard />
         </div>
       </div>
     </div>
