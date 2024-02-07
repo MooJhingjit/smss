@@ -24,6 +24,4 @@ export function getDateFormat(date: Date | string) {
   const year = date.getFullYear();
 
   return `${year}-${month}-${day}`;
-
-
 }

@@ -2,6 +2,9 @@ import { NextResponse, NextRequest } from "next/server";
 import { db } from "@/lib/db";
 import { QuotationList } from "@prisma/client";
 import { generateCode } from "@/lib/utils";
+import { getQuotationGroupByVendor, getQuotationTotalPrice } from "@/lib/quotation.helper";
+import { QuotationListWithRelations } from "@/types";
+
 
 // PUT /api/quotations/:id
 export async function POST(req: NextRequest) {
@@ -19,26 +22,15 @@ export async function POST(req: NextRequest) {
     })
 
     // group quotation lists by vendor
-    const quotationListsByVendor = quotationLists.reduce<{ [key: number]: QuotationList[] }>((acc, curr) => {
-      if (!acc[curr.product.vendorId]) {
-        acc[curr.product.vendorId] = []
-      }
-      acc[curr.product.vendorId].push(curr)
-      return acc
-    }, {})
+    const quotationListsByVendor = getQuotationGroupByVendor(quotationLists as QuotationListWithRelations[])
 
-    // create  purchase orders for each vendor
+    // create purchase orders for each vendor
     const purchaseOrders = await Promise.all(Object.keys(quotationListsByVendor).map(async (vendorId) => {
 
       const vendorIdNum = Number(vendorId)
-      // get total price and discount for each vendor
-      const totalPrice = quotationListsByVendor[vendorIdNum].reduce((acc, curr) => {
-        return acc + (curr.totalPrice ?? 0)
-      }, 0)
-      const totalDiscount = quotationListsByVendor[vendorIdNum].reduce((acc, curr) => {
-        return acc + (curr?.discount ?? 0)
-      }, 0)
 
+      const lists = quotationListsByVendor[vendorIdNum]
+      const { totalPrice, totalDiscount } = getQuotationTotalPrice(lists)
 
       const purchaseOrder = await db.purchaseOrder.create({
         data: {
@@ -69,7 +61,7 @@ export async function POST(req: NextRequest) {
           data: {
             purchaseOrderId: purchaseOrder.id,
             name: quotationList.name,
-            price: quotationList.price,
+            price: quotationList.cost,
             quantity: quotationList.quantity,
             status: 'pending'
           }
@@ -77,16 +69,6 @@ export async function POST(req: NextRequest) {
         return purchaseOrderItem
       }))
     }))
-
-    // // get all purchase orders
-    // const purchaseOrdersWithItems = await db.purchaseOrder.findMany({
-    //   where: {
-    //     quotationId: body.quotationId
-    //   },
-    //   include: {
-    //     purchaseOrderItems: true
-    //   }
-    // })
 
     // return success message
     return NextResponse.json(res);

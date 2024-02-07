@@ -1,23 +1,27 @@
 import React from "react";
-import { Lock } from "lucide-react";
+import { PurchaseOrderStatus, Quotation } from "@prisma/client";
+import Link from "next/link";
 
-export default function OrderStatus() {
+type Props = {
+
+  quotation: Quotation;
+  status: PurchaseOrderStatus
+}
+export default function OrderStatus(props: Readonly<Props>) {
+  const { status, quotation } = props;
   return (
     <div className="space-y-2">
       <div className="flex space-x-3">
-        <span className="inline-flex font-semibold items-center rounded-md bg-yellow-100 px-2 py-1 text-xs text-yellow-700">
-          Draft
+        <span className=" capitalize inline-flex font-semibold items-center rounded-md bg-yellow-100 px-2 py-1 text-xs text-yellow-700">
+          {status}
         </span>
-        <span className="inline-flex font-semibold items-center rounded-md bg-blue-100 px-2 py-1 text-xs text-blue-700 underline cursor-pointer">
-          QT-0001
-        </span>
+        <Link
+          href={`/quotations/${quotation.id}`}
+          target="_blank"
+          className="inline-flex font-semibold items-center rounded-md bg-blue-100 px-2 py-1 text-xs text-blue-700 underline cursor-pointer">
+          {quotation.code}
+        </Link>
       </div>
-      {Array.from({ length: 6 }).map((_, index) => (
-        <div className="h-3 bg-gray-200 w-full mb-2"></div>
-      ))}
-      {/* <Item label="Status" value="Draft" />
-      <Item label="Status" value="Draft" />
-      <Item label="Status" value="Draft" /> */}
     </div>
   );
 }

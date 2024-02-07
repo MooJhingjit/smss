@@ -13,11 +13,19 @@ export type ItemRefs =
       vendorRef?: { id: number | undefined; name: string | undefined };
     };
 export type QuotationListWithRelations = QuotationList & {
-  product: Product;
+  product: ProductWithRelations;
   quotation: Quotation;
 };
 export type PurchaseOrderWithRelations = PurchaseOrder & {
-  purchaseOrderItems: PurchaseOrderItem[];
-  vendor: User;
-  quotation: Quotation;
+  purchaseOrderItems?: PurchaseOrderItem[];
+  vendor?: User;
+  quotation?: Quotation;
 };
+
+export type PurchaseOrderPreview = {
+  id: number;
+  vendor : User;
+  totalPrice : number;
+  totalDiscount : number;
+  quantity : number;
+}

@@ -20,7 +20,7 @@ export default function QuotationTools(props: Props) {
         <ItemStatus curStatus={status} />
       </div>
       {Array.from({ length: 6 }).map((_, index) => (
-        <div className="h-3 bg-gray-200 w-full mb-2"></div>
+        <div key={index} className="h-3 bg-gray-200 w-full mb-2"></div>
       ))}
       {/* <Item label="Status" value="Draft" />
       <Item label="Status" value="Draft" />

@@ -23,7 +23,11 @@ const getData = async (quotationId: string) => {
       },
       lists: {
         include: {
-          product: true,
+          product: {
+            include: {
+              vendor: true,
+            },
+          }
         },
       },
     },
@@ -89,6 +93,7 @@ export default async function QuotationDetails(
         </div>
         <div className="col-span-5 md:col-span-3">
           <PurchaseOrders
+            quotationLists={lists as QuotationListWithRelations[]}
             hasQuotationItems={lists.length > 0}
             quotationId={data.id}
           />

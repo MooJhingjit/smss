@@ -3,31 +3,24 @@ import React from "react";
 import { Plus, FileEdit } from "lucide-react";
 import PageComponentWrapper from "@/components/page-component-wrapper";
 import PURCHASE_ORDER_SERVICES from "@/app/services/service.purchase-order";
-import { PurchaseOrderWithRelations } from "@/types";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { queryClient } from "@/components/providers/query-provider";
+import { PurchaseOrderWithRelations, QuotationListWithRelations, PurchaseOrderPreview } from "@/types";
+import { useQuery } from "@tanstack/react-query";
 import TableLists from "@/components/table-lists";
 import { getDateFormat } from "@/lib/utils";
 import Link from "next/link";
-import { CircleDashed } from "lucide-react";
-import { toast } from "sonner";
+import { getQuotationGroupByVendor, getQuotationTotalPrice } from "@/lib/quotation.helper";
+import { usePurchasePreviewModal } from "@/hooks/use-po-preview-modal";
 
 const columns = [
   { name: "Code", key: "code" },
   {
     name: "Vendor", key: "name",
     render: (item: PurchaseOrderWithRelations) => {
-      return item.vendor.name;
+      return item.vendor?.name;
     },
   },
-  // {
-  //   name: 'Units', key: 'id',
-  //   render: (item: PurchaseOrderWithRelations) => {
-  //     return item.purchaseOrderItems.length
-  //   }
-  // },
+  { name: "Discount", key: "totalDiscount" },
   { name: "Total Price", key: "totalPrice" },
-  { name: "Total Discount", key: "totalDiscount" },
   {
     name: "Created", key: "createdAt",
     render: (item: PurchaseOrderWithRelations) => {
@@ -50,11 +43,14 @@ const columns = [
 ];
 
 export default function PurchaseOrders(props: {
+  quotationLists: QuotationListWithRelations[]
   hasQuotationItems: boolean;
   quotationId: number;
 }) {
-  const { quotationId } = props;
+  const { quotationId, quotationLists } = props;
   const queryKey = ['purchase-orders', quotationId]
+
+  const modal = usePurchasePreviewModal();
 
   const { data } = useQuery<PurchaseOrderWithRelations[]>({
     queryKey,
@@ -65,39 +61,43 @@ export default function PurchaseOrders(props: {
     },
   });
 
-  const mutation = useMutation(
-    {
-      mutationFn: async () => {
-        return await PURCHASE_ORDER_SERVICES.generatePOs({
-          quotationId
-        });
-      },
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey })
-        toast.success("Purchase order generated successfully");
-      },
-    }
-  );
 
-  const generatePurchaseOrder = async () => {
-    mutation.mutate();
-  };
+  const previewPurchaseOrders = () => {
+    const quotationListsByVendor = getQuotationGroupByVendor(quotationLists)
+
+    const purchaseOrderPreview = Object.keys(quotationListsByVendor).map((vendorId) => {
+
+      const vendorIdNum = Number(vendorId)
+
+      const lists = quotationListsByVendor[vendorIdNum]
+      const { totalPrice, totalDiscount, quantity } = getQuotationTotalPrice(lists)
+      
+      return {
+        id: vendorIdNum,
+        vendor: lists[0].product.vendor,
+        quantity: quantity,
+        totalPrice,
+        totalDiscount,
+      }
+    })
+
+    modal.onOpen(purchaseOrderPreview as PurchaseOrderPreview[], queryKey, quotationId);
+  }
 
   const renderActionButtons = () => {
     if (data?.length === 0) {
       return (
         <button
-          disabled={mutation.isPending}
-          onClick={generatePurchaseOrder}
+          onClick={previewPurchaseOrders}
 
           className="flex items-center justify-center  bg-gray-50 hover:text-gray-700 border border-gray-300 rounded text-xs px-4 py-0.5">
           Generate
-          {
+          {/* {
             mutation.isPending && (
               <CircleDashed className="animate-spin -mr-1 ml-2 h-3 w-3 text-gray-400" />
 
             )
-          }
+          } */}
         </button>
       );
     }

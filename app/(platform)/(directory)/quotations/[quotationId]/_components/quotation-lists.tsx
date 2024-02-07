@@ -11,7 +11,6 @@ import { useAction } from "@/hooks/use-action";
 import { updateQuotation } from "@/actions/quotation/update";
 import { toast } from "sonner";
 import { FormSubmit } from "@/components/form/form-submit";
-import { get } from "http";
 
 type Props = {
   quotationId: number;
@@ -24,6 +23,12 @@ const columns = [
     name: "name", key: "name",
     render: (item: QuotationListWithRelations) => {
       return item.product.name;
+    },
+  },
+  {
+    name: "vendor", key: "vendor",
+    render: (item: QuotationListWithRelations) => {
+      return item.product.vendor?.name;
     },
   },
   {
@@ -154,15 +159,6 @@ const BillingInfo = (props: BillingProps) => {
             })}
           </dd>
         </div>
-        {/* <div className="flex items-center justify-between py-4">
-          <dt className="text-gray-600">Total</dt>
-          <dd className="font-medium text-gray-900">
-            {(summary.subtotal - summary.discount).toLocaleString("th-TH", {
-              style: "currency",
-              currency: "THB",
-            })}
-          </dd>
-        </div> */}
         <div className="flex items-center justify-between py-4">
           <dt className="text-gray-600">7% Vat</dt>
           <dd className="font-medium text-gray-900">
