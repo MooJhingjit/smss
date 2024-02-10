@@ -64,6 +64,7 @@ export default function PurchaseOrders(props: {
 
   const previewPurchaseOrders = () => {
     const quotationListsByVendor = getQuotationGroupByVendor(quotationLists)
+    console.log(quotationListsByVendor);
 
     const purchaseOrderPreview = Object.keys(quotationListsByVendor).map((vendorId) => {
 
