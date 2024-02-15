@@ -86,9 +86,9 @@ function MenuItems() {
         Quotations
       </Link>
       <Link
-        href="/purchases"
+        href="/purchase-orders"
         className={classNames(
-          isActive("/purchases")
+          isActive("/purchase-orders")
             ? "text-primary-600 font-semibold"
             : "text-gray-500 font-semibold",
         )}

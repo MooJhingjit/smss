@@ -1,33 +1,31 @@
 "use client";
 import React from "react";
-import { usePurchaseModal } from "@/hooks/use-po-modal";
+import { useQuotationModal } from "@/hooks/use-quotation-modal";
 import CardWrapper from "./card-wrapper";
-import { PurchaseOrder } from "@prisma/client";
+import { QuotationWithBuyer } from "@/types";
 import TableLists from "@/components/table-lists";
-import { PurchaseOrderWithVendor } from "../page";
 
 type Props = {
-  data: PurchaseOrderWithVendor[];
+  data: QuotationWithBuyer[];
 };
-
-
 
 const columns = [
   { name: "Code", key: "code" },
   {
-    name: "Vendor", key: "vendorId",
-    render: (item: PurchaseOrderWithVendor) => {
+    name: "Buyer", key: "buyer.name",
+    render: (item: QuotationWithBuyer) => {
       return (
-        <p>{item.vendor.name}</p>
+        <div className="">
+          {item.buyer.name}
+        </div>
       );
     },
   },
-  { name: "Total Price", key: "totalPrice" },
-  { name: "Payment Type", key: "paymentType" },
+  { name: "Payment", key: "paymentType" },
   {
     name: "Status",
     key: "status",
-    render: (item: PurchaseOrder) => {
+    render: (item: QuotationWithBuyer) => {
       return (
         <span className="inline-flex items-center rounded-md bg-yellow-100 px-2 py-0.5 text-xs text-yellow-700">
           {item.status}
@@ -37,20 +35,20 @@ const columns = [
   },
 ];
 
-export default function PurchaseOrders(props: Readonly<Props>) {
+export default function Quotations(props: Readonly<Props>) {
+  const { onOpen } = useQuotationModal();
   const { data } = props;
-  const { onOpen } = usePurchaseModal();
-
   return (
     <CardWrapper
-      title="ใบสั่งซื้อ"
+      title="ใบเสนอราคา"
       description="5 รายการที่มีการเปลี่ยนแปลงล่าสุด"
       onCreate={onOpen}
+      link="/quotations"
     >
-      <TableLists<PurchaseOrderWithVendor>
+      <TableLists<QuotationWithBuyer>
         columns={columns}
         data={data}
-        link="/purchases"
+        link="/quotations"
       />
     </CardWrapper>
   );

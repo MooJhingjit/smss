@@ -55,6 +55,15 @@ export default async function QuotationDetails(
     },
     {
       name: data?.code ?? "",
+      render: () => {
+        return <div>
+          <p className="rounded bg-gray-100 px-2 py-0.5 text-xs tracking-wide text-gray-600 space-x-2">
+            <span>{data?.code}</span> 
+            <span className="capitalize">({data?.type})</span>
+          </p>
+        </div>
+
+      },
       href: "",
       current: true,
     },
@@ -80,7 +89,7 @@ export default async function QuotationDetails(
           {buyer && <CustomerInfo data={buyer} />}
         </div>
         <div className="col-span-2">
-          <QuotationTools status={data.status} type={data.type} />
+          <QuotationTools quotationId={data.id} status={data.status} type={data.type} />
         </div>
         <div className="col-span-5">
           <QuotationLists

@@ -25,7 +25,7 @@ export default function PurchaseOrderTable<TData, TValue>(
         cell: ({ row }: any) => {
           return (
             <div className="flex space-x-2 items-center">
-              <Link href={`/purchases/${row.original.id}`} passHref>
+              <Link href={`/purchase-orders/${row.original.id}`} passHref>
                 <Button
                   className="text-xs h-8"
                   variant="secondary"

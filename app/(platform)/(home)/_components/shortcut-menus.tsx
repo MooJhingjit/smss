@@ -26,7 +26,7 @@ export default function ShortcutMenus() {
           />
         }
         label="PO ทั้งหมด"
-        link="/purchases"
+        link="/purchase-orders"
       />
       <MenuItem
         icon={

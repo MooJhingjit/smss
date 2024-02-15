@@ -36,7 +36,7 @@ export default async function PurchaseOrders(props: Readonly<Props>) {
   const pages = [
     {
       name: "Purchase Orders",
-      href: "/purchases",
+      href: "/purchase-orders",
       current: false,
     },
   ];

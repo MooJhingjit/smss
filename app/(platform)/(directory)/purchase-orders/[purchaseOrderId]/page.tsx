@@ -55,7 +55,7 @@ export default async function PurchaseOrderDetails(
   const pages = [
     {
       name: "Purchase Orders",
-      href: "/purchases",
+      href: "/purchase-orders",
       current: false,
     },
     {

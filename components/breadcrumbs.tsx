@@ -1,15 +1,24 @@
 import { ChevronRight, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
+import React from "react";
 
 type Page = {
   name: string;
   href: string;
   current: boolean;
+  render?: () => React.ReactNode;
 };
 
 export default function Breadcrumbs(props: { pages: Page[] }) {
   const { pages } = props;
 
+  const getValue = (page: Page) => {
+    if (page.render) {
+      return page.render();
+    }
+    return page.name;
+  }
+  
   return (
     <nav className="flex" aria-label="Breadcrumb">
       <ol role="list" className="flex items-center space-x-4">
@@ -33,7 +42,7 @@ export default function Breadcrumbs(props: { pages: Page[] }) {
                   className="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700"
                   aria-current="page"
                 >
-                  {page.name}
+                  {getValue(page)}
                 </p>
               ) : (
                 <a
@@ -41,7 +50,7 @@ export default function Breadcrumbs(props: { pages: Page[] }) {
                   className="ml-4 text-sm font-medium text-gray-400 hover:text-gray-700"
                   aria-current={page.current ? "page" : undefined}
                 >
-                  {page.name}
+                  {getValue(page)}
                 </a>
               )}
             </div>

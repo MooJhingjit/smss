@@ -29,7 +29,7 @@ const columns = [
     render: (item: PurchaseOrderWithRelations) => {
       return (
         <Link
-          href={`/purchases/${item.id}`}
+          href={`/purchase-orders/${item.id}`}
           className="flex space-x-1  font-semibold items-center rounded-md bg-yellow-100 px-2 py-1 text-xs text-yellow-700">
           <span>{item.status}</span>
           <FileEdit className="w-3 h-3 text-orange-400 cursor-pointer hover:text-orange-700" />

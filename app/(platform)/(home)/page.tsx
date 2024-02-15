@@ -1,20 +1,33 @@
 import React from "react";
-import CardWrapper from "./_components/card-wrapper";
-import QuotationCard from "./_components/quotation-card";
+import Quotations from "./_components/overview.quotations";
 import ShortcutMenus from "./_components/shortcut-menus";
-import PurchaseOrders from "./_components/purchase-order-card";
+import PurchaseOrders from "./_components/overview.purchase-orders";
 import { db } from "@/lib/db";
 import { QuotationWithBuyer } from "@/types";
 import { PurchaseOrder, User } from "@prisma/client";
-import StatisticCard from "./_components/statistic-card";
+import StatisticCard from "./_components/statistics";
+import Tasks from "./_components/tasks";
 
 
 export type PurchaseOrderWithVendor = PurchaseOrder & { vendor: User }
 
-async function getData(): Promise<[QuotationWithBuyer[], PurchaseOrderWithVendor[]]> {
+async function getData(): Promise<[QuotationWithBuyer[], PurchaseOrderWithVendor[], QuotationWithBuyer[]]> {
   const quotations = db.quotation.findMany({
     include: {
       buyer: true,
+    },
+    take: 5,
+    orderBy: {
+      updatedAt: "desc",
+    },
+  });
+
+  const tasks = db.quotation.findMany({
+    include: {
+      buyer: true,
+    },
+    where: {
+      status: "offer",
     },
     take: 5,
     orderBy: {
@@ -32,14 +45,13 @@ async function getData(): Promise<[QuotationWithBuyer[], PurchaseOrderWithVendor
     },
   });
 
-  const data = await Promise.all([quotations, purchaseOrders]);
+  const data = await Promise.all([quotations, purchaseOrders, tasks]);
   return data;
 
 }
 
 export default async function HomePage() {
-  const [qt, po] = await getData();
-  console.log("qt", qt)
+  const [quotations, purchaseOrders, tasks] = await getData();
 
   return (
     <div className="mx-auto max-w-6xl px-2 xl:px-0">
@@ -53,13 +65,13 @@ export default async function HomePage() {
           </div>
         </div>
         <div className="md:col-span-7 col-span-12">
-          <CardWrapper title="งานที่ต้องตรวจสอบ" description="ตรวจสอบในเสนอราคา และอื่นๆ" />
+          <Tasks data={tasks} />
         </div>
         <div className="lg:col-span-6 col-span-12">
-          <QuotationCard data={qt} />
+          <Quotations data={quotations} />
         </div>
         <div className="lg:col-span-6 col-span-12">
-          <PurchaseOrders data={po} />
+          <PurchaseOrders data={purchaseOrders} />
         </div>
         <div className="col-span-12">
           <StatisticCard />

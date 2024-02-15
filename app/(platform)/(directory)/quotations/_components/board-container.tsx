@@ -13,6 +13,7 @@ import QT_SERVICES from "@/app/services/service.quotation";
 import Link from "next/link";
 import { FormInput } from "@/components/form/form-input";
 import { useSearchParams } from "next/navigation";
+import { quotationStatusMapping } from "@/app/config";
 
 interface Props {}
 
@@ -155,42 +156,42 @@ export default function BoardContainer(props: Props) {
               <BoardColumn
                 items={queries[0].data ?? ([] as QuotationWithBuyer[])}
                 columnKey={QuotationStatus.open}
-                label="เปิด QT"
+                label={quotationStatusMapping[QuotationStatus.open]}
               />
               <BoardColumn
                 items={queries[1].data ?? ([] as QuotationWithBuyer[])}
                 columnKey={QuotationStatus.offer}
-                label="ส่ง QT (ให้ลูกค้า)"
+                label={quotationStatusMapping[QuotationStatus.offer]}
               />
               <BoardColumn
                 items={queries[2].data ?? ([] as QuotationWithBuyer[])}
                 columnKey={QuotationStatus.approved}
-                label="อนุมัติ QT"
+                label={quotationStatusMapping[QuotationStatus.approved]}
               />
               <BoardColumn
                 items={queries[3].data ?? ([] as QuotationWithBuyer[])}
                 columnKey={QuotationStatus.po_preparing}
-                label="เตรียม PO (ผู้ขาย)"
+                label={quotationStatusMapping[QuotationStatus.po_preparing]}
               />
               <BoardColumn
                 items={queries[4].data ?? ([] as QuotationWithBuyer[])}
                 columnKey={QuotationStatus.po_sent}
-                label="ส่ง PO (ผู้ขาย)"
+                label={quotationStatusMapping[QuotationStatus.po_sent]}
               />
               <BoardColumn
                 items={queries[5].data ?? ([] as QuotationWithBuyer[])}
                 columnKey={QuotationStatus.product_received}
-                label="รับสินค้า"
+                label={quotationStatusMapping[QuotationStatus.product_received]}
               />
               <BoardColumn
                 items={queries[6].data ?? ([] as QuotationWithBuyer[])}
                 columnKey={QuotationStatus.order_preparing}
-                label="รอส่งสินค้า"
+                label={quotationStatusMapping[QuotationStatus.order_preparing]}
               />
               <BoardColumn
                 items={queries[7].data ?? ([] as QuotationWithBuyer[])}
                 columnKey={QuotationStatus.delivered}
-                label="ส่งสินค้า / ปิดงาน"
+                label={quotationStatusMapping[QuotationStatus.delivered]}
               />
               {provided.placeholder}
               <div className="flex-shrink-0 w-1" />
