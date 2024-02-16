@@ -42,7 +42,7 @@ export default function ProductTable<TData, TValue>(
                 className="text-xs h-8"
                 variant="secondary"
               >
-                Manage
+                จัดการ
               </Button>
               <Link href={`/products/${row.original.id}`} passHref>
                 <ExternalLink className="w-4 h-4" />

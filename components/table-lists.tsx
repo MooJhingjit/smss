@@ -97,7 +97,7 @@ export default function TableLists<T extends WithKey>(
                   variant="secondary"
                   className="text-xs h-6"
                 >
-                  Manage
+                  จัดการ
                 </Button>
               </TableCell>
             )}

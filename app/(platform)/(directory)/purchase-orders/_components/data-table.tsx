@@ -30,7 +30,7 @@ export default function PurchaseOrderTable<TData, TValue>(
                   className="text-xs h-8"
                   variant="secondary"
                 >
-                  Manage
+                  จัดการ
                 </Button>
               </Link>
             </div>

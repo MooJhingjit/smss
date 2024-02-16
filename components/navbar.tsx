@@ -13,7 +13,7 @@ export default function MainNavbar(props: { showMenu?: boolean }) {
   return (
     <div
       className={classNames(
-        "fixed top-0 w-full h-14 px-4 shadow  flex items-center ",
+        "fixed top-0 w-full h-14 px-4 shadow  flex items-center z-[999]",
         showMenu
           ? "bg-primary-50 bg-gradient-to-r  from-primary-400 via-primary-100  to-primary-50 shadow-lg"
           : "",

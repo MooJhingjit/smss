@@ -39,7 +39,7 @@ export default function UserTable<TData, TValue>(
               className="text-xs h-8"
               variant="secondary"
             >
-              Manage
+              จัดการ
             </Button>
           );
         },
