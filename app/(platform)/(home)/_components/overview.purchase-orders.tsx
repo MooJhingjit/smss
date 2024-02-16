@@ -2,9 +2,10 @@
 import React from "react";
 import { usePurchaseModal } from "@/hooks/use-po-modal";
 import CardWrapper from "./card-wrapper";
-import { PurchaseOrder } from "@prisma/client";
+import { PurchaseOrder, PurchaseOrderPaymentType } from "@prisma/client";
 import TableLists from "@/components/table-lists";
 import { PurchaseOrderWithVendor } from "../page";
+import { paymentTypeMapping } from "@/app/config";
 
 type Props = {
   data: PurchaseOrderWithVendor[];
@@ -23,7 +24,14 @@ const columns = [
     },
   },
   { name: "Total Price", key: "totalPrice" },
-  { name: "Payment Type", key: "paymentType" },
+  {
+    name: "Payment",
+    key: "paymentType",
+    render: (item: PurchaseOrderWithVendor) => {
+      const paymentType = item.paymentType as PurchaseOrderPaymentType
+      return <p className="">{paymentTypeMapping[paymentType]}</p>;
+    },
+  },
   {
     name: "Status",
     key: "status",

@@ -4,6 +4,8 @@ import { useQuotationModal } from "@/hooks/use-quotation-modal";
 import CardWrapper from "./card-wrapper";
 import { QuotationWithBuyer } from "@/types";
 import TableLists from "@/components/table-lists";
+import { paymentTypeMapping, quotationStatusMapping } from "@/app/config";
+import { PurchaseOrderPaymentType } from "@prisma/client";
 
 type Props = {
   data: QuotationWithBuyer[];
@@ -12,23 +14,30 @@ type Props = {
 const columns = [
   { name: "Code", key: "code" },
   {
-    name: "Buyer", key: "buyer.name",
+    name: "Buyer",
+    key: "buyer.name",
     render: (item: QuotationWithBuyer) => {
-      return (
-        <div className="">
-          {item.buyer.name}
-        </div>
-      );
+      return <div className="">{item.buyer.name}</div>;
     },
   },
-  { name: "Payment", key: "paymentType" },
+  {
+    name: "Payment",
+    key: "paymentType",
+    render: (item: QuotationWithBuyer) => {
+      const paymentType = item.paymentType as PurchaseOrderPaymentType
+      return <p className="">{paymentTypeMapping[paymentType]}</p>;
+    },
+  },
+
   {
     name: "Status",
     key: "status",
     render: (item: QuotationWithBuyer) => {
       return (
         <span className="inline-flex items-center rounded-md bg-yellow-100 px-2 py-0.5 text-xs text-yellow-700">
-          {item.status}
+          {
+            quotationStatusMapping[item.status]
+          }
         </span>
       );
     },

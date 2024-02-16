@@ -15,3 +15,8 @@ export const quotationStatusMapping = {
   order_preparing: "รอส่งสินค้า",
   delivered: "ส่งสินค้า / ปิดงาน"
 }
+
+export const paymentTypeMapping = {
+  cash: "เงินสด",
+  credit: "เครดิต",
+}
