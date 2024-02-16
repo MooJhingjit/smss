@@ -55,7 +55,7 @@ export default function QuotationTools(props: Props) {
         {/* <div className="inline-flex capitalize font-semibold rounded-md bg-gray-100 px-2 py-1 text-xs text-gray-700 items-center">
           <span>{type}</span>
         </div> */}
-        <div className="w-[150px]">
+        <div className="w-[200px] ">
           <ItemStatus
             onStatusChange={handleItemChange}
             curStatus={status} />
@@ -82,7 +82,7 @@ const ItemStatus = ({ curStatus, onStatusChange }: {
     <Select onValueChange={onStatusChange}>
       <SelectTrigger className="inline-flex capitalize font-semibold  rounded-md bg-gray-100 px-2 py-1 text-xs text-gray-700 items-center">
         <SelectValue placeholder={
-          quotationStatusMapping[curStatus]
+          "อยู่ในสถานะ การ" + quotationStatusMapping[curStatus]
         } />
       </SelectTrigger>
       <SelectContent className="bg-white text-xs p-2 space-y-2 ">

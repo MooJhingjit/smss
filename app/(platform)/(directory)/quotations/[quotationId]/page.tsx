@@ -49,7 +49,7 @@ export default async function QuotationDetails(
 
   const pages = [
     {
-      name: "Quotations",
+      name: "การเสนอราคาทั้งหมด (QT)",
       href: "/quotations",
       current: false,
     },
