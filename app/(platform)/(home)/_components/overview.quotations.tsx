@@ -12,16 +12,16 @@ type Props = {
 };
 
 const columns = [
-  { name: "Code", key: "code" },
+  { name: "รหัส", key: "code" },
   {
-    name: "Buyer",
+    name: "ลูกค้า",
     key: "buyer.name",
     render: (item: QuotationWithBuyer) => {
       return <div className="">{item.buyer.name}</div>;
     },
   },
   {
-    name: "Payment",
+    name: "ประเภทการชำระเงิน",
     key: "paymentType",
     render: (item: QuotationWithBuyer) => {
       const paymentType = item.paymentType as PurchaseOrderPaymentType
@@ -30,7 +30,7 @@ const columns = [
   },
 
   {
-    name: "Status",
+    name: "สถานะ",
     key: "status",
     render: (item: QuotationWithBuyer) => {
       return (

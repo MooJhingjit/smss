@@ -53,7 +53,7 @@ export default async function PurchaseOrderDetails(props: Readonly<Props>) {
   const associateOrders = await getAssociateOrders(data.quotationId, data.id);
   const pages = [
     {
-      name: "Purchase Orders",
+      name: "การสั่งซื้อทั้งหมด (POs)",
       href: "/purchase-orders",
       current: false,
     },

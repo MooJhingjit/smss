@@ -217,15 +217,16 @@ const BoardFilters = (props: BoardFiltersProps) => {
   const { onSubmit } = props;
   return (
     <div className="gap-x-2 mb-3 border border-gray-100  p-2  rounded-lg bg-gray-50 flex justify-end">
-      <form onSubmit={onSubmit} className="grid grid-cols-4 gap-2">
-        <FormInput id="code" type="search" placeholder="Code" />
-        <FormInput id="buyer" type="search" placeholder="Buyer" />
-        <FormInput id="vendor" type="search" placeholder="Vendor" />
+      <form onSubmit={onSubmit} className="grid grid-cols-5 gap-2 items-center">
+        <p className="text-xs text-right text-gray-600 mt-1 mr-2 font-semibold">ค้นหาโดย</p>
+        <FormInput id="code" type="search" placeholder="รหัส" />
+        <FormInput id="buyer" type="search" placeholder="ชื่อลูกค้า" />
+        <FormInput id="vendor" type="search" placeholder="ชื่อผู้ขาย" />
         <button
           type="submit"
-          className="col-span-1 bg-gray-100 rounded-md p-1.5 text-xs text-gray-600 font-semibold"
+          className="col-span-1 bg-gray-200 rounded-md p-1.5 text-xs text-gray-600 font-semibold mt-1"
         >
-          Search
+          ค้นหา
         </button>
       </form>
     </div>
