@@ -85,7 +85,7 @@ const ItemLists = () => {
       </thead>
       <tbody className="divide-y divide-gray-200 border-b border-gray-200 text-sm sm:border-t">
         {Array.from({ length: 2 }).map((_, index) => (
-          <tr className="border-b border-gray-200 ">
+          <tr key={index} className="border-b border-gray-200 ">
             <td>{index + 1}</td>
             <td>
               <Input id="serial-number" className="my-2" />

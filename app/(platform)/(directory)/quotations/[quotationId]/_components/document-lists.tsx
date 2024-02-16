@@ -31,8 +31,8 @@ export default function DocumentItems() {
       headerTitle="Documents"
     >
       <ul role="list" className="divide-y divide-gray-100 ">
-        {docs.map((doc) => (
-          <li className="flex items-center justify-between py-4 pl-4 pr-5 text-sm leading-6">
+        {docs.map((doc, idx) => (
+          <li key={idx} className="flex items-center justify-between py-4 pl-4 pr-5 text-sm leading-6">
             <div className="flex w-0 flex-1 items-center">
               <div className="flex min-w-0 flex-1 gap-2">
                 <span className="truncate font-medium">{doc.name}</span>
