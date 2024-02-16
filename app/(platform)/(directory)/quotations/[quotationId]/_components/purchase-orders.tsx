@@ -131,7 +131,7 @@ export default function PurchaseOrders(props: {
     return (
       <div className="bg-gray-50 w-full h-40 rounded flex items-center justify-center">
         <p className="text-gray-500 text-sm">
-          Required at least 1 quotations item to generate Purchase order
+          ต้องมีรายการอย่างน้อย 1 รายการเพื่อสร้างใบสั่งซื้อ
         </p>
       </div>
     );

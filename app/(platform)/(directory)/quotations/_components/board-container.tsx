@@ -14,7 +14,9 @@ import Link from "next/link";
 import { FormInput } from "@/components/form/form-input";
 import { useSearchParams } from "next/navigation";
 import { quotationStatusMapping } from "@/app/config";
-import { Files, Paperclip, Receipt } from "lucide-react";
+import { Files, Paperclip, PlusIcon, Receipt } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useQuotationModal } from "@/hooks/use-quotation-modal";
 
 interface Props {}
 
@@ -28,6 +30,8 @@ type QuotationWithCounts = QuotationWithBuyer & {
 
 export default function BoardContainer(props: Props) {
   const allQuotationStatus = Object.values(QuotationStatus);
+  const { onOpen } = useQuotationModal();
+
   const [searchParams, setSearchParams] = useState({
     code: "",
     buyer: "",
@@ -150,7 +154,17 @@ export default function BoardContainer(props: Props) {
 
   return (
     <div className="">
-      <BoardFilters onSubmit={onSearch} />
+      <div className="flex justify-between items-center">
+        <div className="">
+          <Button onClick={onOpen} 
+            variant={"default"}
+          >
+            <PlusIcon className="w-4 h-4 mr-1 text-white" />
+            QT ใหม่
+          </Button>
+        </div>
+        <BoardFilters onSubmit={onSearch} />
+      </div>
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId="lists" type="list">
           {(provided) => (
@@ -218,7 +232,9 @@ const BoardFilters = (props: BoardFiltersProps) => {
   return (
     <div className="gap-x-2 mb-3 border border-gray-100  p-2  rounded-lg bg-gray-50 flex justify-end">
       <form onSubmit={onSubmit} className="grid grid-cols-5 gap-2 items-center">
-        <p className="text-xs text-right text-gray-600 mt-1 mr-2 font-semibold">ค้นหาโดย</p>
+        <p className="text-xs text-right text-gray-600 mt-1 mr-2 font-semibold">
+          ค้นหาโดย
+        </p>
         <FormInput id="code" type="search" placeholder="รหัส" />
         <FormInput id="buyer" type="search" placeholder="ชื่อลูกค้า" />
         <FormInput id="vendor" type="search" placeholder="ชื่อผู้ขาย" />
@@ -343,7 +359,9 @@ const BoardCard = ({
               {item?._count?.medias > 0 && (
                 <div className="flex items-center my-1" title="Files">
                   <Paperclip className="w-3 h-3  text-blue-400" />
-                  <span className="text-xs text-blue-400">{item?._count?.medias}</span>
+                  <span className="text-xs text-blue-400">
+                    {item?._count?.medias}
+                  </span>
                 </div>
               )}
 

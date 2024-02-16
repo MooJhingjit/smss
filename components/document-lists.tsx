@@ -115,7 +115,7 @@ export default function DocumentItems(props: Props) {
       headerIcon={
         <Upload className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-700" />
       }
-      headerTitle="Documents"
+      headerTitle="เอกสาร"
     >
       <ImageUpload onChange={onUpload} />
       <ul role="list" className="divide-y divide-gray-100 ">

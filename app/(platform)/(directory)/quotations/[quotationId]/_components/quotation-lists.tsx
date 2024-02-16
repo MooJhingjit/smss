@@ -77,7 +77,7 @@ export default function QuotationLists(props: Props) {
 
   return (
     <PageComponentWrapper
-      headerTitle="Quotation Items"
+      headerTitle="รายการ"
       headerIcon={
         <Plus
           onClick={() =>
@@ -85,7 +85,7 @@ export default function QuotationLists(props: Props) {
               quotationRef: { id: quotationId },
             })
           }
-          className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-700"
+          className="w-4 h-4 text-primary-600 cursor-pointer hover:text-primary-700 font-semibold"
         />
       }
     >

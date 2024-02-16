@@ -56,26 +56,27 @@ export const NewQuotationModal = () => {
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>New Quotation</DialogTitle>
-          <DialogDescription>Please select the customer.</DialogDescription>
+          <DialogTitle>สร้างใบเสนอราคาใหม่</DialogTitle>
+          <DialogDescription>เลือกชื่อลูกค้า และประเภทของ QT</DialogDescription>
         </DialogHeader>
         <form action={onSubmit} className="pb-4 space-y-2">
           <Tabs defaultValue="product" className="w-full">
-            <Label className="text-xs">Type</Label>
+            <Label className="text-xs">ประเภท</Label>
             <TabsList className="w-full flex">
               <TabsTrigger
                 className="flex-1 text-xs"
                 value="product"
                 onClick={() => onTypeChange("product")}
               >
-                Product
+                สินค้า
               </TabsTrigger>
               <TabsTrigger
                 className="flex-1 text-xs"
                 value="service"
+                disabled
                 onClick={() => onTypeChange("service")}
               >
-                Service
+                บริการ
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -83,7 +84,7 @@ export const NewQuotationModal = () => {
           <div className="">
             <FormSearchAsync
               id="customer"
-              label="Customer"
+              label="ลูกค้า"
               config={{
                 endpoint: "/users",
                 params: {
@@ -102,7 +103,7 @@ export const NewQuotationModal = () => {
             </div>
           )}
           <div className="col-start-2 col-span-1 flex justify-end">
-            <FormSubmit>Create</FormSubmit>
+            <FormSubmit>สร้าง</FormSubmit>
           </div>
         </form>
       </DialogContent>
