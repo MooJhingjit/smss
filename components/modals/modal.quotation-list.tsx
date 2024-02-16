@@ -18,6 +18,8 @@ import { useEffect, useState } from "react";
 import { Product } from "@prisma/client";
 import { useForm } from "react-hook-form";
 import { FormTextarea } from "../form/form-textarea";
+import { Input } from "@/components/ui/input";
+import { MinusCircle, PlusCircle } from "lucide-react";
 
 type FormInput = {
   productId: string;
@@ -32,6 +34,7 @@ type FormInput = {
   totalPrice: string;
   discount: string;
   description: string;
+  subItems: string;
 };
 
 export const QuotationListModal = () => {
@@ -70,6 +73,9 @@ export const QuotationListModal = () => {
         : "",
       discount: defaultData?.discount ? defaultData.discount.toString() : "",
       description: defaultData?.description ?? "",
+      subItems: defaultData?.subItems
+        ? defaultData.subItems
+        : "[]",
     };
     reset(formData);
   }, [defaultData, reset]);
@@ -134,6 +140,7 @@ export const QuotationListModal = () => {
       totalPrice: parseFloat(total),
       discount: discount ? parseFloat(discount) : 0,
       description,
+      subItems: getValues("subItems")
     };
 
     if (defaultData?.id) {
@@ -183,6 +190,8 @@ export const QuotationListModal = () => {
     watch("quantity"),
     watch("discount"),
   ]);
+
+  const subItems = watch("subItems");
 
   return (
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
@@ -317,11 +326,97 @@ export const QuotationListModal = () => {
             />
           </div>
 
+          <SubItems setValue={setValue} defaultSubItems={subItems} />
+
           <div className="col-start-4 col-span-1 flex justify-end">
             <FormSubmit>{defaultData?.id ? "Update" : "Create"}</FormSubmit>
           </div>
         </form>
       </DialogContent>
     </Dialog>
+  );
+};
+
+const SubItems = ({ setValue, defaultSubItems }: { setValue: any, defaultSubItems: string }) => {
+  const [subItems, setSubItems] = useState<
+    {
+      label: string;
+      quantity: string;
+    }[]
+  >(
+    defaultSubItems
+      ? JSON.parse(defaultSubItems)
+      : [{ label: "", quantity: "" }]
+  );
+
+
+  const handleAdd = () => {
+    setSubItems([...subItems, { label: "", quantity: "" }]);
+  };
+
+  const handleRemove = (index: number) => {
+    const items = subItems.filter((_, i) => i !== index);
+    setSubItems(items);
+    setValue("subItems", JSON.stringify(items));
+    
+  };
+
+  const handleSubItemChange = (index: number, key: string, value: string) => {
+    const items = subItems?.map((item, i) => {
+      if (i === index) {
+        return {
+          ...item,
+          [key]: value,
+        };
+      }
+      return item;
+    });
+    setSubItems(items);
+    setValue("subItems", JSON.stringify(items));
+  };
+
+
+  return (
+    <div className="col-span-4">
+      <div className="flex space-x-2 items-center">
+        <h3 className="font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-xs capitalize">
+          รายละเอียดย่อย
+        </h3>
+        <PlusCircle onClick={handleAdd} className=" w-4  cursor-pointer">
+          Add
+        </PlusCircle>
+      </div>
+      <div className="mt-2">
+        {subItems.map((item, index) => (
+          <div key={index} className="flex items-center gap-2 mb-2">
+            <Input
+              id="label"
+              placeholder="รายการ"
+              value={item.label}
+              onChange={(e) =>
+                handleSubItemChange(index, "label", e.target.value)
+              }
+            />
+            <Input
+              id="quantity"
+              placeholder="จำนวน"
+              value={item.quantity}
+              onChange={(e) =>
+                handleSubItemChange(index, "quantity", e.target.value)
+              }
+              className="w-20"
+            />
+
+            {/* <input type="text" value={item.label} placeholder="Sub Item" className="input input-bordered" /> */}
+            <MinusCircle
+              onClick={() => handleRemove(index)}
+              className="text-red-300 w-5  hover:text-red-400 cursor-pointer"
+            >
+              Remove
+            </MinusCircle>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 };

@@ -138,6 +138,7 @@ model QuotationList {
   discount              Float?
   totalPrice            Float?
   description           String?
+  subItems              String?
   createdAt             DateTime        @default(now())
   updatedAt             DateTime        @updatedAt
   QuotationItems         QuotationItem[]

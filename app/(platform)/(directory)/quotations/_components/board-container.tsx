@@ -311,10 +311,14 @@ const BoardCard = ({
                 {item.buyer.name}
               </div>
             </div>
+            {/* <div className="">
+              
+            </div> */}
+          </div>
+          <div className="bg-gray-50 flex justify-between items-center px-2">
             <div className="">
               <p className=" text-slate-700 capitalize text-xs">
                 {/* display date in DD/MM/YYYY */}
-
                 {new Date(item.createdAt).toLocaleDateString("th-TH", {
                   year: "numeric",
                   month: "2-digit",
@@ -322,33 +326,36 @@ const BoardCard = ({
                 })}
               </p>
             </div>
-          </div>
-          <div className="bg-gray-50 flex justify-end items-center space-x-2 px-2">
-            {/* PO */}
-            {item?._count?.purchaseOrders > 0 && (
-              <div className="flex items-center my-1" title="PO">
-                <Receipt className="w-3 h-3  text-orange-400" />
-                <span className="text-xs text-orange-400">
-                  {item?._count?.purchaseOrders}
-                </span>
-              </div>
-            )}
 
-            {/* files */}
-            {item?._count?.files > 0 && (
-              <div className="flex items-center my-1" title="Files">
-                <Paperclip className="w-3 h-3  text-blue-400" />
-                <span className="text-xs text-blue-400">0</span>
-              </div>
-            )}
+            <div className="flex  space-x-2">
+              {/* PO */}
+              {item?._count?.purchaseOrders > 0 && (
+                <div className="flex items-center my-1" title="PO">
+                  <Receipt className="w-3 h-3  text-orange-400" />
+                  <span className="text-xs text-orange-400">
+                    {item?._count?.purchaseOrders}
+                  </span>
+                </div>
+              )}
 
-            {/* lists */}
-            {item?._count?.lists > 0 && (
-              <div className="flex items-center my-1" title="Lists">
-                <Files className="w-3 h-3  text-green-700" />
-                <span className="text-xs text-green-700">{item?._count?.lists}</span>
-              </div>
-            )}
+              {/* files */}
+              {item?._count?.files > 0 && (
+                <div className="flex items-center my-1" title="Files">
+                  <Paperclip className="w-3 h-3  text-blue-400" />
+                  <span className="text-xs text-blue-400">0</span>
+                </div>
+              )}
+
+              {/* lists */}
+              {item?._count?.lists > 0 && (
+                <div className="flex items-center my-1" title="Lists">
+                  <Files className="w-3 h-3  text-green-700" />
+                  <span className="text-xs text-green-700">
+                    {item?._count?.lists}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
         </li>
       )}
