@@ -55,8 +55,7 @@ const data = {
 export default function StatisticCard() {
   return (
     <CardWrapper
-      title="สถิติ"
-      description="สถิติการใช้งานระบบ"
+      title="ยอดขาย และยอกสั่งซื้อทั้งปี"
     >
 
       <Line options={options} data={data} />

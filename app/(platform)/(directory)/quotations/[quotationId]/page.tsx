@@ -3,7 +3,7 @@ import Breadcrumbs from "@/components/breadcrumbs";
 import CustomerInfo from "./_components/customer-details";
 import QuotationTools from "./_components/quotation-tools";
 import QuotationLists from "./_components/quotation-lists";
-import DocumentItems from "./_components/document-lists";
+import DocumentItems from "@/components/document-lists";
 import PurchaseOrders from "./_components/purchase-orders";
 import { db } from "@/lib/db";
 import { QuotationListWithRelations } from "@/types";
@@ -27,7 +27,7 @@ const getData = async (quotationId: string) => {
             include: {
               vendor: true,
             },
-          }
+          },
         },
       },
     },
@@ -42,7 +42,7 @@ interface QuotationIdPageProps {
 }
 
 export default async function QuotationDetails(
-  props: Readonly<QuotationIdPageProps>,
+  props: Readonly<QuotationIdPageProps>
 ) {
   const { params } = props;
   const data = await getData(params.quotationId);
@@ -56,13 +56,14 @@ export default async function QuotationDetails(
     {
       name: data?.code ?? "",
       render: () => {
-        return <div>
-          <p className="rounded bg-gray-100 px-2 py-0.5 text-xs tracking-wide text-gray-600 space-x-2">
-            <span>{data?.code}</span> 
-            <span className="capitalize">({data?.type})</span>
-          </p>
-        </div>
-
+        return (
+          <div>
+            <p className="rounded bg-gray-100 px-2 py-0.5 text-xs tracking-wide text-gray-600 space-x-2">
+              <span>{data?.code}</span>
+              <span className="capitalize">({data?.type})</span>
+            </p>
+          </div>
+        );
       },
       href: "",
       current: true,
@@ -77,10 +78,7 @@ export default async function QuotationDetails(
     );
   }
 
-  const {
-    buyer,
-    lists,
-  } = data;
+  const { buyer, lists } = data;
   return (
     <>
       <Breadcrumbs pages={pages} />
@@ -89,16 +87,21 @@ export default async function QuotationDetails(
           {buyer && <CustomerInfo data={buyer} />}
         </div>
         <div className="col-span-2">
-          <QuotationTools quotationId={data.id} status={data.status} type={data.type} />
+          <QuotationTools
+            quotationId={data.id}
+            status={data.status}
+            type={data.type}
+          />
         </div>
         <div className="col-span-5">
           <QuotationLists
             quotationId={data.id}
             remark={data.remark ?? ""}
-            data={lists as QuotationListWithRelations[]} />
+            data={lists as QuotationListWithRelations[]}
+          />
         </div>
         <div className="col-span-5 md:col-span-2">
-          <DocumentItems />
+          <DocumentItems refType="quotation" refId={data.id} />
         </div>
         <div className="col-span-5 md:col-span-3">
           <PurchaseOrders

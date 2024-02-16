@@ -83,7 +83,7 @@ function MenuItems() {
             : "text-gray-500 font-semibold",
         )}
       >
-        Quotations
+        เสนอราคา (QT)
       </Link>
       <Link
         href="/purchase-orders"
@@ -93,7 +93,7 @@ function MenuItems() {
             : "text-gray-500 font-semibold",
         )}
       >
-        Purchase Orders
+        การสั่งซื้อ (PO)
       </Link>
       <Link
         href="/products"
@@ -103,7 +103,7 @@ function MenuItems() {
             : "text-gray-500 font-semibold",
         )}
       >
-        Products
+        สินค้า
       </Link>
       <Link
         href="/users"
@@ -113,7 +113,7 @@ function MenuItems() {
             : "text-gray-500 font-semibold",
         )}
       >
-        Users
+        ผู้ใช้งาน
       </Link>
     </div>
   );

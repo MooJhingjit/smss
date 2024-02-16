@@ -5,6 +5,7 @@ import OrderStatus from "./_components/order-status";
 import OrderItems from "./_components/order-items";
 import AssociateOrders from "./_components/associate-orders";
 import { db } from "@/lib/db";
+import DocumentItems from "../../../../../components/document-lists";
 const getData = async (id: string) => {
   const data = await db.purchaseOrder.findUnique({
     where: {
@@ -13,8 +14,8 @@ const getData = async (id: string) => {
     include: {
       vendor: true,
       quotation: true,
-      purchaseOrderItems: true
-    }
+      purchaseOrderItems: true,
+    },
   });
   return data;
 };
@@ -30,16 +31,14 @@ const getAssociateOrders = async (quotationId: number, excluded: number) => {
     where: {
       quotationId,
       id: {
-        not: excluded
-      }
-    }
+        not: excluded,
+      },
+    },
   });
   return data;
-}
+};
 
-export default async function PurchaseOrderDetails(
-  props: Readonly<Props>,
-) {
+export default async function PurchaseOrderDetails(props: Readonly<Props>) {
   const { params } = props;
   const data = await getData(params.purchaseOrderId);
 
@@ -80,27 +79,25 @@ export default async function PurchaseOrderDetails(
       <Breadcrumbs pages={pages} />
       <div className="grid grid-cols-5 gap-8 mt-6">
         <div className="col-span-3">
-          {
-            vendor && (
-              <VendorInfo data={vendor} />
-            )
-          }
+          {vendor && <VendorInfo data={vendor} />}
         </div>
         <div className="col-span-2">
-          <OrderStatus
-            quotation={quotation}
-            status={data.status} />
+          <OrderStatus quotation={quotation} status={data.status} />
         </div>
         <div className="col-span-5">
           <OrderItems data={data} />
         </div>
-        {
-          associateOrders.length > 0 && (
-            <div className="col-span-5">
-              <AssociateOrders quotationCode={data.quotation.code} data={associateOrders} />
-            </div>
-          )
-        }
+        <div className="col-span-2">
+          <DocumentItems refType="purchaseOrder" refId={data.id} />
+        </div>
+        {associateOrders.length > 0 && (
+          <div className="col-span-3">
+            <AssociateOrders
+              quotationCode={data.quotation.code}
+              data={associateOrders}
+            />
+          </div>
+        )}
       </div>
     </>
   );

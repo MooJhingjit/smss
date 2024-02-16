@@ -21,7 +21,7 @@ interface Props {}
 type QuotationWithCounts = QuotationWithBuyer & {
   _count: {
     purchaseOrders: number;
-    files: number;
+    medias: number;
     lists: number; // quotation list
   };
 };
@@ -288,7 +288,7 @@ const BoardCard = ({
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           ref={provided.innerRef}
-          className="w-full rounded-md bg-white shadow mb-3 "
+          className="w-full rounded-md bg-white shadow mb-3 cursor-move "
         >
           <div className="p-2 text-xs">
             <div className="flex justify-between items-center">
@@ -339,10 +339,10 @@ const BoardCard = ({
               )}
 
               {/* files */}
-              {item?._count?.files > 0 && (
+              {item?._count?.medias > 0 && (
                 <div className="flex items-center my-1" title="Files">
                   <Paperclip className="w-3 h-3  text-blue-400" />
-                  <span className="text-xs text-blue-400">0</span>
+                  <span className="text-xs text-blue-400">{item?._count?.medias}</span>
                 </div>
               )}
 

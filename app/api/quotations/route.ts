@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
       include: {
         buyer: true,
         _count: {
-          select: { purchaseOrders: true, lists: true },
+          select: { purchaseOrders: true, lists: true, medias: true },
         },
       },
       where: {

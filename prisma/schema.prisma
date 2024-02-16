@@ -116,6 +116,7 @@ model Quotation {
   updatedAt             DateTime        @updatedAt
   lists                 QuotationList[]
   purchaseOrders         PurchaseOrder[]
+  medias             Media[]
 
   @@index([buyerId])
   @@index([sellerId])
@@ -188,6 +189,7 @@ model PurchaseOrder {
   createdAt         DateTime                 @default(now())
   updatedAt         DateTime                 @updatedAt
   purchaseOrderItems PurchaseOrderItem[]
+  medias             Media[]
 
   @@index([quotationId])
   @@index([vendorId])
@@ -209,6 +211,22 @@ model PurchaseOrderItem {
   createdAt       DateTime                @default(now())
   updatedAt       DateTime                @updatedAt
 
+  @@index([purchaseOrderId])
+}
+
+model Media {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  url         String
+  quotationId Int?
+  quotation   Quotation? @relation(fields: [quotationId], references: [id])
+  purchaseOrderId Int?
+  purchaseOrder   PurchaseOrder? @relation(fields: [purchaseOrderId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([quotationId])
   @@index([purchaseOrderId])
 }
 
