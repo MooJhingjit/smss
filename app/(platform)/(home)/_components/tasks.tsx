@@ -38,7 +38,6 @@ export default function Tasks(props: Readonly<Props>) {
   return (
     <CardWrapper
       title="งานที่ต้องตรวจสอบ"
-      onCreate={onOpen}
     >
       <TableLists<QuotationWithBuyer>
         columns={columns}

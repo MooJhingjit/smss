@@ -51,7 +51,7 @@ export default function PurchaseOrders(props: Readonly<Props>) {
 
   return (
     <CardWrapper
-      title="ใบสั่งซื้อ"
+      title="ใบสั่งซื้อ (PO)"
       description="5 รายการที่มีการเปลี่ยนแปลงล่าสุด"
       onCreate={onOpen}
     >

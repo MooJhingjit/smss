@@ -12,7 +12,6 @@ import {
   queryClient,
 } from "@/components/providers/query-provider";
 import { toast } from "sonner";
-import { render } from "react-dom";
 const docs = [
   {
     name: "PO1.pdf",
