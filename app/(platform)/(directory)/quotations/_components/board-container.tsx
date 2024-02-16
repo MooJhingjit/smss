@@ -14,26 +14,34 @@ import Link from "next/link";
 import { FormInput } from "@/components/form/form-input";
 import { useSearchParams } from "next/navigation";
 import { quotationStatusMapping } from "@/app/config";
+import { Files, Paperclip, Receipt } from "lucide-react";
 
 interface Props {}
+
+type QuotationWithCounts = QuotationWithBuyer & {
+  _count: {
+    purchaseOrders: number;
+    files: number;
+    lists: number; // quotation list
+  };
+};
 
 export default function BoardContainer(props: Props) {
   const allQuotationStatus = Object.values(QuotationStatus);
   const [searchParams, setSearchParams] = useState({
     code: "",
-    // buyer: "",
-    // vendor: "",
+    buyer: "",
+    vendor: "",
   });
   const queries = useQueries({
     queries: allQuotationStatus.map((quotationStatus) => {
-
       // combine quotationStatus and searchParams to create a unique queryKey
       const params = [
-        'quotationKeys',
+        "quotationKeys",
         quotationStatus,
         searchParams.code,
-        // searchParams.buyer,
-        // searchParams.vendor,
+        searchParams.buyer,
+        searchParams.vendor,
       ].join("-");
       return {
         queryKey: [params],
@@ -43,8 +51,8 @@ export default function BoardContainer(props: Props) {
             status: quotationStatus,
             // dynamic query params from searchParams state
             code: searchParams.code,
-            // buyer: searchParams.buyer,
-            // vendor: searchParams.vendor,
+            buyer: searchParams.buyer,
+            vendor: searchParams.vendor,
           }),
       };
     }),
@@ -53,9 +61,7 @@ export default function BoardContainer(props: Props) {
   const invalidateQuotationQueries = () => {
     queryClient.invalidateQueries({
       predicate: (query) =>
-        query.queryKey.every((key: any) =>
-          key.includes("quotationKeys")
-        ),
+        query.queryKey.every((key: any) => key.includes("quotationKeys")),
     });
   };
 
@@ -93,7 +99,7 @@ export default function BoardContainer(props: Props) {
       //       invalidateKeys?.map((k) => "quotation-" + k).includes(key)
       //     ),
       // });
-      invalidateQuotationQueries()
+      invalidateQuotationQueries();
 
       toast.success("Updated successfully");
     },
@@ -128,17 +134,17 @@ export default function BoardContainer(props: Props) {
     e.preventDefault();
     // get all data
     const code = (e.target as any).code.value;
-    // const buyer = (e.target as any).buyer.value;
-    // const vendor = (e.target as any).vendor.value;
+    const buyer = (e.target as any).buyer.value;
+    const vendor = (e.target as any).vendor.value;
     console.log({
       code,
-      // buyer,
-      // vendor,
+      buyer,
+      vendor,
     });
     setSearchParams({
       code,
-      // buyer,
-      // vendor,
+      buyer,
+      vendor,
     });
   };
 
@@ -211,10 +217,10 @@ const BoardFilters = (props: BoardFiltersProps) => {
   const { onSubmit } = props;
   return (
     <div className="gap-x-2 mb-3 border border-gray-100  p-2  rounded-lg bg-gray-50 flex justify-end">
-      <form onSubmit={onSubmit} className="grid grid-cols-2 gap-2">
+      <form onSubmit={onSubmit} className="grid grid-cols-4 gap-2">
         <FormInput id="code" type="search" placeholder="Code" />
-        {/* <FormInput id="buyer" placeholder="Buyer" /> */}
-        {/* <FormInput id="vendor" placeholder="Vendor" /> */}
+        <FormInput id="buyer" type="search" placeholder="Buyer" />
+        <FormInput id="vendor" type="search" placeholder="Vendor" />
         <button
           type="submit"
           className="col-span-1 bg-gray-100 rounded-md p-1.5 text-xs text-gray-600 font-semibold"
@@ -233,7 +239,7 @@ const BoardColumn = ({
 }: {
   columnKey: QuotationStatus;
   label: string;
-  items: QuotationWithBuyer[];
+  items: QuotationWithCounts[];
 }) => {
   return (
     <div className="h-auto min-w-[210px] select-none">
@@ -254,7 +260,7 @@ const BoardColumn = ({
                 ref={provided.innerRef}
                 className="h-full"
               >
-                {items.map((i: QuotationWithBuyer, cardIdx) => {
+                {items.map((i: QuotationWithCounts, cardIdx) => {
                   return <BoardCard idx={`QT-${i.id}`} key={i.id} item={i} />;
                 })}
 
@@ -273,7 +279,7 @@ const BoardCard = ({
   item,
 }: {
   idx: string;
-  item: QuotationWithBuyer;
+  item: QuotationWithCounts;
 }) => {
   return (
     <Draggable draggableId={idx.toString()} index={item.id}>
@@ -316,6 +322,33 @@ const BoardCard = ({
                 })}
               </p>
             </div>
+          </div>
+          <div className="bg-gray-50 flex justify-end items-center space-x-2 px-2">
+            {/* PO */}
+            {item?._count?.purchaseOrders > 0 && (
+              <div className="flex items-center my-1" title="PO">
+                <Receipt className="w-3 h-3  text-orange-400" />
+                <span className="text-xs text-orange-400">
+                  {item?._count?.purchaseOrders}
+                </span>
+              </div>
+            )}
+
+            {/* files */}
+            {item?._count?.files > 0 && (
+              <div className="flex items-center my-1" title="Files">
+                <Paperclip className="w-3 h-3  text-blue-400" />
+                <span className="text-xs text-blue-400">0</span>
+              </div>
+            )}
+
+            {/* lists */}
+            {item?._count?.lists > 0 && (
+              <div className="flex items-center my-1" title="Lists">
+                <Files className="w-3 h-3  text-green-700" />
+                <span className="text-xs text-green-700">{item?._count?.lists}</span>
+              </div>
+            )}
           </div>
         </li>
       )}

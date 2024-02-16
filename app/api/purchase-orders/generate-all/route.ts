@@ -56,11 +56,11 @@ export async function POST(req: NextRequest) {
     // generate purchase order items
     const res = await Promise.all(purchaseOrders.map(async (purchaseOrder) => {
       const quotationLists = quotationListsByVendor[purchaseOrder.vendorId]
-      return Promise.all(quotationLists.map(async (quotationList: QuotationList) => {
+      return Promise.all(quotationLists.map(async (quotationList: QuotationListWithRelations) => {
         const purchaseOrderItem = await db.purchaseOrderItem.create({
           data: {
             purchaseOrderId: purchaseOrder.id,
-            name: quotationList.name,
+            name: quotationList.product.name,
             price: quotationList.cost,
             quantity: quotationList.quantity,
             status: 'pending'

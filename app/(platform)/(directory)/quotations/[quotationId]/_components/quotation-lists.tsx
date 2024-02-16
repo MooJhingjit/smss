@@ -138,6 +138,7 @@ const BillingInfo = (props: BillingProps) => {
     },
     { subtotal: 0, discount: 0, total: 0, vat: 0, totalPrice: 0 },);
 
+    // TODO save to db
   return (
     <div className="bg-gray-100 p-4 w-full sm:rounded-lg sm:px-6">
       <dl className="divide-y divide-gray-200 text-sm">

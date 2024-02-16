@@ -1,15 +1,23 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import PageComponentWrapper from "@/components/page-component-wrapper";
 import { Input } from "@/components/ui/input";
 import { PurchaseOrderWithRelations } from "@/types";
 import { PurchaseOrderItem } from "@prisma/client";
 import TableLists from "@/components/table-lists";
+import { usePurchaseOrderListModal } from "@/hooks/use-po-list-modal";
+import { FormTextarea } from "@/components/form/form-textarea";
+import { FormSubmit } from "@/components/form/form-submit";
+import { useAction } from "@/hooks/use-action";
+import { toast } from "sonner";
+import { useForm } from "react-hook-form";
+import { updatePurchaseOrder } from "@/actions/po/update";
 
 const columns = [
   { name: "No.", key: "index" },
   {
-    name: "name", key: "name",
+    name: "name",
+    key: "name",
     render: (item: PurchaseOrderItem) => {
       return item.name;
     },
@@ -19,8 +27,14 @@ const columns = [
   { name: "Status", key: "status" },
 ];
 
-export default function QuotationItems({ data }: { data: PurchaseOrderWithRelations }) {
+export default function QuotationItems({
+  data,
+}: {
+  data: PurchaseOrderWithRelations;
+}) {
   const { purchaseOrderItems } = data;
+  const modal = usePurchaseOrderListModal();
+
   if (!purchaseOrderItems) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -35,12 +49,19 @@ export default function QuotationItems({ data }: { data: PurchaseOrderWithRelati
         <TableLists<PurchaseOrderItem>
           columns={columns}
           data={purchaseOrderItems}
+          onManage={(item) => {
+            modal.onOpen(item)
+          }}
         />
       </div>
       {data && (
         <div className="grid grid-cols-5 gap-4 mt-4">
           <div className="col-span-5 md:col-span-3 ">
-            <Remarks />
+            <Remarks
+              id={data.id}
+              remark={data.remark}
+            />
+            <TaxInfo/>
           </div>
           <div className="col-span-5 md:col-span-2">
             <BillingInfo data={data} />
@@ -55,7 +76,6 @@ const BillingInfo = ({ data }: { data: PurchaseOrderWithRelations }) => {
   return (
     <div className="bg-gray-100 p-4 w-full sm:rounded-lg sm:px-6">
       <dl className="divide-y divide-gray-200 text-sm">
-
         <div className="flex items-center justify-between py-4">
           <dt className="text-gray-600">Discount</dt>
           <dd className="font-medium text-gray-900">
@@ -87,17 +107,69 @@ const BillingInfo = ({ data }: { data: PurchaseOrderWithRelations }) => {
     </div>
   );
 };
+type FormRemark = {
+  id: number;
+  remark: string | null;
+};
+const Remarks = ({ id, remark }: { id: number, remark: string | null }) => {
 
-const Remarks = () => {
+  // useForm
+  const {
+    register,
+    watch,
+    reset,
+    getValues,
+    formState: { errors, isValid, isDirty },
+  } = useForm<FormRemark>({
+    mode: "onChange",
+    defaultValues: {
+      remark: remark ?? "",
+    },
+  });
+
+  useEffect(() => {
+    reset({ remark: remark ?? "" })
+  }, [remark, reset])
+
+  const handleUpdate = useAction(updatePurchaseOrder, {
+    onSuccess: (data) => {
+      toast.success("PO Updated");
+    },
+    onError: (error) => {
+      toast.error(error);
+    },
+  });
+
+  const onSubmit = async () => {
+    const remark = getValues("remark") ?? "";
+    handleUpdate.execute({ id, remark });
+  };
+
   return (
-    <div className="space-y-4">
-      <div className="w-full">
-        <textarea
-          className="w-full min-h-44 border p-2 rounded-lg"
-          placeholder="Remarks"
-        ></textarea>
+    <form action={onSubmit} className="relative">
+      <FormTextarea
+        id="remark"
+        placeholder="Remark"
+        className="w-full h-full border p-2 rounded-lg"
+        register={register}
+        rows={12}
+      />
+      <div className="absolute top-2 right-2">
+        {
+          isDirty && (
+            <FormSubmit variant="default" className="text-xs">
+              Update
+            </FormSubmit>
+          )
+        }
       </div>
-      <div className=" grid grid-cols-3 gap-2">
+    </form>
+  );
+};
+
+const TaxInfo = () => {
+  return (
+    <div className=" grid grid-cols-3 gap-2">
         <div>
           <label
             htmlFor="price"
@@ -149,6 +221,5 @@ const Remarks = () => {
           </div>
         </div>
       </div>
-    </div>
-  );
-};
+  )
+}

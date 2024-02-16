@@ -38,7 +38,7 @@ export const QuotationListModal = () => {
   // const [productSelected, setProduct] = useState<Product | null>(null);
   const modal = useQuotationListModal();
   const defaultData = modal.data;
-  const p = defaultData?.percentage?.toString() ?? ""
+  const p = defaultData?.percentage?.toString() ?? "";
   const refs = modal.refs;
   const {
     register,
@@ -55,9 +55,7 @@ export const QuotationListModal = () => {
     const formData = {
       name: defaultData?.name ?? "",
       price: defaultData?.price ? defaultData.price.toString() : "",
-      unitPrice: defaultData?.unitPrice
-        ? defaultData.unitPrice.toString()
-        : "",
+      unitPrice: defaultData?.unitPrice ? defaultData.unitPrice.toString() : "",
       cost: defaultData?.cost ? defaultData.cost.toString() : "",
       percentage: p,
       quantity: defaultData?.quantity ? defaultData.quantity.toString() : "1",
@@ -72,11 +70,9 @@ export const QuotationListModal = () => {
         : "",
       discount: defaultData?.discount ? defaultData.discount.toString() : "",
       description: defaultData?.description ?? "",
-    }
-    reset(
-      formData,
-    )
-  }, [defaultData, reset])
+    };
+    reset(formData);
+  }, [defaultData, reset]);
 
   const handleCreate = useAction(createQuotationList, {
     onSuccess: (data) => {
@@ -108,7 +104,7 @@ export const QuotationListModal = () => {
     const quantity = formData.get("quantity") as string;
     const withholdingTax = formData.get("withholdingTax") as string;
     const withholdingTaxPercent = formData.get(
-      "withholdingTaxPercent",
+      "withholdingTaxPercent"
     ) as string;
 
     const product = productId
@@ -136,10 +132,9 @@ export const QuotationListModal = () => {
       withholdingTax: parseFloat(withholdingTax),
       withholdingTaxPercent: parseFloat(withholdingTaxPercent),
       totalPrice: parseFloat(total),
-      discount: parseFloat(discount),
+      discount: discount ? parseFloat(discount) : 0,
       description,
     };
-
 
     if (defaultData?.id) {
       handleUpdate.execute({
@@ -152,36 +147,42 @@ export const QuotationListModal = () => {
     handleCreate.execute({ ...payload });
   };
 
-  const fieldErrors = (defaultData?.id ? handleUpdate : handleCreate).fieldErrors;
+  const fieldErrors = (defaultData?.id ? handleUpdate : handleCreate)
+    .fieldErrors;
 
   useEffect(() => {
-
-    const cost = watch('cost');
-    const percentage = watch('percentage');
+    const cost = watch("cost");
+    const percentage = watch("percentage");
     if (cost && percentage) {
-      const unitPrice = parseFloat(cost) + (parseFloat(cost) * parseFloat(percentage)) / 100
+      const unitPrice =
+        parseFloat(cost) + (parseFloat(cost) * parseFloat(percentage)) / 100;
       // multiply by quantity
-      const quantity = watch('quantity')
+      const quantity = watch("quantity");
       // console.log("quantity", quantity)
-      let totalPrice = unitPrice
+      let totalPrice = unitPrice;
       if (quantity) {
-        totalPrice = unitPrice * parseFloat(quantity)
+        totalPrice = unitPrice * parseFloat(quantity);
       }
-      setValue('price', unitPrice.toString())
+      setValue("price", unitPrice.toString());
 
       // calculate tax 7%
-      const tax = (totalPrice * 7) / 100
-      setValue('withholdingTax', tax.toString())
+      const tax = (totalPrice * 7) / 100;
+      setValue("withholdingTax", tax.toString());
 
       // set total price + tax - discount
-      const discount = watch('discount')
-      let total = totalPrice + tax
+      const discount = watch("discount");
+      let total = totalPrice + tax;
       if (discount) {
-        total = total - parseFloat(discount)
+        total = total - parseFloat(discount);
       }
-      setValue('totalPrice', total.toString())
+      setValue("totalPrice", total.toString());
     }
-  }, [watch('cost'), watch('percentage'), watch('quantity'), watch('discount')]);
+  }, [
+    watch("cost"),
+    watch("percentage"),
+    watch("quantity"),
+    watch("discount"),
+  ]);
 
   return (
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
@@ -207,7 +208,6 @@ export const QuotationListModal = () => {
                 // setProduct(item.data);
                 setValue("percentage", item.data.percentage);
                 setValue("cost", item.data.cost);
-
               }}
               errors={fieldErrors}
             />
@@ -318,9 +318,7 @@ export const QuotationListModal = () => {
           </div>
 
           <div className="col-start-4 col-span-1 flex justify-end">
-            <FormSubmit>
-              {defaultData?.id ? "Update" : "Create"}
-            </FormSubmit>
+            <FormSubmit>{defaultData?.id ? "Update" : "Create"}</FormSubmit>
           </div>
         </form>
       </DialogContent>
