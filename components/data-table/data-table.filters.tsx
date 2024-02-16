@@ -17,7 +17,7 @@ export default function TableFilter(props: Props) {
             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
               <Search className="h-5 w-5 text-gray-400" aria-hidden="true" />
             </div>
-            <Input name="search" />
+            <Input id="search" name="search" />
           </div>
         </div>
         <Button variant="secondary" className="h-[36px]" onClick={onCreate}>
