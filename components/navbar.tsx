@@ -9,22 +9,27 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/components/ui/popover";
 import { LogOutIcon, UserRoundCog } from "lucide-react";
 import { handleSignOut } from "@/actions/auth";
+import { useCurrentRole } from "@/hooks/use-current-role";
+import { useCurrentUser } from "@/hooks/use-current-user";
 
 export default function MainNavbar(props: { showMenu?: boolean }) {
   const { showMenu = false } = props;
   const onSignOut = async () => {
-    handleSignOut()
-  }
+    handleSignOut();
+  };
+  const user = useCurrentUser();
+  console.log("client get session >>>>>", user);
+
   return (
     <div
       className={classNames(
         "fixed top-0 w-full h-14 px-4 shadow  flex items-center z-[999]",
         showMenu
           ? "bg-primary-50 bg-gradient-to-r  from-primary-400 via-primary-100  to-primary-50 shadow-lg"
-          : "",
+          : ""
       )}
     >
       {!showMenu && (
@@ -37,21 +42,22 @@ export default function MainNavbar(props: { showMenu?: boolean }) {
           href="/"
           className={classNames(
             "font-semibold text-lg",
-            showMenu ? "text-gray-700" : "text-white",
+            showMenu ? "text-gray-700" : "text-white"
           )}
         >
           <Image src={LOGO} width={80} height={80} alt="Logo" />
         </Link>
         {showMenu && <MenuItems />}
         <div className="space-x-2 md:w-auto flex items-center justify-between">
-          <p
+          <div
             className={classNames(
-              "hidden md:block text-xs text-gray-500",
-              showMenu ? "text-gray-700" : "text-white",
+              "hidden md:flex text-xs text-gray-500 text-right capitalize md:justify-center md:items-center space-x-1 ",
+              showMenu ? "text-gray-700" : "text-white"
             )}
           >
-            Admin
-          </p>
+            <p>{user?.name}</p>
+            <p>({user?.role})</p>
+          </div>
           <Popover>
             <PopoverTrigger>
               <div className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-gray-500 cursor-pointer">
@@ -66,23 +72,17 @@ export default function MainNavbar(props: { showMenu?: boolean }) {
                   <div className="mt-1 flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
                     <UserRoundCog className="h-6 w-6 text-gray-600 group-hover:text-indigo-600" />
                   </div>
-                  <p className="text-sm text-gray-900">
-                    Profile
-                  </p>
+                  <p className="text-sm text-gray-900">Profile</p>
                 </button>
                 <button
                   onClick={onSignOut}
-                  className="cursor-pointer group relative space-y-1 flex flex-col items-center gap-x-6 rounded-lg p-4 hover:bg-gray-50">
+                  className="cursor-pointer group relative space-y-1 flex flex-col items-center gap-x-6 rounded-lg p-4 hover:bg-gray-50"
+                >
                   <div className="mt-1 flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
                     <LogOutIcon className="h-6 w-6 text-gray-600 group-hover:text-indigo-600" />
                   </div>
-                  <p className="text-sm text-gray-900">
-                    SignOut
-                  </p>
+                  <p className="text-sm text-gray-900">SignOut</p>
                 </button>
-
-
-
               </div>
             </PopoverContent>
           </Popover>
@@ -113,7 +113,7 @@ function MenuItems() {
         className={classNames(
           isActive("/quotations")
             ? "text-primary-600 font-semibold"
-            : "text-gray-500 font-semibold",
+            : "text-gray-500 font-semibold"
         )}
       >
         เสนอราคา (QT)
@@ -123,7 +123,7 @@ function MenuItems() {
         className={classNames(
           isActive("/purchase-orders")
             ? "text-primary-600 font-semibold"
-            : "text-gray-500 font-semibold",
+            : "text-gray-500 font-semibold"
         )}
       >
         การสั่งซื้อ (PO)
@@ -133,7 +133,7 @@ function MenuItems() {
         className={classNames(
           isActive("/products")
             ? "text-primary-600 font-semibold"
-            : "text-gray-500 font-semibold",
+            : "text-gray-500 font-semibold"
         )}
       >
         สินค้า
@@ -143,7 +143,7 @@ function MenuItems() {
         className={classNames(
           isActive("/users")
             ? "text-primary-600 font-semibold"
-            : "text-gray-500 font-semibold",
+            : "text-gray-500 font-semibold"
         )}
       >
         ผู้ใช้งาน

@@ -7,11 +7,13 @@ import { QuotationWithBuyer } from "@/types";
 import { PurchaseOrder, User } from "@prisma/client";
 import StatisticCard from "./_components/statistics";
 import Tasks from "./_components/tasks";
+import { currentUser } from "@/lib/auth";
 
+export type PurchaseOrderWithVendor = PurchaseOrder & { vendor: User };
 
-export type PurchaseOrderWithVendor = PurchaseOrder & { vendor: User }
-
-async function getData(): Promise<[QuotationWithBuyer[], PurchaseOrderWithVendor[], QuotationWithBuyer[]]> {
+async function getData(): Promise<
+  [QuotationWithBuyer[], PurchaseOrderWithVendor[], QuotationWithBuyer[]]
+> {
   const quotations = db.quotation.findMany({
     include: {
       buyer: true,
@@ -47,12 +49,12 @@ async function getData(): Promise<[QuotationWithBuyer[], PurchaseOrderWithVendor
 
   const data = await Promise.all([quotations, purchaseOrders, tasks]);
   return data;
-
 }
 
 export default async function HomePage() {
   const [quotations, purchaseOrders, tasks] = await getData();
-
+  const user = await currentUser();
+  console.log('server get session >>>>>', user);
   return (
     <div className="mx-auto max-w-6xl px-2 xl:px-0">
       <div className="grid grid-cols-12 gap-6">

@@ -20,6 +20,17 @@ async function getUser(email: string): Promise<User | undefined> {
   }
 }
 
+export const getUserById = async (id: number) => {
+  try {
+      const user = await db.user.findUnique({ where: { id } });
+
+    return user;
+  } catch {
+    return null;
+  }
+};
+
+
 export const { auth, signIn, signOut } = NextAuth({
   ...authConfig,
   providers: [
