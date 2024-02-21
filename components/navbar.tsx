@@ -1,15 +1,23 @@
 "use client";
 import React from "react";
-import { Button } from "./ui/button";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { classNames } from "@/lib/utils";
 import Image from "next/image";
 import LOGO from "@/public/logo.png";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { LogOutIcon, UserRoundCog } from "lucide-react";
+import { handleSignOut } from "@/actions/auth";
 
 export default function MainNavbar(props: { showMenu?: boolean }) {
   const { showMenu = false } = props;
-
+  const onSignOut = async () => {
+    handleSignOut()
+  }
   return (
     <div
       className={classNames(
@@ -44,15 +52,40 @@ export default function MainNavbar(props: { showMenu?: boolean }) {
           >
             Admin
           </p>
-          <Button
-            asChild
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-gray-500 cursor-pointer"
-          >
-            {/* <Link href="/sign-in">Login</Link> */}
-            <span className="text-xs font-medium leading-none text-white">
-              P
-            </span>
-          </Button>
+          <Popover>
+            <PopoverTrigger>
+              <div className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-gray-500 cursor-pointer">
+                <span className="text-xs font-medium leading-none text-white">
+                  P
+                </span>
+              </div>
+            </PopoverTrigger>
+            <PopoverContent className="relative z-[99999]">
+              <div className=" flex justify-evenly">
+                <button className="cursor-pointer group relative space-y-1  flex flex-col items-center gap-x-6 rounded-lg p-4 hover:bg-gray-50">
+                  <div className="mt-1 flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
+                    <UserRoundCog className="h-6 w-6 text-gray-600 group-hover:text-indigo-600" />
+                  </div>
+                  <p className="text-sm text-gray-900">
+                    Profile
+                  </p>
+                </button>
+                <button
+                  onClick={onSignOut}
+                  className="cursor-pointer group relative space-y-1 flex flex-col items-center gap-x-6 rounded-lg p-4 hover:bg-gray-50">
+                  <div className="mt-1 flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
+                    <LogOutIcon className="h-6 w-6 text-gray-600 group-hover:text-indigo-600" />
+                  </div>
+                  <p className="text-sm text-gray-900">
+                    SignOut
+                  </p>
+                </button>
+
+
+
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
     </div>

@@ -1,24 +1,51 @@
+'use client';
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import LOGO from "@/public/logo.png";
+import { useFormState, useFormStatus } from 'react-dom';
+import { authenticate } from '@/actions/auth';
 
 export default function SignInPage() {
+  const [errorMessage, dispatch] = useFormState(authenticate, undefined);
+  const { pending } = useFormStatus();
+
   return (
     <div className="flex min-h-full flex-1 items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
-      <div className="w-full max-w-sm space-y-10">
-
-        <form className="space-y-6" action="#" method="POST">
+      {/* image bg */}
+      
+      <div className="absolute w-full z-10 inset-0  	">
+        <img
+          className="h-full w-full object-cover "
+          src="https://smartss9168.com/wp-content/uploads/2018/08/network-2402637_1280.jpg"
+          alt=""
+        />
+      </div>
+      <div className="w-full max-w-md space-y-10 relative z-20 backdrop-blur-sm bg-white/40 p-20 rounded">
+        <div className="flex items-center space-x-4 justify-center">
+          <img
+            className="h-20 w-auto"
+            src={LOGO.src}
+            alt="Workflow"
+          />
+          <span className="text-2xl font-semibold text-white">
+            เข้าสู่ระบบ
+          </span>
+        </div>
+        <form action={dispatch} className="space-y-6" >
           <div className="relative space-y-2  rounded-md shadow-sm">
             <div>
-              <Label htmlFor="name" className="sr-only">
-                ชื่อผู้ใช้
+              <Label htmlFor="email" className="sr-only">
+                อีเมล์
               </Label>
               <Input
-                id="name"
-                name="name"
+                id="email"
+                name="email"
+                type="email"
+                className="text-white placeholder:text-white" 
                 required
-                placeholder="ชื่อผู้ใช้"
+                placeholder="อีเมล์"
               />
             </div>
             <div>
@@ -30,11 +57,12 @@ export default function SignInPage() {
                 name="password"
                 type="password"
                 required
+                className="text-white placeholder:text-white"
                 placeholder="รหัสผ่าน"
               />
             </div>
           </div>
-
+          {/* 
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <Input
@@ -56,26 +84,30 @@ export default function SignInPage() {
                 ลืมรหัสผ่าน?
               </p>
             </div>
-          </div>
+          </div> */}
 
           <div>
             <Button
+              disabled={pending}
               type="submit"
-              className="flex w-full space-x-2 justify-center rounded-md bg-primary-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
+              variant={'secondary'}
+              className="w-full"
             >
-              <span>
-                เข้าสู่ระบบ
-
-              </span>
-              <img
-                className="h-8 w-auto"
-                src={LOGO.src}
-                alt="Workflow"
-              />
+              ยืนยัน
             </Button>
           </div>
         </form>
+        {
+          errorMessage && (
+            <div className="bg-red-400 border-red-100 p-2 text-center rounded">
+              <p className="text-sm text-white  text-center ">
+                อีเมล์หรือรหัสผ่านไม่ถูกต้อง
+              </p>
+            </div>
+          )
+        }
       </div>
+
     </div>
   );
 }

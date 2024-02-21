@@ -22,4 +22,5 @@ export const UserSchema = z.object({
   contact: z.string().optional(),
   fax: z.string().optional(),
   address: z.string().optional(),
+  password: z.string().optional(),
 });

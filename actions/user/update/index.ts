@@ -7,16 +7,18 @@ import { db } from "@/lib/db";
 import { createSafeAction } from "@/lib/create-safe-action";
 import { InputType, ReturnType } from "./types";
 import { UserSchema } from "./schema";
+import bcrypt from "bcrypt";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-  const { id, taxId, role, name, email, phone, contact, fax, address } = data;
+  const { id, taxId, role, name, email, phone, contact, fax, address, password } = data;
   let user;
   try {
+    const hashPassword = password ? await bcrypt.hash(password, 10) : undefined;
     user = await db.user.update({
       where: {
         id,
       },
-      data: { role, taxId, name, email, phone, contact, fax, address },
+      data: { role, taxId, name, email, phone, contact, fax, address, password: hashPassword },
     });
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError) {

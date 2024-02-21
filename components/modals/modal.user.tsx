@@ -15,6 +15,8 @@ import { useAction } from "@/hooks/use-action";
 import { FormTextarea } from "../form/form-textarea";
 import { FormSelect } from "../form/form-select";
 import { UserRole } from "@prisma/client";
+import { useState } from "react";
+import { ChevronDown } from "lucide-react";
 
 export const NewUserModal = () => {
   const modal = useUserModal();
@@ -51,6 +53,7 @@ export const NewUserModal = () => {
     const contact = formData.get("contact") as string;
     const address = formData.get("address") as string;
     const taxId = formData.get("taxId") as string;
+    const password = formData.get("password") as string;
 
     const payload = {
       role,
@@ -61,6 +64,7 @@ export const NewUserModal = () => {
       fax,
       contact,
       address,
+      password,
     };
     if (user?.id) {
       // update user
@@ -147,11 +151,47 @@ export const NewUserModal = () => {
             />
           </div>
 
+          <PasswordForm
+            fieldErrors={fieldErrors}
+          />
+
           <div className="col-start-2 col-span-1 flex justify-end">
-            <FormSubmit>{user ? "Update User" : "Create User"}</FormSubmit>
+            <FormSubmit>{user ? "บันทึกการเปลี่ยนแปลง" : "สร้างใหม่"}</FormSubmit>
           </div>
+
+
         </form>
       </DialogContent>
     </Dialog>
   );
 };
+
+const PasswordForm = ({ fieldErrors }: { fieldErrors: any }) => {
+  const [showPassword, setShowPassword] = useState(false);
+
+  if (!showPassword) {
+    return (
+      <div className="col-span-2 flex">
+        <button
+          type="button"
+          onClick={() => setShowPassword(true)}
+          className="text-gray-500 hover:underline text-xs space-x-2 flex items-center hover:text-gray-700 cursor-pointer"
+        >
+          <span>เปลี่ยนรหัสผ่าน</span>
+          <ChevronDown className="w-4 h-4 ml-1" />
+        </button>
+      </div>
+    );
+  }
+  return (
+    <div className=" col-span-2 border border-gray-200 bg-gray-50 p-3 rounded ">
+      <FormInput
+        id="password"
+        label="เปลี่ยนรหัสผ่าน"
+        type="password"
+        className="w-[200px]"
+        errors={fieldErrors}
+      />
+    </div>
+  )
+}
