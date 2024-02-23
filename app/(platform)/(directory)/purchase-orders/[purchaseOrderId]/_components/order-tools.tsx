@@ -21,13 +21,14 @@ import Link from "next/link";
 
 type Props = {
   orderId: number;
+  quotationId: number;
   quotationCode: string;
   status: PurchaseOrderStatus;
   isLocked?: boolean;
 };
 
 export default function PurchaseOrderTools(props: Props) {
-  const { orderId, quotationCode, status, isLocked } = props;
+  const { orderId, quotationId, quotationCode, status, isLocked } = props;
 
   // const { mutate } = useMutation<
   //   MutationResponseType,
@@ -74,10 +75,10 @@ export default function PurchaseOrderTools(props: Props) {
           <PrintButton />
         </div>
         <div className="col-span-6 flex items-center space-x-1">
-          <span className="inline-flex items-center rounded-md bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-600">ใบเสนอราคา
+          <span className="inline-flex items-center rounded-md bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-600">จากใบเสนอราคา
 
             <Link
-              href={`/quotations/${quotationCode}`}
+              href={`/quotations/${quotationId}`}
               className="ml-1.5 text-blue-500 underline"
             >
               {quotationCode}

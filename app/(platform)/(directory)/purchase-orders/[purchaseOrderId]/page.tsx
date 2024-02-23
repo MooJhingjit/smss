@@ -85,7 +85,8 @@ export default async function PurchaseOrderDetails(props: Readonly<Props>) {
         <div className="col-span-2">
           <PurchaseOrderTools
             orderId={data.id}
-            quotationCode={data.code}
+            quotationId={data.quotationId}
+            quotationCode={data.quotation.code}
             status={data.status} />
         </div>
         <div className="col-span-5">
