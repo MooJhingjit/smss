@@ -15,12 +15,15 @@ import { updateQuotationList } from "@/actions/quotation-list/update";
 import { FormInput } from "../form/form-input";
 import { useQuotationListModal } from "@/hooks/use-quotation-list";
 import { useEffect, useState } from "react";
-import { Product } from "@prisma/client";
+import { Product, QuotationType } from "@prisma/client";
 import { useForm } from "react-hook-form";
 import { FormTextarea } from "../form/form-textarea";
 import { Input } from "@/components/ui/input";
 import { MinusCircle, PlusCircle } from "lucide-react";
 import { Button } from "../ui/button";
+import { quotationTypeMapping } from "@/app/config";
+import { classNames } from "@/lib/utils";
+import { render } from "react-dom";
 
 type FormInput = {
   productId: string;
@@ -44,6 +47,8 @@ export const QuotationListModal = () => {
   const defaultData = modal.data;
   const p = defaultData?.percentage?.toString() ?? "";
   const refs = modal.refs;
+  const isProduct = refs?.quotationRef?.type === QuotationType.product;
+  const isService = refs?.quotationRef?.type === QuotationType.service;
   const {
     register,
     watch,
@@ -78,7 +83,6 @@ export const QuotationListModal = () => {
         ? defaultData.subItems
         : "[]",
     };
-    console.log('reset', formData)
     reset(formData);
   }, [defaultData, reset]);
 
@@ -104,7 +108,7 @@ export const QuotationListModal = () => {
     },
   });
 
-  const onSubmit = async (formData: FormData) => {
+  const onProductSubmit = async (formData: FormData) => {
     const productId = formData.get("productId") as string;
     const price = formData.get("price") as string;
     const cost = formData.get("cost") as string;
@@ -143,7 +147,8 @@ export const QuotationListModal = () => {
       totalPrice: parseFloat(total),
       discount: discount ? parseFloat(discount) : 0,
       description,
-      subItems: getValues("subItems")
+      subItems: getValues("subItems"),
+      quotationType: refs.quotationRef.type,
     };
 
     if (defaultData?.id) {
@@ -157,10 +162,52 @@ export const QuotationListModal = () => {
     handleCreate.execute({ ...payload });
   };
 
+  const onServiceSubmit = async (formData: FormData) => {
+
+    const unitPrice = formData.get("unitPrice") as string;
+    const quantity = formData.get("quantity") as string;
+    const total = formData.get("totalPrice") as string;
+    const name = formData.get("name") as string;
+    const discount = formData.get("discount") as string;
+
+    if (!refs?.quotationRef?.id) {
+      toast.error("จำเป็นต้องกรอกข้อมูลให้ครบ");
+      return;
+    }
+
+    const payload = {
+      quotationId: refs.quotationRef.id,
+      name,
+      unitPrice: parseFloat(unitPrice),
+      quantity: parseFloat(quantity),
+      totalPrice: parseFloat(total),
+      price: parseFloat(unitPrice),
+      cost: parseFloat(unitPrice),
+      discount: discount ? parseFloat(discount) : 0,
+      subItems: getValues("subItems"),
+      quotationType: refs.quotationRef.type,
+      productId: 0 // service doesn't have product id
+    };
+
+    if (defaultData?.id) {
+      handleUpdate.execute({
+        id: defaultData.id,
+        ...payload,
+      });
+      return;
+    }
+
+    handleCreate.execute({ ...payload, quotationType: refs.quotationRef.type, });
+  }
+
   const fieldErrors = (defaultData?.id ? handleUpdate : handleCreate)
     .fieldErrors;
 
+  // summary of product
+
   useEffect(() => {
+    if (isService) return
+
     const cost = watch("cost");
     const percentage = watch("percentage");
     if (cost && percentage) {
@@ -194,160 +241,295 @@ export const QuotationListModal = () => {
     watch("discount"),
   ]);
 
+  // summary of service
+  useEffect(() => {
+    if (isProduct) return
+
+    // summary for service
+
+    const unitPrice = watch('unitPrice');
+    const quantity = watch('quantity');
+    const discount = watch('discount');
+    let totalPrice = parseFloat(unitPrice);
+    if (quantity) {
+      totalPrice = parseFloat(unitPrice) * parseFloat(quantity);
+    }
+    if (discount) {
+      totalPrice = totalPrice - parseFloat(discount);
+    }
+    setValue("totalPrice", totalPrice.toString());
+  }, [
+    watch('unitPrice'),
+    watch('quantity'),
+    watch('discount')
+  ])
+
   const subItems = getValues("subItems");
 
   if (!modal.isOpen) return
+
+  const renderProductForm = () => {
+    return (
+      <form
+        key={refs?.timestamps}
+        action={onProductSubmit} className="grid grid-cols-4 gap-3 mt-3">
+        <div className="col-span-4">
+          <FormSearchAsync
+            id="productId"
+            label="ค้าหาชื่อสินค้า/บริการ"
+            required
+            config={{
+              endpoint: "products",
+              params: {},
+            }}
+            defaultValue={{
+              id: defaultData?.product.id,
+              label: defaultData?.product.name,
+            }}
+            onSelected={(item) => {
+              // setProduct(item.data);
+              setValue("percentage", item.data.percentage);
+              setValue("cost", item.data.cost);
+            }}
+            errors={fieldErrors}
+          />
+        </div>
+
+        <div className="hidden">
+          <FormInput
+            id="name"
+            label="ชื่อสินค้า/บริการ"
+            type="text"
+            defaultValue={defaultData?.name}
+            errors={fieldErrors}
+          />
+        </div>
+
+        <div className="">
+          <FormInput
+            key={refs?.timestamps}
+            id="cost"
+            label="ต้นทุน"
+            required
+            register={register}
+            type="number"
+            errors={fieldErrors}
+          />
+        </div>
+        <div className="">
+          <FormInput
+            id="percentage"
+            label="กำไร (%)"
+            required
+            type="number"
+            register={register}
+            errors={fieldErrors}
+          />
+        </div>
+        <div className="">
+          <FormInput
+            id="price"
+            label="ราคาขายต่อหน่วย"
+            required
+            type="number"
+            readOnly
+            register={register}
+            errors={fieldErrors}
+          />
+        </div>
+        <div className="">
+          <FormInput
+            id="quantity"
+            label="จำนวน"
+            required
+            type="number"
+            register={register}
+            defaultValue={defaultData?.quantity}
+            errors={fieldErrors}
+          />
+        </div>
+
+        <div className="">
+          <FormInput
+            id="withholdingTaxPercent"
+            label="ภาษี (%)"
+            type="number"
+            readOnly
+            register={register}
+            defaultValue="7"
+            errors={fieldErrors}
+          />
+        </div>
+
+        <div className="">
+          <FormInput
+            id="withholdingTax"
+            label="ภาษีทั้งหมด"
+            type="number"
+            readOnly
+            register={register}
+            errors={fieldErrors}
+          />
+        </div>
+        <div className="">
+          <FormInput
+            id="discount"
+            label="ส่วนลด"
+            type="number"
+            register={register}
+            // defaultValue={defaultData?.withholdingTax}
+            errors={fieldErrors}
+          />
+        </div>
+        <div className="">
+          <FormInput
+            id="totalPrice"
+            label="ยอดรวม"
+            required
+            type="number"
+            register={register}
+            readOnly
+            className="bg-green-50"
+            // defaultValue={defaultData?.withholdingTax}
+            errors={fieldErrors}
+          />
+        </div>
+
+        <div className="col-span-4">
+          <FormTextarea
+            id="description"
+            label="รายละเอียด"
+            errors={fieldErrors}
+            defaultValue={defaultData?.description ?? ""}
+            rows={6}
+          />
+        </div>
+
+        <SubItems setValue={setValue} defaultSubItems={subItems} />
+
+        <div className="col-start-4 col-span-1 flex justify-end space-x-2">
+          {/* <Button variant="destructive" size="sm">
+              ลบ
+            </Button> */}
+          <FormSubmit>{defaultData?.id ? "อัพเดท" : "สร้างใหม่"}</FormSubmit>
+        </div>
+      </form>
+    )
+  }
+
+  const renderServiceForm = () => {
+    return (
+      <form
+        key={refs?.timestamps}
+        action={onServiceSubmit} className="grid grid-cols-4 gap-3 mt-3">
+
+
+        <div className="col-span-4">
+          <FormTextarea
+            id="name"
+            label="ชื่อสินค้า/บริการ"
+            defaultValue={defaultData?.name}
+            errors={fieldErrors}
+            rows={12}
+
+          />
+        </div>
+
+        <div className="">
+          <FormInput
+            id="unitPrice"
+            label="ราคาขายต่อหน่วย"
+            required
+            type="number"
+            register={register}
+            errors={fieldErrors}
+          />
+        </div>
+        <div className="">
+          <FormInput
+            id="quantity"
+            label="จำนวน"
+            required
+            type="number"
+            register={register}
+            defaultValue={defaultData?.quantity}
+            errors={fieldErrors}
+          />
+        </div>
+        <div className="">
+          <FormInput
+            id="discount"
+            label="ส่วนลด"
+            type="number"
+            register={register}
+            // defaultValue={defaultData?.withholdingTax}
+            errors={fieldErrors}
+          />
+        </div>
+        <div className="">
+          <FormInput
+            id="totalPrice"
+            label="ยอดรวม"
+            required
+            type="number"
+            register={register}
+            readOnly
+            // defaultValue={defaultData?.withholdingTax}
+            errors={fieldErrors}
+          />
+        </div>
+
+        {/* <div className="col-span-4">
+          <FormTextarea
+            id="description"
+            label="รายละเอียด"
+            errors={fieldErrors}
+            defaultValue={defaultData?.description ?? ""}
+            rows={6}
+          />
+        </div> */}
+
+        {/* <SubItems setValue={setValue} defaultSubItems={subItems} /> */}
+
+        <div className="col-span-4 flex justify-end space-x-2 items-center">
+          {/* <Button variant="destructive" size="sm">
+              ลบ
+            </Button> */}
+          <FormSubmit>{defaultData?.id ? "อัพเดท" : "สร้างใหม่"}</FormSubmit>
+        </div>
+      </form>
+    )
+  }
+
+
   return (
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
       <DialogContent className="sm:max-w-[425px] md:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>รายละเอียดสินค้าในใบ PO</DialogTitle>
-          {/* <DialogDescription>Please select the customer.</DialogDescription> */}
+          <DialogTitle>
+            <span>รายละเอียดสินค้าในใบ PO</span>
+            {
+              refs?.quotationRef.type && (
+                <span className={
+                  classNames(
+                    "ml-2 inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ",
+                    isProduct ? "bg-gray-100 text-gray-800" : "bg-green-100 text-green-800"
+                  )
+                }>
+                  {
+                    quotationTypeMapping[refs?.quotationRef.type]
+                  }
+                </span>
+              )
+            }
+          </DialogTitle>
         </DialogHeader>
-        <form
-          key={refs?.timestamps}
-          action={onSubmit} className="grid grid-cols-4 gap-3 mt-3">
-          <div className="col-span-4">
-            <FormSearchAsync
-              id="productId"
-              label="ค้าหาชื่อสินค้า/บริการ"
-              required
-              config={{
-                endpoint: "products",
-                params: {},
-              }}
-              defaultValue={{
-                id: defaultData?.product.id,
-                label: defaultData?.product.name,
-              }}
-              onSelected={(item) => {
-                // setProduct(item.data);
-                setValue("percentage", item.data.percentage);
-                setValue("cost", item.data.cost);
-              }}
-              errors={fieldErrors}
-            />
-          </div>
-
-          <div className="hidden">
-            <FormInput
-              id="name"
-              label="ชื่อสินค้า/บริการ"
-              type="text"
-              defaultValue={defaultData?.name}
-              errors={fieldErrors}
-            />
-          </div>
-
-          <div className="">
-            <FormInput
-              key={refs?.timestamps}
-              id="cost"
-              label="ต้นทุน"
-              required
-              register={register}
-              type="number"
-              errors={fieldErrors}
-            />
-          </div>
-          <div className="">
-            <FormInput
-              id="percentage"
-              label="กำไร (%)"
-              required
-              type="number"
-              register={register}
-              errors={fieldErrors}
-            />
-          </div>
-          <div className="">
-            <FormInput
-              id="price"
-              label="ราคาขายต่อหน่วย"
-              required
-              type="number"
-              readOnly
-              register={register}
-              errors={fieldErrors}
-            />
-          </div>
-          <div className="">
-            <FormInput
-              id="quantity"
-              label="จำนวน"
-              required
-              type="number"
-              register={register}
-              defaultValue={defaultData?.quantity}
-              errors={fieldErrors}
-            />
-          </div>
-
-          <div className="">
-            <FormInput
-              id="withholdingTaxPercent"
-              label="ภาษี (%)"
-              type="number"
-              readOnly
-              register={register}
-              defaultValue="7"
-              errors={fieldErrors}
-            />
-          </div>
-
-          <div className="">
-            <FormInput
-              id="withholdingTax"
-              label="ภาษีทั้งหมด"
-              type="number"
-              readOnly
-              register={register}
-              errors={fieldErrors}
-            />
-          </div>
-          <div className="">
-            <FormInput
-              id="discount"
-              label="ส่วนลด"
-              type="number"
-              register={register}
-              // defaultValue={defaultData?.withholdingTax}
-              errors={fieldErrors}
-            />
-          </div>
-          <div className="">
-            <FormInput
-              id="totalPrice"
-              label="ยอดรวม"
-              required
-              type="number"
-              register={register}
-              readOnly
-              className="bg-green-50"
-              // defaultValue={defaultData?.withholdingTax}
-              errors={fieldErrors}
-            />
-          </div>
-
-          <div className="col-span-4">
-            <FormTextarea
-              id="description"
-              label="รายละเอียด"
-              errors={fieldErrors}
-              defaultValue={defaultData?.description ?? ""}
-              rows={6}
-            />
-          </div>
-
-          <SubItems setValue={setValue} defaultSubItems={subItems} />
-
-          <div className="col-start-4 col-span-1 flex justify-end space-x-2">
-            {/* <Button variant="destructive" size="sm">
-              ลบ
-            </Button> */}
-            <FormSubmit>{defaultData?.id ? "อัพเดท" : "สร้างใหม่"}</FormSubmit>
-          </div>
-        </form>
+        {
+          isProduct ?
+            renderProductForm()
+            :
+            renderServiceForm()
+        }
       </DialogContent>
     </Dialog>
   );

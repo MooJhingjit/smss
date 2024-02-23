@@ -2,7 +2,7 @@
 import React, { SyntheticEvent, useEffect, useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { QuotationWithBuyer } from "@/types";
-import { QuotationStatus } from "@prisma/client";
+import { QuotationStatus, QuotationType } from "@prisma/client";
 import { useQueries, useMutation } from "@tanstack/react-query";
 import {
   MutationResponseType,
@@ -17,6 +17,7 @@ import { quotationStatusMapping } from "@/app/config";
 import { Files, LockIcon, Paperclip, PlusIcon, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuotationModal } from "@/hooks/use-quotation-modal";
+import { classNames } from "@/lib/utils";
 
 interface Props { }
 
@@ -305,14 +306,19 @@ const BoardCard = ({
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           ref={provided.innerRef}
-          className="w-full rounded-md bg-white shadow mb-3 cursor-move "
+          className="w-full rounded-md bg-white shadow mb-3 cursor-move bg-white"
         >
           <div className="p-2 text-xs">
             <div className="flex justify-between items-center">
               <div className="flex space-x-1">
                 <Link
                   href={`/quotations/${item.id}`}
-                  className="inline-flex items-center capitalize rounded bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-700 underline"
+                  className={
+                    classNames(
+                      "inline-flex items-center capitalize rounded bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-700 underline",
+                      item.type === QuotationType.product ? "bg-white" : "bg-green-100",
+                    )
+                  }
                 >
                   {
                     item.isLocked && (
@@ -339,7 +345,7 @@ const BoardCard = ({
           </div>
           <div className="bg-gray-50 flex justify-between items-center px-2">
             <div className="">
-              <p className=" text-slate-700 capitalize text-xs">
+              <p className=" text-slate-700 capitalize text-xs my-1">
                 {/* display date in DD/MM/YYYY */}
                 {new Date(item.createdAt).toLocaleDateString("th-TH", {
                   year: "numeric",

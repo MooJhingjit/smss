@@ -33,3 +33,8 @@ export const purchaseOrderItemStatusMapping = {
   pending: "รอสินค้า",
   confirmed: "รับสินค้า",
 }
+
+export const quotationTypeMapping = {
+  product: "สินค้า",
+  service: "บริการ",
+}

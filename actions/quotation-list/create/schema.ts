@@ -3,17 +3,21 @@ import { z } from "zod";
 // get data from QuotationType enum
 export const schema = z.object({
   quotationId: z.number().int().positive(),
-  productId: z.number().int().positive(),
   name: z.string(),
-  price: z.number().positive(),
+  totalPrice: z.number().positive(),
   unitPrice: z.number().positive(),
-  cost: z.number().positive(),
-  percentage: z.number().optional(),
   quantity: z.number().positive(),
+  quotationType: z.enum(["product", "service"]),
+
+  // required for product
+  productId: z.number().int(),
+  price: z.number().positive(),
+  cost: z.number().positive(),
+
+  percentage: z.number().optional(),
   withholdingTax: z.number().optional(),
   withholdingTaxPercent: z.number().optional(),
   discount: z.number().nullable().optional(),
-  totalPrice: z.number().positive(),
   description: z.string().optional(),
   subItems: z.string().optional(),
   

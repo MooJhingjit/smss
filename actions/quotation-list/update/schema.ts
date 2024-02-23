@@ -4,8 +4,9 @@ import { z } from "zod";
 export const schema = z.object({
   id: z.number(),
   quotationId: z.number().int().positive(),
-  productId: z.number().int().positive(),
+  productId: z.number().int(),
   name: z.string(),
+  quotationType: z.enum(["product", "service"]),
   price: z.number().positive(),
   unitPrice: z.number().positive(),
   cost: z.number().positive(),

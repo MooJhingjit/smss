@@ -73,7 +73,6 @@ export const NewQuotationModal = () => {
               <TabsTrigger
                 className="flex-1 text-xs"
                 value="service"
-                disabled
                 onClick={() => onTypeChange("service")}
               >
                 บริการ

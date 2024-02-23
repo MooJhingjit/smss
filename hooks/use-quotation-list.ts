@@ -1,9 +1,10 @@
 import { QuotationListWithRelations } from "@/types";
+import { QuotationType } from "@prisma/client";
 import { create } from "zustand";
 
 export type ItemRefs =
   | undefined
-  | { productRef?: { id: number; name: string }; quotationRef: { id: number }, timestamps: number };
+  | { productRef?: { id: number; name: string }; quotationRef: { id: number, type: QuotationType }, timestamps: number };
 
 type Store = {
   isOpen: boolean;
