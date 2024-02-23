@@ -23,7 +23,6 @@ import { MinusCircle, PlusCircle } from "lucide-react";
 import { Button } from "../ui/button";
 import { quotationTypeMapping } from "@/app/config";
 import { classNames } from "@/lib/utils";
-import { render } from "react-dom";
 
 type FormInput = {
   productId: string;
