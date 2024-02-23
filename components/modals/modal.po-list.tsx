@@ -42,7 +42,7 @@ export const PurchaseOrderListModal = () => {
 
   const handleUpdate = useAction(updatePurchaseItem, {
     onSuccess: (data) => {
-      toast.success("List updated");
+      toast.success("สำเร็จ");
       modal.onClose();
     },
     onError: (error) => {

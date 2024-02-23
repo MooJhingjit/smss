@@ -1,11 +1,12 @@
 import React from "react";
 import Breadcrumbs from "@/components/breadcrumbs";
 import VendorInfo from "./_components/vendor-details";
-import OrderStatus from "./_components/order-status";
+import OrderStatus from "./_components/_order-status";
 import OrderItems from "./_components/order-items";
 import AssociateOrders from "./_components/associate-orders";
 import { db } from "@/lib/db";
 import DocumentItems from "../../../../../components/document-lists";
+import PurchaseOrderTools from "./_components/order-tools";
 const getData = async (id: string) => {
   const data = await db.purchaseOrder.findUnique({
     where: {
@@ -82,7 +83,10 @@ export default async function PurchaseOrderDetails(props: Readonly<Props>) {
           {vendor && <VendorInfo data={vendor} />}
         </div>
         <div className="col-span-2">
-          <OrderStatus quotation={quotation} status={data.status} />
+          <PurchaseOrderTools
+            orderId={data.id}
+            quotationCode={data.code}
+            status={data.status} />
         </div>
         <div className="col-span-5">
           <OrderItems data={data} />

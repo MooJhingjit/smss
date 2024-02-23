@@ -20,3 +20,16 @@ export const paymentTypeMapping = {
   cash: "เงินสด",
   credit: "เครดิต",
 }
+
+export const purchaseOrderStatusMapping = {
+  draft: "กำลังตรวจสอบ",
+  // open: "เปิด PO",
+  // preparing: "เตรียมสินค้า",
+  // sent: "ส่งสินค้า",
+  // delivered: "ส่งสินค้า / ปิดงาน",
+}
+
+export const purchaseOrderItemStatusMapping = {
+  pending: "รอสินค้า",
+  confirmed: "รับสินค้า",
+}

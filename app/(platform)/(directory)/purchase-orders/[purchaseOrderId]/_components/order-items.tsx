@@ -12,19 +12,26 @@ import { useAction } from "@/hooks/use-action";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { updatePurchaseOrder } from "@/actions/po/update";
+import { purchaseOrderItemStatusMapping } from "@/app/config";
 
 const columns = [
-  { name: "No.", key: "index" },
+  { name: "#", key: "index" },
   {
-    name: "name",
+    name: "ชื่อสินค้า",
     key: "name",
     render: (item: PurchaseOrderItem) => {
       return item.name;
     },
   },
-  { name: "Price", key: "price" },
-  { name: "Quantity", key: "quantity" },
-  { name: "Status", key: "status" },
+  { name: "ราคา", key: "price" },
+  { name: "จำนวน", key: "quantity" },
+  {
+    name: "สถานะ", key: "status",
+    render: (item: PurchaseOrderItem) => {
+      return purchaseOrderItemStatusMapping[item.status];
+    },
+
+  },
 ];
 
 export default function QuotationItems({
@@ -32,19 +39,19 @@ export default function QuotationItems({
 }: {
   data: PurchaseOrderWithRelations;
 }) {
-  const { purchaseOrderItems } = data;
+  const { purchaseOrderItems, vendor } = data;
   const modal = usePurchaseOrderListModal();
 
   if (!purchaseOrderItems) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <p className="text-gray-500 text-sm">Data not found</p>
+        <p className="text-gray-500 text-sm">ไม่มีข้อมูล</p>
       </div>
     );
   }
 
   return (
-    <PageComponentWrapper headerTitle="Quotation Items">
+    <PageComponentWrapper headerTitle={`รายการสั่งซื้อจาก ${vendor?.name}`}>
       <div className="overflow-x-scroll md:overflow-auto">
         <TableLists<PurchaseOrderItem>
           columns={columns}
@@ -61,7 +68,9 @@ export default function QuotationItems({
               id={data.id}
               remark={data.remark}
             />
-            <TaxInfo/>
+            <div className="mt-2 bg-gray-50 p-3 rounded">
+              <TaxInfo />
+            </div>
           </div>
           <div className="col-span-5 md:col-span-2">
             <BillingInfo data={data} />
@@ -133,7 +142,7 @@ const Remarks = ({ id, remark }: { id: number, remark: string | null }) => {
 
   const handleUpdate = useAction(updatePurchaseOrder, {
     onSuccess: (data) => {
-      toast.success("PO Updated");
+      toast.success("สำเร็จ");
     },
     onError: (error) => {
       toast.error(error);
@@ -170,56 +179,57 @@ const Remarks = ({ id, remark }: { id: number, remark: string | null }) => {
 const TaxInfo = () => {
   return (
     <div className=" grid grid-cols-3 gap-2">
-        <div>
-          <label
-            htmlFor="price"
-            className="block text-sm font-medium leading-6 text-gray-900"
-          >
-            ราคาก่อนหักภาษี
-          </label>
-          <div className="relative mt-2 rounded-md shadow-sm">
-            <Input type="text" name="price" id="price" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-              <span className="text-gray-500 sm:text-sm" id="price-currency">
-                บาท
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <label
-            htmlFor="price"
-            className="block text-sm font-medium leading-6 text-gray-900"
-          >
-            หัก ณ ที่จ่าย 3%
-          </label>
-          <div className="relative mt-2 rounded-md shadow-sm">
-            <Input type="text" name="price" id="price" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-              <span className="text-gray-500 sm:text-sm" id="price-currency">
-                บาท
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <label
-            htmlFor="price"
-            className="block text-sm font-medium leading-6 text-gray-900"
-          >
-            ราคาหลังจากหัก ณ ที่จ่าย
-          </label>
-          <div className="relative mt-2 rounded-md shadow-sm">
-            <Input type="text" name="price" id="price" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-              <span className="text-gray-500 sm:text-sm" id="price-currency">
-                บาท
-              </span>
-            </div>
+      <div>
+        <label
+          htmlFor="price"
+          className="block text-sm font-medium leading-6 text-gray-900"
+        >
+          ราคาก่อนหักภาษี
+        </label>
+        <div className="relative mt-2 rounded-md shadow-sm">
+          <Input type="text" name="price" id="price" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+            <span className="text-gray-500 sm:text-sm" id="price-currency">
+              บาท
+            </span>
           </div>
         </div>
       </div>
+
+      <div>
+        <label
+          htmlFor="price"
+          className="block text-sm font-medium leading-6 text-gray-900"
+        >
+          หัก ณ ที่จ่าย 3%
+        </label>
+        <div className="relative mt-2 rounded-md shadow-sm">
+          <Input type="text" name="price" id="price" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+            <span className="text-gray-500 sm:text-sm" id="price-currency">
+              บาท
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <label
+          htmlFor="price"
+          className="block text-sm font-medium leading-6 text-gray-900"
+        >
+          ราคาหลังจากหัก ณ ที่จ่าย
+        </label>
+        <div className="relative mt-2 rounded-md shadow-sm">
+          <Input type="text" name="price" id="price" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+            <span className="text-gray-500 sm:text-sm" id="price-currency">
+              บาท
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
+
