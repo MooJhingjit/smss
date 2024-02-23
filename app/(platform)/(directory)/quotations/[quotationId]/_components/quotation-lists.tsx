@@ -11,50 +11,63 @@ import { useAction } from "@/hooks/use-action";
 import { updateQuotation } from "@/actions/quotation/update";
 import { toast } from "sonner";
 import { FormSubmit } from "@/components/form/form-submit";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   quotationId: number;
   data: QuotationListWithRelations[];
   remark: string;
+  isLocked: boolean;
 };
 const columns = [
-  { name: "No.", key: "index" },
+  { name: "#", key: "index" },
   {
-    name: "name", key: "name",
+    name: "ชื่อสินค้า/บริการ", key: "name",
     render: (item: QuotationListWithRelations) => {
-      return item.product.name;
+      return <div className="">
+        <p className="text-sm font-semibold">{item.product.name}</p>
+        {
+          item.subItems && !!JSON.parse(item.subItems).length && (
+            <div className="text-xs text-gray-400">
+              <span>+</span>
+              <span>{JSON.parse(item.subItems).length}</span>
+              <span> รายการย่อย</span>
+            </div>
+          )
+        }
+      </div>
     },
   },
   {
-    name: "vendor", key: "vendor",
+    name: "ผู้ขาย", key: "vendor",
     render: (item: QuotationListWithRelations) => {
       return item.product.vendor?.name;
     },
   },
   {
-    name: "Cost", key: "cost"
+    name: "ต้นทุน", key: "cost"
   },
   {
-    name: "Unit Price", key: "unitPrice",
+    name: "ราคาต่อหน่วย", key: "unitPrice",
     render: (item: QuotationListWithRelations) => {
       return `(+${item.percentage}%) ${item.unitPrice}`;
     },
   },
-  { name: "Quantity", key: "quantity" },
+  { name: "จำนวน", key: "quantity" },
 
 
 
   {
-    name: "Total Tax", key: "withholdingTaxPercent",
+    name: "ภาษี", key: "withholdingTaxPercent",
     render: (item: QuotationListWithRelations) => {
       return `(+${item.withholdingTaxPercent}%) ${item.withholdingTax}`;
     },
   },
   {
-    name: "Discount", key: "discount",
+    name: "ส่วนลด", key: "discount",
   },
   {
-    name: "Total Price", key: "totalPrice",
+    name: "ยอดรวม", key: "totalPrice",
     render: (item: QuotationListWithRelations) => {
       return item.totalPrice;
     },
@@ -62,7 +75,7 @@ const columns = [
 
   // { name: "Price", key: "price" },
   {
-    name: "Updated",
+    name: "อัพเดทล่าสุด",
     key: "quantity",
     render: (item: QuotationListWithRelations) => {
       const date = new Date(item.updatedAt);
@@ -72,45 +85,60 @@ const columns = [
 ];
 
 export default function QuotationLists(props: Props) {
-  const { data, quotationId, remark } = props;
+  const { data, quotationId, remark, isLocked } = props;
   const modal = useQuotationListModal();
 
+  const listLabel = isLocked ? "" : "เพิ่มรายการสินค้า/บริการ";
   return (
     <PageComponentWrapper
-      headerTitle="รายการ"
+      headerTitle={listLabel}
       headerIcon={
-        <Plus
-          onClick={() =>
-            modal.onOpen(undefined, {
-              quotationRef: { id: quotationId },
-            })
-          }
-          className="w-4 h-4 text-primary-600 cursor-pointer hover:text-primary-700 font-semibold"
-        />
+        !isLocked && (
+          <Button
+            onClick={() =>
+              !!isLocked && modal.onOpen(undefined, {
+                quotationRef: { id: quotationId },
+                timestamps: Date.now()
+              })
+            }
+            disabled={isLocked}
+            variant="secondary"
+            className="flex items-center justify-center  h-5 rounded  "
+          >
+            <Plus
+              className="w-4 h-4 text-gray-400 hover:text-gray-600  cursor-pointer font-semibold"
+            />
+          </Button>
+        )
+
+
       }
     >
       <div className="overflow-x-scroll md:overflow-auto">
         <TableLists<QuotationListWithRelations>
           columns={columns}
           data={data}
-          onManage={(item) =>
+          onManage={isLocked ? undefined : (item) =>
             modal.onOpen(item, {
               quotationRef: { id: item.quotationId },
               productRef: { id: item.productId, name: item.product.name },
+              timestamps: Date.now(),
             })
           }
         />
       </div>
-      {data.length > 0 && (
-        <div className="grid grid-cols-5 gap-4 mt-4">
-          <div className="col-span-5 md:col-span-3 ">
-            <Remark id={quotationId} remark={remark} />
+      {
+        data.length > 0 && (
+          <div className="grid grid-cols-5 gap-4 mt-4">
+            <div className="col-span-5 md:col-span-3 ">
+              <Remark id={quotationId} remark={remark} />
+            </div>
+            <div className="col-span-5 md:col-span-2">
+              <BillingInfo data={data} />
+            </div>
           </div>
-          <div className="col-span-5 md:col-span-2">
-            <BillingInfo data={data} />
-          </div>
-        </div>
-      )}
+        )
+      }
     </PageComponentWrapper >
   );
 }
@@ -138,7 +166,7 @@ const BillingInfo = (props: BillingProps) => {
     },
     { subtotal: 0, discount: 0, total: 0, vat: 0, totalPrice: 0 },);
 
-    // TODO save to db
+  // TODO save to db
   return (
     <div className="bg-gray-100 p-4 w-full sm:rounded-lg sm:px-6">
       <dl className="divide-y divide-gray-200 text-sm">

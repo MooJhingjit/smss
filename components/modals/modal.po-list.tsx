@@ -65,14 +65,14 @@ export const PurchaseOrderListModal = () => {
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
       <DialogContent className="sm:max-w-[425px] md:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Quotation List</DialogTitle>
+          <DialogTitle>ระบุรายการสินค้า</DialogTitle>
           {/* <DialogDescription>Please select the customer.</DialogDescription> */}
         </DialogHeader>
         <form action={onSubmit} className="grid grid-cols-4 gap-3 mt-3">
           <div className="col-span-4">
             <FormInput
               id="name"
-              label="Name"
+              label="ชื่อสินค้า/บริการ"
               register={register}
               errors={handleUpdate.fieldErrors}
             />
@@ -81,7 +81,7 @@ export const PurchaseOrderListModal = () => {
           <div className="col-span-2">
             <FormInput
               id="price"
-              label="Unit Price"
+              label="ราคาต่อหน่วย"
               type="number"
               readOnly
               register={register}
@@ -91,7 +91,7 @@ export const PurchaseOrderListModal = () => {
           <div className="col-span-2">
             <FormInput
               id="quantity"
-              label="Quantity"
+              label="จำนวน"
               type="number"
               readOnly
               register={register}
@@ -100,7 +100,7 @@ export const PurchaseOrderListModal = () => {
             />
           </div>
           <div className="col-span-4 flex justify-end">
-            <FormSubmit>Update</FormSubmit>
+            <FormSubmit>อัพเดท</FormSubmit>
           </div>
         </form>
       </DialogContent>

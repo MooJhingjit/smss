@@ -7,6 +7,8 @@ import DocumentItems from "@/components/document-lists";
 import PurchaseOrders from "./_components/purchase-orders";
 import { db } from "@/lib/db";
 import { QuotationListWithRelations } from "@/types";
+import { QuotationStatus } from "@prisma/client";
+import { InfoIcon } from "lucide-react";
 
 const getData = async (quotationId: string) => {
   const data = await db.quotation.findUnique({
@@ -78,7 +80,9 @@ export default async function QuotationDetails(
     );
   }
 
-  const { buyer, lists } = data;
+  const { buyer, lists, status } = data;
+
+  const isQT_Approved = status === QuotationStatus.approved
   return (
     <>
       <Breadcrumbs pages={pages} />
@@ -88,6 +92,7 @@ export default async function QuotationDetails(
         </div>
         <div className="col-span-2">
           <QuotationTools
+            isLocked={data.isLocked}
             quotationId={data.id}
             status={data.status}
             type={data.type}
@@ -95,6 +100,7 @@ export default async function QuotationDetails(
         </div>
         <div className="col-span-5">
           <QuotationLists
+            isLocked={data.isLocked}
             quotationId={data.id}
             remark={data.remark ?? ""}
             data={lists as QuotationListWithRelations[]}
@@ -104,11 +110,37 @@ export default async function QuotationDetails(
           <DocumentItems refType="quotation" refId={data.id} />
         </div>
         <div className="col-span-5 md:col-span-3">
-          <PurchaseOrders
-            quotationLists={lists as QuotationListWithRelations[]}
-            hasQuotationItems={lists.length > 0}
-            quotationId={data.id}
-          />
+          {
+            isQT_Approved ? (
+
+              <PurchaseOrders
+                quotationLists={lists as QuotationListWithRelations[]}
+                hasQuotationItems={lists.length > 0}
+                quotationId={data.id}
+              />
+            )
+              :
+              (
+                <div className="mt-6 bg-gray-50 w-full h-40 rounded flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="flex justify-center mb-2">
+                      <InfoIcon className="w-10 h-10 text-yellow-500" />
+                    </div>
+                    <p className="text-gray-700 font-semibold">
+                      การสร้างใบสั่งซื้อ(PO) จากใบเสนอราคา(QT)แบบอัตโนมัติ
+                    </p>
+                    <div className="flex space-x-1 items-center text-sm">
+                      <p>
+                        ใบเสนอราคาต้องอยู่ในสถานะได้รับการอนุมัติ
+                      </p>
+                      <span className="inline-flex items-center rounded-md bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800 border-yellow-400 border">อนุมัติ QT</span>
+                      <p>ถึงจะสามารถสร้างใบ PO ได้</p>
+                    </div>
+                  </div>
+                </div>
+
+              )
+          }
         </div>
       </div>
     </>

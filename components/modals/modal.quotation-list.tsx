@@ -20,6 +20,7 @@ import { useForm } from "react-hook-form";
 import { FormTextarea } from "../form/form-textarea";
 import { Input } from "@/components/ui/input";
 import { MinusCircle, PlusCircle } from "lucide-react";
+import { Button } from "../ui/button";
 
 type FormInput = {
   productId: string;
@@ -77,6 +78,7 @@ export const QuotationListModal = () => {
         ? defaultData.subItems
         : "[]",
     };
+    console.log('reset', formData)
     reset(formData);
   }, [defaultData, reset]);
 
@@ -121,8 +123,9 @@ export const QuotationListModal = () => {
     const discount = formData.get("discount") as string;
     const description = formData.get("description") as string;
 
+
     if (!refs?.quotationRef?.id || !product) {
-      toast.error("Quotation not found");
+      toast.error("จำเป็นต้องกรอกข้อมูลให้ครบ");
       return;
     }
 
@@ -191,20 +194,24 @@ export const QuotationListModal = () => {
     watch("discount"),
   ]);
 
-  const subItems = watch("subItems");
+  const subItems = getValues("subItems");
 
+  if (!modal.isOpen) return
   return (
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
       <DialogContent className="sm:max-w-[425px] md:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Quotation List</DialogTitle>
+          <DialogTitle>รายละเอียดสินค้าในใบ PO</DialogTitle>
           {/* <DialogDescription>Please select the customer.</DialogDescription> */}
         </DialogHeader>
-        <form action={onSubmit} className="grid grid-cols-4 gap-3 mt-3">
+        <form
+          key={refs?.timestamps}
+          action={onSubmit} className="grid grid-cols-4 gap-3 mt-3">
           <div className="col-span-4">
             <FormSearchAsync
               id="productId"
-              label="Product"
+              label="ค้าหาชื่อสินค้า/บริการ"
+              required
               config={{
                 endpoint: "products",
                 params: {},
@@ -225,7 +232,7 @@ export const QuotationListModal = () => {
           <div className="hidden">
             <FormInput
               id="name"
-              label="Name"
+              label="ชื่อสินค้า/บริการ"
               type="text"
               defaultValue={defaultData?.name}
               errors={fieldErrors}
@@ -234,8 +241,10 @@ export const QuotationListModal = () => {
 
           <div className="">
             <FormInput
+              key={refs?.timestamps}
               id="cost"
-              label="Cost"
+              label="ต้นทุน"
+              required
               register={register}
               type="number"
               errors={fieldErrors}
@@ -244,7 +253,8 @@ export const QuotationListModal = () => {
           <div className="">
             <FormInput
               id="percentage"
-              label="Percentage"
+              label="กำไร (%)"
+              required
               type="number"
               register={register}
               errors={fieldErrors}
@@ -253,7 +263,8 @@ export const QuotationListModal = () => {
           <div className="">
             <FormInput
               id="price"
-              label="Unit Price"
+              label="ราคาขายต่อหน่วย"
+              required
               type="number"
               readOnly
               register={register}
@@ -263,7 +274,8 @@ export const QuotationListModal = () => {
           <div className="">
             <FormInput
               id="quantity"
-              label="Quantity"
+              label="จำนวน"
+              required
               type="number"
               register={register}
               defaultValue={defaultData?.quantity}
@@ -274,7 +286,7 @@ export const QuotationListModal = () => {
           <div className="">
             <FormInput
               id="withholdingTaxPercent"
-              label="Tax Percent"
+              label="ภาษี (%)"
               type="number"
               readOnly
               register={register}
@@ -286,7 +298,7 @@ export const QuotationListModal = () => {
           <div className="">
             <FormInput
               id="withholdingTax"
-              label="Tax Total"
+              label="ภาษีทั้งหมด"
               type="number"
               readOnly
               register={register}
@@ -296,7 +308,7 @@ export const QuotationListModal = () => {
           <div className="">
             <FormInput
               id="discount"
-              label="Discount"
+              label="ส่วนลด"
               type="number"
               register={register}
               // defaultValue={defaultData?.withholdingTax}
@@ -306,7 +318,8 @@ export const QuotationListModal = () => {
           <div className="">
             <FormInput
               id="totalPrice"
-              label="Total Price"
+              label="ยอดรวม"
+              required
               type="number"
               register={register}
               readOnly
@@ -319,7 +332,7 @@ export const QuotationListModal = () => {
           <div className="col-span-4">
             <FormTextarea
               id="description"
-              label="Description"
+              label="รายละเอียด"
               errors={fieldErrors}
               defaultValue={defaultData?.description ?? ""}
               rows={6}
@@ -328,8 +341,11 @@ export const QuotationListModal = () => {
 
           <SubItems setValue={setValue} defaultSubItems={subItems} />
 
-          <div className="col-start-4 col-span-1 flex justify-end">
-            <FormSubmit>{defaultData?.id ? "Update" : "Create"}</FormSubmit>
+          <div className="col-start-4 col-span-1 flex justify-end space-x-2">
+            {/* <Button variant="destructive" size="sm">
+              ลบ
+            </Button> */}
+            <FormSubmit>{defaultData?.id ? "อัพเดท" : "สร้างใหม่"}</FormSubmit>
           </div>
         </form>
       </DialogContent>
@@ -342,23 +358,25 @@ const SubItems = ({ setValue, defaultSubItems }: { setValue: any, defaultSubItem
     {
       label: string;
       quantity: string;
-    }[]
-  >(
-    defaultSubItems
-      ? JSON.parse(defaultSubItems)
-      : [{ label: "", quantity: "" }]
-  );
+    }[] | null
+  >(null);
 
+  useEffect(() => {
+    if (!defaultSubItems) return;
+    setSubItems(JSON.parse(defaultSubItems));
+  }, [defaultSubItems]);
+
+  console.log('subItems2', subItems)
 
   const handleAdd = () => {
-    setSubItems([...subItems, { label: "", quantity: "" }]);
+    setSubItems([...subItems || [], { label: "", quantity: "" }]);
   };
 
   const handleRemove = (index: number) => {
-    const items = subItems.filter((_, i) => i !== index);
-    setSubItems(items);
+    const items = subItems?.filter((_, i) => i !== index);
+    setSubItems(items ?? []);
     setValue("subItems", JSON.stringify(items));
-    
+
   };
 
   const handleSubItemChange = (index: number, key: string, value: string) => {
@@ -371,7 +389,7 @@ const SubItems = ({ setValue, defaultSubItems }: { setValue: any, defaultSubItem
       }
       return item;
     });
-    setSubItems(items);
+    setSubItems(items ?? []);
     setValue("subItems", JSON.stringify(items));
   };
 
@@ -387,7 +405,7 @@ const SubItems = ({ setValue, defaultSubItems }: { setValue: any, defaultSubItem
         </PlusCircle>
       </div>
       <div className="mt-2">
-        {subItems.map((item, index) => (
+        {subItems?.map((item, index) => (
           <div key={index} className="flex items-center gap-2 mb-2">
             <Input
               id="label"
@@ -412,7 +430,7 @@ const SubItems = ({ setValue, defaultSubItems }: { setValue: any, defaultSubItem
               onClick={() => handleRemove(index)}
               className="text-red-300 w-5  hover:text-red-400 cursor-pointer"
             >
-              Remove
+              ลบ
             </MinusCircle>
           </div>
         ))}
@@ -420,3 +438,7 @@ const SubItems = ({ setValue, defaultSubItems }: { setValue: any, defaultSubItem
     </div>
   );
 };
+
+
+
+

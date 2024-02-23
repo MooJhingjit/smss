@@ -21,7 +21,7 @@ export default function MainNavbar(props: { showMenu?: boolean }) {
     handleSignOut();
   };
   const user = useCurrentUser();
-  console.log("client get session >>>>>", user);
+  // console.log("client get session >>>>>", user);
 
   return (
     <div

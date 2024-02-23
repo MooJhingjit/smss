@@ -54,7 +54,7 @@ async function getData(): Promise<
 export default async function HomePage() {
   const [quotations, purchaseOrders, tasks] = await getData();
   const user = await currentUser();
-  console.log('server get session >>>>>', user);
+  // console.log('server get session >>>>>', user);
   return (
     <div className="mx-auto max-w-6xl px-2 xl:px-0">
       <div className="grid grid-cols-12 gap-6">

@@ -27,7 +27,7 @@ export const NewQuotationModal = () => {
 
   const handleCreate = useAction(createQuotation, {
     onSuccess: (data) => {
-      toast.success("New quotation created");
+      toast.success("สำเร็จ");
       modal.onClose();
       router.push(`quotations/${data.id}`);
     },

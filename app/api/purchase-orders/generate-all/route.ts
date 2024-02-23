@@ -70,6 +70,12 @@ export async function POST(req: NextRequest) {
       }))
     }))
 
+    // lock quotation
+    await db.quotation.update({
+      where: { id: body.quotationId },
+      data: { isLocked: true },
+    });
+
     // return success message
     return NextResponse.json(res);
 

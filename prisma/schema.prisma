@@ -112,6 +112,7 @@ model Quotation {
   withholdingTaxPercent Float?
   status                QuotationStatus @default(open)
   remark                String?
+  isLocked              Boolean         @default(false)
   createdAt             DateTime        @default(now())
   updatedAt             DateTime        @updatedAt
   lists                 QuotationList[]

@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { Plus, FileEdit } from "lucide-react";
+import { PenLineIcon, FileEdit } from "lucide-react";
 import PageComponentWrapper from "@/components/page-component-wrapper";
 import PURCHASE_ORDER_SERVICES from "@/app/services/service.purchase-order";
 import {
@@ -17,6 +17,7 @@ import {
   getQuotationTotalPrice,
 } from "@/lib/quotation.helper";
 import { usePurchasePreviewModal } from "@/hooks/use-po-preview-modal";
+import { Button } from "@/components/ui/button";
 
 const columns = [
   { name: "Code", key: "code" },
@@ -101,46 +102,37 @@ export default function PurchaseOrders(props: {
     );
   };
 
-  const renderActionButtons = () => {
-    if (data?.length) {
-      return;
-    }
-    return (
-      <button
-        onClick={previewPurchaseOrders}
-        className="flex items-center justify-center  bg-gray-50 hover:text-gray-700 border border-gray-300 rounded text-xs px-4 py-0.5"
-      >
-        Generate
-        {/* {
-            mutation.isPending && (
-              <CircleDashed className="animate-spin -mr-1 ml-2 h-3 w-3 text-gray-400" />
+  // const renderActionButtons = () => {
+  //   if (data?.length) {
+  //     return;
+  //   }
+  //   return (
+  //     <button
+  //       onClick={previewPurchaseOrders}
+  //       className="flex items-center justify-center  bg-gray-50 hover:text-gray-700 border border-gray-300 rounded text-xs px-4 py-0.5"
+  //     >
+  //       Generate
+  //     </button>
+  //   );
+  // };
 
-            )
-          } */}
-      </button>
-    );
-    // return (
-    //   <Plus
-    //     // onClick={usePurchaseModal().onOpen}
-    //     className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-700"
-    //   />
-    // );
-  };
-
-  if (!props.hasQuotationItems) {
+  if (!data?.length) {
     return (
-      <div className="bg-gray-50 w-full h-40 rounded flex items-center justify-center">
-        <p className="text-gray-500 text-sm">
-          ต้องมีรายการอย่างน้อย 1 รายการเพื่อสร้างใบสั่งซื้อ
-        </p>
+      <div className="mt-6 bg-gray-50 w-full h-40 rounded flex items-center justify-center">
+        <Button
+          onClick={previewPurchaseOrders}
+          variant="outline"
+          className="text-gray-500 text-sm space-x-2">
+          <PenLineIcon className="w-5 h-5 text-yellow-500" />
+          <span>สร้างใบสั่งซื้อ(PO) จากใบเสนอราคา(QT) แบบอัตโนมัติ</span>
+        </Button>
       </div>
     );
   }
 
   return (
     <PageComponentWrapper
-      headerIcon={renderActionButtons()}
-      headerTitle="Purchase Orders"
+      headerTitle="รายการใบสั่งซื้อ(PO) ของใบเสนอราคานี้"
     >
       {!!data?.length && (
         <TableLists<PurchaseOrderWithRelations> columns={columns} data={data} />

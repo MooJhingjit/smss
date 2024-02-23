@@ -43,7 +43,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onChange, value }) => {
               transition
               border-dashed 
               border-2 
-              p-8 
+              p-9
               border-neutral-300
               flex
               flex-col
@@ -54,7 +54,9 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onChange, value }) => {
             "
           >
             <FilePlus size={30} />
-            <div className="font-semibold text-sm">Click to upload</div>
+            <div className=" text-sm">
+              คลิกเพื่ออัพโหลด
+            </div>
             {/* {value && (
               <div
                 className="

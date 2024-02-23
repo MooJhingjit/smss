@@ -23,11 +23,11 @@ export default function CustomerInfo(props: Readonly<Props>) {
           </button>
         </div>
         <div className="mt-2 text-sm text-yellow-700 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-          <Item label="Tax ID" value={data.taxId ?? ""} />
-          <Item label="Tel." value={data.phone ?? ""} />
-          <Item label="Email" value={data.email} />
+          <Item label="เลขประจำตัวผู้เสียภาษี" value={data.taxId ?? ""} />
+          <Item label="โทร" value={data.phone ?? ""} />
+          <Item label="อีเมล์" value={data.email} />
           <div className="md:col-span-3">
-            <Item label="Address" value={data.address ?? ""} />
+            <Item label="ที่อยู่" value={data.address ?? ""} />
           </div>
         </div>
       </div>

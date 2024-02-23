@@ -3,7 +3,7 @@ import { create } from "zustand";
 
 export type ItemRefs =
   | undefined
-  | { productRef?: { id: number; name: string }; quotationRef: { id: number } };
+  | { productRef?: { id: number; name: string }; quotationRef: { id: number }, timestamps: number };
 
 type Store = {
   isOpen: boolean;

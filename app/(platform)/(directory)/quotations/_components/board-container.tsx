@@ -14,11 +14,11 @@ import Link from "next/link";
 import { FormInput } from "@/components/form/form-input";
 import { useSearchParams } from "next/navigation";
 import { quotationStatusMapping } from "@/app/config";
-import { Files, Paperclip, PlusIcon, Receipt } from "lucide-react";
+import { Files, LockIcon, Paperclip, PlusIcon, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuotationModal } from "@/hooks/use-quotation-modal";
 
-interface Props {}
+interface Props { }
 
 type QuotationWithCounts = QuotationWithBuyer & {
   _count: {
@@ -156,7 +156,7 @@ export default function BoardContainer(props: Props) {
     <div className="">
       <div className="flex justify-between items-center">
         <div className="">
-          <Button onClick={onOpen} 
+          <Button onClick={onOpen}
             variant={"default"}
           >
             <PlusIcon className="w-4 h-4 mr-1 text-white" />
@@ -314,7 +314,12 @@ const BoardCard = ({
                   href={`/quotations/${item.id}`}
                   className="inline-flex items-center capitalize rounded bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-700 underline"
                 >
-                  {item.code}
+                  {
+                    item.isLocked && (
+                      <LockIcon className="w-3 h-3 mr-1 text-gray-500" />
+                    )
+                  }
+                  <span>{item.code}</span>
                 </Link>
                 {/* <span className="inline-flex items-center capitalize rounded bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-600">
                   {item.type}

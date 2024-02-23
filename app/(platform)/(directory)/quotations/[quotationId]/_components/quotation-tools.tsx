@@ -1,6 +1,6 @@
 'use client';
 import React from "react";
-import { Lock, ChevronDown, CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
+import { LockIcon, ChevronDown, CheckIcon, ChevronDownIcon, ChevronUpIcon, PrinterIcon } from "lucide-react";
 import { QuotationStatus, QuotationType } from "@prisma/client";
 // import * as Select from '@radix-ui/react-select';
 import { quotationStatusMapping } from "@/app/config";
@@ -16,15 +16,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   quotationId: number;
   type: QuotationType;
   status: QuotationStatus;
+  isLocked: boolean;
 };
 
 export default function QuotationTools(props: Props) {
-  const { quotationId, status, type } = props;
+  const { quotationId, status, isLocked } = props;
 
   const { mutate } = useMutation<
     MutationResponseType,
@@ -40,7 +42,7 @@ export default function QuotationTools(props: Props) {
       return res
     },
     onSuccess: async (n) => {
-      toast.success("Updated successfully");
+      toast.success("สำเร็จ");
     },
   });
 
@@ -51,14 +53,24 @@ export default function QuotationTools(props: Props) {
 
   return (
     <div className="space-y-2">
-      <div className="flex space-x-3 justify-end">
+      <div className="grid grid-cols-12 gap-3 ">
         {/* <div className="inline-flex capitalize font-semibold rounded-md bg-gray-100 px-2 py-1 text-xs text-gray-700 items-center">
           <span>{type}</span>
         </div> */}
-        <div className="w-[200px] ">
+        {
+          isLocked && (
+            <div className="col-span-1 flex items-center">
+              <LockIcon className="w-6 h-6 text-yellow-500" />
+            </div>
+          )
+        }
+        <div className="col-span-5">
           <ItemStatus
             onStatusChange={handleItemChange}
             curStatus={status} />
+        </div>
+        <div className="col-span-4">
+          <PrintButton />
         </div>
       </div>
       {/* {Array.from({ length: 6 }).map((_, index) => (
@@ -80,7 +92,7 @@ const ItemStatus = ({ curStatus, onStatusChange }: {
 
   return (
     <Select onValueChange={onStatusChange}>
-      <SelectTrigger className="inline-flex capitalize font-semibold  rounded-md bg-gray-100 px-2 py-1 text-xs text-gray-700 items-center">
+      <SelectTrigger className="inline-flex capitalize font-semibold  rounded-md bg-yellow-50 px-2 py-1 text-xs text-yellow-700 border border-yellow-500 items-center">
         <SelectValue placeholder={
           "อยู่ในสถานะ การ" + quotationStatusMapping[curStatus]
         } />
@@ -99,4 +111,15 @@ const ItemStatus = ({ curStatus, onStatusChange }: {
 }
 
 
+const PrintButton = () => {
+  return (
+    <Button
+      variant="outline"
+      className="inline-flex items-center px-2 py-1 rounded-md bg-gray-100 text-gray-700 text-xs h-full"
+    >
+      <PrinterIcon className="w-4 h-4 mr-1" />
+      <span>พิมพ์ใบเสนอราคา</span>
+    </Button>
+  )
+}
 
