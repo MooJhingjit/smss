@@ -84,8 +84,6 @@ export const ItemModal = () => {
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="flex space-x-2 items-center">
-            <p>Add</p>
-
             <span className="inline-flex items-center rounded-md bg-primary-50 px-2 py-1 text-sm font-medium text-primary-700 ring-1 ring-inset ring-blue-700/10">
               {productRef?.name}
             </span>
@@ -103,23 +101,33 @@ export const ItemModal = () => {
         </DialogHeader>
 
         <form action={onSubmit} className="grid grid-cols-2 gap-3 mt-3">
+          <div className="col-span-2">
+            <FormInput
+              id="name"
+              label="เลบใบ PO"
+              type="text"
+              defaultValue={item?.name}
+              errors={fieldErrors}
+            />
+          </div>
+
           <FormInput
             id="name"
-            label="name"
+            label="ชื่อสินค้า"
             type="text"
             defaultValue={item?.name}
             errors={fieldErrors}
           />
           <FormInput
             id="serialNumber"
-            label="serial Number"
+            label="รหัสส (SN)"
             type="text"
             defaultValue={item?.serialNumber}
             errors={fieldErrors}
           />
           <FormInput
             id="warranty"
-            label="warranty"
+            label="ระยะเวลาประกัน"
             type="date"
             defaultValue={
               item?.warrantyDate
@@ -128,16 +136,16 @@ export const ItemModal = () => {
             }
             errors={fieldErrors}
           />
-          <FormInput
+          {/* <FormInput
             id="cost"
             label="Cost"
             type="number"
             defaultValue={item?.cost}
             errors={fieldErrors}
-          />
+          /> */}
           <FormSelect
             id="status"
-            label="Status"
+            label="สถานะ"
             defaultValue={item?.status ?? undefined}
             options={[{ id: "pending", title: "Pending" }]}
           />

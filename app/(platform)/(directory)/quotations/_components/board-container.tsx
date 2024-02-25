@@ -18,8 +18,10 @@ import { Files, LockIcon, Paperclip, PlusIcon, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuotationModal } from "@/hooks/use-quotation-modal";
 import { classNames } from "@/lib/utils";
+import { Select } from "@/components/ui/select";
+import { FormSelect } from "@/components/form/form-select";
 
-interface Props { }
+interface Props {}
 
 type QuotationWithCounts = QuotationWithBuyer & {
   _count: {
@@ -31,12 +33,14 @@ type QuotationWithCounts = QuotationWithBuyer & {
 
 export default function BoardContainer(props: Props) {
   const allQuotationStatus = Object.values(QuotationStatus);
+  const [filterdData, setFilterdData] = useState([] as QuotationWithBuyer[]);
   const { onOpen } = useQuotationModal();
 
   const [searchParams, setSearchParams] = useState({
     code: "",
     buyer: "",
     vendor: "",
+    type: "all"
   });
   const queries = useQueries({
     queries: allQuotationStatus.map((quotationStatus) => {
@@ -47,6 +51,8 @@ export default function BoardContainer(props: Props) {
         searchParams.code,
         searchParams.buyer,
         searchParams.vendor,
+        searchParams.type,
+
       ].join("-");
       return {
         queryKey: [params],
@@ -58,6 +64,7 @@ export default function BoardContainer(props: Props) {
             code: searchParams.code,
             buyer: searchParams.buyer,
             vendor: searchParams.vendor,
+            type: searchParams.type,
           }),
       };
     }),
@@ -86,7 +93,6 @@ export default function BoardContainer(props: Props) {
     }
   >({
     mutationFn: async (formData) => {
-      console.log(formData);
       const quotationId = formData.id;
       const newStatus = formData.status;
       const res = await QT_SERVICES.put(quotationId, {
@@ -141,6 +147,8 @@ export default function BoardContainer(props: Props) {
     const code = (e.target as any).code.value;
     const buyer = (e.target as any).buyer.value;
     const vendor = (e.target as any).vendor.value;
+    const type = (e.target as any).type.value;
+
     console.log({
       code,
       buyer,
@@ -150,21 +158,20 @@ export default function BoardContainer(props: Props) {
       code,
       buyer,
       vendor,
+      type
     });
   };
 
   return (
     <div className="">
       <div className="flex justify-between items-center">
-        <div className="">
-          <Button onClick={onOpen}
-            variant={"default"}
-          >
+        {/* <div className="">
+          <Button onClick={onOpen} variant={"default"}>
             <PlusIcon className="w-4 h-4 mr-1 text-white" />
             QT ใหม่
           </Button>
-        </div>
-        <BoardFilters onSubmit={onSearch} />
+        </div> */}
+        <BoardFilters onCreate={onOpen} onSubmit={onSearch} />
       </div>
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId="lists" type="list">
@@ -225,26 +232,46 @@ export default function BoardContainer(props: Props) {
 }
 
 type BoardFiltersProps = {
+  onCreate: () => void;
   onSubmit: (data: any) => void;
 };
 
 const BoardFilters = (props: BoardFiltersProps) => {
-  const { onSubmit } = props;
+  const { onCreate, onSubmit } = props;
   return (
     <div className="gap-x-2 mb-3 border border-gray-100  p-2  rounded-lg bg-gray-50 flex justify-end">
-      <form onSubmit={onSubmit} className="grid grid-cols-5 gap-2 items-center">
-        <p className="text-xs text-right text-gray-600 mt-1 mr-2 font-semibold">
-          ค้นหาโดย
-        </p>
+      <form onSubmit={onSubmit} className="grid grid-cols-6 gap-2 items-center">
+        <div className=" mt-1">
+          <Button variant={"default"} onClick={onCreate}>
+            <PlusIcon className="w-4 h-4 mr-1 text-white" />
+            QT ใหม่
+          </Button>
+        </div>
+
+        <div className="w-[200px]">
+          <FormSelect
+            id="type"
+            className="w-full"
+            defaultValue="all"
+            options={[
+              { id: "all", title: "ทุกประเภท" },
+              { id: "product", title: "เฉพาะสินค้า" },
+              { id: "service", title: "เฉพาะบริการ" },
+            ]}
+          />
+        </div>
+
         <FormInput id="code" type="search" placeholder="รหัส" />
         <FormInput id="buyer" type="search" placeholder="ชื่อลูกค้า" />
         <FormInput id="vendor" type="search" placeholder="ชื่อผู้ขาย" />
-        <button
-          type="submit"
-          className="col-span-1 bg-gray-200 rounded-md p-1.5 text-xs text-gray-600 font-semibold mt-1"
-        >
-          ค้นหา
-        </button>
+        <div className="py-0.5 w-full h-full mt-1">
+          <button
+            type="submit"
+            className="col-span-1 bg-gray-200 rounded-md  text-xs text-gray-600 font-semibold  h-full w-full"
+          >
+            ค้นหา
+          </button>
+        </div>
       </form>
     </div>
   );
@@ -313,25 +340,23 @@ const BoardCard = ({
               <div className="flex space-x-1">
                 <Link
                   href={`/quotations/${item.id}`}
-                  className={
-                    classNames(
-                      "inline-flex items-center capitalize rounded bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-700 underline",
-                      item.type === QuotationType.product ? "bg-white" : "bg-green-100",
-                    )
-                  }
+                  className={classNames(
+                    "inline-flex items-center capitalize rounded bg-gray-100  py-0.5 text-xs font-medium text-gray-700 underline",
+                    item.type === QuotationType.product
+                      ? "bg-white"
+                      : "bg-green-100"
+                  )}
                 >
-                  {
-                    item.isLocked && (
-                      <LockIcon className="w-3 h-3 mr-1 text-gray-500" />
-                    )
-                  }
+                  {item.isLocked && (
+                    <LockIcon className="w-3 h-3 mr-1 text-gray-500" />
+                  )}
                   <span>{item.code}</span>
                 </Link>
                 {/* <span className="inline-flex items-center capitalize rounded bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-600">
                   {item.type}
                 </span> */}
               </div>
-              <p className=" text-slate-700 capitalize">{item.paymentType}</p>
+              {/* <p className=" text-slate-700 capitalize">{item.paymentType}</p> */}
             </div>
 
             <div className="flex justify-between mt-2">

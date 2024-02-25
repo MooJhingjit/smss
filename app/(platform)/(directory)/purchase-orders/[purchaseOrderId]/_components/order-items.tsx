@@ -2,7 +2,10 @@
 import React, { useEffect } from "react";
 import PageComponentWrapper from "@/components/page-component-wrapper";
 import { Input } from "@/components/ui/input";
-import { PurchaseOrderWithRelations } from "@/types";
+import {
+  PurchaseOrderItemWithRelations,
+  PurchaseOrderWithRelations,
+} from "@/types";
 import { PurchaseOrderItem } from "@prisma/client";
 import TableLists from "@/components/table-lists";
 import { usePurchaseOrderListModal } from "@/hooks/use-po-list-modal";
@@ -13,25 +16,49 @@ import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { updatePurchaseOrder } from "@/actions/po/update";
 import { purchaseOrderItemStatusMapping } from "@/app/config";
+import { PackagePlus } from "lucide-react";
+import { useItemModal } from "@/hooks/use-item-modal";
 
 const columns = [
   { name: "#", key: "index" },
   {
     name: "ชื่อสินค้า",
     key: "name",
-    render: (item: PurchaseOrderItem) => {
+    render: (item: PurchaseOrderItemWithRelations) => {
       return item.name;
     },
   },
   { name: "ราคา", key: "price" },
   { name: "จำนวน", key: "quantity" },
   {
-    name: "สถานะ", key: "status",
-    render: (item: PurchaseOrderItem) => {
+    name: "รับเข้า",
+    key: "quantity",
+    render: (item: PurchaseOrderItemWithRelations) => {
+      return <p>{item.items.length}/{item.quantity}</p>
+    },
+  },
+  {
+    name: "สถานะ",
+    key: "status",
+    render: (item: PurchaseOrderItemWithRelations) => {
       return purchaseOrderItemStatusMapping[item.status];
     },
-
   },
+  // {
+  //   name: "รับสินค้า",
+  //   key: "action",
+  //   render: (item: PurchaseOrderItem) => {
+  //     return (
+  //       <div className="ml-3 ">
+  //         <PackagePlus
+  //           size={24}
+  //           className="hover:text-green-600 cursor-pointer"
+  //           onClick={}
+  //         />
+  //       </div>
+  //     );
+  //   },
+  // },
 ];
 
 export default function QuotationItems({
@@ -49,25 +76,21 @@ export default function QuotationItems({
       </div>
     );
   }
-
   return (
     <PageComponentWrapper headerTitle={`รายการสั่งซื้อจาก ${vendor?.name}`}>
       <div className="overflow-x-scroll md:overflow-auto">
-        <TableLists<PurchaseOrderItem>
+        <TableLists<PurchaseOrderItemWithRelations>
           columns={columns}
           data={purchaseOrderItems}
-          onManage={(item) => {
-            modal.onOpen(item)
+          onManage={(purchaseOrderItem) => {
+            modal.onOpen(purchaseOrderItem as PurchaseOrderItemWithRelations);
           }}
         />
       </div>
       {data && (
         <div className="grid grid-cols-5 gap-4 mt-4">
           <div className="col-span-5 md:col-span-3 ">
-            <Remarks
-              id={data.id}
-              remark={data.remark}
-            />
+            <Remarks id={data.id} remark={data.remark} />
             <div className="mt-2 bg-gray-50 p-3 rounded">
               <TaxInfo />
             </div>
@@ -120,8 +143,7 @@ type FormRemark = {
   id: number;
   remark: string | null;
 };
-const Remarks = ({ id, remark }: { id: number, remark: string | null }) => {
-
+const Remarks = ({ id, remark }: { id: number; remark: string | null }) => {
   // useForm
   const {
     register,
@@ -137,8 +159,8 @@ const Remarks = ({ id, remark }: { id: number, remark: string | null }) => {
   });
 
   useEffect(() => {
-    reset({ remark: remark ?? "" })
-  }, [remark, reset])
+    reset({ remark: remark ?? "" });
+  }, [remark, reset]);
 
   const handleUpdate = useAction(updatePurchaseOrder, {
     onSuccess: (data) => {
@@ -164,13 +186,11 @@ const Remarks = ({ id, remark }: { id: number, remark: string | null }) => {
         rows={12}
       />
       <div className="absolute top-2 right-2">
-        {
-          isDirty && (
-            <FormSubmit variant="default" className="text-xs">
-              Update
-            </FormSubmit>
-          )
-        }
+        {isDirty && (
+          <FormSubmit variant="default" className="text-xs">
+            Update
+          </FormSubmit>
+        )}
       </div>
     </form>
   );
@@ -230,6 +250,5 @@ const TaxInfo = () => {
         </div>
       </div>
     </div>
-  )
-}
-
+  );
+};

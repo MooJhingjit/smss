@@ -15,7 +15,11 @@ const getData = async (id: string) => {
     include: {
       vendor: true,
       quotation: true,
-      purchaseOrderItems: true,
+      purchaseOrderItems: {
+        include: {
+          items: true,
+        },
+      },
     },
   });
   return data;

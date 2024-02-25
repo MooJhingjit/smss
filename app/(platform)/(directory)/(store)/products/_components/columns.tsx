@@ -21,25 +21,28 @@ export const columns: ColumnDef<Product>[] = [
   },
   {
     accessorKey: "name",
-    header: "Name",
+    header: "ชื่อสินค้า",
   },
   {
     accessorKey: "vendor.name",
-    header: "Vendor",
+    header: "ผู้ขาย/ร้านค้า",
   },
   {
     accessorKey: "itemCount",
-    header: "Balance",
+    header: "จำนวนสินค้า",
   },
   {
     accessorKey: "cost",
-    header: "Cost",
+    header: "ต้นทุน",
   },
   {
     accessorKey: "percentage",
-    header: "Percentage",
+    header: "กำไร(%)",
   },
   {
     id: "actions",
   },
 ];
+
+
+

@@ -5,7 +5,7 @@ import CardWrapper from "./card-wrapper";
 import { PurchaseOrder, PurchaseOrderPaymentType } from "@prisma/client";
 import TableLists from "@/components/table-lists";
 import { PurchaseOrderWithVendor } from "../page";
-import { paymentTypeMapping } from "@/app/config";
+import { paymentTypeMapping, purchaseOrderStatusMapping } from "@/app/config";
 
 type Props = {
   data: PurchaseOrderWithVendor[];
@@ -38,7 +38,7 @@ const columns = [
     render: (item: PurchaseOrder) => {
       return (
         <span className="inline-flex items-center rounded-md bg-yellow-100 px-2 py-0.5 text-xs text-yellow-700">
-          {item.status}
+          {purchaseOrderStatusMapping[item.status]}
         </span>
       );
     },

@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 
 const pages = [
   {
-    name: "All Products",
+    name: "สินค้าทั้งหมด",
     href: "/products",
     current: true,
   },

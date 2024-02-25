@@ -94,7 +94,7 @@ const ItemStatus = ({ curStatus, onStatusChange }: {
     <Select onValueChange={onStatusChange}>
       <SelectTrigger className="inline-flex capitalize font-semibold  rounded-md bg-yellow-50 px-2 py-1 text-xs text-yellow-700 border border-yellow-500 items-center">
         <SelectValue placeholder={
-          "อยู่ในสถานะ การ" + quotationStatusMapping[curStatus]
+          "สถานะปัจจุบัน: " + quotationStatusMapping[curStatus]
         } />
       </SelectTrigger>
       <SelectContent className="bg-white text-xs p-2 space-y-2 ">

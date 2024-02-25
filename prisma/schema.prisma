@@ -30,7 +30,7 @@ model User {
   products         Product[]
   buyerQuotations  Quotation[]     @relation("buyer")
   sellerQuotations Quotation[]     @relation("seller")
-  purchaseOrders    PurchaseOrder[] @relation("vendor")
+  purchaseOrders   PurchaseOrder[] @relation("vendor")
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
 }
@@ -40,15 +40,15 @@ model Product {
   name           String
   vendor         User            @relation(fields: [vendorId], references: [id])
   vendorId       Int
-  description    String?
+  description    String?         @db.Text
   cost           Float?
   percentage     Decimal?
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   items          Item[]
   QuotationLists QuotationList[]
-  @@index([vendorId])
 
+  @@index([vendorId])
 }
 
 enum ItemStatus {
@@ -63,20 +63,20 @@ model Item {
   id              Int             @id @default(autoincrement())
   productId       Int
   product         Product         @relation(fields: [productId], references: [id])
-  purchaseOrderId Int?
-  purchaseOrder   PurchaseOrder?   @relation(fields: [purchaseOrderId], references: [id])
+  purchaseOrderItemId Int?
+  purchaseOrderItem   PurchaseOrderItem? @relation(fields: [purchaseOrderItemId], references: [id])
   name            String
-  description     String?
+  description     String?         @db.Text
   serialNumber    String?
   warrantyDate    DateTime?
   cost            Float?
   status          ItemStatus      @default(available)
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
-  QuotationItems   QuotationItem[]
+  QuotationItems  QuotationItem[]
 
   @@index([productId])
-  @@index([purchaseOrderId])
+  @@index([purchaseOrderItemId])
 }
 
 enum QuotationType {
@@ -111,13 +111,13 @@ model Quotation {
   withholdingTax        Float?
   withholdingTaxPercent Float?
   status                QuotationStatus @default(open)
-  remark                String?
+  remark                String?         @db.Text
   isLocked              Boolean         @default(false)
   createdAt             DateTime        @default(now())
   updatedAt             DateTime        @updatedAt
   lists                 QuotationList[]
-  purchaseOrders         PurchaseOrder[]
-  medias             Media[]
+  purchaseOrders        PurchaseOrder[]
+  medias                Media[]
 
   @@index([buyerId])
   @@index([sellerId])
@@ -128,7 +128,7 @@ model QuotationList {
   quotationId           Int
   quotation             Quotation       @relation(fields: [quotationId], references: [id])
   productId             Int?
-  product               Product?         @relation(fields: [productId], references: [id])
+  product               Product?        @relation(fields: [productId], references: [id])
   name                  String
   price                 Float?
   unitPrice             Float?
@@ -139,11 +139,11 @@ model QuotationList {
   withholdingTaxPercent Float?
   discount              Float?
   totalPrice            Float?
-  description           String?
+  description           String?         @db.Text
   subItems              String?
   createdAt             DateTime        @default(now())
   updatedAt             DateTime        @updatedAt
-  QuotationItems         QuotationItem[]
+  QuotationItems        QuotationItem[]
 
   @@index([quotationId])
   @@index([productId])
@@ -160,7 +160,6 @@ model QuotationItem {
 
   @@index([quotationListId])
   @@index([itemId])
-
 }
 
 enum PurchaseOrderStatus {
@@ -173,22 +172,21 @@ enum PurchaseOrderPaymentType {
 }
 
 model PurchaseOrder {
-  id                Int                      @id @default(autoincrement())
-  code              String
-  quotationId       Int
-  quotation         Quotation                @relation(fields: [quotationId], references: [id])
-  vendorId          Int
-  vendor            User                     @relation(fields: [vendorId], references: [id], name: "vendor")
-  totalDiscount     Float?
-  totalTax          Float?
-  totalPrice        Float?
-  status            PurchaseOrderStatus      @default(draft)
-  paymentType       PurchaseOrderPaymentType @default(cash)
-  Item              Item[]
-  paymentDueDate    DateTime?
-  remark            String?
-  createdAt         DateTime                 @default(now())
-  updatedAt         DateTime                 @updatedAt
+  id                 Int                      @id @default(autoincrement())
+  code               String
+  quotationId        Int
+  quotation          Quotation                @relation(fields: [quotationId], references: [id])
+  vendorId           Int
+  vendor             User                     @relation(fields: [vendorId], references: [id], name: "vendor")
+  totalDiscount      Float?
+  totalTax           Float?
+  totalPrice         Float?
+  status             PurchaseOrderStatus      @default(draft)
+  paymentType        PurchaseOrderPaymentType @default(cash)
+  paymentDueDate     DateTime?
+  remark             String?                  @db.Text
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
   purchaseOrderItems PurchaseOrderItem[]
   medias             Media[]
 
@@ -209,6 +207,7 @@ model PurchaseOrderItem {
   price           Float?
   quantity        Int?
   status          PurchaseOrderItemStatus @default(pending)
+  items          Item[]
   createdAt       DateTime                @default(now())
   updatedAt       DateTime                @updatedAt
 
@@ -216,16 +215,16 @@ model PurchaseOrderItem {
 }
 
 model Media {
-  id          Int      @id @default(autoincrement())
-  name        String
-  description String?
-  url         String
-  quotationId Int?
-  quotation   Quotation? @relation(fields: [quotationId], references: [id])
+  id              Int            @id @default(autoincrement())
+  name            String
+  description     String?        @db.Text
+  url             String
+  quotationId     Int?
+  quotation       Quotation?     @relation(fields: [quotationId], references: [id])
   purchaseOrderId Int?
   purchaseOrder   PurchaseOrder? @relation(fields: [purchaseOrderId], references: [id])
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
 
   @@index([quotationId])
   @@index([purchaseOrderId])

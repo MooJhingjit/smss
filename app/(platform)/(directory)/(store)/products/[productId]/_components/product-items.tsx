@@ -7,11 +7,11 @@ import { ProductWithRelations } from "@/types";
 import Toolbar from "./toolsbar";
 
 const columns = [
-  { name: "Purchase ID", key: "poID" },
-  { name: "Name", key: "name" },
-  { name: "Serial Number", key: "serialNumber" },
+  { name: "เลบใบ PO", key: "poID" },
+  { name: "ชื่อสินค้า", key: "name" },
+  { name: "รหัส (SN)", key: "serialNumber" },
   {
-    name: "Warranty",
+    name: "ระยะเวลาประกัน",
     key: "warrantyDate",
     render: (item: Item) => {
       if (!item.warrantyDate) return null;
@@ -20,8 +20,8 @@ const columns = [
       return date.toLocaleDateString("th-TH");
     },
   },
-  { name: "Cost", key: "cost" },
-  { name: "Status", key: "status" },
+  { name: "ต้นทุน", key: "cost" },
+  { name: "สถานะ", key: "status" },
 ];
 
 type Props = {

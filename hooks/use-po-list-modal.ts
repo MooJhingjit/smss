@@ -1,10 +1,11 @@
+import { PurchaseOrderItemWithRelations } from "@/types";
 import { PurchaseOrderItem } from "@prisma/client";
 import { create } from "zustand";
 
 type Store = {
   isOpen: boolean;
-  data: PurchaseOrderItem | null;
-  onOpen: (data?: PurchaseOrderItem | null) => void;
+  data: PurchaseOrderItemWithRelations | null;
+  onOpen: (data?: PurchaseOrderItemWithRelations | null) => void;
   onClose: () => void;
 };
 

@@ -26,24 +26,29 @@ export default function ProductView(props: Props) {
       <div className="mt-4 flex w-full flex-none gap-x-4 px-6">
         <dl className=" space-y-6 border-t border-gray-200 py-6 text-xs font-medium text-gray-900 lg:block  w-full ">
           <div className="flex items-center justify-between">
-            <dt className="text-gray-600">Vendor</dt>
+            <dt className="text-gray-600">ผู้ขาย/ร้านค้า</dt>
             <dd>{vendor?.name}</dd>
           </div>
 
           <div className="flex items-center justify-between">
-            <dt className="text-gray-600">Cost</dt>
-            <dd>{cost}</dd>
+            <dt className="text-gray-600">ต้นทุน</dt>
+            <dd>{ cost && 
+              new Intl.NumberFormat('th-TH', {
+                style: 'currency',
+                currency: 'THB'
+              }).format(cost)
+              }</dd>
           </div>
 
           <div className="flex items-center justify-between">
-            <dt className="text-gray-600">Percentage</dt>
+            <dt className="text-gray-600">กำไร(%)</dt>
             <dd className="flex items-center space-x-2">
               {percentage?.toString()}%
             </dd>
           </div>
 
           <div className="flex items-center justify-between">
-            <dt className="text-gray-600">Updated</dt>
+            <dt className="text-gray-600">อัพเดทล่าสุด</dt>
             <dd>{new Date(updatedAt).toLocaleDateString()}</dd>
           </div>
 
@@ -55,7 +60,7 @@ export default function ProductView(props: Props) {
           <dd>
             <div className="w-full">
               <Button variant="default" onClick={onUpdate} className="w-full">
-                Update
+                จัดการ
               </Button>
             </div>
           </dd>

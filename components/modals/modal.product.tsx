@@ -21,7 +21,7 @@ export const NewProductModal = () => {
 
   const handleCreate = useAction(createProduct, {
     onSuccess: (data) => {
-      toast.success("New product created");
+      toast.success("สำเร็จ");
       modal.onClose();
     },
     onError: (error) => {
@@ -32,7 +32,7 @@ export const NewProductModal = () => {
 
   const handleUpdate = useAction(updateProduct, {
     onSuccess: (data) => {
-      toast.success("Product updated");
+      toast.success("สำเร็จ");
       modal.onClose();
     },
     onError: (error) => {
@@ -72,14 +72,14 @@ export const NewProductModal = () => {
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>New Product</DialogTitle>
+          <DialogTitle> {product ? "แก้ไขสินค้า" : "สินค้าใหม่"}</DialogTitle>
           {/* <DialogDescription>Please select the vendor.</DialogDescription> */}
         </DialogHeader>
         <form action={onSubmit} className="grid grid-cols-2 gap-3">
           <div className="">
             <FormSearchAsync
               id="vendor"
-              label="vendor"
+              label="ผู้ขาย/ร้านค้า"
               config={{
                 endpoint: "/users",
                 params: {
@@ -97,7 +97,7 @@ export const NewProductModal = () => {
           <div className="">
             <FormInput
               id="name"
-              label="Name"
+              label="ชื่อสินค้า"
               type="text"
               defaultValue={product?.name}
               errors={fieldErrors}
@@ -106,7 +106,7 @@ export const NewProductModal = () => {
           <div className="">
             <FormInput
               id="cost"
-              label="Cost"
+              label="ต้นทุน"
               type="number"
               defaultValue={product?.cost}
               errors={fieldErrors}
@@ -115,7 +115,7 @@ export const NewProductModal = () => {
           <div className="">
             <FormInput
               id="percentage"
-              label="Percentage"
+              label="กำไร(%)"
               type="number"
               defaultValue={product?.percentage}
               errors={fieldErrors}
@@ -124,13 +124,14 @@ export const NewProductModal = () => {
           <div className="col-span-2">
             <FormTextarea
               id="description"
-              label="Description"
+              label="รายละเอียด"
               defaultValue={product?.description ?? ""}
               errors={fieldErrors}
+              rows={6}
             />
           </div>
           <div className="col-start-2 col-span-1 flex justify-end">
-            <FormSubmit>{product ? "Update" : "Create"}</FormSubmit>
+            <FormSubmit>{product ? "แก้ไข" : "สร้าง"}</FormSubmit>
           </div>
         </form>
       </DialogContent>

@@ -9,14 +9,20 @@ export async function GET(req: NextRequest) {
     const code = req.nextUrl.searchParams.get("code") as string;
     const buyerName = req.nextUrl.searchParams.get("buyer") as string;
     const vendorName = req.nextUrl.searchParams.get("vendor") as string;
+    const type = req.nextUrl.searchParams.get("type") as string;
 
-    console.log(buyerName);
     if (!status) {
       return new NextResponse("Missing status", { status: 400 });
     }
 
     let conditions = {};
     // check if filter provided
+
+    
+    if (type && type !== "all") {
+      conditions = { ...conditions, type };
+    }
+
     if (status) {
       conditions = { ...conditions, status };
     }
