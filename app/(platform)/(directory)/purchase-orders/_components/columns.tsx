@@ -20,12 +20,12 @@ export const columns: ColumnDef<PurchaseOrderWithRelations & {
   };
 }>[] = [
     {
-      accessorKey: "id",
-      header: "#",
+      accessorKey: "code",
+      header: "ใบสั่งซื้อ",
     },
     {
-      accessorKey: "code",
-      header: "รหัส",
+      accessorKey: "quotation.code",
+      header: "ใบเสนอราคา",
     },
     {
       accessorKey: "vendor.name",

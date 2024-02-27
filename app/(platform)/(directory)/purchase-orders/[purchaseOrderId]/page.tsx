@@ -1,8 +1,7 @@
 import React from "react";
 import Breadcrumbs from "@/components/breadcrumbs";
 import VendorInfo from "./_components/vendor-details";
-import OrderStatus from "./_components/_order-status";
-import OrderItems from "./_components/order-items";
+import PurchaseOrderItems from "./_components/order-items";
 import AssociateOrders from "./_components/associate-orders";
 import { db } from "@/lib/db";
 import DocumentItems from "../../../../../components/document-lists";
@@ -31,7 +30,15 @@ interface Props {
   };
 }
 
-const getAssociateOrders = async (quotationId: number, excluded: number) => {
+const getAssociateOrders = async (
+  quotationId: number | null,
+  excluded: number
+) => {
+
+  if (!quotationId) {
+    return [];
+  }
+
   const data = await db.purchaseOrder.findMany({
     where: {
       quotationId,
@@ -56,6 +63,7 @@ export default async function PurchaseOrderDetails(props: Readonly<Props>) {
   }
 
   const associateOrders = await getAssociateOrders(data.quotationId, data.id);
+
   const pages = [
     {
       name: "การสั่งซื้อทั้งหมด (POs)",
@@ -90,11 +98,12 @@ export default async function PurchaseOrderDetails(props: Readonly<Props>) {
           <PurchaseOrderTools
             orderId={data.id}
             quotationId={data.quotationId}
-            quotationCode={data.quotation.code}
-            status={data.status} />
+            quotationCode={data.quotation?.code ?? ""}
+            status={data.status}
+          />
         </div>
         <div className="col-span-5">
-          <OrderItems data={data} />
+          <PurchaseOrderItems data={data} />
         </div>
         <div className="col-span-2">
           <DocumentItems refType="purchaseOrder" refId={data.id} />
@@ -102,7 +111,7 @@ export default async function PurchaseOrderDetails(props: Readonly<Props>) {
         {associateOrders.length > 0 && (
           <div className="col-span-3">
             <AssociateOrders
-              quotationCode={data.quotation.code}
+              quotationCode={data.quotation?.code ?? ""}
               data={associateOrders}
             />
           </div>

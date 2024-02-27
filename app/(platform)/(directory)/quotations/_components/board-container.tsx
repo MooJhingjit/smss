@@ -40,7 +40,7 @@ export default function BoardContainer(props: Props) {
     code: "",
     buyer: "",
     vendor: "",
-    type: "all"
+    type: "all",
   });
   const queries = useQueries({
     queries: allQuotationStatus.map((quotationStatus) => {
@@ -52,7 +52,6 @@ export default function BoardContainer(props: Props) {
         searchParams.buyer,
         searchParams.vendor,
         searchParams.type,
-
       ].join("-");
       return {
         queryKey: [params],
@@ -158,7 +157,7 @@ export default function BoardContainer(props: Props) {
       code,
       buyer,
       vendor,
-      type
+      type,
     });
   };
 
@@ -182,42 +181,51 @@ export default function BoardContainer(props: Props) {
               className="flex gap-x-3 h-full"
             >
               <BoardColumn
+                color="yellow"
                 items={queries[0].data ?? ([] as QuotationWithBuyer[])}
                 columnKey={QuotationStatus.open}
                 label={quotationStatusMapping[QuotationStatus.open]}
               />
               <BoardColumn
+                color="yellow"
                 items={queries[1].data ?? ([] as QuotationWithBuyer[])}
+                columnKey={QuotationStatus.pending_approval}
+                label={quotationStatusMapping[QuotationStatus.pending_approval]}
+              />
+              <BoardColumn
+                color="yellow"
+                items={queries[2].data ?? ([] as QuotationWithBuyer[])}
                 columnKey={QuotationStatus.offer}
                 label={quotationStatusMapping[QuotationStatus.offer]}
               />
               <BoardColumn
-                items={queries[2].data ?? ([] as QuotationWithBuyer[])}
+                color="yellow"
+                items={queries[3].data ?? ([] as QuotationWithBuyer[])}
                 columnKey={QuotationStatus.approved}
                 label={quotationStatusMapping[QuotationStatus.approved]}
               />
               <BoardColumn
-                items={queries[3].data ?? ([] as QuotationWithBuyer[])}
+                items={queries[4].data ?? ([] as QuotationWithBuyer[])}
                 columnKey={QuotationStatus.po_preparing}
                 label={quotationStatusMapping[QuotationStatus.po_preparing]}
               />
               <BoardColumn
-                items={queries[4].data ?? ([] as QuotationWithBuyer[])}
+                items={queries[5].data ?? ([] as QuotationWithBuyer[])}
                 columnKey={QuotationStatus.po_sent}
                 label={quotationStatusMapping[QuotationStatus.po_sent]}
               />
               <BoardColumn
-                items={queries[5].data ?? ([] as QuotationWithBuyer[])}
+                items={queries[6].data ?? ([] as QuotationWithBuyer[])}
                 columnKey={QuotationStatus.product_received}
                 label={quotationStatusMapping[QuotationStatus.product_received]}
               />
               <BoardColumn
-                items={queries[6].data ?? ([] as QuotationWithBuyer[])}
+                items={queries[7].data ?? ([] as QuotationWithBuyer[])}
                 columnKey={QuotationStatus.order_preparing}
                 label={quotationStatusMapping[QuotationStatus.order_preparing]}
               />
               <BoardColumn
-                items={queries[7].data ?? ([] as QuotationWithBuyer[])}
+                items={queries[8].data ?? ([] as QuotationWithBuyer[])}
                 columnKey={QuotationStatus.delivered}
                 label={quotationStatusMapping[QuotationStatus.delivered]}
               />
@@ -281,14 +289,21 @@ const BoardColumn = ({
   items,
   columnKey,
   label,
+  color,
 }: {
   columnKey: QuotationStatus;
   label: string;
   items: QuotationWithCounts[];
+  color?: "yellow" | "green";
 }) => {
   return (
     <div className="h-auto min-w-[210px] select-none">
-      <div className="w-full rounded-md bg-gray-50 shadow-md pb-2 h-full">
+      <div
+        className={classNames(
+          "w-full rounded-md  shadow-md pb-2 h-full",
+          color === "yellow" ? "bg-yellow-50" : "bg-green-50"
+        )}
+      >
         <div className="flex justify-between items-center px-3 pt-2 pb-4">
           <div className="text-sm font-semibold text-[#4a4a4a] whitespace-nowrap">
             {label}

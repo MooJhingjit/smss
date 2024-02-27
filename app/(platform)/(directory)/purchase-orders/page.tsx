@@ -16,6 +16,11 @@ async function getData(): Promise<any[]> {
           name: true,
         },
       },
+      quotation: {
+        select: {
+          code: true,
+        },
+      },
     },
     orderBy: {
       id: "desc",

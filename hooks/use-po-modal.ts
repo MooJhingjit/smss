@@ -6,7 +6,7 @@ type Store = {
   onClose: () => void;
 };
 
-export const usePurchaseModal = create<Store>((set) => ({
+export const usePurchaseOrderModal = create<Store>((set) => ({
   isOpen: false,
   onOpen: () => set({ isOpen: true }),
   onClose: () => set({ isOpen: false }),

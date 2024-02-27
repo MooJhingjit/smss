@@ -2,7 +2,7 @@
 import React from "react";
 import { Plus } from "lucide-react";
 import PageComponentWrapper from "@/components/page-component-wrapper";
-import { usePurchaseModal } from "@/hooks/use-po-modal";
+import { usePurchaseOrderModal } from "@/hooks/use-po-modal";
 import { PurchaseOrderWithRelations } from "@/types";
 import TableLists from "@/components/table-lists";
 import { purchaseOrderColumns } from "../..";
@@ -15,7 +15,7 @@ export default function AssociateOrders({ data, quotationCode }: {
     <PageComponentWrapper
       headerIcon={
         <Plus
-          onClick={usePurchaseModal().onOpen}
+          onClick={usePurchaseOrderModal().onOpen}
           className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-700"
         />
       }

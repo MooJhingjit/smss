@@ -40,7 +40,7 @@ export type QuotationListWithRelations = QuotationList & {
 export type PurchaseOrderWithRelations = PurchaseOrder & {
   purchaseOrderItems?: PurchaseOrderItemWithRelations[];
   vendor?: User;
-  quotation?: Quotation;
+  quotation?: Quotation | null;
 };
 
 export type PurchaseOrderPreview = {

@@ -65,7 +65,7 @@ const columns = [
   // },
 ];
 
-export default function QuotationItems({
+export default function PurchaseOrderItems({
   data,
 }: {
   data: PurchaseOrderWithRelations;

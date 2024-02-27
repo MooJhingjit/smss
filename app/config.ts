@@ -7,6 +7,7 @@ export const routeName = {
 
 export const quotationStatusMapping = {
   open: "เปิด QT",
+  pending_approval: "รออนุมัติ QT",
   offer: "ส่ง QT (ให้ลูกค้า)",
   approved: "อนุมัติ QT แล้ว",
   po_preparing: "เตรียม PO (ผู้ขาย)",

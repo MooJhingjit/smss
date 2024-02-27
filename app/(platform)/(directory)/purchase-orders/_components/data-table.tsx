@@ -6,6 +6,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
 import Link from "next/link";
+import { usePurchaseOrderModal } from "@/hooks/use-po-modal";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -16,7 +17,11 @@ export default function PurchaseOrderTable<TData, TValue>(
   props: DataTableProps<TData, TValue>
 ) {
   const { columns, data } = props;
+  const modal = usePurchaseOrderModal();
 
+  const handleCreate = () => {
+    modal.onOpen();
+  };
   // modify actions column
   const modifiedColumns = columns.map((column) => {
     if (column.id === "actions") {
@@ -26,10 +31,7 @@ export default function PurchaseOrderTable<TData, TValue>(
           return (
             <div className="flex space-x-2 items-center">
               <Link href={`/purchase-orders/${row.original.id}`} passHref>
-                <Button
-                  className="text-xs h-8"
-                  variant="secondary"
-                >
+                <Button className="text-xs h-8" variant="secondary">
                   จัดการ
                 </Button>
               </Link>
@@ -41,5 +43,7 @@ export default function PurchaseOrderTable<TData, TValue>(
     return column;
   });
 
-  return <DataTable columns={modifiedColumns} data={data} />;
+  return (
+    <DataTable onCreate={handleCreate} columns={modifiedColumns} data={data} />
+  );
 }

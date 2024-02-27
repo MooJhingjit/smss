@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { usePurchaseModal } from "@/hooks/use-po-modal";
+import { usePurchaseOrderModal } from "@/hooks/use-po-modal";
 import CardWrapper from "./card-wrapper";
 import { PurchaseOrder, PurchaseOrderPaymentType } from "@prisma/client";
 import TableLists from "@/components/table-lists";
@@ -45,7 +45,7 @@ const columns = [
 
 export default function Tasks(props: Readonly<Props>) {
   const { data } = props;
-  const { onOpen } = usePurchaseModal();
+  const { onOpen } = usePurchaseOrderModal();
 
   return (
     <CardWrapper title={`งานที่ต้องตรวจสอบ สถานะ: ${quotationStatusMapping['offer']}`}>
