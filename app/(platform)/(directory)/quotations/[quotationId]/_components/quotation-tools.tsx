@@ -1,6 +1,13 @@
-'use client';
+"use client";
 import React from "react";
-import { LockIcon, ChevronDown, CheckIcon, ChevronDownIcon, ChevronUpIcon, PrinterIcon } from "lucide-react";
+import {
+  LockIcon,
+  ChevronDown,
+  CheckIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+  PrinterIcon,
+} from "lucide-react";
 import { QuotationStatus, QuotationType } from "@prisma/client";
 // import * as Select from '@radix-ui/react-select';
 import { quotationStatusMapping } from "@/app/config";
@@ -17,6 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { FormInput } from "@/components/form/form-input";
 
 type Props = {
   quotationId: number;
@@ -37,9 +45,9 @@ export default function QuotationTools(props: Props) {
   >({
     mutationFn: async (fields) => {
       const res = await QT_SERVICES.put(quotationId, {
-        ...fields
+        ...fields,
       });
-      return res
+      return res;
     },
     onSuccess: async (n) => {
       toast.success("สำเร็จ");
@@ -47,9 +55,8 @@ export default function QuotationTools(props: Props) {
   });
 
   const handleItemChange = (status: QuotationStatus) => {
-    mutate({ status })
-  }
-
+    mutate({ status });
+  };
 
   return (
     <div className="space-y-2">
@@ -57,20 +64,26 @@ export default function QuotationTools(props: Props) {
         {/* <div className="inline-flex capitalize font-semibold rounded-md bg-gray-100 px-2 py-1 text-xs text-gray-700 items-center">
           <span>{type}</span>
         </div> */}
-        {
-          isLocked && (
-            <div className="col-span-1 flex items-center">
-              <LockIcon className="w-6 h-6 text-yellow-500" />
-            </div>
-          )
-        }
-        <div className="col-span-5">
-          <ItemStatus
-            onStatusChange={handleItemChange}
-            curStatus={status} />
+
+        <div className="col-span-6">
+          <ItemStatus onStatusChange={handleItemChange} curStatus={status} />
         </div>
-        <div className="col-span-4">
-          <PrintButton />
+        <div className="col-span-5"></div>
+        <div className="col-span-1 flex items-center">
+          {isLocked && <LockIcon className="w-6 h-6 text-yellow-500" />}
+        </div>
+        <div className="col-span-4 flex items-center">
+          <FormInput
+            id="Ref_PO"
+            label="อ้างอิงใบสั่งซื้อ"
+            className="text-xs w-full"
+            placeholder="PO-xxxxxx"
+          />
+        </div>
+        <div className="col-span-5 flex  items-end">
+          <div className="h-[36px]">
+            <PrintButton />
+          </div>
         </div>
       </div>
       {/* {Array.from({ length: 6 }).map((_, index) => (
@@ -83,33 +96,32 @@ export default function QuotationTools(props: Props) {
   );
 }
 
-const ItemStatus = ({ curStatus, onStatusChange }: {
-  curStatus: QuotationStatus
-  onStatusChange: (status: QuotationStatus) => void
-}
-) => {
-  const allStatus = Object.keys(QuotationStatus) as QuotationStatus[]
+const ItemStatus = ({
+  curStatus,
+  onStatusChange,
+}: {
+  curStatus: QuotationStatus;
+  onStatusChange: (status: QuotationStatus) => void;
+}) => {
+  const allStatus = Object.keys(QuotationStatus) as QuotationStatus[];
 
   return (
     <Select onValueChange={onStatusChange}>
       <SelectTrigger className="inline-flex capitalize font-semibold  rounded-md bg-yellow-50 px-2 py-1 text-xs text-yellow-700 border border-yellow-500 items-center">
-        <SelectValue placeholder={
-          "สถานะปัจจุบัน: " + quotationStatusMapping[curStatus]
-        } />
+        <SelectValue
+          placeholder={"สถานะปัจจุบัน: " + quotationStatusMapping[curStatus]}
+        />
       </SelectTrigger>
       <SelectContent className="bg-white text-xs p-2 space-y-2 ">
-        {
-          allStatus.map((status, index) => (
-            <SelectItem value={status} key={index}>{
-              quotationStatusMapping[status]
-            }</SelectItem>
-          ))
-        }
+        {allStatus.map((status, index) => (
+          <SelectItem value={status} key={index}>
+            {quotationStatusMapping[status]}
+          </SelectItem>
+        ))}
       </SelectContent>
     </Select>
-  )
-}
-
+  );
+};
 
 const PrintButton = () => {
   return (
@@ -120,6 +132,5 @@ const PrintButton = () => {
       <PrinterIcon className="w-4 h-4 mr-1" />
       <span>พิมพ์ใบเสนอราคา</span>
     </Button>
-  )
-}
-
+  );
+};

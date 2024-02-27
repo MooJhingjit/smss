@@ -110,7 +110,7 @@ export const PurchaseOrderListModal = () => {
           </div>
           <div className="col-span-4">
             <div className="w-full rounded-md bg-green-50 p-4 border border-green-200">
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-4 gap-3">
                 {defaultItemLength &&
                   Array.from({ length: defaultItemLength }).map((_, index) => (
                     <ItemRow key={index} />
@@ -130,6 +130,14 @@ export const PurchaseOrderListModal = () => {
 const ItemRow = () => {
   return (
     <>
+    
+      <FormInput
+        id="serialNumber"
+        label="ชื่อรุ่น"
+        type="text"
+        // defaultValue={item?.serialNumber}
+        // errors={fieldErrors}
+      />
       <FormInput
         id="serialNumber"
         label="รหัส (SN)"

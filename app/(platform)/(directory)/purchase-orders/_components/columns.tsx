@@ -25,36 +25,28 @@ export const columns: ColumnDef<PurchaseOrderWithRelations & {
     },
     {
       accessorKey: "code",
-      header: "Code",
+      header: "รหัส",
     },
     {
       accessorKey: "vendor.name",
-      header: "Vendor",
+      header: "ผู้ขาย/ร้านค้า",
       cell: ({ row }) => {
         const { vendor } = row.original;
         return vendor?.name;
       }
     },
-    {
-      accessorKey: "itemCount",
-      header: "Item Count",
-      cell: ({ row }) => {
-        const { _count } = row.original;
-        return _count.purchaseOrderItems;
-      }
-    },
 
     {
       accessorKey: "totalDiscount",
-      header: "Total Discount",
+      header: "ส่วนลด",
     },
     {
       accessorKey: "totalTax",
-      header: "Total Tax",
+      header: "ภาษี",
     },
     {
       accessorKey: "createdAt",
-      header: "Created",
+      header: "สร้างเมื่อ",
       cell: ({ row }) => {
         const { createdAt } = row.original
         return getDateFormat(createdAt);

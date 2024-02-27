@@ -34,7 +34,11 @@ const columns = [
     name: "รับเข้า",
     key: "quantity",
     render: (item: PurchaseOrderItemWithRelations) => {
-      return <p>{item.items.length}/{item.quantity}</p>
+      return (
+        <p>
+          {item.items.length}/{item.quantity}
+        </p>
+      );
     },
   },
   {
@@ -109,12 +113,30 @@ const BillingInfo = ({ data }: { data: PurchaseOrderWithRelations }) => {
     <div className="bg-gray-100 p-4 w-full sm:rounded-lg sm:px-6">
       <dl className="divide-y divide-gray-200 text-sm">
         <div className="flex items-center justify-between py-4">
-          <dt className="text-gray-600">Discount</dt>
+          <dt className="text-gray-600">ราคา</dt>
           <dd className="font-medium text-gray-900">
-            {data.totalDiscount?.toLocaleString("th-TH", {
+            {data.totalPrice?.toLocaleString("th-TH", {
               style: "currency",
               currency: "THB",
             }) ?? 0}
+          </dd>
+        </div>
+        <div className="flex items-center justify-between py-4">
+          <dt className="text-gray-600">ส่วนลด</dt>
+          <dd className="font-medium text-gray-900">
+            <input
+              className="h-[35px] border border-gray-300 text-right px-2"
+              defaultValue={0}
+            />
+          </dd>
+        </div>
+        <div className="flex items-center justify-between py-4">
+          <dt className="text-gray-600">ต้นทุนเพิ่ม</dt>
+          <dd className="font-medium text-gray-900">
+            <input
+              className="h-[35px] border border-gray-300 text-right px-2"
+              defaultValue={0}
+            />
           </dd>
         </div>
         <div className="flex items-center justify-between py-4">
@@ -127,7 +149,7 @@ const BillingInfo = ({ data }: { data: PurchaseOrderWithRelations }) => {
           </dd>
         </div>
         <div className="flex items-center justify-between pt-4">
-          <dt className="font-medium text-gray-900">Grand Total</dt>
+          <dt className="font-medium text-gray-900">ราคาทั้งหมด</dt>
           <dd className="font-medium text-primary-600">
             {data.totalPrice?.toLocaleString("th-TH", {
               style: "currency",

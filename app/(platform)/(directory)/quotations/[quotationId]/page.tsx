@@ -97,11 +97,11 @@ export default async function QuotationDetails(
   return (
     <>
       <Breadcrumbs pages={pages} />
-      <div className="grid grid-cols-5 gap-8 mt-6">
-        <div className="col-span-3">
+      <div className="grid  grid-cols-5 gap-8 mt-6">
+        <div className="col-span-5 md:col-span-3">
           {buyer && <CustomerInfo data={buyer} />}
         </div>
-        <div className="col-span-2">
+        <div className="col-span-5 md:col-span-2">
           <QuotationTools
             isLocked={data.isLocked}
             quotationId={data.id}

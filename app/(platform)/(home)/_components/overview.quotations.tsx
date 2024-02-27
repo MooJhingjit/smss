@@ -21,7 +21,7 @@ const columns = [
     },
   },
   {
-    name: "ประเภทการชำระเงิน",
+    name: "การชำระเงิน",
     key: "paymentType",
     render: (item: QuotationWithBuyer) => {
       const paymentType = item.paymentType as PurchaseOrderPaymentType

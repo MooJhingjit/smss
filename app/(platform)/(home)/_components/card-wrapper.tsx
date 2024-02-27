@@ -22,7 +22,7 @@ export default function CardWrapper(props: Props) {
     <Card className="overflow-hidden shadow-lg">
       <CardHeader className="bg-blue-100 p-4 flex flex-row items-center">
         <div className="flex-1 space-y-2">
-          <CardTitle>{title}</CardTitle>
+          <CardTitle className="text-gray-700">{title}</CardTitle>
           {
             description && <CardDescription>{description}</CardDescription>
           }
@@ -55,3 +55,5 @@ export default function CardWrapper(props: Props) {
     </Card>
   );
 }
+
+

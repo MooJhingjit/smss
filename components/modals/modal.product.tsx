@@ -72,7 +72,7 @@ export const NewProductModal = () => {
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle> {product ? "แก้ไขสินค้า" : "สินค้าใหม่"}</DialogTitle>
+          <DialogTitle> {product ? "แก้ไขกลุ่มสินค้า" : "กลุ่มสินค้าใหม่"}</DialogTitle>
           {/* <DialogDescription>Please select the vendor.</DialogDescription> */}
         </DialogHeader>
         <form action={onSubmit} className="grid grid-cols-2 gap-3">
@@ -97,7 +97,7 @@ export const NewProductModal = () => {
           <div className="">
             <FormInput
               id="name"
-              label="ชื่อสินค้า"
+              label="ชื่อสินค้า/บริการ"
               type="text"
               defaultValue={product?.name}
               errors={fieldErrors}

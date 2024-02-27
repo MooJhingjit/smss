@@ -25,7 +25,7 @@ const columns = [
   },
   { name: "จำนวนเงิน", key: "totalPrice" },
   {
-    name: "ประเภทการชำระเงิน",
+    name: "การชำระเงิน",
     key: "paymentType",
     render: (item: PurchaseOrderWithVendor) => {
       const paymentType = item.paymentType as PurchaseOrderPaymentType

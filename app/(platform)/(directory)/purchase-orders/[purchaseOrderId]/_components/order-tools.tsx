@@ -112,6 +112,7 @@ const ItemStatus = ({ curStatus, onStatusChange }: {
             }</SelectItem>
           ))
         }
+        <SelectItem value="closed" >ปิดงาน</SelectItem>
       </SelectContent>
     </Select>
   )

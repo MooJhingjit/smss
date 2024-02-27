@@ -506,7 +506,7 @@ export const QuotationListModal = () => {
       <DialogContent className="sm:max-w-[425px] md:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>
-            <span>รายละเอียดสินค้าในใบ PO</span>
+            <span>รายละเอียดสินค้าในใบ QT</span>
             {
               refs?.quotationRef.type && (
                 <span className={

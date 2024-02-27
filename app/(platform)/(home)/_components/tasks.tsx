@@ -5,7 +5,7 @@ import CardWrapper from "./card-wrapper";
 import { PurchaseOrder, PurchaseOrderPaymentType } from "@prisma/client";
 import TableLists from "@/components/table-lists";
 import { QuotationWithBuyer } from "@/types";
-import { paymentTypeMapping } from "@/app/config";
+import { paymentTypeMapping, quotationStatusMapping } from "@/app/config";
 
 type Props = {
   data: QuotationWithBuyer[];
@@ -21,16 +21,25 @@ const columns = [
     },
   },
   {
-    name: "ประเภทการชำระเงิน",
-    key: "paymentType",
-    render: (item: QuotationWithBuyer) => {
-      const paymentType = item.paymentType as PurchaseOrderPaymentType;
-      return <p className="">{paymentTypeMapping[paymentType]}</p>;
-    },
+    name: "รหัสพนักงาน",
+    key: "sellerId",
+    // render: (item: QuotationWithBuyer) => {
+    //   const paymentType = item.paymentType as PurchaseOrderPaymentType;
+    //   return <p className="">{paymentTypeMapping[paymentType]}</p>;
+    // },
   },
   {
-    name: "จำนวนเงิน",
-    key: "totalPrice",
+    name: "อัพเดทล่าสุด",
+    key: "updatedAt",
+    render: (item: QuotationWithBuyer) => {
+      return <p className="">
+        {new Date(item.updatedAt).toLocaleDateString("th-TH", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })}
+      </p>;
+    }
   },
 ];
 
@@ -39,7 +48,7 @@ export default function Tasks(props: Readonly<Props>) {
   const { onOpen } = usePurchaseModal();
 
   return (
-    <CardWrapper title="งานที่ต้องตรวจสอบ">
+    <CardWrapper title={`งานที่ต้องตรวจสอบ สถานะ: ${quotationStatusMapping['offer']}`}>
       <TableLists<QuotationWithBuyer>
         columns={columns}
         data={data}

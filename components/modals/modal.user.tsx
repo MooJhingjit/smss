@@ -83,13 +83,13 @@ export const NewUserModal = () => {
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
       <DialogContent className="max-w-sm sm:max-w-[625px]">
         <DialogHeader>
-          <DialogTitle>{user ? "Update User" : "Create User"}</DialogTitle>
+          <DialogTitle>{user ? "แก้ไข" : "เพิ่มผู้ใช้ใหม่"}</DialogTitle>
         </DialogHeader>
         <form action={onSubmit} className="grid grid-cols-2 gap-3 mt-3">
           <div className="col-span-2">
             <FormSelect
               id="role"
-              label="Role"
+              label="ประเภท"
               defaultValue={user?.role ?? undefined}
               options={[
                 { id: "buyer", title: "Buyer" },
@@ -101,42 +101,42 @@ export const NewUserModal = () => {
           </div>
           <FormInput
             id="taxId"
-            label="Tax Number"
+            label="เลขผู้เสียภาษี"
             type="number"
             defaultValue={user?.taxId}
             errors={fieldErrors}
           />
           <FormInput
             id="name"
-            label="name"
+            label="ชื่อ"
             type="text"
             defaultValue={user?.name}
             errors={fieldErrors}
           />
           <FormInput
             id="email"
-            label="email"
+            label="อีเมล์"
             type="email"
             defaultValue={user?.email}
             errors={fieldErrors}
           />
           <FormInput
             id="phone"
-            label="phone"
+            label="เบอร์โทร"
             type="text"
             defaultValue={user?.phone ?? undefined}
             errors={fieldErrors}
           />
           <FormInput
             id="fax"
-            label="fax"
+            label="แฟกซ์"
             type="text"
             defaultValue={user?.fax ?? undefined}
             errors={fieldErrors}
           />
           <FormInput
             id="contact"
-            label="contact"
+            label="การติดต่อ"
             type="text"
             defaultValue={user?.contact ?? undefined}
             errors={fieldErrors}
@@ -145,7 +145,7 @@ export const NewUserModal = () => {
             <FormTextarea
               id="address"
               rows={4}
-              label="address"
+              label="ที่อยู่"
               defaultValue={user?.address ?? undefined}
               errors={fieldErrors}
             />

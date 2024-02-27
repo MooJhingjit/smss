@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 
 const pages = [
   {
-    name: "All Users",
+    name: "ผู้ใช้งานทั้งหมด",
     href: "/users",
     current: true,
   },

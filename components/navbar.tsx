@@ -136,7 +136,7 @@ function MenuItems() {
             : "text-gray-500 font-semibold"
         )}
       >
-        สินค้า
+        สินค้า/บริการ
       </Link>
       <Link
         href="/users"

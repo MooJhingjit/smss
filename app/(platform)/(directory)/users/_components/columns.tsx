@@ -23,23 +23,23 @@ export const columns: ColumnDef<User>[] = [
   },
   {
     accessorKey: "name",
-    header: "Name",
+    header: "ชื่อ",
   },
   {
     accessorKey: "phone",
-    header: "Phone",
+    header: "เบอร์โทร",
   },
   {
     accessorKey: "email",
-    header: "Email",
+    header: "อีเมล์",
   },
   {
     accessorKey: "address",
-    header: "Address",
+    header: "ที่อยู่",
   },
   {
     accessorKey: "type",
-    header: "Type",
+    header: "ประเภท",
     cell: ({ row }) => {
       const { role } = row.original;
       return <p className="capitalize">{role}</p>;
