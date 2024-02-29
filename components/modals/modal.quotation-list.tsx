@@ -275,7 +275,7 @@ export const QuotationListModal = () => {
         <div className="col-span-4">
           <FormSearchAsync
             id="productId"
-            label="ค้าหาชื่อสินค้า/บริการ"
+            label="ค้นหาชื่อสินค้า/บริการ"
             required
             config={{
               endpoint: "products",

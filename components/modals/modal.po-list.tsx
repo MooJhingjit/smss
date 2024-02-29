@@ -64,6 +64,7 @@ export const PurchaseOrderListModal = () => {
     ? defaultData?.items.length
     : defaultData?.quantity;
 
+  const isNewItem = !defaultData
   return (
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
       <DialogContent className="sm:max-w-[425px] md:max-w-[600px]">
@@ -86,7 +87,7 @@ export const PurchaseOrderListModal = () => {
               id="price"
               label="ราคาต่อหน่วย"
               type="number"
-              readOnly
+              readOnly={!isNewItem}
               register={register}
               // errors={fieldErrors}
             />
@@ -96,7 +97,7 @@ export const PurchaseOrderListModal = () => {
               id="quantity"
               label="จำนวน"
               type="number"
-              readOnly
+              readOnly={!isNewItem}
               register={register}
               defaultValue={defaultData?.quantity}
               // errors={fieldErrors}
@@ -130,7 +131,6 @@ export const PurchaseOrderListModal = () => {
 const ItemRow = () => {
   return (
     <>
-    
       <FormInput
         id="serialNumber"
         label="ชื่อรุ่น"

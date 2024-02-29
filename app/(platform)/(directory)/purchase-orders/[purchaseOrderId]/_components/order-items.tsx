@@ -16,8 +16,9 @@ import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { updatePurchaseOrder } from "@/actions/po/update";
 import { purchaseOrderItemStatusMapping } from "@/app/config";
-import { PackagePlus } from "lucide-react";
+import { PackagePlus, Plus } from "lucide-react";
 import { useItemModal } from "@/hooks/use-item-modal";
+import { Button } from "@/components/ui/button";
 
 const columns = [
   { name: "#", key: "index" },
@@ -81,7 +82,20 @@ export default function PurchaseOrderItems({
     );
   }
   return (
-    <PageComponentWrapper headerTitle={`รายการสั่งซื้อจาก ${vendor?.name}`}>
+    <PageComponentWrapper
+      headerTitle={`รายการสั่งซื้อจาก ${vendor?.name}`}
+      headerIcon={
+        <Button
+          onClick={() =>
+            modal.onOpen()
+          }
+          variant="secondary"
+          className="flex items-center justify-center  h-5 rounded  "
+        >
+          <Plus className="w-4 h-4 text-gray-400 hover:text-gray-600  cursor-pointer font-semibold" />
+        </Button>
+      }
+    >
       <div className="overflow-x-scroll md:overflow-auto">
         <TableLists<PurchaseOrderItemWithRelations>
           columns={columns}
