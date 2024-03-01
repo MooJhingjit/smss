@@ -25,3 +25,12 @@ export function getDateFormat(date: Date | string) {
 
   return `${year}-${month}-${day}`;
 }
+
+
+export const debounce = <T extends unknown[]>(func: (...args: T) => any, delay: number) => {
+  let timer: NodeJS.Timeout;
+  return function (...args: T) {
+    clearTimeout(timer);
+    timer = setTimeout(() => func(...args), delay);
+  };
+};

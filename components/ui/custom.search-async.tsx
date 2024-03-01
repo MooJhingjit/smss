@@ -3,8 +3,9 @@ import AsyncSelect from "react-select/async";
 import { StylesConfig } from "react-select";
 import { useSearchAsync } from "@/hooks/use-search-async";
 
-export type Config = {
+export type AsyncSelectConfigType = {
   endpoint: string;
+  customRender: (data: any) => any;
   params: Record<string, any>;
 };
 
@@ -41,9 +42,17 @@ const customStyles: StylesConfig = {
   }),
 };
 
-const SearchAsync = React.forwardRef<any, any>(
+type Props = {
+  id: string;
+  className?: string;
+  defaultValue?: any;
+  onSelected: (selected: any) => void;
+  config: AsyncSelectConfigType;
+};
+
+const SearchAsync = React.forwardRef<any, Props>(
   ({ className, id, defaultValue, onSelected, config, ...props }, ref) => {
-    const { search } = useSearchAsync(config.endpoint, config.params);
+    const { search } = useSearchAsync(config);
     return (
       <AsyncSelect
         loadOptions={search}

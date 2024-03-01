@@ -23,6 +23,7 @@ import { MinusCircle, PlusCircle } from "lucide-react";
 import { Button } from "../ui/button";
 import { quotationTypeMapping } from "@/app/config";
 import { classNames } from "@/lib/utils";
+import { ProductWithRelations } from "@/types";
 
 type FormInput = {
   productId: string;
@@ -280,6 +281,13 @@ export const QuotationListModal = () => {
             config={{
               endpoint: "products",
               params: {},
+              customRender: (data: ProductWithRelations) => {
+                return {
+                  value: data.id,
+                  label: `${data.name} (${data.vendor?.name})`,
+                  data: data,
+                };
+              }
             }}
             defaultValue={{
               id: defaultData?.product.id,

@@ -101,7 +101,8 @@ export default async function QuotationDetails(
           {buyer && <CustomerInfo data={buyer} />}
         </div>
         <div className="col-span-5 md:col-span-2">
-          <QuotationTools
+          <QuotationTools 
+            purchaseOrderRef={data.purchaseOrderRef ?? ""}
             isLocked={data.isLocked}
             quotationId={data.id}
             status={data.status}

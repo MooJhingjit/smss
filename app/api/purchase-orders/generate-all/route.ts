@@ -24,20 +24,28 @@ export async function POST(req: NextRequest) {
     // group quotation lists by vendor
     const quotationListsByVendor = getQuotationGroupByVendor(quotationLists as QuotationListWithRelations[])
 
+    let sumTotalPrice: number = 0;
+    let sumTotalDiscount: number = 0;
+    let sumTotalTax: number = 0
+
     // create purchase orders for each vendor
     const purchaseOrders = await Promise.all(Object.keys(quotationListsByVendor).map(async (vendorId) => {
 
       const vendorIdNum = Number(vendorId)
-
       const lists = quotationListsByVendor[vendorIdNum]
-      const { totalPrice, totalDiscount } = getQuotationTotalPrice(lists)
+      const { totalCost, totalPrice, totalDiscount, totalTax } = getQuotationTotalPrice(lists)
+
+      // summary of total price, tax and total discount for quotation
+      sumTotalPrice += totalPrice
+      sumTotalDiscount += totalDiscount
+      sumTotalTax += totalTax
 
       const purchaseOrder = await db.purchaseOrder.create({
         data: {
           code: "DRAFT-PO-" + Math.floor(Math.random() * 1000000),
           vendorId: Number(vendorId),
           quotationId: body.quotationId,
-          totalPrice,
+          totalPrice: totalCost,
           totalDiscount,
           status: "draft"
         }
@@ -53,6 +61,17 @@ export async function POST(req: NextRequest) {
       return purchaseOrder
     }))
 
+    // update total price, tax and total discount for quotation
+    await db.quotation.update({
+      where: { id: body.quotationId },
+      data: {
+        totalPrice: sumTotalPrice,
+        totalDiscount: sumTotalDiscount,
+        totalTax: sumTotalTax,
+      },
+    });
+
+
     // generate purchase order items
     const res = await Promise.all(purchaseOrders.map(async (purchaseOrder) => {
       const quotationLists = quotationListsByVendor[purchaseOrder.vendorId]
@@ -66,9 +85,23 @@ export async function POST(req: NextRequest) {
             status: 'pending'
           }
         })
+
+        // generate Items based on purchaseOrder item quantity
+        await Promise.all(Array.from({ length: purchaseOrderItem.quantity ?? 1 }).map(async () => (
+          await db.item.create({
+            data: {
+              productId: quotationList.productId ?? 0,
+              purchaseOrderItemId: purchaseOrderItem.id,
+              name: quotationList.product.name,
+              cost: quotationList.cost,
+            }
+          })
+        )))
+
         return purchaseOrderItem
       }))
     }))
+
 
     // lock quotation
     await db.quotation.update({

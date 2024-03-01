@@ -11,22 +11,23 @@ export const getQuotationGroupByVendor = (quotationLists: QuotationListWithRelat
 }
 export const getQuotationTotalPrice = (items: QuotationListWithRelations[]) => {
   // get total price and discount for each vendor
-  const totalPrice = items.reduce((acc, curr) => {
-    return acc + ((curr.cost ?? 0) * (curr.quantity ?? 0))
-  }, 0)
-
-  const quantity = items.reduce((acc, curr) => {
-    return acc + (curr.quantity ?? 0)
-  }, 0)
-
-  // TODO  TBC
-  // const totalDiscount = quotationListsByVendor[vendorIdNum].reduce((acc, curr) => {
-  //   return acc + (curr?.discount ?? 0)
-  // }, 0)
-
-  return {
-    totalPrice,
-    totalDiscount: 0,
-    quantity
+  const summary = items.reduce((acc, curr) => {
+    const quantity = curr.quantity ?? 0
+    return {
+      totalCost: acc.totalCost + ((curr.cost ?? 0) * quantity),
+      totalPrice: acc.totalPrice + ((curr.price ?? 0) * quantity),
+      totalDiscount: acc.totalDiscount + (curr.discount ?? 0),
+      quantity: acc.quantity + quantity,
+      totalTax: acc.totalTax + (curr.withholdingTax ?? 0) 
+    }
   }
+    , {
+      totalCost: 0,
+      totalPrice: 0,
+      totalDiscount: 0,
+      quantity: 0,
+      totalTax: 0
+    })
+
+  return summary
 }

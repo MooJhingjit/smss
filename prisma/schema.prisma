@@ -99,6 +99,7 @@ enum QuotationStatus {
 model Quotation {
   id                    Int             @id @default(autoincrement())
   code                  String
+  purchaseOrderRef       String?
   type                  QuotationType   @default(product)
   buyerId               Int
   buyer                 User            @relation(fields: [buyerId], references: [id], name: "buyer")

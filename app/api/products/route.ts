@@ -19,6 +19,9 @@ export async function GET(
     }
 
     const product = await db.product.findMany({
+      include: {
+        vendor: true,
+      },
       where: {
         OR: [
           {

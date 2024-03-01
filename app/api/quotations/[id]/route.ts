@@ -12,7 +12,7 @@ export async function PUT(req: NextRequest, context: { params: { id: number } })
     }
 
     // body whitelist
-    const bodyWhitelist = ["status"];
+    const bodyWhitelist = ["status", "purchaseOrderRef"];
 
     // check if body has any keys that are not in the whitelist
     const body = await req.json();

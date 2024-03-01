@@ -27,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import { FormInput } from "@/components/form/form-input";
 
 type Props = {
+  purchaseOrderRef: string;
   quotationId: number;
   type: QuotationType;
   status: QuotationStatus;
@@ -34,12 +35,13 @@ type Props = {
 };
 
 export default function QuotationTools(props: Props) {
-  const { quotationId, status, isLocked } = props;
+  const { purchaseOrderRef, quotationId, status, isLocked } = props;
 
   const { mutate } = useMutation<
     MutationResponseType,
     Error,
     {
+      purchaseOrderRef?: string;
       status: QuotationStatus;
     }
   >({
@@ -54,8 +56,15 @@ export default function QuotationTools(props: Props) {
     },
   });
 
-  const handleItemChange = (status: QuotationStatus) => {
-    mutate({ status });
+  const handleItemChange = (payload: {
+    status?: QuotationStatus;
+    purchaseOrderRef?: string;
+  }) => {
+    console.log("payload", payload)
+    mutate({
+      status: payload.status ?? status,
+      purchaseOrderRef: payload.purchaseOrderRef ?? purchaseOrderRef,
+    });
   };
 
   return (
@@ -66,18 +75,18 @@ export default function QuotationTools(props: Props) {
         </div> */}
 
         <div className="col-span-6">
-          <ItemStatus onStatusChange={handleItemChange} curStatus={status} />
+          <ItemStatus onStatusChange={(s) => {
+            handleItemChange({ status: s });
+          }} curStatus={status} />
         </div>
         <div className="col-span-5"></div>
         <div className="col-span-1 flex items-center">
           {isLocked && <LockIcon className="w-6 h-6 text-yellow-500" />}
         </div>
         <div className="col-span-4 flex items-center">
-          <FormInput
-            id="Ref_PO"
-            label="อ้างอิงใบสั่งซื้อ"
-            className="text-xs w-full"
-            placeholder="PO-xxxxxx"
+          <PurchaseOrderRefInput
+            defaultValue={purchaseOrderRef}
+            onUpdate={handleItemChange}
           />
         </div>
         <div className="col-span-5 flex  items-end">
@@ -134,3 +143,30 @@ const PrintButton = () => {
     </Button>
   );
 };
+
+
+const PurchaseOrderRefInput = ({ onUpdate, defaultValue }: {
+  onUpdate: (payload: { purchaseOrderRef: string, }) => void;
+  defaultValue: string;
+}) => {
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  return (
+    <FormInput
+      id="Ref_PO"
+      label="อ้างอิงใบสั่งซื้อ"
+      ref={inputRef}
+      className="text-xs w-full"
+      placeholder="PO-xxxxxx"
+      defaultValue={defaultValue}
+      onBlur={() => {
+        // get current value
+        const purchaseOrderRef = inputRef.current?.value || "";
+
+        // check if value is different from default
+        if (purchaseOrderRef === defaultValue) return;
+
+        onUpdate({ purchaseOrderRef });
+      }}
+    />
+  )
+}
