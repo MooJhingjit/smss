@@ -10,23 +10,24 @@ export const getQuotationGroupByVendor = (quotationLists: QuotationListWithRelat
   }, {})
 }
 export const getQuotationTotalPrice = (items: QuotationListWithRelations[]) => {
+  console.log(items);
   // get total price and discount for each vendor
   const summary = items.reduce((acc, curr) => {
     const quantity = curr.quantity ?? 0
     return {
       totalCost: acc.totalCost + ((curr.cost ?? 0) * quantity),
       totalPrice: acc.totalPrice + ((curr.price ?? 0) * quantity),
-      totalDiscount: acc.totalDiscount + (curr.discount ?? 0),
+      discount: acc.discount + (curr.discount ?? 0),
       quantity: acc.quantity + quantity,
-      totalTax: acc.totalTax + (curr.withholdingTax ?? 0) 
+      tax: acc.tax + (curr.withholdingTax ?? 0) 
     }
   }
     , {
       totalCost: 0,
       totalPrice: 0,
-      totalDiscount: 0,
+      discount: 0,
       quantity: 0,
-      totalTax: 0
+      tax: 0
     })
 
   return summary

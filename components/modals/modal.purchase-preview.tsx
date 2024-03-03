@@ -33,7 +33,7 @@ const columns = [
     },
   },
   { name: "จำนวนสินค้า", key: "quantity" },
-  { name: "ราคาทั้งหมด", key: "totalPrice" },
+  { name: "ราคาทั้งหมด", key: "totalCost" },
 ];
 
 

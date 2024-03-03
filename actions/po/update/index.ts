@@ -6,29 +6,52 @@ import { schema } from "./schema";
 import { revalidatePath } from "next/cache";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-  const { id, remark } = data;
+  const {
+    id,
+    remark,
+    formType,
+    discount,
+    extraCost,
+    // totalPrice,
+    tax,
+    vat,
+    grandTotal,
+  } = data;
   let purchaseOrder;
   try {
     if (!id) {
       return {
-        error: "Failed to create.",
+        error: "Failed to update.",
       };
     }
 
-    purchaseOrder = await db.purchaseOrder.update({
-      where: { id },
-      data: { remark },
-    });
+    if (formType === "billing") {
+      purchaseOrder = await db.purchaseOrder.update({
+        where: { id },
+        data: {
+          discount,
+          extraCost,
+          // totalPrice,
+          tax,
+          vat,
+          grandTotal,
+        },
+      });
+    } else {
+      purchaseOrder = await db.purchaseOrder.update({
+        where: { id },
+        data: { remark },
+      });
+    }
 
-  
   } catch (error) {
     console.log("error", error);
     return {
-      error: "Failed to create.",
+      error: "Failed to update.",
     };
   }
 
-  revalidatePath("/purchases/[purchaseOrderId]")
+  revalidatePath("/purchases/[purchaseOrderId]");
 
   return { data: purchaseOrder };
 };

@@ -99,15 +99,15 @@ enum QuotationStatus {
 model Quotation {
   id                    Int             @id @default(autoincrement())
   code                  String
-  purchaseOrderRef       String?
+  purchaseOrderRef      String?
   type                  QuotationType   @default(product)
   buyerId               Int
   buyer                 User            @relation(fields: [buyerId], references: [id], name: "buyer")
   sellerId              Int?
   seller                User?           @relation(fields: [sellerId], references: [id], name: "seller")
-  totalDiscount         Float?
+  discount         Float?
   totalPrice            Float?
-  totalTax              Float?
+  tax              Float?
   paymentType           String          @default("cash")
   paymentDueDate        DateTime?
   withholdingTax        Float?
@@ -180,9 +180,12 @@ model PurchaseOrder {
   quotation          Quotation?               @relation(fields: [quotationId], references: [id])
   vendorId           Int
   vendor             User                     @relation(fields: [vendorId], references: [id], name: "vendor")
-  totalDiscount      Float?
-  totalTax           Float?
+  discount           Float?
+  extraCost          Float?
   totalPrice         Float?
+  tax                Float?
+  vat                Float?
+  grandTotal         Float?
   status             PurchaseOrderStatus      @default(draft)
   paymentType        PurchaseOrderPaymentType @default(cash)
   paymentDueDate     DateTime?

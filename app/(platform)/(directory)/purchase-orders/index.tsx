@@ -12,8 +12,8 @@ export const purchaseOrderColumns = [
       return item.vendor?.name;
     },
   },
-  { name: "ส่วนลด", key: "totalDiscount" },
-  { name: "Total Price", key: "totalPrice" },
+  { name: "ส่วนลด", key: "discount" },
+  { name: "ราคาสั่งซื้อ", key: "grandTotal" },
   {
     name: "สร้างเมื่อ",
     key: "createdAt",

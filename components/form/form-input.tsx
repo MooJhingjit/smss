@@ -23,6 +23,7 @@ interface FormInputProps {
   readOnly?: boolean;
   onBlur?: () => void;
   register?: UseFormRegister<any>;
+  step?: string;
 }
 
 export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
@@ -39,7 +40,8 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
       defaultValue = "",
       onBlur,
       register,
-      readOnly
+      readOnly,
+      step = "any",
     },
     ref,
   ) => {
@@ -71,6 +73,7 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
             disabled={pending || disabled}
             className={cn("text-xs", className)}
             aria-describedby={`${id}-error`}
+            step={step}
           />
         </div>
       </div>

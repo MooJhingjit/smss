@@ -6,7 +6,6 @@ import {
   PurchaseOrderItemWithRelations,
   PurchaseOrderWithRelations,
 } from "@/types";
-import { PurchaseOrderItem } from "@prisma/client";
 import TableLists from "@/components/table-lists";
 import { usePurchaseOrderListModal } from "@/hooks/use-po-list-modal";
 import { FormTextarea } from "@/components/form/form-textarea";
@@ -16,9 +15,9 @@ import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { updatePurchaseOrder } from "@/actions/po/update";
 import { purchaseOrderItemStatusMapping } from "@/app/config";
-import { PackagePlus, Plus } from "lucide-react";
-import { useItemModal } from "@/hooks/use-item-modal";
+import {  Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import BillingInfo from "./billing-info";
 
 const columns = [
   { name: "#", key: "index" },
@@ -109,9 +108,9 @@ export default function PurchaseOrderItems({
         <div className="grid grid-cols-5 gap-4 mt-4">
           <div className="col-span-5 md:col-span-3 ">
             <Remarks id={data.id} remark={data.remark} />
-            <div className="mt-2 bg-gray-50 p-3 rounded">
+            {/* <div className="mt-2 bg-gray-50 p-3 rounded">
               <TaxInfo />
-            </div>
+            </div> */}
           </div>
           <div className="col-span-5 md:col-span-2">
             <BillingInfo data={data} />
@@ -122,59 +121,7 @@ export default function PurchaseOrderItems({
   );
 }
 
-const BillingInfo = ({ data }: { data: PurchaseOrderWithRelations }) => {
-  return (
-    <div className="bg-gray-100 p-4 w-full sm:rounded-lg sm:px-6">
-      <dl className="divide-y divide-gray-200 text-sm">
-        <div className="flex items-center justify-between py-4">
-          <dt className="text-gray-600">ราคา</dt>
-          <dd className="font-medium text-gray-900">
-            {data.totalPrice?.toLocaleString("th-TH", {
-              style: "currency",
-              currency: "THB",
-            }) ?? 0}
-          </dd>
-        </div>
-        <div className="flex items-center justify-between py-4">
-          <dt className="text-gray-600">ส่วนลด</dt>
-          <dd className="font-medium text-gray-900">
-            <input
-              className="h-[35px] border border-gray-300 text-right px-2"
-              defaultValue={0}
-            />
-          </dd>
-        </div>
-        <div className="flex items-center justify-between py-4">
-          <dt className="text-gray-600">ต้นทุนเพิ่ม</dt>
-          <dd className="font-medium text-gray-900">
-            <input
-              className="h-[35px] border border-gray-300 text-right px-2"
-              defaultValue={0}
-            />
-          </dd>
-        </div>
-        <div className="flex items-center justify-between py-4">
-          <dt className="text-gray-600">7% Vat</dt>
-          <dd className="font-medium text-gray-900">
-            {data.totalTax?.toLocaleString("th-TH", {
-              style: "currency",
-              currency: "THB",
-            }) ?? 0}
-          </dd>
-        </div>
-        <div className="flex items-center justify-between pt-4">
-          <dt className="font-medium text-gray-900">ราคาทั้งหมด</dt>
-          <dd className="font-medium text-primary-600">
-            {data.totalPrice?.toLocaleString("th-TH", {
-              style: "currency",
-              currency: "THB",
-            }) ?? 0}
-          </dd>
-        </div>
-      </dl>
-    </div>
-  );
-};
+
 type FormRemark = {
   id: number;
   remark: string | null;
@@ -209,7 +156,7 @@ const Remarks = ({ id, remark }: { id: number; remark: string | null }) => {
 
   const onSubmit = async () => {
     const remark = getValues("remark") ?? "";
-    handleUpdate.execute({ id, remark });
+    handleUpdate.execute({ id, remark, formType: "remark" });
   };
 
   return (

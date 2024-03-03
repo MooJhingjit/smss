@@ -79,9 +79,7 @@ export const QuotationListModal = () => {
         : "",
       discount: defaultData?.discount ? defaultData.discount.toString() : "",
       description: defaultData?.description ?? "",
-      subItems: defaultData?.subItems
-        ? defaultData.subItems
-        : "[]",
+      subItems: defaultData?.subItems ? defaultData.subItems : "[]",
     };
     reset(formData);
   }, [defaultData, reset]);
@@ -127,7 +125,6 @@ export const QuotationListModal = () => {
     const discount = formData.get("discount") as string;
     const description = formData.get("description") as string;
 
-
     if (!refs?.quotationRef?.id || !product) {
       toast.error("จำเป็นต้องกรอกข้อมูลให้ครบ");
       return;
@@ -163,7 +160,6 @@ export const QuotationListModal = () => {
   };
 
   const onServiceSubmit = async (formData: FormData) => {
-
     const unitPrice = formData.get("unitPrice") as string;
     const quantity = formData.get("quantity") as string;
     const total = formData.get("totalPrice") as string;
@@ -186,7 +182,7 @@ export const QuotationListModal = () => {
       discount: discount ? parseFloat(discount) : 0,
       subItems: getValues("subItems"),
       quotationType: refs.quotationRef.type,
-      productId: 0 // service doesn't have product id
+      productId: 0, // service doesn't have product id
     };
 
     if (defaultData?.id) {
@@ -197,8 +193,8 @@ export const QuotationListModal = () => {
       return;
     }
 
-    handleCreate.execute({ ...payload, quotationType: refs.quotationRef.type, });
-  }
+    handleCreate.execute({ ...payload, quotationType: refs.quotationRef.type });
+  };
 
   const fieldErrors = (defaultData?.id ? handleUpdate : handleCreate)
     .fieldErrors;
@@ -206,7 +202,7 @@ export const QuotationListModal = () => {
   // summary of product
 
   useEffect(() => {
-    if (isService) return
+    if (isService) return;
 
     const cost = watch("cost");
     const percentage = watch("percentage");
@@ -243,13 +239,13 @@ export const QuotationListModal = () => {
 
   // summary of service
   useEffect(() => {
-    if (isProduct) return
+    if (isProduct) return;
 
     // summary for service
 
-    const unitPrice = watch('unitPrice');
-    const quantity = watch('quantity');
-    const discount = watch('discount');
+    const unitPrice = watch("unitPrice");
+    const quantity = watch("quantity");
+    const discount = watch("discount");
     let totalPrice = parseFloat(unitPrice);
     if (quantity) {
       totalPrice = parseFloat(unitPrice) * parseFloat(quantity);
@@ -258,21 +254,19 @@ export const QuotationListModal = () => {
       totalPrice = totalPrice - parseFloat(discount);
     }
     setValue("totalPrice", totalPrice.toString());
-  }, [
-    watch('unitPrice'),
-    watch('quantity'),
-    watch('discount')
-  ])
+  }, [watch("unitPrice"), watch("quantity"), watch("discount")]);
 
   const subItems = getValues("subItems");
 
-  if (!modal.isOpen) return
+  if (!modal.isOpen) return;
 
   const renderProductForm = () => {
     return (
       <form
         key={refs?.timestamps}
-        action={onProductSubmit} className="grid grid-cols-4 gap-3 mt-3">
+        action={onProductSubmit}
+        className="grid grid-cols-4 gap-3 mt-3"
+      >
         <div className="col-span-4">
           <FormSearchAsync
             id="productId"
@@ -287,7 +281,7 @@ export const QuotationListModal = () => {
                   label: `${data.name} (${data.vendor?.name})`,
                   data: data,
                 };
-              }
+              },
             }}
             defaultValue={{
               id: defaultData?.product.id,
@@ -318,6 +312,7 @@ export const QuotationListModal = () => {
             id="cost"
             label="ต้นทุน"
             required
+            step="0.01"
             register={register}
             type="number"
             errors={fieldErrors}
@@ -421,16 +416,16 @@ export const QuotationListModal = () => {
           <FormSubmit>{defaultData?.id ? "อัพเดท" : "สร้างใหม่"}</FormSubmit>
         </div>
       </form>
-    )
-  }
+    );
+  };
 
   const renderServiceForm = () => {
     return (
       <form
         key={refs?.timestamps}
-        action={onServiceSubmit} className="grid grid-cols-4 gap-3 mt-3">
-
-
+        action={onServiceSubmit}
+        className="grid grid-cols-4 gap-3 mt-3"
+      >
         <div className="col-span-4">
           <FormTextarea
             id="name"
@@ -438,7 +433,6 @@ export const QuotationListModal = () => {
             defaultValue={defaultData?.name}
             errors={fieldErrors}
             rows={12}
-
           />
         </div>
 
@@ -448,6 +442,7 @@ export const QuotationListModal = () => {
             label="ราคาขายต่อหน่วย"
             required
             type="number"
+            step="0.01"
             register={register}
             errors={fieldErrors}
           />
@@ -505,9 +500,8 @@ export const QuotationListModal = () => {
           <FormSubmit>{defaultData?.id ? "อัพเดท" : "สร้างใหม่"}</FormSubmit>
         </div>
       </form>
-    )
-  }
-
+    );
+  };
 
   return (
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
@@ -515,39 +509,39 @@ export const QuotationListModal = () => {
         <DialogHeader>
           <DialogTitle>
             <span>รายละเอียดสินค้าในใบ QT</span>
-            {
-              refs?.quotationRef.type && (
-                <span className={
-                  classNames(
-                    "ml-2 inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ",
-                    isProduct ? "bg-gray-100 text-gray-800" : "bg-green-100 text-green-800"
-                  )
-                }>
-                  {
-                    quotationTypeMapping[refs?.quotationRef.type]
-                  }
-                </span>
-              )
-            }
+            {refs?.quotationRef.type && (
+              <span
+                className={classNames(
+                  "ml-2 inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ",
+                  isProduct
+                    ? "bg-gray-100 text-gray-800"
+                    : "bg-green-100 text-green-800"
+                )}
+              >
+                {quotationTypeMapping[refs?.quotationRef.type]}
+              </span>
+            )}
           </DialogTitle>
         </DialogHeader>
-        {
-          isProduct ?
-            renderProductForm()
-            :
-            renderServiceForm()
-        }
+        {isProduct ? renderProductForm() : renderServiceForm()}
       </DialogContent>
     </Dialog>
   );
 };
 
-const SubItems = ({ setValue, defaultSubItems }: { setValue: any, defaultSubItems: string }) => {
+const SubItems = ({
+  setValue,
+  defaultSubItems,
+}: {
+  setValue: any;
+  defaultSubItems: string;
+}) => {
   const [subItems, setSubItems] = useState<
-    {
-      label: string;
-      quantity: string;
-    }[] | null
+    | {
+        label: string;
+        quantity: string;
+      }[]
+    | null
   >(null);
 
   useEffect(() => {
@@ -555,17 +549,16 @@ const SubItems = ({ setValue, defaultSubItems }: { setValue: any, defaultSubItem
     setSubItems(JSON.parse(defaultSubItems));
   }, [defaultSubItems]);
 
-  console.log('subItems2', subItems)
+  console.log("subItems2", subItems);
 
   const handleAdd = () => {
-    setSubItems([...subItems || [], { label: "", quantity: "" }]);
+    setSubItems([...(subItems || []), { label: "", quantity: "" }]);
   };
 
   const handleRemove = (index: number) => {
     const items = subItems?.filter((_, i) => i !== index);
     setSubItems(items ?? []);
     setValue("subItems", JSON.stringify(items));
-
   };
 
   const handleSubItemChange = (index: number, key: string, value: string) => {
@@ -581,7 +574,6 @@ const SubItems = ({ setValue, defaultSubItems }: { setValue: any, defaultSubItem
     setSubItems(items ?? []);
     setValue("subItems", JSON.stringify(items));
   };
-
 
   return (
     <div className="col-span-4">
@@ -627,7 +619,3 @@ const SubItems = ({ setValue, defaultSubItems }: { setValue: any, defaultSubItem
     </div>
   );
 };
-
-
-
-

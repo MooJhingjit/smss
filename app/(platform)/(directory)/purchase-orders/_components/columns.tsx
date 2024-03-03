@@ -37,11 +37,11 @@ export const columns: ColumnDef<PurchaseOrderWithRelations & {
     },
 
     {
-      accessorKey: "totalDiscount",
+      accessorKey: "discount",
       header: "ส่วนลด",
     },
     {
-      accessorKey: "totalTax",
+      accessorKey: "tax",
       header: "ภาษี",
     },
     {

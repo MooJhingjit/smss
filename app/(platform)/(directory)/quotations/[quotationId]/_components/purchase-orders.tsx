@@ -48,15 +48,14 @@ export default function PurchaseOrders(props: {
         const vendorIdNum = Number(vendorId);
 
         const lists = quotationListsByVendor[vendorIdNum];
-        const { totalPrice, totalDiscount, quantity } =
+        const { totalCost, quantity } =
           getQuotationTotalPrice(lists);
 
         return {
           id: vendorIdNum,
           vendor: lists[0].product.vendor,
           quantity: quantity,
-          totalPrice,
-          totalDiscount,
+          totalCost,
         };
       }
     );

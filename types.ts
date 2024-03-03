@@ -46,8 +46,8 @@ export type PurchaseOrderWithRelations = PurchaseOrder & {
 export type PurchaseOrderPreview = {
   id: number;
   vendor: User;
-  totalPrice: number;
-  totalDiscount: number;
+  totalCost: number;
+  discount: number;
   quantity: number;
 };
 
