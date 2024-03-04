@@ -89,7 +89,7 @@ export const PurchaseOrderListModal = () => {
               type="number"
               readOnly={!isNewItem}
               register={register}
-              // errors={fieldErrors}
+            // errors={fieldErrors}
             />
           </div>
           <div className="col-span-2">
@@ -100,7 +100,7 @@ export const PurchaseOrderListModal = () => {
               readOnly={!isNewItem}
               register={register}
               defaultValue={defaultData?.quantity}
-              // errors={fieldErrors}
+            // errors={fieldErrors}
             />
           </div>
           <div className="col-span-2 flex items-center space-x-2">
@@ -111,10 +111,10 @@ export const PurchaseOrderListModal = () => {
           </div>
           <div className="col-span-4">
             <div className="w-full rounded-md bg-green-50 p-4 border border-green-200">
-              <div className="grid grid-cols-4 gap-3">
+              <div className="space-y-8">
                 {defaultItemLength &&
                   Array.from({ length: defaultItemLength }).map((_, index) => (
-                    <ItemRow key={index} />
+                    <NewItem key={index} />
                   ))}
               </div>
             </div>
@@ -128,41 +128,59 @@ export const PurchaseOrderListModal = () => {
   );
 };
 
-const ItemRow = () => {
+const NewItem = () => {
   return (
-    <>
-      <FormInput
-        id="serialNumber"
-        label="ชื่อรุ่น"
-        type="text"
-        // defaultValue={item?.serialNumber}
-        // errors={fieldErrors}
-      />
-      <FormInput
-        id="serialNumber"
-        label="รหัส (SN)"
-        type="text"
-        // defaultValue={item?.serialNumber}
-        // errors={fieldErrors}
-      />
-      <FormInput
-        id="warranty"
-        label="ระยะเวลาการรับประกัน"
-        type="date"
-        // defaultValue={
-        //   item?.warrantyDate
-        //     ? new Date(item.warrantyDate).toISOString().slice(0, 10)
-        //     : undefined
-        // }
-        // errors={fieldErrors}
-      />
-      <FormInput
-        id="description"
-        label="หมายเหตุ"
-        type="text"
-        // defaultValue={item?.name}
-        // errors={fieldErrors}
-      />
-    </>
+    <div className="flex items-start ">
+      <div className="flex-0 pr-3">
+        <p className="text-xs -mt-1">1</p>
+      </div>
+      <div className="flex-1">
+        <div className="grid grid-cols-4 gap-3">
+          <div className="col-span-2">
+            <FormInput
+              id="serialNumber"
+              label="ชื่อรุ่น"
+              type="text"
+            // defaultValue={item?.serialNumber}
+            // errors={fieldErrors}
+            />
+          </div>
+          <div className="col-span-2">
+
+            <FormInput
+              id="serialNumber"
+              label="รหัส (SN)"
+              type="text"
+            // defaultValue={item?.serialNumber}
+            // errors={fieldErrors}
+            />
+          </div>
+          <div className="col-span-2">
+
+            <FormInput
+              id="warranty"
+              label="ระยะเวลาการรับประกัน"
+              type="date"
+            // defaultValue={
+            //   item?.warrantyDate
+            //     ? new Date(item.warrantyDate).toISOString().slice(0, 10)
+            //     : undefined
+            // }
+            // errors={fieldErrors}
+            />
+          </div>
+          <div className="col-span-2">
+
+            <FormInput
+              id="description"
+              label="หมายเหตุ"
+              type="text"
+            // defaultValue={item?.name}
+            // errors={fieldErrors}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
