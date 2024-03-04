@@ -10,7 +10,6 @@ export const getQuotationGroupByVendor = (quotationLists: QuotationListWithRelat
   }, {})
 }
 export const getQuotationTotalPrice = (items: QuotationListWithRelations[]) => {
-  console.log(items);
   // get total price and discount for each vendor
   const summary = items.reduce((acc, curr) => {
     const quantity = curr.quantity ?? 0
