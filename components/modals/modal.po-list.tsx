@@ -46,7 +46,6 @@ export const PurchaseOrderListModal = () => {
     },
     onError: (error) => {
       toast.error(error);
-      console.log("error", error);
     },
   });
 
