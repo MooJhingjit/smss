@@ -9,7 +9,7 @@ import { InputType, ReturnType } from "./types";
 import { Schema } from "./schema";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-  const { id, name, cost, warrantyDate, serialNumber, status } = data;
+  const { id, name, warrantyDate, serialNumber, description } = data;
 
   let item;
   try {
@@ -19,10 +19,9 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       },
       data: {
         name,
-        cost: cost ? parseFloat(cost) : null,
         warrantyDate: warrantyDate ? new Date(warrantyDate) : null,
         serialNumber,
-        status,
+        description,
       },
     });
   } catch (e) {

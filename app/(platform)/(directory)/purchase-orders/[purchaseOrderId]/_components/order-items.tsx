@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { updatePurchaseOrder } from "@/actions/po/update";
 import { purchaseOrderItemStatusMapping } from "@/app/config";
-import {  Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BillingInfo from "./billing-info";
 
@@ -84,15 +84,17 @@ export default function PurchaseOrderItems({
     <PageComponentWrapper
       headerTitle={`รายการสั่งซื้อจาก ${vendor?.name}`}
       headerIcon={
-        <Button
-          onClick={() =>
-            modal.onOpen()
-          }
-          variant="secondary"
-          className="flex items-center justify-center  h-5 rounded  "
-        >
-          <Plus className="w-4 h-4 text-gray-400 hover:text-gray-600  cursor-pointer font-semibold" />
-        </Button>
+        !data.quotationId && (
+          <Button
+            onClick={() =>
+              modal.onOpen()
+            }
+            variant="secondary"
+            className="flex items-center justify-center  h-5 rounded  "
+          >
+            <Plus className="w-4 h-4 text-gray-400 hover:text-gray-600  cursor-pointer font-semibold" />
+          </Button>
+        )
       }
     >
       <div className="overflow-x-scroll md:overflow-auto">

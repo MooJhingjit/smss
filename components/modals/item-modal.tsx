@@ -37,7 +37,7 @@ export const ItemModal = () => {
 
   const handleUpdate = useAction(updateItem, {
     onSuccess: (data) => {
-      toast.success("User updated");
+      toast.success("สำเร็จ");
       modal.onClose();
     },
     onError: (error) => {
@@ -55,16 +55,14 @@ export const ItemModal = () => {
     const name = formData.get("name") as string;
     const serialNumber = formData.get("serialNumber") as string;
     const warrantyDate = formData.get("warranty") as string;
-    const cost = formData.get("cost") as string;
-    const status = formData.get("status") as ItemStatus;
+    const description = formData.get("description") as string;
 
     const payload = {
       productId: productRef?.id,
       name,
       serialNumber,
       warrantyDate,
-      cost,
-      status,
+      description,
     };
 
     if (item?.id) {
@@ -75,7 +73,7 @@ export const ItemModal = () => {
       });
       return;
     }
-    handleCreate.execute({ ...payload });
+    // handleCreate.execute({ ...payload });
   };
 
   const fieldErrors = (item?.id ? handleUpdate : handleCreate).fieldErrors;
@@ -101,7 +99,7 @@ export const ItemModal = () => {
         </DialogHeader>
 
         <form action={onSubmit} className="grid grid-cols-2 gap-3 mt-3">
-          <div className="col-span-2">
+          {/* <div className="col-span-2">
             <FormInput
               id="name"
               label="เลบใบ PO"
@@ -109,7 +107,7 @@ export const ItemModal = () => {
               defaultValue={item?.name}
               errors={fieldErrors}
             />
-          </div>
+          </div> */}
 
           <FormInput
             id="name"
@@ -143,12 +141,19 @@ export const ItemModal = () => {
             defaultValue={item?.cost}
             errors={fieldErrors}
           /> */}
-          <FormSelect
+          <FormInput
+            id="description"
+            label="หมายเหตุ"
+            type="text"
+            defaultValue={item?.description}
+          // errors={fieldErrors}
+          />
+          {/* <FormSelect
             id="status"
             label="สถานะ"
             defaultValue={item?.status ?? undefined}
             options={[{ id: "pending", title: "Pending" }]}
-          />
+          /> */}
           <div className="col-span-2  flex justify-end">
             <FormSubmit>{item ? "Update Item" : "Create Item"}</FormSubmit>
           </div>
