@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { NewQuotationModal } from "@/components/modals/modal-quotation";
 import { NewPurchaseModal } from "@/components/modals/modal.purchase-orders";
 import { NewProductModal } from "../modals/modal.product";
-// import { ProductItemModal } from "../modals/modal.product-items";
 import { NewUserModal } from "../modals/modal.user";
 import { ItemModal } from "../modals/item-modal";
 import { QuotationListModal } from "../modals/modal.quotation-list";
@@ -29,7 +28,6 @@ export const ModalProvider = () => {
       <ItemModal />
       <QuotationListModal />
       <PurchasePreviewModal />
-      {/* <ProductItemModal /> */}
       <NewProductModal />
       <NewQuotationModal />
       <NewPurchaseModal />

@@ -54,7 +54,6 @@ export const useSearchAsync = (
   // }
 
 
-    console.log("search", search)
   return {
     search,
   };

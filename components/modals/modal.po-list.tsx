@@ -13,12 +13,16 @@ import { useEffect } from "react";
 import { FormSubmit } from "../form/form-submit";
 import { useAction } from "@/hooks/use-action";
 import { toast } from "sonner";
-import { Item } from "@prisma/client";
+import { Item, Product } from "@prisma/client";
 import { PackagePlus } from "lucide-react";
 import { updateItem } from "@/actions/item/update";
 import { createPurchaseItem } from "@/actions/po-list/create";
+import { FormSearchAsync } from "../form/form-search-async";
+import { ProductWithRelations } from "@/types";
+import { get } from "http";
 
 type FormInput = {
+  productId: string;
   name: string;
   price: string;
   quantity: string;
@@ -26,7 +30,7 @@ type FormInput = {
 export const PurchaseOrderListModal = () => {
   const modal = usePurchaseOrderListModal();
   const defaultData = modal.data;
-  const { register, reset } = useForm<FormInput>({
+  const { register, reset, setValue, getValues } = useForm<FormInput>({
     mode: "onChange",
   });
 
@@ -39,7 +43,7 @@ export const PurchaseOrderListModal = () => {
     reset(formData);
   }, [defaultData, reset]);
 
-  const handleUpdate = useAction(createPurchaseItem, {
+  const handleCreate = useAction(createPurchaseItem, {
     onSuccess: (data) => {
       toast.success("สำเร็จ");
       modal.onClose();
@@ -50,9 +54,12 @@ export const PurchaseOrderListModal = () => {
   });
 
   const onSubmit = async (formData: FormData) => {
-    const name = formData.get("name") as string;
-    handleUpdate.execute({
-      name,
+    const name = getValues("name");
+    const productId = getValues("productId");
+
+    handleCreate.execute({
+      name: name,
+      productId: Number(productId),
       price: Number(formData.get("price")),
       quantity: Number(formData.get("quantity")),
       purchaseOrderId: 70
@@ -74,13 +81,44 @@ export const PurchaseOrderListModal = () => {
         <div className="grid grid-cols-4 gap-3 mt-3">
           <form action={onSubmit} className="grid col-span-4 gap-3">
             <div className="col-span-4">
-              <FormInput
-                id="name"
-                label="ชื่อสินค้า"
-                register={register}
-                readOnly={!isNewItem}
-                errors={handleUpdate.fieldErrors}
-              />
+              {
+                isNewItem ? (
+                  <FormSearchAsync
+                    id="productId"
+                    label="ค้นหาชื่อสินค้า/บริการ"
+                    required
+                    config={{
+                      endpoint: "products",
+                      params: {},
+                      customRender: (data: ProductWithRelations) => {
+                        return {
+                          value: data.id,
+                          label: `${data.name} (${data.vendor?.name})`,
+                          data: data,
+                        };
+                      },
+                    }}
+                    onSelected={(item: {
+                      value: string;
+                      label: string;
+                      data: ProductWithRelations;
+                    }) => {
+                      setValue("price", item.data.cost?.toString() ?? "");
+                      setValue("productId", item.value);
+                      setValue("name", item.data.name);
+                    }}
+                    errors={handleCreate.fieldErrors}
+                  />
+                ) : (
+                  <FormInput
+                    id="name"
+                    label="ชื่อสินค้า"
+                    register={register}
+                    readOnly={!isNewItem}
+                  />
+                )
+              }
+
             </div>
 
             <div className="col-span-2">
@@ -90,7 +128,7 @@ export const PurchaseOrderListModal = () => {
                 type="number"
                 readOnly={!isNewItem}
                 register={register}
-              // errors={fieldErrors}
+                errors={handleCreate.fieldErrors}
               />
             </div>
             <div className="col-span-2">
@@ -101,7 +139,7 @@ export const PurchaseOrderListModal = () => {
                 readOnly={!isNewItem}
                 register={register}
                 defaultValue={defaultData?.quantity}
-              // errors={fieldErrors}
+                errors={handleCreate.fieldErrors}
               />
             </div>
             <div className="col-span-4 flex justify-end">

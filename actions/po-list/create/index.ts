@@ -11,7 +11,8 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     purchaseOrderId,
     name,
     price,
-    quantity
+    quantity,
+    productId
   } = data;
 
   let purchaseOrderItem: PurchaseOrderItem;
@@ -30,7 +31,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         async () =>
           await db.item.create({
             data: {
-              // productId:  0, // Linked item and product
+              productId,
               purchaseOrderItemId: purchaseOrderItem.id,
               name: name,
               cost: price

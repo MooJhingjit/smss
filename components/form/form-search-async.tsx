@@ -6,7 +6,7 @@ import { useFormStatus } from "react-dom";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { FormErrors } from "./form-errors";
-import { SearchAsync, Config } from "../ui/custom.search-async";
+import { SearchAsync } from "../ui/custom.search-async";
 
 interface FormInputProps {
   id: string;
@@ -18,8 +18,8 @@ interface FormInputProps {
   className?: string;
   defaultValue?: any;
   onBlur?: () => void;
-  onSelected?: (item: any) => void;
-  config: Config;
+  onSelected: (item: any) => void
+  config: any;
 }
 
 export const FormSearchAsync = forwardRef<any, FormInputProps>(
