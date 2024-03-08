@@ -87,7 +87,7 @@ export default function PurchaseOrderItems({
         !data.quotationId && (
           <Button
             onClick={() =>
-              modal.onOpen()
+              modal.onOpen(null, data)
             }
             variant="secondary"
             className="flex items-center justify-center  h-5 rounded  "
@@ -102,7 +102,7 @@ export default function PurchaseOrderItems({
           columns={columns}
           data={purchaseOrderItems}
           onManage={(purchaseOrderItem) => {
-            modal.onOpen(purchaseOrderItem as PurchaseOrderItemWithRelations);
+            modal.onOpen(purchaseOrderItem as PurchaseOrderItemWithRelations, data);
           }}
         />
       </div>

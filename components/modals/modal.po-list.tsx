@@ -13,13 +13,12 @@ import { useEffect } from "react";
 import { FormSubmit } from "../form/form-submit";
 import { useAction } from "@/hooks/use-action";
 import { toast } from "sonner";
-import { Item, Product } from "@prisma/client";
+import { Item } from "@prisma/client";
 import { PackagePlus } from "lucide-react";
 import { updateItem } from "@/actions/item/update";
 import { createPurchaseItem } from "@/actions/po-list/create";
 import { FormSearchAsync } from "../form/form-search-async";
 import { ProductWithRelations } from "@/types";
-import { get } from "http";
 
 type FormInput = {
   productId: string;
@@ -30,6 +29,8 @@ type FormInput = {
 export const PurchaseOrderListModal = () => {
   const modal = usePurchaseOrderListModal();
   const defaultData = modal.data;
+  const purchaseOrderRelations = modal.refs;
+
   const { register, reset, setValue, getValues } = useForm<FormInput>({
     mode: "onChange",
   });
@@ -54,6 +55,9 @@ export const PurchaseOrderListModal = () => {
   });
 
   const onSubmit = async (formData: FormData) => {
+
+    if (!purchaseOrderRelations) return;
+
     const name = getValues("name");
     const productId = getValues("productId");
 
@@ -62,21 +66,16 @@ export const PurchaseOrderListModal = () => {
       productId: Number(productId),
       price: Number(formData.get("price")),
       quantity: Number(formData.get("quantity")),
-      purchaseOrderId: 70
+      purchaseOrderId: purchaseOrderRelations.id
     });
   };
-
-  // const defaultItemLength = !!defaultData?.items.length
-  //   ? defaultData?.items.length
-  //   : defaultData?.quantity;
 
   const isNewItem = !defaultData
   return (
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
       <DialogContent className="sm:max-w-[425px] md:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>รายการสินค้า</DialogTitle>
-          {/* <DialogDescription>Please select the customer.</DialogDescription> */}
+          <DialogTitle>รายการสินค้า ({purchaseOrderRelations?.vendor?.name})</DialogTitle>
         </DialogHeader>
         <div className="grid grid-cols-4 gap-3 mt-3">
           <form action={onSubmit} className="grid col-span-4 gap-3">
@@ -89,7 +88,9 @@ export const PurchaseOrderListModal = () => {
                     required
                     config={{
                       endpoint: "products",
-                      params: {},
+                      params: {
+                        vendorId : purchaseOrderRelations?.vendor?.id
+                      },
                       customRender: (data: ProductWithRelations) => {
                         return {
                           value: data.id,

@@ -7,38 +7,37 @@ export async function GET(
 ) {
   try {
     const search = req.nextUrl.searchParams.get("search");
+    const vendorId = req.nextUrl.searchParams.get("vendorId");
 
-    // const { userId, orgId } = auth();
-
-    // if (!userId || !orgId) {
-    //   return new NextResponse("Unauthorized", { status: 401 });
-    // }
 
     if (!search) {
       return new NextResponse("Bad Request", { status: 400 });
+    }
+
+    const conditions: any = {
+      OR: [
+        {
+          name: {
+            contains: search,
+          },
+        },
+        {
+          description: {
+            contains: search,
+          },
+        },
+      ],
+    }
+
+    if (vendorId) {
+      conditions["vendorId"] = Number(vendorId);
     }
 
     const product = await db.product.findMany({
       include: {
         vendor: true,
       },
-      where: {
-        OR: [
-          {
-            name: {
-              contains: search,
-            },
-          },
-          {
-            description: {
-              contains: search,
-            },
-          },
-        ],
-        // xxx: {
-        //   equals: xxx
-        // }
-      },
+      where: conditions
     });
     return NextResponse.json(product);
   } catch (error) {
