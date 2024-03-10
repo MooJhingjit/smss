@@ -12,7 +12,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     formType,
     discount,
     extraCost,
-    // totalPrice,
+    totalPrice,
     tax,
     vat,
     grandTotal,
@@ -31,7 +31,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         data: {
           discount,
           extraCost,
-          // totalPrice,
+          totalPrice,
           tax,
           vat,
           grandTotal,

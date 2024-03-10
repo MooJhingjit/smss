@@ -55,7 +55,6 @@ export const PurchaseOrderListModal = () => {
   });
 
   const onSubmit = async (formData: FormData) => {
-
     if (!purchaseOrderRelations) return;
 
     const name = getValues("name");
@@ -66,60 +65,59 @@ export const PurchaseOrderListModal = () => {
       productId: Number(productId),
       price: Number(formData.get("price")),
       quantity: Number(formData.get("quantity")),
-      purchaseOrderId: purchaseOrderRelations.id
+      purchaseOrderId: purchaseOrderRelations.id,
     });
   };
 
-  const isNewItem = !defaultData
+  const isNewItem = !defaultData;
   return (
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
       <DialogContent className="sm:max-w-[425px] md:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>รายการสินค้า ({purchaseOrderRelations?.vendor?.name})</DialogTitle>
+          <DialogTitle>
+            รายการสินค้า ({purchaseOrderRelations?.vendor?.name})
+          </DialogTitle>
         </DialogHeader>
         <div className="grid grid-cols-4 gap-3 mt-3">
           <form action={onSubmit} className="grid col-span-4 gap-3">
             <div className="col-span-4">
-              {
-                isNewItem ? (
-                  <FormSearchAsync
-                    id="productId"
-                    label="ค้นหาชื่อสินค้า/บริการ"
-                    required
-                    config={{
-                      endpoint: "products",
-                      params: {
-                        vendorId : purchaseOrderRelations?.vendor?.id
-                      },
-                      customRender: (data: ProductWithRelations) => {
-                        return {
-                          value: data.id,
-                          label: `${data.name} (${data.vendor?.name})`,
-                          data: data,
-                        };
-                      },
-                    }}
-                    onSelected={(item: {
-                      value: string;
-                      label: string;
-                      data: ProductWithRelations;
-                    }) => {
-                      setValue("price", item.data.cost?.toString() ?? "");
-                      setValue("productId", item.value);
-                      setValue("name", item.data.name);
-                    }}
-                    errors={handleCreate.fieldErrors}
-                  />
-                ) : (
-                  <FormInput
-                    id="name"
-                    label="ชื่อสินค้า"
-                    register={register}
-                    readOnly={!isNewItem}
-                  />
-                )
-              }
-
+              {isNewItem ? (
+                <FormSearchAsync
+                  id="productId"
+                  label="ค้นหาชื่อสินค้า/บริการ"
+                  required
+                  config={{
+                    endpoint: "products",
+                    params: {
+                      vendorId: purchaseOrderRelations?.vendor?.id,
+                    },
+                    customRender: (data: ProductWithRelations) => {
+                      return {
+                        value: data.id,
+                        label: `${data.name} (${data.vendor?.name})`,
+                        data: data,
+                      };
+                    },
+                  }}
+                  onSelected={(item: {
+                    value: string;
+                    label: string;
+                    data: ProductWithRelations;
+                  }) => {
+                    setValue("price", item.data.cost?.toString() ?? "");
+                    setValue("productId", item.value);
+                    setValue("name", item.data.name);
+                  }}
+                  errors={handleCreate.fieldErrors}
+                />
+              ) : (
+                <FormInput
+                  id="name"
+                  label="ชื่อสินค้า"
+                  register={register}
+                  readOnly={!isNewItem}
+                />
+              )}
             </div>
 
             <div className="col-span-2">
@@ -143,34 +141,31 @@ export const PurchaseOrderListModal = () => {
                 errors={handleCreate.fieldErrors}
               />
             </div>
-            <div className="col-span-4 flex justify-end">
-              <FormSubmit>สร้างรายการใหม่</FormSubmit>
-            </div>
+            {isNewItem && (
+              <div className="col-span-4 flex justify-end">
+                <FormSubmit>สร้างรายการใหม่</FormSubmit>
+              </div>
+            )}
           </form>
-          {
-            !!defaultData?.items && (
-              <>
-                <div className="col-span-2 flex items-center space-x-2">
-                  <PackagePlus size={16} className="" />
-                  <p className="font-medium cursor-default text-xs capitalize">
-                    รับสินค้าเข้าระบบ
-                  </p>
-                </div>
-                <div className="col-span-4">
-                  <div className="w-full rounded-md p-4 border border-gray-200">
-                    <div className="space-y-8">
-                      {defaultData?.items.map((item: Item) => (
-                        <NewItemForm
-                          key={item.id}
-                          data={item}
-                        />
-                      ))}
-                    </div>
+          {!!defaultData?.items && (
+            <>
+              <div className="col-span-2 flex items-center space-x-2">
+                <PackagePlus size={16} className="" />
+                <p className="font-medium cursor-default text-xs capitalize">
+                  รับสินค้าเข้าระบบ
+                </p>
+              </div>
+              <div className="col-span-4">
+                <div className="w-full rounded-md p-4 border border-gray-200">
+                  <div className="space-y-8">
+                    {defaultData?.items.map((item: Item) => (
+                      <NewItemForm key={item.id} data={item} />
+                    ))}
                   </div>
                 </div>
-              </>
-            )
-          }
+              </div>
+            </>
+          )}
         </div>
       </DialogContent>
     </Dialog>
@@ -184,10 +179,7 @@ type ItemInput = {
   description: string;
 };
 
-const NewItemForm = ({ data }: {
-  data: Item
-}) => {
-
+const NewItemForm = ({ data }: { data: Item }) => {
   const {
     register,
     watch,
@@ -199,7 +191,9 @@ const NewItemForm = ({ data }: {
     defaultValues: {
       name: data?.name ?? "",
       serialNumber: data?.serialNumber ?? "",
-      warrantyDate: data?.warrantyDate ? new Date(data.warrantyDate).toISOString().slice(0, 10) : "",
+      warrantyDate: data?.warrantyDate
+        ? new Date(data.warrantyDate).toISOString().slice(0, 10)
+        : "",
       description: data?.description ?? "",
     },
   });
@@ -212,7 +206,6 @@ const NewItemForm = ({ data }: {
       toast.error(error);
     },
   });
-
 
   const onSubmit = (formData: FormData) => {
     const serialNumber = formData.get("serialNumber") as string;
@@ -233,12 +226,11 @@ const NewItemForm = ({ data }: {
       name,
       serialNumber,
       warrantyDate,
-      description
+      description,
     });
-  }
+  };
 
   return (
-
     <form action={onSubmit} className="grid grid-cols-4 gap-3">
       <div className="col-span-2">
         <FormInput
@@ -246,55 +238,47 @@ const NewItemForm = ({ data }: {
           label="ชื่อรุ่น"
           type="text"
           register={register}
-        // defaultValue={item?.serialNumber}
-        // errors={fieldErrors}
+          // defaultValue={item?.serialNumber}
+          // errors={fieldErrors}
         />
       </div>
       <div className="col-span-2">
-
         <FormInput
           id="serialNumber"
           label="รหัส (SN)"
           type="text"
           register={register}
-        // defaultValue={item?.serialNumber}
-        // errors={fieldErrors}
+          // defaultValue={item?.serialNumber}
+          // errors={fieldErrors}
         />
       </div>
       <div className="col-span-2">
-
         <FormInput
           id="warrantyDate"
           label="ระยะเวลาการรับประกัน"
           type="date"
           register={register}
-        // defaultValue={
-        //   item?.warrantyDate
-        //     ? new Date(item.warrantyDate).toISOString().slice(0, 10)
-        //     : undefined
-        // }
-        // errors={fieldErrors}
+          // defaultValue={
+          //   item?.warrantyDate
+          //     ? new Date(item.warrantyDate).toISOString().slice(0, 10)
+          //     : undefined
+          // }
+          // errors={fieldErrors}
         />
       </div>
       <div className="col-span-2">
-
         <FormInput
           id="description"
           label="หมายเหตุ"
           type="text"
           register={register}
-        // defaultValue={item?.name}
-        // errors={fieldErrors}
+          // defaultValue={item?.name}
+          // errors={fieldErrors}
         />
       </div>
       <div className="col-span-4 flex justify-end">
-        {
-          isDirty && (
-            <FormSubmit>อัพเดท</FormSubmit>
-          )
-        }
+        {isDirty && <FormSubmit>อัพเดท</FormSubmit>}
       </div>
     </form>
-
   );
 };

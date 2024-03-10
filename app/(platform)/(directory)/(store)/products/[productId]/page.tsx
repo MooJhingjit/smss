@@ -34,7 +34,7 @@ export default async function ProductItemsPage(props: ProductIdPageProps) {
 
   const pages = [
     {
-      name: "สินค้าทั้งหมด",
+      name: "กลุ่มสินค้าทั้งหมด",
       href: "/products",
       current: false,
     },

@@ -125,7 +125,10 @@ const ItemStatus = ({
             {purchaseOrderStatusMapping[status]}
           </SelectItem>
         ))}
-        <SelectItem value="closed">ปิดงาน</SelectItem>
+        <SelectItem value="closed">รอสินค้า</SelectItem>
+        <SelectItem value="closed">รับสินค้าเข้า</SelectItem>
+        <SelectItem value="closed">รอออกใบเสร็จ</SelectItem>
+        <SelectItem value="closed">ส่งสินค้า/ปิดงาน</SelectItem>
       </SelectContent>
     </Select>
   );

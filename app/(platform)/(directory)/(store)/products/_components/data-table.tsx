@@ -44,9 +44,9 @@ export default function ProductTable<TData, TValue>(
               >
                 จัดการ
               </Button>
-              <Link href={`/products/${row.original.id}`} passHref>
+              {/* <Link href={`/products/${row.original.id}`} passHref>
                 <ExternalLink className="w-4 h-4" />
-              </Link>
+              </Link> */}
             </div>
           );
         },

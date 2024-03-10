@@ -16,8 +16,10 @@ type FormInput = {
   grandTotal: number;
 };
 export default function BillingInfo({
+  isManual,
   data,
 }: {
+  isManual: boolean;
   data: PurchaseOrderWithRelations;
 }) {
   const {
@@ -48,7 +50,13 @@ export default function BillingInfo({
     const discountNum = Number(discount);
     const extraCostNum = Number(extraCost);
 
-    const totalPrice = (data.totalPrice ?? 0) - discountNum + extraCostNum;
+    let tPrice = data.totalPrice ?? 0;
+
+    // if manual input
+    if (isManual) {
+      tPrice = Number(getValues("totalPrice"));
+    }
+    const totalPrice = tPrice - discountNum + extraCostNum;
     const vat = totalPrice * 0.07;
     const tax = totalPrice * 0.03;
     const grandTotal = totalPrice + vat - tax;
@@ -78,11 +86,16 @@ export default function BillingInfo({
   const onSubmit = (formData: FormInput) => {
     handleUpdate.execute({
       ...formData,
+      totalPrice: Number(formData.totalPrice),
       discount: Number(formData.discount),
       extraCost: Number(formData.extraCost),
       id: data.id,
       formType: "billing",
     });
+  };
+
+  const onReset = () => {
+    reset();
   };
 
   React.useEffect(() => {
@@ -91,7 +104,8 @@ export default function BillingInfo({
     }
   }, [isDirty, discount, extraCost]);
 
-  const priceBeforeTax = Number(totalPrice) - Number(discount) + Number(extraCost);
+  const priceBeforeTax =
+    Number(totalPrice) - Number(discount) + Number(extraCost);
 
   return (
     <form
@@ -102,10 +116,21 @@ export default function BillingInfo({
         <div className="flex items-center justify-between py-1">
           <dt className="text-gray-600">ราคา</dt>
           <dd className="font-medium text-gray-900">
-            {totalPrice?.toLocaleString("th-TH", {
-              style: "currency",
-              currency: "THB",
-            }) ?? 0}
+            {isManual ? (
+              <Input
+                id="totalPrice"
+                {...register("totalPrice")}
+                step={0.01}
+                type="number"
+                className="h-[30px] border border-gray-300 text-right px-2 text-xs focus:ring-0"
+                defaultValue={0}
+              />
+            ) : (
+              totalPrice?.toLocaleString("th-TH", {
+                style: "currency",
+                currency: "THB",
+              }) ?? 0
+            )}
           </dd>
         </div>
         <div className="flex items-center justify-between py-1">
@@ -166,9 +191,20 @@ export default function BillingInfo({
 
           <dd className="font-medium text-primary-600 flex items-center space-x-2">
             {isDirty && (
-              <Button size={"sm"} type="submit" className="text-xs p-2">
-                บันทึก
-              </Button>
+              <div className="flex items-center space-x-3 px-2">
+                <Button
+                  onClick={onReset}
+                  size={"sm"}
+                  type="button"
+                  variant="link"
+                  className="text-xs text-orange-400 underline"
+                >
+                  ยกเลิก
+                </Button>
+                <Button size={"sm"} type="submit" className="text-xs">
+                  บันทึก
+                </Button>
+              </div>
             )}
             <span>
               {" "}

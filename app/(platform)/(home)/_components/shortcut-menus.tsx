@@ -1,13 +1,13 @@
 "use client";
 import React from "react";
-import { KanbanSquare, Receipt, Box, Users } from "lucide-react";
+import { KanbanSquare, Receipt, Box, Users, PackageOpen } from "lucide-react";
 import Link from "next/link";
 // import { create } from '@/actions/create-user'
 
 export default function ShortcutMenus() {
 
   return (
-    <div className="grid grid-cols-4 gap-4">
+    <div className="grid grid-cols-5 gap-4">
       <MenuItem
         icon={
           <KanbanSquare
@@ -35,8 +35,18 @@ export default function ShortcutMenus() {
             strokeWidth={1.5}
           />
         }
-        label="สินค้า/บริการ"
+        label="กลุ่มสินค้า"
         link="/products"
+      />
+      <MenuItem
+        icon={
+          <PackageOpen
+            className="w-6 h-6 lg:w-12 lg:h-12  text-white"
+            strokeWidth={1.5}
+          />
+        }
+        label="คลังสินค้า"
+        link="/items"
       />
       <MenuItem
         icon={

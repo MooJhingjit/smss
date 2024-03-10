@@ -28,10 +28,6 @@ export const columns: ColumnDef<Product>[] = [
     header: "ผู้ขาย/ร้านค้า",
   },
   {
-    accessorKey: "itemCount",
-    header: "จำนวนสินค้า",
-  },
-  {
     accessorKey: "cost",
     header: "ต้นทุน",
   },

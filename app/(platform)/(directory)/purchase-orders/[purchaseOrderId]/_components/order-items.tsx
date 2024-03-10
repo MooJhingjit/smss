@@ -115,7 +115,7 @@ export default function PurchaseOrderItems({
             </div> */}
           </div>
           <div className="col-span-5 md:col-span-2">
-            <BillingInfo data={data} />
+            <BillingInfo isManual={!data.quotationId} data={data} />
           </div>
         </div>
       )}

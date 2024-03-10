@@ -79,7 +79,7 @@ export function DataTable<TData, TValue>({
         <div className="flex flex-1 w-full items-center space-x-2 justify-end ">
           <Input
             id="search"
-            placeholder=""
+            placeholder="ค้นหา"
             value={globalFilter}
             onChange={(e) => {
               setGlobalFilter(e.target.value);

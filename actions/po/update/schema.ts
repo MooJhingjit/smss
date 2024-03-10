@@ -7,7 +7,7 @@ export const schema = z.object({
   formType: z.enum(["billing", "remark"]),
   discount:  z.number().optional(),
   extraCost:  z.number().optional(),
-  // totalPrice:  z.number().optional(),
+  totalPrice:  z.number().optional(),
   tax:  z.number().optional(),
   vat:  z.number().optional(),
   grandTotal:  z.number().optional(),

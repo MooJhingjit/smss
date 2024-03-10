@@ -116,7 +116,7 @@ function MenuItems() {
             : "text-gray-500 font-semibold"
         )}
       >
-        เสนอราคา (QT)
+        ใบเสนอราคา (QT)
       </Link>
       <Link
         href="/purchase-orders"
@@ -136,7 +136,17 @@ function MenuItems() {
             : "text-gray-500 font-semibold"
         )}
       >
-        สินค้า/บริการ
+        กลุ่มสินค้า/บริการ
+      </Link>
+      <Link
+        href="/items"
+        className={classNames(
+          isActive("/items")
+            ? "text-primary-600 font-semibold"
+            : "text-gray-500 font-semibold"
+        )}
+      >
+        คลังสินค้า
       </Link>
       <Link
         href="/users"

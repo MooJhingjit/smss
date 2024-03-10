@@ -60,7 +60,7 @@ export default function ProductView(props: Props) {
           <dd>
             <div className="w-full">
               <Button variant="default" onClick={onUpdate} className="w-full">
-                จัดการ
+                แก้ไขกลุ่มสินค้า
               </Button>
             </div>
           </dd>
