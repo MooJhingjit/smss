@@ -86,6 +86,7 @@ export const NewProductModal = () => {
                   role: "vendor",
                 },
               }}
+              onSelected={(data) => { }}
               defaultValue={
                 product?.vendor
                   ? { value: product.vendor.id, label: product.vendor.name }
