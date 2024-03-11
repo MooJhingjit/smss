@@ -297,7 +297,7 @@ const BoardColumn = ({
   color?: "yellow" | "green";
 }) => {
   return (
-    <div className="h-auto min-w-[210px] select-none">
+    <div className="h-auto min-w-[220px] select-none">
       <div
         className={classNames(
           "w-full rounded-md  shadow-md pb-2 h-full",
@@ -305,11 +305,16 @@ const BoardColumn = ({
         )}
       >
         <div className="flex justify-between items-center px-3 pt-2 pb-4">
-          <div className="text-sm font-semibold text-[#4a4a4a] whitespace-nowrap">
-            {label}
+          <div className="">
+            <p className="text-sm font-semibold text-[#4a4a4a] whitespace-nowrap">
+              {label}
+            </p>
+            <p className="text-xs text-[#4a4a4a]">
+              ความคืบหน้า{" "} ??%
+            </p>
           </div>
           <div className="text-xs font-semibold text-[#4a4a4a]">
-            {items.length} รายการ
+            ({items.length})
           </div>
         </div>
         <div className="h-full px-3">
