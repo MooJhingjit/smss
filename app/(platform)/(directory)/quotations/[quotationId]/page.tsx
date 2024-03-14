@@ -92,7 +92,6 @@ export default async function QuotationDetails(
   const { buyer, lists, status } = data;
 
   const isQT_Approved = !["open", "pending_approval", "offer"].includes(status);
-  const isProductType = data.type === QuotationType.product;
   return (
     <>
       <Breadcrumbs pages={pages} />
@@ -101,7 +100,7 @@ export default async function QuotationDetails(
           {buyer && <CustomerInfo data={buyer} />}
         </div>
         <div className="col-span-5 md:col-span-2">
-          <QuotationTools 
+          <QuotationTools
             purchaseOrderRef={data.purchaseOrderRef ?? ""}
             isLocked={data.isLocked}
             quotationId={data.id}
@@ -121,35 +120,33 @@ export default async function QuotationDetails(
         <div className="col-span-5 md:col-span-2">
           <DocumentItems refType="quotation" refId={data.id} />
         </div>
-        {isProductType && (
-          <div className="col-span-5 md:col-span-3">
-            {isQT_Approved ? (
-              <PurchaseOrders
-                quotationLists={lists as QuotationListWithRelations[]}
-                hasQuotationItems={lists.length > 0}
-                quotationId={data.id}
-              />
-            ) : (
-              <div className="mt-6 bg-gray-50 w-full h-40 rounded flex items-center justify-center">
-                <div className="text-center">
-                  <div className="flex justify-center mb-2">
-                    <InfoIcon className="w-10 h-10 text-yellow-500" />
-                  </div>
-                  <p className="text-gray-700 font-semibold">
-                    การสร้างใบสั่งซื้อ(PO) จากใบเสนอราคา(QT)แบบอัตโนมัติ
-                  </p>
-                  <div className="flex space-x-1 items-center text-sm">
-                    <p>ใบเสนอราคาต้องอยู่ในสถานะได้รับการอนุมัติ</p>
-                    <span className="inline-flex items-center rounded-md bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800 border-yellow-400 border">
-                      อนุมัติ QT
-                    </span>
-                    <p>ถึงจะสามารถสร้างใบ PO ได้</p>
-                  </div>
+        <div className="col-span-5 md:col-span-3">
+          {isQT_Approved ? (
+            <PurchaseOrders
+              quotationLists={lists as QuotationListWithRelations[]}
+              hasQuotationItems={lists.length > 0}
+              quotationId={data.id}
+            />
+          ) : (
+            <div className="mt-6 bg-gray-50 w-full h-40 rounded flex items-center justify-center">
+              <div className="text-center">
+                <div className="flex justify-center mb-2">
+                  <InfoIcon className="w-10 h-10 text-yellow-500" />
+                </div>
+                <p className="text-gray-700 font-semibold">
+                  การสร้างใบสั่งซื้อ(PO) จากใบเสนอราคา(QT)แบบอัตโนมัติ
+                </p>
+                <div className="flex space-x-1 items-center text-sm">
+                  <p>ใบเสนอราคาต้องอยู่ในสถานะได้รับการอนุมัติ</p>
+                  <span className="inline-flex items-center rounded-md bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800 border-yellow-400 border">
+                    อนุมัติ QT
+                  </span>
+                  <p>ถึงจะสามารถสร้างใบ PO ได้</p>
                 </div>
               </div>
-            )}
-          </div>
-        )}
+            </div>
+          )}
+        </div>
       </div>
     </>
   );
