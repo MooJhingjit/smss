@@ -36,7 +36,7 @@ const columns = [
       return (
         <span className="inline-flex items-center rounded-md bg-yellow-100 px-2 py-0.5 text-xs text-yellow-700">
           {
-            quotationStatusMapping[item.status]
+            quotationStatusMapping[item.status].label
           }
         </span>
       );

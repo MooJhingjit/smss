@@ -11,7 +11,6 @@ import {
 import { QuotationStatus, QuotationType } from "@prisma/client";
 // import * as Select from '@radix-ui/react-select';
 import { quotationStatusMapping } from "@/app/config";
-import { classNames } from "@/lib/utils";
 import { MutationResponseType } from "@/components/providers/query-provider";
 import { useMutation } from "@tanstack/react-query";
 import QT_SERVICES from "@/app/services/service.quotation";
@@ -118,13 +117,13 @@ const ItemStatus = ({
     <Select onValueChange={onStatusChange}>
       <SelectTrigger className="inline-flex capitalize font-semibold  rounded-md bg-yellow-50 px-2 py-1 text-xs text-yellow-700 border border-yellow-500 items-center">
         <SelectValue
-          placeholder={"สถานะปัจจุบัน: " + quotationStatusMapping[curStatus]}
+          placeholder={"สถานะปัจจุบัน: " + quotationStatusMapping[curStatus].label}
         />
       </SelectTrigger>
       <SelectContent className="bg-white text-xs p-2 space-y-2 ">
         {allStatus.map((status, index) => (
           <SelectItem value={status} key={index}>
-            {quotationStatusMapping[status]}
+            {quotationStatusMapping[status].label}
           </SelectItem>
         ))}
       </SelectContent>

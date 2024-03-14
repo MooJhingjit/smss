@@ -21,13 +21,13 @@ type Props = {
   remark: string;
   isLocked: boolean;
 };
-const productColumns = [
+const columns = [
   { name: "#", key: "index" },
   {
     name: "ชื่อสินค้า/บริการ", key: "name",
     render: (item: QuotationListWithRelations) => {
       return <div className="">
-        <p className="text-sm font-semibold">{item.product.name}</p>
+        <p className="text-xs font-semibold">{item.product.name}</p>
         {
           item.subItems && !!JSON.parse(item.subItems).length && (
             <div className="text-xs text-gray-400">
@@ -85,60 +85,11 @@ const productColumns = [
     },
   },
 ];
-const serviceColumns = [
-  { name: "#", key: "index" },
-  {
-    name: "ชื่อสินค้า/บริการ", key: "name",
-    render: (item: QuotationListWithRelations) => {
-      return <div className="">
-        <p className="text-sm font-semibold">{item.name}</p>
-        {
-          item.subItems && !!JSON.parse(item.subItems).length && (
-            <div className="text-xs text-gray-400">
-              <span>+</span>
-              <span>{JSON.parse(item.subItems).length}</span>
-              <span> รายการย่อย</span>
-            </div>
-          )
-        }
-      </div>
-    },
-  },
- 
-  {
-    name: "ราคาต่อหน่วย", key: "unitPrice",
-    render: (item: QuotationListWithRelations) => {
-      return `${item.unitPrice}`;
-    },
-  },
-  { name: "จำนวน", key: "quantity" },
- 
-  {
-    name: "ส่วนลด", key: "discount",
-  },
-  {
-    name: "ยอดรวม", key: "totalPrice",
-    render: (item: QuotationListWithRelations) => {
-      return item.totalPrice;
-    },
-  },
 
-  // { name: "Price", key: "price" },
-  {
-    name: "อัพเดทล่าสุด",
-    key: "quantity",
-    render: (item: QuotationListWithRelations) => {
-      const date = new Date(item.updatedAt);
-      return date.toLocaleDateString("th-TH");
-    },
-  },
-];
 
 export default function QuotationLists(props: Props) {
   const { data, quotationId, quotationType, remark, isLocked } = props;
   const modal = useQuotationListModal();
-  const isProductType = quotationType === QuotationType.product;
-  const isServiceType = quotationType === QuotationType.service;
 
   const listLabel = isLocked ? "" : "เพิ่มรายการสินค้า/บริการ";
   return (
@@ -168,11 +119,7 @@ export default function QuotationLists(props: Props) {
     >
       <div className="overflow-x-scroll md:overflow-auto">
         <TableLists<QuotationListWithRelations>
-          columns={
-            isProductType
-              ? productColumns
-              : serviceColumns
-          }
+          columns={columns }
           data={data}
           onManage={isLocked ? undefined : (item) => {
             return modal.onOpen(item, {
@@ -280,10 +227,9 @@ const Remark = ({ id, remark }: { id: number, remark: string | null }) => {
   // useForm
   const {
     register,
-    watch,
     reset,
     getValues,
-    formState: { errors, isValid, isDirty },
+    formState: { isDirty },
   } = useForm<FormRemark>({
     mode: "onChange",
     defaultValues: {
@@ -322,7 +268,7 @@ const Remark = ({ id, remark }: { id: number, remark: string | null }) => {
         {
           isDirty && (
             <FormSubmit variant="default" className="text-xs">
-              Update
+              บันทึก
             </FormSubmit>
           )
         }

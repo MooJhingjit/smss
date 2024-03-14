@@ -48,7 +48,7 @@ export default function Tasks(props: Readonly<Props>) {
   const { onOpen } = usePurchaseOrderModal();
 
   return (
-    <CardWrapper title={`งานที่ต้องตรวจสอบ สถานะ: ${quotationStatusMapping['offer']}`}>
+    <CardWrapper title={`งานที่ต้องตรวจสอบ สถานะ: ${quotationStatusMapping['offer'].label}`}>
       <TableLists<QuotationWithBuyer>
         columns={columns}
         data={data}

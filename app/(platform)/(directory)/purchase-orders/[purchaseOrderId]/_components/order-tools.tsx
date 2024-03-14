@@ -16,7 +16,6 @@ import {
 // import * as Select from '@radix-ui/react-select';
 import {
   purchaseOrderStatusMapping,
-  quotationStatusMapping,
 } from "@/app/config";
 // import { classNames } from "@/lib/utils";
 // import { MutationResponseType } from "@/components/providers/query-provider";

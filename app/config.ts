@@ -6,15 +6,42 @@ export const routeName = {
 }
 
 export const quotationStatusMapping = {
-  open: "เปิด QT",
-  pending_approval: "รออนุมัติ QT",
-  offer: "อนุมัติแล้ว  รอส่ง QT (ให้ลูกค้า)",
-  approved: "อนุมัติ QT แล้ว",
-  po_preparing: "เตรียม PO (ผู้ขาย)",
-  po_sent: "ส่ง PO (ผู้ขาย)",
-  product_received: "รับสินค้า",
-  order_preparing: "รอส่งสินค้า",
-  delivered: "ส่งสินค้า / ปิดงาน"
+  open: {
+    label: "เปิด QT",
+    progress: 10,
+  },
+  pending_approval: {
+    label: "รออนุมัติ QT",
+    progress: 20,
+  },
+  offer: {
+    label: "รอส่ง QT (ให้ลูกค้า)",
+    progress: 30,
+  },
+  approved: {
+    label: "อนุมัติ QT แล้ว",
+    progress: 40,
+  },
+  po_preparing: {
+    label: "เตรียม PO (ผู้ขาย)",
+    progress: 50,
+  },
+  po_sent: {
+    label: "ส่ง PO (ผู้ขาย)",
+    progress: 60,
+  },
+  product_received: {
+    label: "รับสินค้า",
+    progress: 70,
+  },
+  order_preparing: {
+    label: "รอส่งสินค้า",
+    progress: 80,
+  },
+  delivered: {
+    label: "ส่งสินค้า / ปิดงาน",
+    progress: 90,
+  }
 }
 
 export const paymentTypeMapping = {
