@@ -17,7 +17,7 @@ const columns = [
     name: "ลูกค้า",
     key: "buyer.name",
     render: (item: QuotationWithBuyer) => {
-      return <div className="">{item.buyer.name}</div>;
+      return <div className="">{item.contact.name}</div>;
     },
   },
   {

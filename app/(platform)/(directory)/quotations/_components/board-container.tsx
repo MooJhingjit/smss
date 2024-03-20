@@ -392,7 +392,7 @@ const BoardCard = ({
 
             <div className="flex justify-between mt-2">
               <div className="font-medium text-slate-900">
-                {item.buyer.name}
+                {item.contact.name}
               </div>
             </div>
             {/* <div className="">
