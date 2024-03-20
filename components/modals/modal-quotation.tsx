@@ -85,10 +85,7 @@ export const NewQuotationModal = () => {
               id="customer"
               label="ลูกค้า"
               config={{
-                endpoint: "/users",
-                params: {
-                  role: "buyer",
-                },
+                endpoint: "/contacts",
               }}
               onSelected={(item) => {
                 setCustomerDetails(item.data);

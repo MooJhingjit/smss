@@ -16,7 +16,7 @@ async function getData(): Promise<
 > {
   const quotations = db.quotation.findMany({
     include: {
-      buyer: true,
+      contact: true,
     },
     take: 5,
     orderBy: {
@@ -26,7 +26,7 @@ async function getData(): Promise<
 
   const tasks = db.quotation.findMany({
     include: {
-      buyer: true,
+      contact: true,
     },
     where: {
       status: "pending_approval",

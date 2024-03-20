@@ -19,7 +19,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       data: {
         type,
         code: "",
-        buyerId,
+        contactId: buyerId,
       },
     });
 

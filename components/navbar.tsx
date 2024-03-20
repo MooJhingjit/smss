@@ -149,6 +149,16 @@ function MenuItems() {
         คลังสินค้า
       </Link>
       <Link
+        href="/contacts"
+        className={classNames(
+          isActive("/contacts")
+            ? "text-primary-600 font-semibold"
+            : "text-gray-500 font-semibold"
+        )}
+      >
+        ลูกค้า
+      </Link>
+      <Link
         href="/users"
         className={classNames(
           isActive("/users")

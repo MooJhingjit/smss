@@ -1,14 +1,14 @@
 "use client";
-import { useUserModal } from "@/hooks/use-user-modal";
-import { User } from "@prisma/client";
+import { useContactModal } from "@/hooks/use-contact-modal";
+import { Contact } from "@prisma/client";
 import React from "react";
 
 type Props = {
-  data: User;
+  data: Contact;
 };
 
 export default function CustomerInfo(props: Readonly<Props>) {
-  const modal = useUserModal();
+  const modal = useContactModal();
   const { data } = props;
   return (
     <div className="rounded-md bg-yellow-50 p-4 border border-yellow-400">

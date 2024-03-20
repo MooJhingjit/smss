@@ -7,8 +7,8 @@ import {
   PurchaseOrder,
   PurchaseOrderItemStatus,
   PurchaseOrderItem,
+  Contact,
 } from "@prisma/client";
-import NextAuth from "next-auth";
 import { JWT } from "next-auth/jwt";
 
 declare module "next-auth" {
@@ -22,7 +22,7 @@ declare module "next-auth" {
 }
 export type ProductWithRelations = Product & { items?: Item[]; vendor?: User };
 
-export type QuotationWithBuyer = Quotation & { buyer: User };
+export type QuotationWithBuyer = Quotation & { contact: Contact };
 export type ItemWithRefs = Item & {
   productRef: { id: number; name: string };
   vendorRef?: { id: number | undefined; name: string | undefined };

@@ -18,7 +18,7 @@ const getData = async (quotationId: string) => {
       id: parseInt(quotationId),
     },
     include: {
-      buyer: true,
+      contact: true,
       seller: true,
       purchaseOrders: {
         include: {
@@ -89,7 +89,7 @@ export default async function QuotationDetails(
     );
   }
 
-  const { buyer, lists, status } = data;
+  const { contact, lists, status } = data;
 
   const isQT_Approved = !["open", "pending_approval", "offer"].includes(status);
   return (
@@ -97,7 +97,7 @@ export default async function QuotationDetails(
       <Breadcrumbs pages={pages} />
       <div className="grid  grid-cols-5 gap-8 mt-6">
         <div className="col-span-5 md:col-span-3">
-          {buyer && <CustomerInfo data={buyer} />}
+          {contact && <CustomerInfo data={contact} />}
         </div>
         <div className="col-span-5 md:col-span-2">
           <QuotationTools

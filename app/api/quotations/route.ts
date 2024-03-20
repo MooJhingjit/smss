@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
 
     const quotations = await db.quotation.findMany({
       include: {
-        buyer: true,
+        contact: true,
         _count: {
           select: { purchaseOrders: true, lists: true, medias: true },
         },
