@@ -12,6 +12,7 @@ enum UserRole {
   buyer
   vendor
   sale
+  seller
   admin
 }
 
@@ -28,7 +29,7 @@ model User {
   password         String?
   isProtected      Boolean         @default(false)
   products         Product[]
-  contacts         Contact[]
+  contacts         Contact[]       @relation("seller")
   sellerQuotations Quotation[]     @relation("seller")
   purchaseOrders   PurchaseOrder[] @relation("vendor")
   createdAt        DateTime        @default(now())
@@ -37,8 +38,8 @@ model User {
 
 model Contact {
   id          Int         @id @default(autoincrement())
-  userId      Int?
-  user        User?       @relation(fields: [userId], references: [id])
+  sellerId    Int?
+  user        User?       @relation(fields: [sellerId], references: [id], name: "seller")
   name        String
   email       String      @unique
   taxId       String?     @unique
@@ -51,7 +52,7 @@ model Contact {
   updatedAt   DateTime    @updatedAt
   quotation   Quotation[]
 
-  @@index([userId])
+  @@index([sellerId])
 }
 
 model Product {

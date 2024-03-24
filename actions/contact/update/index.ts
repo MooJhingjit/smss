@@ -9,10 +9,20 @@ import { InputType, ReturnType } from "./types";
 import { ContactSchema } from "./schema";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-  const { id, taxId, name, email, phone, contact, fax, address } = data;
+  const { id, taxId, name, email, phone, contact, fax, address, isProtected } =
+    data;
   let buyer;
   try {
-    const payload: any = { taxId, name, email, phone, contact, fax, address }
+    const payload: any = {
+      taxId,
+      name,
+      email,
+      phone,
+      contact,
+      fax,
+      address,
+      isProtected,
+    };
 
     buyer = await db.contact.update({
       where: {

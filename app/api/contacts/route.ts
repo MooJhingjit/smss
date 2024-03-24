@@ -1,21 +1,31 @@
 import { NextResponse, NextRequest } from "next/server";
 import { db } from "@/lib/db";
+import { useUser } from "@/hooks/use-user";
 
 export async function GET(
-  req: NextRequest,
+  req: NextRequest
   // { params }: { params: { search: string } }
 ) {
   try {
+    const { isSeller, info } = await useUser();
     const search = req.nextUrl.searchParams.get("search");
 
-    // const { userId, orgId } = auth();
-
-    // if (!userId || !orgId) {
-    //   return new NextResponse("Unauthorized", { status: 401 });
-    // }
+    if (!info?.id) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
 
     if (!search) {
       return new NextResponse("Bad Request", { status: 400 });
+    }
+
+    let contactScope = {};
+
+    if (isSeller) {
+      // only isProtected is false and sellerId = info.id
+      contactScope = {
+        isProtected: false,
+        sellerId: parseInt(info.id),
+      };
     }
 
     const vendors = await db.contact.findMany({
@@ -32,9 +42,7 @@ export async function GET(
             },
           },
         ],
-        // role: {
-        //   equals: role,
-        // },
+        ...contactScope,
       },
     });
     // console.log('vendors', vendors.)

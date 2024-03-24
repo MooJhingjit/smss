@@ -1,7 +1,5 @@
-"use client";
 import React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { classNames } from "@/lib/utils";
 import Image from "next/image";
 import LOGO from "@/public/logo.png";
@@ -12,15 +10,16 @@ import {
 } from "@/components/ui/popover";
 import { LogOutIcon, UserRoundCog } from "lucide-react";
 import { handleSignOut } from "@/actions/auth";
-import { useCurrentRole } from "@/hooks/use-current-role";
+import { useUser } from "@/hooks/use-user";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import MenuItems from "./navbar.menus";
 
-export default function MainNavbar(props: { showMenu?: boolean }) {
+export default async function MainNavbar(props: { showMenu?: boolean }) {
   const { showMenu = false } = props;
   const onSignOut = async () => {
     handleSignOut();
   };
-  const user = useCurrentUser();
+  const { info, isAdmin } = await useUser();
   // console.log("client get session >>>>>", user);
 
   return (
@@ -47,7 +46,7 @@ export default function MainNavbar(props: { showMenu?: boolean }) {
         >
           <Image src={LOGO} width={80} height={80} alt="Logo" />
         </Link>
-        {showMenu && <MenuItems />}
+        {showMenu && info?.role && <MenuItems userRole={info?.role} />}
         <div className="space-x-2 md:w-auto flex items-center justify-between">
           <div
             className={classNames(
@@ -55,8 +54,7 @@ export default function MainNavbar(props: { showMenu?: boolean }) {
               showMenu ? "text-gray-700" : "text-white"
             )}
           >
-            <p>{user?.name}</p>
-            <p>({user?.role})</p>
+            <p>{info?.name}</p>
           </div>
           <Popover>
             <PopoverTrigger>
@@ -74,7 +72,7 @@ export default function MainNavbar(props: { showMenu?: boolean }) {
                   </div>
                   <p className="text-sm text-gray-900">Profile</p>
                 </button>
-                <button
+                {/* <button
                   onClick={onSignOut}
                   className="cursor-pointer group relative space-y-1 flex flex-col items-center gap-x-6 rounded-lg p-4 hover:bg-gray-50"
                 >
@@ -82,92 +80,12 @@ export default function MainNavbar(props: { showMenu?: boolean }) {
                     <LogOutIcon className="h-6 w-6 text-gray-600 group-hover:text-indigo-600" />
                   </div>
                   <p className="text-sm text-gray-900">SignOut</p>
-                </button>
+                </button> */}
               </div>
             </PopoverContent>
           </Popover>
         </div>
       </div>
-    </div>
-  );
-}
-
-function MenuItems() {
-  const pathname = usePathname();
-  const isActive = (path: string) => {
-    const currentPath = pathname.split("?")[0]; // Remove query parameters
-
-    // Special handling for the root path "/"
-    if (path === "/") {
-      return currentPath === "/";
-    }
-
-    // Check if the current path starts with the specified path
-    const normalizedPath = path.endsWith("/") ? path.slice(0, -1) : path;
-    return currentPath.startsWith(normalizedPath);
-  };
-  return (
-    <div className="hidden md:flex items-center space-x-4 text-sm text-slate-700">
-      <Link
-        href="/quotations"
-        className={classNames(
-          isActive("/quotations")
-            ? "text-primary-600 font-semibold"
-            : "text-gray-500 font-semibold"
-        )}
-      >
-        ใบเสนอราคา (QT)
-      </Link>
-      <Link
-        href="/purchase-orders"
-        className={classNames(
-          isActive("/purchase-orders")
-            ? "text-primary-600 font-semibold"
-            : "text-gray-500 font-semibold"
-        )}
-      >
-        การสั่งซื้อ (PO)
-      </Link>
-      <Link
-        href="/products"
-        className={classNames(
-          isActive("/products")
-            ? "text-primary-600 font-semibold"
-            : "text-gray-500 font-semibold"
-        )}
-      >
-        กลุ่มสินค้า/บริการ
-      </Link>
-      <Link
-        href="/items"
-        className={classNames(
-          isActive("/items")
-            ? "text-primary-600 font-semibold"
-            : "text-gray-500 font-semibold"
-        )}
-      >
-        คลังสินค้า
-      </Link>
-      <Link
-        href="/contacts"
-        className={classNames(
-          isActive("/contacts")
-            ? "text-primary-600 font-semibold"
-            : "text-gray-500 font-semibold"
-        )}
-      >
-        ลูกค้า
-      </Link>
-      <Link
-        href="/users"
-        className={classNames(
-          isActive("/users")
-            ? "text-primary-600 font-semibold"
-            : "text-gray-500 font-semibold"
-        )}
-      >
-        ผู้ใช้งาน
-      </Link>
     </div>
   );
 }

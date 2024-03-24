@@ -1,8 +1,9 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { User } from "@prisma/client";
+import { User, Contact } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
+import { ShieldCheck } from "lucide-react";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -15,7 +16,7 @@ import { ColumnDef } from "@tanstack/react-table";
 //   type: "admin" | "user" | "vendor"
 // }
 
-export const columns: ColumnDef<User>[] = [
+export const columns: ColumnDef<User & { user?: Contact }>[] = [
   {
     accessorKey: "id",
     header: "#",
@@ -39,11 +40,38 @@ export const columns: ColumnDef<User>[] = [
   },
   {
     accessorKey: "userId",
-    header: "ผู้สร้าง",
+    header: "ผู้ดูแล",
     cell: ({ row }) => {
-      return <p className="capitalize">???</p>;
+      const seller = row.original.user;
+      return (
+        <div className="">
+          {seller && (
+            <div className="text-sm">
+              <p>{seller.name}</p>
+              <p>{seller.email}</p>
+            </div>
+          )}
+        </div>
+      );
     },
   },
+  {
+    accessorKey: "isProtected",
+    header: "",
+    cell: ({ row }) => {
+      return (
+        <div className="flex justify-start ml-5">
+          {!row.original.isProtected && (
+            <div className="flex items-center space-x-2">
+              <ShieldCheck className="w-5 h-5 text-green-700" />
+              <p>เซลล์ไม่สามารเข้าถึงได้</p>
+            </div>
+          )}
+        </div>
+      );
+    },
+  },
+  
   {
     id: "actions",
     // cell: ({ row }) => {

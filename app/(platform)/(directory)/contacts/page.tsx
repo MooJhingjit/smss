@@ -14,6 +14,9 @@ const pages = [
 async function getData(): Promise<any[]> {
   // findMany returns an array of 10 users
   const contacts = await db.contact.findMany({
+    include: {
+      user: true,
+    },
     // take: 10,
     // skip: 0,
     orderBy: {

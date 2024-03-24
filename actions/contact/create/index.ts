@@ -4,9 +4,13 @@ import { db } from "@/lib/db";
 import { createSafeAction } from "@/lib/create-safe-action";
 import { InputType, ReturnType } from "./types";
 import { ContactSchema } from "./schema";
+import { currentUser } from "@/lib/auth";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-  const { taxId, name, email, phone, fax, address } = data;
+  const { taxId, name, email, phone, fax, address, isProtected } = data;
+
+  const userSession = await currentUser();
+  console.log("🚀 ~ userSession:", userSession);
   let contact;
   try {
     contact = await db.contact.create({
@@ -18,6 +22,8 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         contact: data.contact,
         fax,
         address,
+        isProtected,
+        sellerId: parseInt(userSession?.id ?? ""),
       },
     });
   } catch (error) {

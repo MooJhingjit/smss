@@ -13,6 +13,7 @@ import { createContact } from "@/actions/contact/create/index";
 import { updateContact } from "@/actions/contact/update/index";
 import { useAction } from "@/hooks/use-action";
 import { FormTextarea } from "../form/form-textarea";
+import { Checkbox } from "../ui/checkbox";
 
 export const ContactModal = () => {
   const modal = useContactModal();
@@ -48,7 +49,7 @@ export const ContactModal = () => {
     const contactText = formData.get("contact") as string;
     const address = formData.get("address") as string;
     const taxId = formData.get("taxId") as string;
-
+    const isProtected = formData.get("isProtected") as string;
     const payload = {
       taxId,
       name,
@@ -57,6 +58,7 @@ export const ContactModal = () => {
       fax,
       contact: contactText,
       address,
+      isProtected: isProtected === "on",
     };
     if (contact?.id) {
       // update user
@@ -120,7 +122,7 @@ export const ContactModal = () => {
             defaultValue={contact?.contact ?? undefined}
             errors={fieldErrors}
           />
-          <div className="col-span-2 ...">
+          <div className="col-span-2">
             <FormTextarea
               id="address"
               rows={4}
@@ -130,12 +132,25 @@ export const ContactModal = () => {
             />
           </div>
 
-
-          <div className="col-start-2 col-span-1 flex justify-end">
-            <FormSubmit>{contact ? "บันทึกการเปลี่ยนแปลง" : "สร้างใหม่"}</FormSubmit>
+          <div className="flex items-center space-x-2">
+            <Checkbox id="isProtected" 
+            name="isProtected" 
+            defaultChecked={contact?.isProtected}
+            
+            
+            />
+            <label
+              htmlFor="isProtected"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              อนุญาตให้เซลล์เข้าถึง
+            </label>
           </div>
-
-
+          <div className="flex justify-end">
+            <FormSubmit>
+              {contact ? "บันทึกการเปลี่ยนแปลง" : "สร้างใหม่"}
+            </FormSubmit>
+          </div>
         </form>
       </DialogContent>
     </Dialog>
