@@ -4,43 +4,45 @@ import Link from "next/link";
 // import { create } from '@/actions/create-user'
 
 export default function ShortcutMenus() {
-
   return (
-    <div className="grid grid-cols-6 gap-4">
-      <Stats />
-      <MenuItem
-        icon={
-          <KanbanSquare
-            className="w-4 h-4 lg:w-8 lg:h-8  text-white"
-            strokeWidth={1.5}
-          />
-        }
-        label="QT ทั้งหมด"
-        link="/quotations"
-      />
-      
-      <MenuItem
-        icon={
-          <Box
-            className="w-4 h-4 lg:w-8 lg:h-8  text-white"
-            strokeWidth={1.5}
-          />
-        }
-        label="กลุ่มสินค้า"
-        link="/products"
-      />
-     
-      <MenuItem
-        icon={
-          <Users
-            className="w-4 h-4 lg:w-8 lg:h-8  text-white"
-            strokeWidth={1.5}
-          />
-        }
-        label="ลูกค้า"
-        link="/contacts"
-      />
-      
+    <div className="">
+      <div className="grid grid-cols-3 gap-4">
+        <MenuItem
+          icon={
+            <KanbanSquare
+              className="w-4 h-4 lg:w-8 lg:h-8  text-white"
+              strokeWidth={1.5}
+            />
+          }
+          label="ใบเสนอราคา (QT)"
+          link="/quotations"
+        />
+
+        <MenuItem
+          icon={
+            <Box
+              className="w-4 h-4 lg:w-8 lg:h-8  text-white"
+              strokeWidth={1.5}
+            />
+          }
+          label="กลุ่มสินค้า"
+          link="/products"
+        />
+
+        <MenuItem
+          icon={
+            <Users
+              className="w-4 h-4 lg:w-8 lg:h-8  text-white"
+              strokeWidth={1.5}
+            />
+          }
+          label="ลูกค้า"
+          link="/contacts"
+        />
+      </div>
+      <div className="mt-4">
+        <Stats />
+      </div>
     </div>
   );
 }

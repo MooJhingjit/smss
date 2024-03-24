@@ -19,7 +19,7 @@ export const quotationStatusMapping = {
     progress: 30,
   },
   approved: {
-    label: "อนุมัติ QT แล้ว",
+    label: "ลูกค้าอนุมัติ QT แล้ว",
     progress: 40,
   },
   po_preparing: {

@@ -15,7 +15,7 @@ export default function ShortcutMenus() {
             strokeWidth={1.5}
           />
         }
-        label="QT ทั้งหมด"
+        label="ใบเสนอราคา"
         link="/quotations"
       />
       <MenuItem
@@ -25,7 +25,7 @@ export default function ShortcutMenus() {
             strokeWidth={1.5}
           />
         }
-        label="PO ทั้งหมด"
+        label="ใบสั่งซื้อ"
         link="/purchase-orders"
       />
       <MenuItem
@@ -57,6 +57,16 @@ export default function ShortcutMenus() {
         }
         label="ผู้ใช้งาน"
         link="/users"
+      />
+      <MenuItem
+        icon={
+          <Users
+            className="w-6 h-6 lg:w-12 lg:h-12  text-white"
+            strokeWidth={1.5}
+          />
+        }
+        label="ลูกค้า"
+        link="/contacts"
       />
       {/* <div className="py-10">
         <form action={create} className="pb-4 space-y-2">

@@ -14,10 +14,14 @@ import { updateContact } from "@/actions/contact/update/index";
 import { useAction } from "@/hooks/use-action";
 import { FormTextarea } from "../form/form-textarea";
 import { Checkbox } from "../ui/checkbox";
+import { useSession } from "next-auth/react";
+import { classNames } from "@/lib/utils";
 
 export const ContactModal = () => {
   const modal = useContactModal();
   const contact = modal.data;
+  const { data: session, status } = useSession();
+  const isAdmin = session?.user?.role === "admin";
 
   const handleCreate = useAction(createContact, {
     onSuccess: (data) => {
@@ -132,21 +136,28 @@ export const ContactModal = () => {
             />
           </div>
 
-          <div className="flex items-center space-x-2">
-            <Checkbox id="isProtected" 
-            name="isProtected" 
-            defaultChecked={contact?.isProtected}
-            
-            
-            />
-            <label
-              htmlFor="isProtected"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              อนุญาตให้เซลล์เข้าถึง
-            </label>
-          </div>
-          <div className="flex justify-end">
+          {isAdmin && (
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="isProtected"
+                name="isProtected"
+                defaultChecked={contact?.isProtected}
+              />
+              <label
+                htmlFor="isProtected"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                อนุญาตให้เซลล์เข้าถึง
+              </label>
+            </div>
+          )}
+
+          <div className={
+            classNames(
+              !isAdmin && "col-span-2",
+              "flex justify-end",
+            )
+          }>
             <FormSubmit>
               {contact ? "บันทึกการเปลี่ยนแปลง" : "สร้างใหม่"}
             </FormSubmit>

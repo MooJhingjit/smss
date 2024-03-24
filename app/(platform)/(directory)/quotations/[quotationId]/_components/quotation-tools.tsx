@@ -7,6 +7,10 @@ import {
   ChevronDownIcon,
   ChevronUpIcon,
   PrinterIcon,
+  Send,
+  Clock,
+  Check,
+  CheckCircle,
 } from "lucide-react";
 import { QuotationStatus, QuotationType } from "@prisma/client";
 // import * as Select from '@radix-ui/react-select';
@@ -24,6 +28,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { FormInput } from "@/components/form/form-input";
+import { customRevalidatePath } from "@/actions/revalidateTag";
 
 type Props = {
   purchaseOrderRef: string;
@@ -31,10 +36,13 @@ type Props = {
   type: QuotationType;
   status: QuotationStatus;
   isLocked: boolean;
+  isAdmin: boolean;
+  hasList: boolean;
 };
 
 export default function QuotationTools(props: Props) {
-  const { purchaseOrderRef, quotationId, status, isLocked } = props;
+  const { hasList, purchaseOrderRef, quotationId, status, isLocked, isAdmin } =
+    props;
 
   const { mutate } = useMutation<
     MutationResponseType,
@@ -52,6 +60,10 @@ export default function QuotationTools(props: Props) {
     },
     onSuccess: async (n) => {
       toast.success("สำเร็จ");
+      // invalidate query
+      customRevalidatePath(`/quotations/${quotationId}`)
+      
+
     },
   });
 
@@ -59,7 +71,7 @@ export default function QuotationTools(props: Props) {
     status?: QuotationStatus;
     purchaseOrderRef?: string;
   }) => {
-    console.log("payload", payload)
+    console.log("payload", payload);
     mutate({
       status: payload.status ?? status,
       purchaseOrderRef: payload.purchaseOrderRef ?? purchaseOrderRef,
@@ -68,38 +80,62 @@ export default function QuotationTools(props: Props) {
 
   return (
     <div className="space-y-2">
-      <div className="grid grid-cols-12 gap-3 ">
+      <div className="grid grid-cols-12 gap-5 ">
         {/* <div className="inline-flex capitalize font-semibold rounded-md bg-gray-100 px-2 py-1 text-xs text-gray-700 items-center">
           <span>{type}</span>
         </div> */}
 
-        <div className="col-span-6">
-          <ItemStatus onStatusChange={(s) => {
-            handleItemChange({ status: s });
-          }} curStatus={status} />
-        </div>
-        <div className="col-span-5"></div>
-        <div className="col-span-1 flex items-center">
-          {isLocked && <LockIcon className="w-6 h-6 text-yellow-500" />}
-        </div>
-        <div className="col-span-4 flex items-center">
+        {isAdmin && (
+          <>
+            <div className="col-span-6">
+              <ItemStatus
+                onStatusChange={(s) => {
+                  handleItemChange({ status: s });
+                }}
+                curStatus={status}
+              />
+            </div>
+            <div className="col-span-5"></div>
+          </>
+        )}
+
+        {isLocked && (
+          <div className="col-span-1 flex items-center">
+            <LockIcon className="w-6 h-6 text-yellow-500" />
+          </div>
+        )}
+
+        <div className="col-span-6 flex items-center">
           <PurchaseOrderRefInput
             defaultValue={purchaseOrderRef}
             onUpdate={handleItemChange}
           />
         </div>
-        <div className="col-span-5 flex  items-end">
-          <div className="h-[36px]">
-            <PrintButton />
+        <div className="col-span-12 grid grid-cols-4 md:grid-cols-6 ">
+          <div className="col-span-2 ">
+            <PrintButton hasList={hasList} />
           </div>
+          {!isAdmin && (
+            <div className="col-span-4 ">
+              <QuotationApprovalButton
+                hasList={hasList}
+                currentStatus={status}
+                onApprove={(s) => {
+                  handleItemChange({
+                    status: s,
+                  });
+                }}
+              />
+            </div>
+          )}
+
+          {/* <div className="col-span-6">
+            <p className="text-xs text-yellow-700 p-2">
+              ต้องเพิ่มรายการสินค้า
+            </p>
+          </div> */}
         </div>
       </div>
-      {/* {Array.from({ length: 6 }).map((_, index) => (
-        <div key={index} className="h-3 bg-gray-200 w-full mb-2"></div>
-      ))} */}
-      {/* <Item label="Status" value="Draft" />
-      <Item label="Status" value="Draft" />
-      <Item label="Status" value="Draft" /> */}
     </div>
   );
 }
@@ -116,13 +152,17 @@ const ItemStatus = ({
   return (
     <Select onValueChange={onStatusChange}>
       <SelectTrigger className="inline-flex capitalize font-semibold  rounded-md bg-yellow-50 px-2 py-1 text-xs text-yellow-700 border border-yellow-500 items-center">
-        <SelectValue
-          placeholder={"สถานะปัจจุบัน: " + quotationStatusMapping[curStatus].label}
-        />
+        <SelectValue placeholder={quotationStatusMapping[curStatus].label} />
       </SelectTrigger>
       <SelectContent className="bg-white text-xs p-2 space-y-2 ">
         {allStatus.map((status, index) => (
-          <SelectItem value={status} key={index}>
+          <SelectItem value={status} key={index}
+            className={
+              status === curStatus
+                ? "bg-yellow-100 text-yellow-700"
+                : "text-gray-700"
+            }
+          >
             {quotationStatusMapping[status].label}
           </SelectItem>
         ))}
@@ -131,9 +171,69 @@ const ItemStatus = ({
   );
 };
 
-const PrintButton = () => {
+const QuotationApprovalButton = ({
+  hasList,
+  onApprove,
+  currentStatus,
+}: {
+  hasList: boolean;
+  onApprove: (status: QuotationStatus) => void;
+  currentStatus: QuotationStatus;
+}) => {
+  console.log("🚀 ~ currentStatus:", currentStatus);
+  if (currentStatus === QuotationStatus.open) {
+    return (
+      <Button
+        variant="default"
+        disabled={!hasList}
+        onClick={() => {
+          onApprove(QuotationStatus.pending_approval);
+        }}
+        className="inline-flex items-center px-2 py-1 rounded-md  text-xs h-full"
+      >
+        <Send className="w-4 h-4 mr-1" />
+        <span>ส่งอนุมัติ</span>
+      </Button>
+    );
+  } else if (currentStatus === QuotationStatus.pending_approval) {
+    return (
+      <div className="flex items-center h-full">
+        <Clock className="w-4 h-4 mr-1 text-yellow-700" />
+        <p className="text-sm text-yellow-700 ">รอการอนุมัติ</p>
+      </div>
+    );
+  } else if (currentStatus === QuotationStatus.offer) {
+    return (
+      <div className="flex items-start space-x-1 h-full">
+        <CheckCircle className="w-4 h-4 mr-1  text-green-700" />
+        <div className="">
+          <p className="text-sm text-green-700 ">
+            ได้รับการอนุมัติ: สามารถนำส่งให้ลูกค้าได้
+          </p>
+          <p
+            className="text-xs text-orange-400 hover:text-orange-500 underline mt-1 cursor-pointer "
+            onClick={() => {
+              onApprove(QuotationStatus.approved);
+            }}
+          >
+            ยืนยันการอนุมัติจากลูกค้า
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <span className="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20">
+      {quotationStatusMapping[currentStatus].label}
+    </span>
+  );
+};
+
+const PrintButton = ({ hasList }: { hasList: boolean }) => {
   return (
     <Button
+      disabled={!hasList}
       variant="outline"
       className="inline-flex items-center px-2 py-1 rounded-md bg-gray-100 text-gray-700 text-xs h-full"
     >
@@ -143,19 +243,21 @@ const PrintButton = () => {
   );
 };
 
-
-const PurchaseOrderRefInput = ({ onUpdate, defaultValue }: {
-  onUpdate: (payload: { purchaseOrderRef: string, }) => void;
+const PurchaseOrderRefInput = ({
+  onUpdate,
+  defaultValue,
+}: {
+  onUpdate: (payload: { purchaseOrderRef: string }) => void;
   defaultValue: string;
 }) => {
   const inputRef = React.useRef<HTMLInputElement>(null);
   return (
     <FormInput
       id="Ref_PO"
-      label="อ้างอิงใบสั่งซื้อ"
+      label=""
       ref={inputRef}
       className="text-xs w-full"
-      placeholder="PO-xxxxxx"
+      placeholder="อ้างอิงใบสั่งซื้อ PO-xxxxxx"
       defaultValue={defaultValue}
       onBlur={() => {
         // get current value
@@ -167,5 +269,5 @@ const PurchaseOrderRefInput = ({ onUpdate, defaultValue }: {
         onUpdate({ purchaseOrderRef });
       }}
     />
-  )
-}
+  );
+};

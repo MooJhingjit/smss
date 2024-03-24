@@ -25,6 +25,22 @@ export const columns: ColumnDef<User & { user?: Contact }>[] = [
   {
     accessorKey: "name",
     header: "ชื่อ",
+    cell: ({ row }) => {
+      const { name, isProtected } = row.original;
+      return (
+        <div className="flex items-center space-x-2">
+          <p>{name}</p>
+          {isProtected && (
+            <div className="flex items-center space-x-2" title="เซลล์ไม่สามารเข้าถึงได้">
+              <ShieldCheck
+                className="w-5 h-5 text-green-700"
+                
+              />
+            </div>
+          )}
+        </div>
+      );
+    }
   },
   {
     accessorKey: "phone",
@@ -56,22 +72,39 @@ export const columns: ColumnDef<User & { user?: Contact }>[] = [
     },
   },
   {
-    accessorKey: "isProtected",
-    header: "",
-    cell: ({ row }) => {
-      return (
-        <div className="flex justify-start ml-5">
-          {!row.original.isProtected && (
-            <div className="flex items-center space-x-2">
-              <ShieldCheck className="w-5 h-5 text-green-700" />
-              <p>เซลล์ไม่สามารเข้าถึงได้</p>
-            </div>
-          )}
-        </div>
-      );
-    },
+    id: "actions",
+    // cell: ({ row }) => {
+    //   const { id } = row.original
+    //   return (
+    //     <Button className="text-xs h-8" variant="secondary"> Manage</Button>
+    //   )
+
+    // }
   },
-  
+];
+export const sellerColumns: ColumnDef<User & { user?: Contact }>[] = [
+  {
+    accessorKey: "id",
+    header: "#",
+    enableColumnFilter: true,
+  },
+  {
+    accessorKey: "name",
+    header: "ชื่อ",
+  },
+  {
+    accessorKey: "phone",
+    header: "เบอร์โทร",
+  },
+  {
+    accessorKey: "email",
+    header: "อีเมล์",
+  },
+  {
+    accessorKey: "address",
+    header: "ที่อยู่",
+  },
+
   {
     id: "actions",
     // cell: ({ row }) => {

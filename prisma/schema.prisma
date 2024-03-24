@@ -128,7 +128,7 @@ model Quotation {
   discount              Float?
   totalPrice            Float?
   tax                   Float?
-  paymentType           String          @default("cash")
+  paymentType           PurchaseOrderPaymentType          @default(cash)
   paymentDueDate        DateTime?
   withholdingTax        Float?
   withholdingTaxPercent Float?
