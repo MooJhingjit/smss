@@ -147,7 +147,7 @@ export const ContactModal = () => {
                 htmlFor="isProtected"
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
-                อนุญาตให้เซลล์เข้าถึง
+                ไม่อนุญาตให้เซลล์เข้าถึง
               </label>
             </div>
           )}
