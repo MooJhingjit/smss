@@ -91,7 +91,7 @@ export default async function QuotationDetails(
     );
   }
 
-  const { contact, lists, status, sellerId } = data;
+  const { contact, lists, status, paymentType, paymentDue } = data;
 
   const isQT_Approved = !["open", "pending_approval", "offer"].includes(status);
   const isReadonly = ['pending_approval', 'offer', 'approved'].includes(status);
@@ -111,6 +111,10 @@ export default async function QuotationDetails(
             quotationId={data.id}
             status={data.status}
             type={data.type}
+            paymentType={paymentType}
+            paymentDue={
+              paymentDue ? new Date(paymentDue).toISOString().split("T")[0] : ""
+            }
           />
         </div>
         <div className="col-span-5">

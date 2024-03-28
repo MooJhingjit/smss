@@ -30,7 +30,7 @@ export const FormSearchAsync = forwardRef<any, FormInputProps>(
       onSelected,
       placeholder,
       required,
-      disabled,
+      disabled = false,
       errors,
       className,
       defaultValue = "",
@@ -52,6 +52,7 @@ export const FormSearchAsync = forwardRef<any, FormInputProps>(
             <FormErrors id={id} errors={errors} />
           </div>
           <SearchAsync
+            disabled={disabled}
             id={id}
             ref={ref}
             config={config}

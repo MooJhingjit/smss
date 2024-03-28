@@ -78,6 +78,7 @@ export const NewProductModal = () => {
         <form action={onSubmit} className="grid grid-cols-2 gap-3">
           <div className="">
             <FormSearchAsync
+              disabled={product?.id ? true : false}
               id="vendor"
               label="ผู้ขาย/ร้านค้า"
               config={{
@@ -97,6 +98,7 @@ export const NewProductModal = () => {
           </div>
           <div className="">
             <FormInput
+              disabled={product?.id ? true : false}
               id="name"
               label="ชื่อสินค้า/บริการ"
               type="text"

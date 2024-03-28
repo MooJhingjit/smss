@@ -2,18 +2,12 @@
 import React from "react";
 import {
   LockIcon,
-  ChevronDown,
-  CheckIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
   PrinterIcon,
   Send,
   Clock,
-  Check,
   CheckCircle,
 } from "lucide-react";
-import { QuotationStatus, QuotationType } from "@prisma/client";
-// import * as Select from '@radix-ui/react-select';
+import { PurchaseOrderPaymentType, QuotationStatus, QuotationType } from "@prisma/client";
 import { quotationStatusMapping } from "@/app/config";
 import { MutationResponseType } from "@/components/providers/query-provider";
 import { useMutation } from "@tanstack/react-query";
@@ -29,6 +23,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { FormInput } from "@/components/form/form-input";
 import { customRevalidatePath } from "@/actions/revalidateTag";
+import PaymentOptionControl from "@/components/payment-option-control";
 
 type Props = {
   purchaseOrderRef: string;
@@ -38,18 +33,22 @@ type Props = {
   isLocked: boolean;
   isAdmin: boolean;
   hasList: boolean;
+  paymentType: PurchaseOrderPaymentType;
+  paymentDue: string;
 };
 
 export default function QuotationTools(props: Props) {
-  const { hasList, purchaseOrderRef, quotationId, status, isLocked, isAdmin } =
+  const { hasList, purchaseOrderRef, quotationId, status, isLocked, paymentDue, paymentType } =
     props;
-
+  const isAdmin = props.isAdmin;
   const { mutate } = useMutation<
     MutationResponseType,
     Error,
     {
       purchaseOrderRef?: string;
-      status: QuotationStatus;
+      status?: QuotationStatus;
+      paymentDue?: string;
+      paymentType?: PurchaseOrderPaymentType;
     }
   >({
     mutationFn: async (fields) => {
@@ -62,61 +61,63 @@ export default function QuotationTools(props: Props) {
       toast.success("สำเร็จ");
       // invalidate query
       customRevalidatePath(`/quotations/${quotationId}`)
-      
+
 
     },
   });
 
   const handleItemChange = (payload: {
     status?: QuotationStatus;
+    paymentDue?: string;
+    paymentType?: PurchaseOrderPaymentType;
     purchaseOrderRef?: string;
   }) => {
-    console.log("payload", payload);
-    mutate({
-      status: payload.status ?? status,
-      purchaseOrderRef: payload.purchaseOrderRef ?? purchaseOrderRef,
-    });
+
+    // update what is provided
+    let payloadBody: any = {}
+    if (payload.status) {
+      payloadBody['status'] = payload.status
+    }
+    if (payload.paymentDue || payload.paymentDue === "") {
+      payloadBody['paymentDue'] = payload.paymentDue ? new Date(payload.paymentDue).toISOString() : null
+    }
+
+    if (payload.paymentType) {
+      payloadBody['paymentType'] = payload.paymentType
+    }
+
+    if (payload.purchaseOrderRef) {
+      payloadBody['purchaseOrderRef'] = payload.purchaseOrderRef
+    }
+
+    // call mutation
+    mutate(payloadBody);
   };
 
   return (
     <div className="space-y-2">
-      <div className="grid grid-cols-12 gap-5 ">
+      <div className="grid grid-cols-12 divide-y divide-gray-100 gap-2 ">
         {/* <div className="inline-flex capitalize font-semibold rounded-md bg-gray-100 px-2 py-1 text-xs text-gray-700 items-center">
           <span>{type}</span>
         </div> */}
 
-        {isAdmin && (
-          <>
-            <div className="col-span-6">
-              <ItemStatus
-                onStatusChange={(s) => {
-                  handleItemChange({ status: s });
-                }}
-                curStatus={status}
-              />
-            </div>
-            <div className="col-span-5"></div>
-          </>
-        )}
-
-        {isLocked && (
-          <div className="col-span-1 flex items-center">
-            <LockIcon className="w-6 h-6 text-yellow-500" />
-          </div>
-        )}
-
-        <div className="col-span-6 flex items-center">
-          <PurchaseOrderRefInput
-            defaultValue={purchaseOrderRef}
-            onUpdate={handleItemChange}
-          />
-        </div>
-        <div className="col-span-12 grid grid-cols-4 md:grid-cols-6 ">
-          <div className="col-span-2 ">
-            <PrintButton hasList={hasList} />
-          </div>
-          {!isAdmin && (
-            <div className="col-span-4 ">
+        <ItemList label="สถานะ">
+          <div className=" text-sm leading-6 text-gray-700 flex space-x-2">
+            {isLocked && (
+              <div className="col-span-1 flex items-center">
+                <LockIcon className="w-4 h-4 text-yellow-500" />
+              </div>
+            )}
+            {isAdmin ? (
+              <div className="">
+                <ItemStatus
+                  onStatusChange={(s) => {
+                    handleItemChange({ status: s });
+                  }}
+                  curStatus={status}
+                />
+              </div>
+            ) : (
               <QuotationApprovalButton
                 hasList={hasList}
                 currentStatus={status}
@@ -126,15 +127,36 @@ export default function QuotationTools(props: Props) {
                   });
                 }}
               />
-            </div>
-          )}
+            )}
+          </div>
+        </ItemList>
 
-          {/* <div className="col-span-6">
-            <p className="text-xs text-yellow-700 p-2">
-              ต้องเพิ่มรายการสินค้า
-            </p>
-          </div> */}
-        </div>
+
+        <ItemList label="อ้างอิงใบสั่งซื้อ">
+
+          <div className="-mt-1 w-[150px]">
+            <PurchaseOrderRefInput
+              defaultValue={purchaseOrderRef}
+              onUpdate={handleItemChange}
+            />
+          </div>
+        </ItemList>
+        {
+          isAdmin && (
+            <ItemList label="การชำระเงิน">
+              <PaymentOptionControl
+                onUpdate={handleItemChange}
+                paymentType={paymentType}
+                paymentDue={paymentDue}
+              />
+            </ItemList>
+          )
+        }
+
+        <ItemList>
+          <PrintButton hasList={hasList} />
+        </ItemList>
+
       </div>
     </div>
   );
@@ -210,14 +232,14 @@ const QuotationApprovalButton = ({
           <p className="text-sm text-green-700 ">
             ได้รับการอนุมัติ: สามารถนำส่งให้ลูกค้าได้
           </p>
-          <p
+          <button
             className="text-xs text-orange-400 hover:text-orange-500 underline mt-1 cursor-pointer "
             onClick={() => {
               onApprove(QuotationStatus.approved);
             }}
           >
             ยืนยันการอนุมัติจากลูกค้า
-          </p>
+          </button>
         </div>
       </div>
     );
@@ -257,7 +279,7 @@ const PurchaseOrderRefInput = ({
       label=""
       ref={inputRef}
       className="text-xs w-full"
-      placeholder="อ้างอิงใบสั่งซื้อ PO-xxxxxx"
+      placeholder="PO-xxxxxx"
       defaultValue={defaultValue}
       onBlur={() => {
         // get current value
@@ -271,3 +293,85 @@ const PurchaseOrderRefInput = ({
     />
   );
 };
+
+
+const ItemList = ({ label, children }: { label?: string, children: React.ReactNode }) => {
+  return (
+    <div className="col-span-12 pt-2">
+      <div className=" flex justify-between items-center">
+        {
+          label && <p className="text-sm leading-6 text-gray-600">{label}</p>
+        }
+        {children}
+      </div>
+    </div>
+  )
+}
+
+// const PaymentOptionControl = ({
+//   paymentType,
+//   paymentDue,
+//   onUpdate
+// }: {
+//   paymentType: PurchaseOrderPaymentType;
+//   paymentDue: string;
+//   onUpdate: (payload: { paymentDue?: string, paymentType?: PurchaseOrderPaymentType }) => void;
+// }) => {
+//   const [paymentTypeState, setPaymentTypeState] = React.useState(paymentType);
+
+//   const onPaymentTypeUpdate = (type: PurchaseOrderPaymentType) => {
+
+//     setPaymentTypeState(type);
+//     if (type === PurchaseOrderPaymentType.cash) {
+//       // reset payment due
+//       onUpdate({
+//         paymentDue: "",
+//         paymentType: PurchaseOrderPaymentType.cash
+//       });
+//     }
+//   }
+
+//   return (
+//     <div className="flex space-x-2 items-center">
+//       {
+//         paymentTypeState == PurchaseOrderPaymentType.credit && (
+//           <div className="w-[140px] -mt-1">
+//             <FormInput
+//               id="paymentDue"
+//               label=""
+//               type="date"
+//               placeholder="กำหนดชำระ"
+//               defaultValue={paymentDue}
+//               onChange={(e) => {
+//                 const value = e.target.value;
+//                 if (!value || paymentDue === value) return;
+//                 onUpdate({
+//                   paymentDue: value,
+//                   paymentType: PurchaseOrderPaymentType.credit
+//                 });
+//               }}
+//             />
+//           </div>
+//         )
+//       }
+//       <Tabs defaultValue={paymentTypeState} className="w-[150px]">
+//         <TabsList className="w-full flex">
+//           <TabsTrigger
+//             className="flex-1 text-xs"
+//             value="cash"
+//             onClick={() => onPaymentTypeUpdate("cash")}
+//           >
+//             เงินสด
+//           </TabsTrigger>
+//           <TabsTrigger
+//             className="flex-1 text-xs"
+//             value="credit"
+//             onClick={() => onPaymentTypeUpdate("credit")}
+//           >
+//             เครดิต
+//           </TabsTrigger>
+//         </TabsList>
+//       </Tabs>
+//     </div>
+//   )
+// }

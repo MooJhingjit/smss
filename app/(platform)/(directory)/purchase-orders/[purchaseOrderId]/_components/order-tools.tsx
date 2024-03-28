@@ -2,26 +2,19 @@
 import React from "react";
 import {
   LockIcon,
-  ChevronDown,
-  CheckIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
   PrinterIcon,
 } from "lucide-react";
 import {
+  PurchaseOrderPaymentType,
   PurchaseOrderStatus,
-  QuotationStatus,
-  QuotationType,
 } from "@prisma/client";
 // import * as Select from '@radix-ui/react-select';
 import {
   purchaseOrderStatusMapping,
 } from "@/app/config";
-// import { classNames } from "@/lib/utils";
-// import { MutationResponseType } from "@/components/providers/query-provider";
-// import { useMutation } from "@tanstack/react-query";
-// import QT_SERVICES from "@/app/services/service.quotation";
-// import { toast } from "sonner";
+import { MutationResponseType } from "@/components/providers/query-provider";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
 import {
   Select,
   SelectContent,
@@ -31,6 +24,10 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { customRevalidatePath } from "@/actions/revalidateTag";
+import PO_SERVICES from "@/app/services/service.purchase-order";
+import PaymentOptionControl from "@/components/payment-option-control";
+
 
 type Props = {
   orderId: number;
@@ -38,63 +35,107 @@ type Props = {
   quotationCode: string | null;
   status: PurchaseOrderStatus;
   isLocked?: boolean;
+  paymentType: PurchaseOrderPaymentType;
+  paymentDue: string;
 };
 
 export default function PurchaseOrderTools(props: Props) {
-  const { orderId, quotationId, quotationCode, status, isLocked } = props;
+  const { orderId, quotationId, quotationCode, status, isLocked, paymentDue, paymentType } = props;
 
-  // const { mutate } = useMutation<
-  //   MutationResponseType,
-  //   Error,
-  //   {
-  //     status: QuotationStatus;
-  //   }
-  // >({
-  //   mutationFn: async (fields) => {
-  //     const res = await QT_SERVICES.put(quotationCode, {
-  //       ...fields
-  //     });
-  //     return res
-  //   },
-  //   onSuccess: async (n) => {
-  //     toast.success("สำเร็จ");
-  //   },
-  // });
+  const { mutate } = useMutation<
+    MutationResponseType,
+    Error,
+    {
+      status?: PurchaseOrderStatus;
+      paymentDue?: string;
+      paymentType?: PurchaseOrderPaymentType;
+    }
+  >({
+    mutationFn: async (fields) => {
+      const res = await PO_SERVICES.put(orderId, {
+        ...fields,
+      });
+      return res;
+    },
+    onSuccess: async (n) => {
+      toast.success("สำเร็จ");
+      // invalidate query
+      customRevalidatePath(`/purchase-orders/${orderId}`)
 
-  const handleItemChange = (status: PurchaseOrderStatus) => {
-    // mutate({ status })
+
+    },
+  });
+
+  const handleChange = (payload: {
+    status?: PurchaseOrderStatus;
+    paymentDue?: string;
+    paymentType?: PurchaseOrderPaymentType;
+  }) => {
+
+    // update what is provided
+    let payloadBody: any = {}
+    if (payload.status) {
+      payloadBody['status'] = payload.status
+    }
+    if (payload.paymentDue || payload.paymentDue === "") {
+      payloadBody['paymentDue'] = payload.paymentDue ? new Date(payload.paymentDue).toISOString() : null
+    }
+
+    if (payload.paymentType) {
+      payloadBody['paymentType'] = payload.paymentType
+    }
+
+    // call mutation
+    mutate(payloadBody);
   };
 
   return (
     <div className="space-y-2">
-      <div className="grid grid-cols-12 gap-3 ">
+      <div className="grid grid-cols-12 divide-y divide-gray-100 gap-2 ">
         {/* <div className="inline-flex capitalize font-semibold rounded-md bg-gray-100 px-2 py-1 text-xs text-gray-700 items-center">
           <span>{type}</span>
         </div> */}
-        {isLocked && (
-          <div className="col-span-2 flex items-center">
-            <LockIcon className="w-6 h-6 text-yellow-500" />
+        <ItemList label="สถานะ">
+          <div className=" text-sm leading-6 text-gray-700 flex space-x-2">
+            {isLocked && (
+              <div className="col-span-1 flex items-center">
+                <LockIcon className="w-4 h-4 text-yellow-500" />
+              </div>
+            )}
+            <div className="">
+              <ItemStatus
+                onStatusChange={(s) => {
+                  handleChange({ status: s });
+                }}
+                curStatus={status} />
+            </div>
           </div>
-        )}
-        <div className="col-span-5">
-          <ItemStatus onStatusChange={handleItemChange} curStatus={status} />
-        </div>
-        <div className="col-span-3">
-          <PrintButton />
-        </div>
-        {quotationId && (
-          <div className="col-span-6 flex items-center space-x-1">
-            <span className="inline-flex items-center rounded-md bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-600">
-              จากใบเสนอราคา
-              <Link
-                href={`/quotations/${quotationId}`}
-                className="ml-1.5 text-blue-500 underline"
-              >
-                {quotationCode}
-              </Link>
-            </span>
+        </ItemList>
+
+        <ItemList label="การชำระเงิน">
+          <PaymentOptionControl
+            onUpdate={handleChange}
+            paymentType={paymentType}
+            paymentDue={paymentDue}
+          />
+        </ItemList>
+
+        <ItemList>
+          <div className="space-x-3 flex items-center">
+            {quotationId && (
+              <div className="inline-flex items-center rounded-md bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-600">
+                <span>QT:</span>
+                <Link
+                  href={`/quotations/${quotationId}`}
+                  className="ml-1.5 text-blue-500 underline"
+                >
+                  {quotationCode}
+                </Link>
+              </div>
+            )}
+            <PrintButton />
           </div>
-        )}
+        </ItemList>
       </div>
     </div>
   );
@@ -114,7 +155,7 @@ const ItemStatus = ({
       <SelectTrigger className="inline-flex capitalize font-semibold  rounded-md bg-yellow-50 px-2 py-1 text-xs text-yellow-700 border border-yellow-500 items-center">
         <SelectValue
           placeholder={
-            "สถานะปัจจุบัน: " + purchaseOrderStatusMapping[curStatus]
+            purchaseOrderStatusMapping[curStatus]
           }
         />
       </SelectTrigger>
@@ -124,10 +165,6 @@ const ItemStatus = ({
             {purchaseOrderStatusMapping[status]}
           </SelectItem>
         ))}
-        <SelectItem value="closed">รอสินค้า</SelectItem>
-        <SelectItem value="closed">รับสินค้าเข้า</SelectItem>
-        <SelectItem value="closed">รอออกใบเสร็จ</SelectItem>
-        <SelectItem value="closed">ส่งสินค้า/ปิดงาน</SelectItem>
       </SelectContent>
     </Select>
   );
@@ -144,3 +181,17 @@ const PrintButton = () => {
     </Button>
   );
 };
+
+
+const ItemList = ({ label, children }: { label?: string, children: React.ReactNode }) => {
+  return (
+    <div className="col-span-12 pt-2">
+      <div className=" flex justify-between items-center">
+        {
+          label && <p className="text-sm leading-6 text-gray-600">{label}</p>
+        }
+        {children}
+      </div>
+    </div>
+  )
+}

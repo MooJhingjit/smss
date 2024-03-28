@@ -1,8 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import { db } from "@/lib/db";
-import { QuotationStatus } from "@prisma/client";
 
-// PUT /api/quotations/:id
 export async function PUT(req: NextRequest, context: { params: { id: number } }) {
   try {
     // console.log("req.query", req.query);
@@ -12,7 +10,7 @@ export async function PUT(req: NextRequest, context: { params: { id: number } })
     }
 
     // body whitelist
-    const bodyWhitelist = ["status", "purchaseOrderRef", "paymentDue", "paymentType"];
+    const bodyWhitelist = ["status", "paymentDue", "paymentType"];
 
     // check if body has any keys that are not in the whitelist
     const body = await req.json();
@@ -22,7 +20,7 @@ export async function PUT(req: NextRequest, context: { params: { id: number } })
       return new NextResponse("Invalid body", { status: 400 });
     }
 
-    const quotation = await db.quotation.update({
+    const purchaseOrder = await db.purchaseOrder.update({
       where: {
         id: Number(id),
       },
@@ -30,7 +28,7 @@ export async function PUT(req: NextRequest, context: { params: { id: number } })
         ...body,
       },
     });
-    return NextResponse.json(quotation);
+    return NextResponse.json(purchaseOrder);
   } catch (error) {
     console.log("error", error);
     return new NextResponse("Internal Error", { status: 500 });

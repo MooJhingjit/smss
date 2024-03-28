@@ -12,8 +12,16 @@ const generatePOs = (data: Record<string, any>) => {
     });
 };
 
+const put = (id: number, data: Record<string, any>) => {
+  return fetcher(`/api/purchase-orders/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+  });
+};
+
 export default {
   get,
-  generatePOs
+  generatePOs,
+  put
 //   updateStatus,
 };

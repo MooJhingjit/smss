@@ -117,26 +117,26 @@ enum QuotationStatus {
 }
 
 model Quotation {
-  id                    Int             @id @default(autoincrement())
+  id                    Int                      @id @default(autoincrement())
   code                  String
   purchaseOrderRef      String?
-  type                  QuotationType   @default(product)
+  type                  QuotationType            @default(product)
   contactId             Int
-  contact               Contact         @relation(fields: [contactId], references: [id])
+  contact               Contact                  @relation(fields: [contactId], references: [id])
   sellerId              Int?
-  seller                User?           @relation(fields: [sellerId], references: [id], name: "seller")
+  seller                User?                    @relation(fields: [sellerId], references: [id], name: "seller")
   discount              Float?
   totalPrice            Float?
   tax                   Float?
-  paymentType           PurchaseOrderPaymentType          @default(cash)
-  paymentDueDate        DateTime?
+  paymentType           PurchaseOrderPaymentType @default(cash)
+  paymentDue            DateTime?
   withholdingTax        Float?
   withholdingTaxPercent Float?
-  status                QuotationStatus @default(open)
-  remark                String?         @db.Text
-  isLocked              Boolean         @default(false)
-  createdAt             DateTime        @default(now())
-  updatedAt             DateTime        @updatedAt
+  status                QuotationStatus          @default(open)
+  remark                String?                  @db.Text
+  isLocked              Boolean                  @default(false)
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
   lists                 QuotationList[]
   purchaseOrders        PurchaseOrder[]
   medias                Media[]
@@ -208,7 +208,7 @@ model PurchaseOrder {
   grandTotal         Float?
   status             PurchaseOrderStatus      @default(draft)
   paymentType        PurchaseOrderPaymentType @default(cash)
-  paymentDueDate     DateTime?
+  paymentDue         DateTime?
   remark             String?                  @db.Text
   createdAt          DateTime                 @default(now())
   updatedAt          DateTime                 @updatedAt

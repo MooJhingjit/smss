@@ -48,10 +48,11 @@ type Props = {
   defaultValue?: any;
   onSelected: (selected: any) => void;
   config: AsyncSelectConfigType;
+  disabled: boolean;
 };
 
 const SearchAsync = React.forwardRef<any, Props>(
-  ({ className, id, defaultValue, onSelected, config, ...props }, ref) => {
+  ({ className, id, defaultValue, onSelected, config, disabled, ...props }, ref) => {
     const { search } = useSearchAsync(config);
     return (
       <AsyncSelect
@@ -62,6 +63,7 @@ const SearchAsync = React.forwardRef<any, Props>(
         onChange={onSelected}
         styles={customStyles}
         defaultValue={defaultValue}
+        isDisabled={disabled}
         className="text-xs w-full h-[36px]"
         {...props}
       />

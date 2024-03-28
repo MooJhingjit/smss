@@ -24,6 +24,7 @@ interface FormInputProps {
   onBlur?: () => void;
   register?: UseFormRegister<any>;
   step?: string;
+  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
@@ -39,6 +40,7 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
       className,
       defaultValue = "",
       onBlur,
+      onChange,
       register,
       readOnly,
       step = "any",
@@ -61,6 +63,7 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
           <Input
             autoComplete="off"
             onBlur={onBlur}
+            onChange={onChange}
             defaultValue={defaultValue}
             ref={ref}
             required={required}

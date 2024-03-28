@@ -85,7 +85,7 @@ export default async function PurchaseOrderDetails(props: Readonly<Props>) {
     );
   }
 
-  const { quotation, vendor } = data;
+  const { vendor } = data;
 
   return (
     <>
@@ -100,6 +100,10 @@ export default async function PurchaseOrderDetails(props: Readonly<Props>) {
             quotationId={data.quotationId}
             quotationCode={data.quotation?.code ?? ""}
             status={data.status}
+            paymentDue={
+              data.paymentDue ? new Date(data.paymentDue).toISOString().split("T")[0] : ""
+            }
+            paymentType={data.paymentType}
           />
         </div>
         <div className="col-span-5">

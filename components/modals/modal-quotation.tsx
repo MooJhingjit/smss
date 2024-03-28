@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { useQuotationModal } from "@/hooks/use-quotation-modal";
 import { Label } from "../ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRef, useState } from "react";
 import { FormSearchAsync } from "../form/form-search-async";
 import { FormSubmit } from "../form/form-submit";
