@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { useUser } from "@/hooks/use-user";
 
 export async function GET(
-  req: NextRequest
+  req: NextRequest,
   // { params }: { params: { search: string } }
 ) {
   try {

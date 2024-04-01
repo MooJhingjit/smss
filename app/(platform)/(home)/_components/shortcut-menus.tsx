@@ -5,7 +5,6 @@ import Link from "next/link";
 // import { create } from '@/actions/create-user'
 
 export default function ShortcutMenus() {
-
   return (
     <div className="grid grid-cols-5 gap-4">
       <MenuItem

@@ -3,7 +3,7 @@ import { debounce } from "@/lib/utils";
 import { ReactElement, useCallback } from "react";
 
 export const useSearchAsync = (
-  config: AsyncSelectConfigType
+  config: AsyncSelectConfigType,
   // endpoint: string,
   // defaultQuery: Record<string, string>,
 ) => {
@@ -24,21 +24,25 @@ export const useSearchAsync = (
   };
 
   const search = useCallback(
-    debounce(async (searchValue: string, callback: (options: any[]) => void) => {
-      const response = await fetch(getSearchURL(searchValue), {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      const data = await response.json();
+    debounce(
+      async (searchValue: string, callback: (options: any[]) => void) => {
+        const response = await fetch(getSearchURL(searchValue), {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        const data = await response.json();
 
-      if (config.customRender) callback(data?.map(config.customRender));
+        if (config.customRender) callback(data?.map(config.customRender));
 
-      // default to mapData
-      callback(mapData(data));
-
-    }, 500), []);
+        // default to mapData
+        callback(mapData(data));
+      },
+      500,
+    ),
+    [],
+  );
 
   // const search = async (searchValue: string, callback: (options: any[]) => void) => {
   //   console.log("searchValue", searchValue)
@@ -52,7 +56,6 @@ export const useSearchAsync = (
   //   return mapData(data);
 
   // }
-
 
   return {
     search,

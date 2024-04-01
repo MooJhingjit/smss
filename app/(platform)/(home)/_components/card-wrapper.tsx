@@ -23,9 +23,7 @@ export default function CardWrapper(props: Props) {
       <CardHeader className="bg-blue-100 p-4 flex flex-row items-center">
         <div className="flex-1 space-y-2">
           <CardTitle className="text-gray-700">{title}</CardTitle>
-          {
-            description && <CardDescription>{description}</CardDescription>
-          }
+          {description && <CardDescription>{description}</CardDescription>}
         </div>
         <div className="flex-none flex items-center space-x-4">
           {link && (
@@ -55,5 +53,3 @@ export default function CardWrapper(props: Props) {
     </Card>
   );
 }
-
-

@@ -6,10 +6,7 @@ import { schema } from "./schema";
 import { revalidatePath } from "next/cache";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-  const {
-    id,
-    name,
-  } = data;
+  const { id, name } = data;
 
   let purchaseOrderItem;
   try {

@@ -3,7 +3,10 @@ import { db } from "@/lib/db";
 import { QuotationStatus } from "@prisma/client";
 
 // PUT /api/quotations/:id
-export async function PUT(req: NextRequest, context: { params: { id: number } }) {
+export async function PUT(
+  req: NextRequest,
+  context: { params: { id: number } },
+) {
   try {
     // console.log("req.query", req.query);
     const { id } = context.params;
@@ -12,7 +15,12 @@ export async function PUT(req: NextRequest, context: { params: { id: number } })
     }
 
     // body whitelist
-    const bodyWhitelist = ["status", "purchaseOrderRef", "paymentDue", "paymentType"];
+    const bodyWhitelist = [
+      "status",
+      "purchaseOrderRef",
+      "paymentDue",
+      "paymentType",
+    ];
 
     // check if body has any keys that are not in the whitelist
     const body = await req.json();

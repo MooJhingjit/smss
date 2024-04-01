@@ -151,15 +151,13 @@ export const NewUserModal = () => {
             />
           </div>
 
-          <PasswordForm
-            fieldErrors={fieldErrors}
-          />
+          <PasswordForm fieldErrors={fieldErrors} />
 
           <div className="col-start-2 col-span-1 flex justify-end">
-            <FormSubmit>{user ? "บันทึกการเปลี่ยนแปลง" : "สร้างใหม่"}</FormSubmit>
+            <FormSubmit>
+              {user ? "บันทึกการเปลี่ยนแปลง" : "สร้างใหม่"}
+            </FormSubmit>
           </div>
-
-
         </form>
       </DialogContent>
     </Dialog>
@@ -193,5 +191,5 @@ const PasswordForm = ({ fieldErrors }: { fieldErrors: any }) => {
         errors={fieldErrors}
       />
     </div>
-  )
-}
+  );
+};

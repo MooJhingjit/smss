@@ -1,13 +1,11 @@
 "use client";
 import React from "react";
+import { LockIcon, PrinterIcon, Send, Clock, CheckCircle } from "lucide-react";
 import {
-  LockIcon,
-  PrinterIcon,
-  Send,
-  Clock,
-  CheckCircle,
-} from "lucide-react";
-import { PurchaseOrderPaymentType, QuotationStatus, QuotationType } from "@prisma/client";
+  PurchaseOrderPaymentType,
+  QuotationStatus,
+  QuotationType,
+} from "@prisma/client";
 import { quotationStatusMapping } from "@/app/config";
 import { MutationResponseType } from "@/components/providers/query-provider";
 import { useMutation } from "@tanstack/react-query";
@@ -38,8 +36,15 @@ type Props = {
 };
 
 export default function QuotationTools(props: Props) {
-  const { hasList, purchaseOrderRef, quotationId, status, isLocked, paymentDue, paymentType } =
-    props;
+  const {
+    hasList,
+    purchaseOrderRef,
+    quotationId,
+    status,
+    isLocked,
+    paymentDue,
+    paymentType,
+  } = props;
   const isAdmin = props.isAdmin;
   const { mutate } = useMutation<
     MutationResponseType,
@@ -60,9 +65,7 @@ export default function QuotationTools(props: Props) {
     onSuccess: async (n) => {
       toast.success("สำเร็จ");
       // invalidate query
-      customRevalidatePath(`/quotations/${quotationId}`)
-
-
+      customRevalidatePath(`/quotations/${quotationId}`);
     },
   });
 
@@ -72,22 +75,23 @@ export default function QuotationTools(props: Props) {
     paymentType?: PurchaseOrderPaymentType;
     purchaseOrderRef?: string;
   }) => {
-
     // update what is provided
-    let payloadBody: any = {}
+    let payloadBody: any = {};
     if (payload.status) {
-      payloadBody['status'] = payload.status
+      payloadBody["status"] = payload.status;
     }
     if (payload.paymentDue || payload.paymentDue === "") {
-      payloadBody['paymentDue'] = payload.paymentDue ? new Date(payload.paymentDue).toISOString() : null
+      payloadBody["paymentDue"] = payload.paymentDue
+        ? new Date(payload.paymentDue).toISOString()
+        : null;
     }
 
     if (payload.paymentType) {
-      payloadBody['paymentType'] = payload.paymentType
+      payloadBody["paymentType"] = payload.paymentType;
     }
 
     if (payload.purchaseOrderRef) {
-      payloadBody['purchaseOrderRef'] = payload.purchaseOrderRef
+      payloadBody["purchaseOrderRef"] = payload.purchaseOrderRef;
     }
 
     // call mutation
@@ -131,9 +135,7 @@ export default function QuotationTools(props: Props) {
           </div>
         </ItemList>
 
-
         <ItemList label="อ้างอิงใบสั่งซื้อ">
-
           <div className="-mt-1 w-[150px]">
             <PurchaseOrderRefInput
               defaultValue={purchaseOrderRef}
@@ -141,22 +143,19 @@ export default function QuotationTools(props: Props) {
             />
           </div>
         </ItemList>
-        {
-          isAdmin && (
-            <ItemList label="การชำระเงิน">
-              <PaymentOptionControl
-                onUpdate={handleItemChange}
-                paymentType={paymentType}
-                paymentDue={paymentDue}
-              />
-            </ItemList>
-          )
-        }
+        {isAdmin && (
+          <ItemList label="การชำระเงิน">
+            <PaymentOptionControl
+              onUpdate={handleItemChange}
+              paymentType={paymentType}
+              paymentDue={paymentDue}
+            />
+          </ItemList>
+        )}
 
         <ItemList>
           <PrintButton hasList={hasList} />
         </ItemList>
-
       </div>
     </div>
   );
@@ -178,7 +177,9 @@ const ItemStatus = ({
       </SelectTrigger>
       <SelectContent className="bg-white text-xs p-2 space-y-2 ">
         {allStatus.map((status, index) => (
-          <SelectItem value={status} key={index}
+          <SelectItem
+            value={status}
+            key={index}
             className={
               status === curStatus
                 ? "bg-yellow-100 text-yellow-700"
@@ -294,19 +295,22 @@ const PurchaseOrderRefInput = ({
   );
 };
 
-
-const ItemList = ({ label, children }: { label?: string, children: React.ReactNode }) => {
+const ItemList = ({
+  label,
+  children,
+}: {
+  label?: string;
+  children: React.ReactNode;
+}) => {
   return (
     <div className="col-span-12 pt-2">
       <div className=" flex justify-between items-center">
-        {
-          label && <p className="text-sm leading-6 text-gray-600">{label}</p>
-        }
+        {label && <p className="text-sm leading-6 text-gray-600">{label}</p>}
         {children}
       </div>
     </div>
-  )
-}
+  );
+};
 
 // const PaymentOptionControl = ({
 //   paymentType,

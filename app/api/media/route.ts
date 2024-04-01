@@ -3,14 +3,14 @@ import { NextResponse, NextRequest } from "next/server";
 import { db } from "@/lib/db";
 
 export async function GET(
-  req: NextRequest
+  req: NextRequest,
   // { params }: { params: { search: string } }
 ) {
   try {
     const refType = req.nextUrl.searchParams.get("refType");
     const refId = req.nextUrl.searchParams.get("refId");
     const field = getRefKey(refType ?? "");
-    console.log('field', field);
+    console.log("field", field);
     if (!refType || !refId || !field) {
       return new NextResponse("Bad Request", { status: 400 });
     }
@@ -50,7 +50,6 @@ export async function POST(req: NextRequest) {
       [field]: parseInt(refId),
       url,
     };
-
 
     const res = await db.media.create({
       data,

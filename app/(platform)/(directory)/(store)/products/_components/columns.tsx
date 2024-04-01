@@ -39,6 +39,3 @@ export const columns: ColumnDef<Product>[] = [
     id: "actions",
   },
 ];
-
-
-

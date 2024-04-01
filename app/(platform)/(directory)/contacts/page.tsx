@@ -24,7 +24,7 @@ async function getData(isAdmin: boolean, userId: string): Promise<any[]> {
         isProtected: false,
         sellerId: parseInt(userId),
       },
-      }
+    };
   }
   // findMany returns an array of 10 users
   const contacts = await db.contact.findMany({

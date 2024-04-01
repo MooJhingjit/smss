@@ -16,7 +16,7 @@ export const columns: ColumnDef<Item>[] = [
     accessorKey: "cost",
     header: "ราคาซื้อ",
   },
-  
+
   {
     id: "warrantyDate",
     accessorKey: "warrantyDate",

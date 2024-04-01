@@ -30,9 +30,9 @@ export type ItemWithRefs = Item & {
 export type ItemRefs =
   | undefined
   | {
-    productRef: { id: number; name: string };
-    vendorRef?: { id: number | undefined; name: string | undefined };
-  };
+      productRef: { id: number; name: string };
+      vendorRef?: { id: number | undefined; name: string | undefined };
+    };
 
 export type QuotationListWithRelations = QuotationList & {
   product: ProductWithRelations;

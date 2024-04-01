@@ -21,7 +21,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     discount,
     totalPrice,
     description,
-    subItems
+    subItems,
   } = data;
 
   let quotationList;
@@ -44,7 +44,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         discount,
         totalPrice,
         description,
-        subItems
+        subItems,
       },
     });
   } catch (error) {

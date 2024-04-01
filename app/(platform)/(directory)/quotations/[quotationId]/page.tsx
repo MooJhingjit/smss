@@ -47,7 +47,7 @@ interface QuotationIdPageProps {
 }
 
 export default async function QuotationDetails(
-  props: Readonly<QuotationIdPageProps>
+  props: Readonly<QuotationIdPageProps>,
 ) {
   const { params } = props;
   const data = await getData(params.quotationId);
@@ -67,7 +67,7 @@ export default async function QuotationDetails(
             <p
               className={classNames(
                 "rounded bg-gray-100 px-2 py-0.5 text-xs tracking-wide text-gray-600 space-x-2",
-                data?.type === QuotationType.service ? "text-green-600" : ""
+                data?.type === QuotationType.service ? "text-green-600" : "",
               )}
             >
               <span>{data?.code}</span>
@@ -94,7 +94,7 @@ export default async function QuotationDetails(
   const { contact, lists, status, paymentType, paymentDue } = data;
 
   const isQT_Approved = !["open", "pending_approval", "offer"].includes(status);
-  const isReadonly = ['pending_approval', 'offer', 'approved'].includes(status);
+  const isReadonly = ["pending_approval", "offer", "approved"].includes(status);
   return (
     <>
       <Breadcrumbs pages={pages} />
@@ -119,7 +119,7 @@ export default async function QuotationDetails(
         </div>
         <div className="col-span-5">
           <QuotationLists
-            isLocked={data.isLocked || (!isAdmin &&  isReadonly)}
+            isLocked={data.isLocked || (!isAdmin && isReadonly)}
             quotationId={data.id}
             quotationType={data.type}
             remark={data.remark ?? ""}

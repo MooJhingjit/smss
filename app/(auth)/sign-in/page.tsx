@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import LOGO from "@/public/logo.png";
-import { useFormState, useFormStatus } from 'react-dom';
-import { authenticate } from '@/actions/auth';
+import { useFormState, useFormStatus } from "react-dom";
+import { authenticate } from "@/actions/auth";
 
 export default function SignInPage() {
   const [errorMessage, dispatch] = useFormState(authenticate, undefined);
@@ -14,7 +14,7 @@ export default function SignInPage() {
   return (
     <div className="flex min-h-full flex-1 items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
       {/* image bg */}
-      
+
       <div className="absolute w-full z-10 inset-0  	">
         <img
           className="h-full w-full object-cover "
@@ -24,16 +24,10 @@ export default function SignInPage() {
       </div>
       <div className="w-full max-w-md space-y-10 relative z-20 backdrop-blur-sm bg-white/40 p-20 rounded">
         <div className="flex items-center space-x-4 justify-center">
-          <img
-            className="h-20 w-auto"
-            src={LOGO.src}
-            alt="Workflow"
-          />
-          <span className="text-2xl font-semibold text-white">
-            เข้าสู่ระบบ
-          </span>
+          <img className="h-20 w-auto" src={LOGO.src} alt="Workflow" />
+          <span className="text-2xl font-semibold text-white">เข้าสู่ระบบ</span>
         </div>
-        <form action={dispatch} className="space-y-6" >
+        <form action={dispatch} className="space-y-6">
           <div className="relative space-y-2  rounded-md shadow-sm">
             <div>
               <Label htmlFor="email" className="sr-only">
@@ -43,7 +37,7 @@ export default function SignInPage() {
                 id="email"
                 name="email"
                 type="email"
-                className="text-white placeholder:text-white" 
+                className="text-white placeholder:text-white"
                 required
                 placeholder="อีเมล์"
               />
@@ -90,24 +84,21 @@ export default function SignInPage() {
             <Button
               disabled={pending}
               type="submit"
-              variant={'secondary'}
+              variant={"secondary"}
               className="w-full"
             >
               ยืนยัน
             </Button>
           </div>
         </form>
-        {
-          errorMessage && (
-            <div className="bg-red-400 border-red-100 p-2 text-center rounded">
-              <p className="text-sm text-white  text-center ">
-                อีเมล์หรือรหัสผ่านไม่ถูกต้อง
-              </p>
-            </div>
-          )
-        }
+        {errorMessage && (
+          <div className="bg-red-400 border-red-100 p-2 text-center rounded">
+            <p className="text-sm text-white  text-center ">
+              อีเมล์หรือรหัสผ่านไม่ถูกต้อง
+            </p>
+          </div>
+        )}
       </div>
-
     </div>
   );
 }

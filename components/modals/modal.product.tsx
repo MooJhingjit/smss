@@ -48,22 +48,22 @@ export const NewProductModal = () => {
     const vendor = formData.get("vendor") as string;
     const description = formData.get("description") as string;
 
-    const payload = {
+    if (product?.id) {
+      handleUpdate.execute({
+        id: product.id,
+        percentage,
+        cost,
+        description
+      });
+      return;
+    }
+    handleCreate.execute({
       name,
       vendorId: parseInt(vendor),
       cost: cost,
       percentage: percentage,
       description,
-    };
-
-    if (product?.id) {
-      handleUpdate.execute({
-        id: product.id,
-        ...payload,
-      });
-      return;
-    }
-    handleCreate.execute({ ...payload });
+    });
   };
 
   const fieldErrors = (product?.id ? handleUpdate : handleCreate).fieldErrors;
@@ -72,7 +72,10 @@ export const NewProductModal = () => {
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle> {product ? "แก้ไขกลุ่มสินค้า" : "กลุ่มสินค้าใหม่"}</DialogTitle>
+          <DialogTitle>
+            {" "}
+            {product ? "แก้ไขกลุ่มสินค้า" : "กลุ่มสินค้าใหม่"}
+          </DialogTitle>
           {/* <DialogDescription>Please select the vendor.</DialogDescription> */}
         </DialogHeader>
         <form action={onSubmit} className="grid grid-cols-2 gap-3">

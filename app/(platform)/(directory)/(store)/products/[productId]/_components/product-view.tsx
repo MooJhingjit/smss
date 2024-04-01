@@ -32,12 +32,13 @@ export default function ProductView(props: Props) {
 
           <div className="flex items-center justify-between">
             <dt className="text-gray-600">ต้นทุน</dt>
-            <dd>{ cost && 
-              new Intl.NumberFormat('th-TH', {
-                style: 'currency',
-                currency: 'THB'
-              }).format(cost)
-              }</dd>
+            <dd>
+              {cost &&
+                new Intl.NumberFormat("th-TH", {
+                  style: "currency",
+                  currency: "THB",
+                }).format(cost)}
+            </dd>
           </div>
 
           <div className="flex items-center justify-between">

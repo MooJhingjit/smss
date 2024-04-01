@@ -24,7 +24,7 @@ const columns = [
     name: "การชำระเงิน",
     key: "paymentType",
     render: (item: QuotationWithBuyer) => {
-      const paymentType = item.paymentType as PurchaseOrderPaymentType
+      const paymentType = item.paymentType as PurchaseOrderPaymentType;
       return <p className="">{paymentTypeMapping[paymentType]}</p>;
     },
   },
@@ -35,9 +35,7 @@ const columns = [
     render: (item: QuotationWithBuyer) => {
       return (
         <span className="inline-flex items-center rounded-md bg-yellow-100 px-2 py-0.5 text-xs text-yellow-700">
-          {
-            quotationStatusMapping[item.status].label
-          }
+          {quotationStatusMapping[item.status].label}
         </span>
       );
     },

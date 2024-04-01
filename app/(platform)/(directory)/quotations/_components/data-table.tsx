@@ -40,7 +40,5 @@ export default function ContactTable<TData, TValue>(
     return column;
   });
 
-  return (
-    <DataTable columns={modifiedColumns} data={data} onCreate={onOpen} />
-  );
+  return <DataTable columns={modifiedColumns} data={data} onCreate={onOpen} />;
 }

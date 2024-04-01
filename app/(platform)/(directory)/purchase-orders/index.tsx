@@ -26,12 +26,10 @@ export const purchaseOrderColumns = [
     key: "id",
     render: (item: PurchaseOrderWithRelations) => {
       return (
-        <Link
-          href={`/purchase-orders/${item.id}`}>
+        <Link href={`/purchase-orders/${item.id}`}>
           <ExternalLink className="w-4 h-4" />
-        </Link >
+        </Link>
       );
     },
-
-  }
+  },
 ];

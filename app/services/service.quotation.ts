@@ -6,14 +6,14 @@ const get = (params?: Record<string, any>) => {
 };
 
 const put = (id: number, data: Record<string, any>) => {
-    return fetcher(`/api/quotations/${id}`, {
-        method: "PUT",
-        body: JSON.stringify(data),
-    });
+  return fetcher(`/api/quotations/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
 };
 
 export default {
   get,
-  put
-//   updateStatus,
+  put,
+  //   updateStatus,
 };

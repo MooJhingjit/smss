@@ -86,9 +86,7 @@ export default function PurchaseOrderItems({
       headerIcon={
         !data.quotationId && (
           <Button
-            onClick={() =>
-              modal.onOpen(null, data)
-            }
+            onClick={() => modal.onOpen(null, data)}
             variant="secondary"
             className="flex items-center justify-center  h-5 rounded  "
           >
@@ -102,7 +100,10 @@ export default function PurchaseOrderItems({
           columns={columns}
           data={purchaseOrderItems}
           onManage={(purchaseOrderItem) => {
-            modal.onOpen(purchaseOrderItem as PurchaseOrderItemWithRelations, data);
+            modal.onOpen(
+              purchaseOrderItem as PurchaseOrderItemWithRelations,
+              data,
+            );
           }}
         />
       </div>
@@ -122,7 +123,6 @@ export default function PurchaseOrderItems({
     </PageComponentWrapper>
   );
 }
-
 
 type FormRemark = {
   id: number;

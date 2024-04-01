@@ -1,4 +1,4 @@
-import { NextResponse, NextRequest, } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { db } from "@/lib/db";
 
 export async function GET(req: NextRequest) {
@@ -8,14 +8,14 @@ export async function GET(req: NextRequest) {
     // get all quotation items from quotationId
     const purchaseOrders = await db.purchaseOrder.findMany({
       where: {
-        quotationId: Number(quotationId)
+        quotationId: Number(quotationId),
       },
       include: {
         vendor: true,
-      }
-    })
+      },
+    });
 
-    return NextResponse.json(purchaseOrders);    
+    return NextResponse.json(purchaseOrders);
   } catch (error) {
     console.log("error", error);
     return new NextResponse("Internal Error", { status: 500 });

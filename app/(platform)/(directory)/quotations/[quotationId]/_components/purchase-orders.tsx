@@ -20,8 +20,6 @@ import { usePurchasePreviewModal } from "@/hooks/use-po-preview-modal";
 import { Button } from "@/components/ui/button";
 import { purchaseOrderColumns } from "../../../purchase-orders";
 
-
-
 export default function PurchaseOrders(props: {
   quotationLists: QuotationListWithRelations[];
   hasQuotationItems: boolean;
@@ -48,8 +46,7 @@ export default function PurchaseOrders(props: {
         const vendorIdNum = Number(vendorId);
 
         const lists = quotationListsByVendor[vendorIdNum];
-        const { totalCost, quantity } =
-          getQuotationTotalPrice(lists);
+        const { totalCost, quantity } = getQuotationTotalPrice(lists);
 
         return {
           id: vendorIdNum,
@@ -57,13 +54,13 @@ export default function PurchaseOrders(props: {
           quantity: quantity,
           totalCost,
         };
-      }
+      },
     );
 
     modal.onOpen(
       purchaseOrderPreview as PurchaseOrderPreview[],
       queryKey,
-      quotationId
+      quotationId,
     );
   };
 
@@ -87,7 +84,8 @@ export default function PurchaseOrders(props: {
         <Button
           onClick={previewPurchaseOrders}
           variant="outline"
-          className="text-gray-500 text-sm space-x-2">
+          className="text-gray-500 text-sm space-x-2"
+        >
           <PenLineIcon className="w-5 h-5 text-yellow-500" />
           <span>สร้างใบสั่งซื้อ(PO) จากใบเสนอราคา(QT) แบบอัตโนมัติ</span>
         </Button>
@@ -96,11 +94,12 @@ export default function PurchaseOrders(props: {
   }
 
   return (
-    <PageComponentWrapper
-      headerTitle="รายการใบสั่งซื้อ(PO) ของใบเสนอราคานี้"
-    >
+    <PageComponentWrapper headerTitle="รายการใบสั่งซื้อ(PO) ของใบเสนอราคานี้">
       {!!data?.length && (
-        <TableLists<PurchaseOrderWithRelations> columns={purchaseOrderColumns} data={data} />
+        <TableLists<PurchaseOrderWithRelations>
+          columns={purchaseOrderColumns}
+          data={data}
+        />
       )}
     </PageComponentWrapper>
   );

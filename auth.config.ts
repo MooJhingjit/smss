@@ -5,7 +5,7 @@ import { db } from "./lib/db";
 
 const getUserById = async (id: number) => {
   try {
-      const user = await db.user.findUnique({ where: { id } });
+    const user = await db.user.findUnique({ where: { id } });
     return user;
   } catch {
     return null;
@@ -41,7 +41,7 @@ export const authConfig = {
       token.email = existingUser.email;
       token.role = existingUser.role;
 
-      return token
+      return token;
     },
     async session({ session, token }) {
       if (token.sub && session.user) {

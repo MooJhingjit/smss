@@ -9,7 +9,6 @@ export async function GET(
     const search = req.nextUrl.searchParams.get("search");
     const vendorId = req.nextUrl.searchParams.get("vendorId");
 
-
     if (!search) {
       return new NextResponse("Bad Request", { status: 400 });
     }
@@ -27,7 +26,7 @@ export async function GET(
           },
         },
       ],
-    }
+    };
 
     if (vendorId) {
       conditions["vendorId"] = Number(vendorId);
@@ -37,7 +36,7 @@ export async function GET(
       include: {
         vendor: true,
       },
-      where: conditions
+      where: conditions,
     });
     return NextResponse.json(product);
   } catch (error) {

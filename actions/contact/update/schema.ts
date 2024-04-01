@@ -21,5 +21,5 @@ export const ContactSchema = z.object({
   contact: z.string().optional(),
   fax: z.string().optional(),
   address: z.string().optional(),
-  isProtected: z.boolean().optional(),  
+  isProtected: z.boolean().optional(),
 });

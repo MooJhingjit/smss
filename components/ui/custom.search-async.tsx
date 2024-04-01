@@ -52,7 +52,10 @@ type Props = {
 };
 
 const SearchAsync = React.forwardRef<any, Props>(
-  ({ className, id, defaultValue, onSelected, config, disabled, ...props }, ref) => {
+  (
+    { className, id, defaultValue, onSelected, config, disabled, ...props },
+    ref,
+  ) => {
     const { search } = useSearchAsync(config);
     return (
       <AsyncSelect

@@ -1,11 +1,17 @@
-import { PurchaseOrderItemWithRelations, PurchaseOrderWithRelations } from "@/types";
+import {
+  PurchaseOrderItemWithRelations,
+  PurchaseOrderWithRelations,
+} from "@/types";
 import { create } from "zustand";
 
 type Store = {
   isOpen: boolean;
   data: PurchaseOrderItemWithRelations | null;
   refs?: PurchaseOrderWithRelations;
-  onOpen: (data?: PurchaseOrderItemWithRelations | null, refs?: PurchaseOrderWithRelations | null) => void;
+  onOpen: (
+    data?: PurchaseOrderItemWithRelations | null,
+    refs?: PurchaseOrderWithRelations | null,
+  ) => void;
   onClose: () => void;
 };
 

@@ -12,7 +12,7 @@ interface DataTableProps<TData, TValue> {
 }
 
 export default function ItemTable<TData, TValue>(
-  props: DataTableProps<TData, TValue>
+  props: DataTableProps<TData, TValue>,
 ) {
   const { columns, data } = props;
 

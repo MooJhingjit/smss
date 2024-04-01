@@ -17,8 +17,8 @@ export default function Breadcrumbs(props: { pages: Page[] }) {
       return page.render();
     }
     return page.name;
-  }
-  
+  };
+
   return (
     <nav className="flex" aria-label="Breadcrumb">
       <ol role="list" className="flex items-center space-x-4">

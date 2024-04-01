@@ -43,7 +43,6 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         data: { remark },
       });
     }
-
   } catch (error) {
     console.log("error", error);
     return {

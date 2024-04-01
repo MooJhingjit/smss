@@ -6,22 +6,22 @@ const get = (params?: Record<string, any>) => {
 };
 
 const generatePOs = (data: Record<string, any>) => {
-    return fetcher(`/api/purchase-orders/generate-all`, {
-        method: "POST",
-        body: JSON.stringify(data),
-    });
+  return fetcher(`/api/purchase-orders/generate-all`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
 };
 
 const put = (id: number, data: Record<string, any>) => {
   return fetcher(`/api/purchase-orders/${id}`, {
-      method: "PUT",
-      body: JSON.stringify(data),
+    method: "PUT",
+    body: JSON.stringify(data),
   });
 };
 
 export default {
   get,
   generatePOs,
-  put
-//   updateStatus,
+  put,
+  //   updateStatus,
 };

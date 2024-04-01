@@ -9,7 +9,7 @@ import { InputType, ReturnType } from "./types";
 import { ProductSchema } from "./schema";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-  const { id, vendorId, name, cost, percentage, description } = data;
+  const { id, cost, percentage, description } = data;
   let product;
   try {
     product = await db.product.update({
@@ -17,8 +17,6 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         id,
       },
       data: {
-        vendorId,
-        name,
         cost: cost ? parseFloat(cost) : null,
         percentage: percentage ? parseFloat(percentage) : null,
         description,

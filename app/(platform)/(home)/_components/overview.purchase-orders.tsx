@@ -11,16 +11,13 @@ type Props = {
   data: PurchaseOrderWithVendor[];
 };
 
-
-
 const columns = [
   { name: "รหัส", key: "code" },
   {
-    name: "ผู้ขาย", key: "vendorId",
+    name: "ผู้ขาย",
+    key: "vendorId",
     render: (item: PurchaseOrderWithVendor) => {
-      return (
-        <p>{item.vendor.name}</p>
-      );
+      return <p>{item.vendor.name}</p>;
     },
   },
   { name: "จำนวนเงิน", key: "totalPrice" },
@@ -28,7 +25,7 @@ const columns = [
     name: "การชำระเงิน",
     key: "paymentType",
     render: (item: PurchaseOrderWithVendor) => {
-      const paymentType = item.paymentType as PurchaseOrderPaymentType
+      const paymentType = item.paymentType as PurchaseOrderPaymentType;
       return <p className="">{paymentTypeMapping[paymentType]}</p>;
     },
   },

@@ -18,7 +18,7 @@ interface FormInputProps {
   className?: string;
   defaultValue?: any;
   onBlur?: () => void;
-  onSelected: (item: any) => void
+  onSelected: (item: any) => void;
   config: any;
 }
 

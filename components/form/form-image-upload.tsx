@@ -21,7 +21,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onChange, value }) => {
     (result: any) => {
       onChange(result.info.secure_url);
     },
-    [onChange]
+    [onChange],
   );
 
   return (
@@ -54,9 +54,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onChange, value }) => {
             "
           >
             <FilePlus size={30} />
-            <div className=" text-sm">
-              คลิกเพื่ออัพโหลด
-            </div>
+            <div className=" text-sm">คลิกเพื่ออัพโหลด</div>
             {/* {value && (
               <div
                 className="

@@ -6,7 +6,11 @@ type Store = {
   data: PurchaseOrderPreview[] | null;
   queryKey: (string | number)[];
   quotationId: number;
-  onOpen: (data: PurchaseOrderPreview[], queryKey: (string | number)[], quotationId: number) => void;
+  onOpen: (
+    data: PurchaseOrderPreview[],
+    queryKey: (string | number)[],
+    quotationId: number,
+  ) => void;
   onClose: () => void;
 };
 

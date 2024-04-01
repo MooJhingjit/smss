@@ -1,17 +1,9 @@
 "use client";
 import React from "react";
-import {
-  LockIcon,
-  PrinterIcon,
-} from "lucide-react";
-import {
-  PurchaseOrderPaymentType,
-  PurchaseOrderStatus,
-} from "@prisma/client";
+import { LockIcon, PrinterIcon } from "lucide-react";
+import { PurchaseOrderPaymentType, PurchaseOrderStatus } from "@prisma/client";
 // import * as Select from '@radix-ui/react-select';
-import {
-  purchaseOrderStatusMapping,
-} from "@/app/config";
+import { purchaseOrderStatusMapping } from "@/app/config";
 import { MutationResponseType } from "@/components/providers/query-provider";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -28,7 +20,6 @@ import { customRevalidatePath } from "@/actions/revalidateTag";
 import PO_SERVICES from "@/app/services/service.purchase-order";
 import PaymentOptionControl from "@/components/payment-option-control";
 
-
 type Props = {
   orderId: number;
   quotationId: number | null;
@@ -40,7 +31,15 @@ type Props = {
 };
 
 export default function PurchaseOrderTools(props: Props) {
-  const { orderId, quotationId, quotationCode, status, isLocked, paymentDue, paymentType } = props;
+  const {
+    orderId,
+    quotationId,
+    quotationCode,
+    status,
+    isLocked,
+    paymentDue,
+    paymentType,
+  } = props;
 
   const { mutate } = useMutation<
     MutationResponseType,
@@ -60,9 +59,7 @@ export default function PurchaseOrderTools(props: Props) {
     onSuccess: async (n) => {
       toast.success("สำเร็จ");
       // invalidate query
-      customRevalidatePath(`/purchase-orders/${orderId}`)
-
-
+      customRevalidatePath(`/purchase-orders/${orderId}`);
     },
   });
 
@@ -71,18 +68,19 @@ export default function PurchaseOrderTools(props: Props) {
     paymentDue?: string;
     paymentType?: PurchaseOrderPaymentType;
   }) => {
-
     // update what is provided
-    let payloadBody: any = {}
+    let payloadBody: any = {};
     if (payload.status) {
-      payloadBody['status'] = payload.status
+      payloadBody["status"] = payload.status;
     }
     if (payload.paymentDue || payload.paymentDue === "") {
-      payloadBody['paymentDue'] = payload.paymentDue ? new Date(payload.paymentDue).toISOString() : null
+      payloadBody["paymentDue"] = payload.paymentDue
+        ? new Date(payload.paymentDue).toISOString()
+        : null;
     }
 
     if (payload.paymentType) {
-      payloadBody['paymentType'] = payload.paymentType
+      payloadBody["paymentType"] = payload.paymentType;
     }
 
     // call mutation
@@ -107,7 +105,8 @@ export default function PurchaseOrderTools(props: Props) {
                 onStatusChange={(s) => {
                   handleChange({ status: s });
                 }}
-                curStatus={status} />
+                curStatus={status}
+              />
             </div>
           </div>
         </ItemList>
@@ -153,11 +152,7 @@ const ItemStatus = ({
   return (
     <Select onValueChange={onStatusChange}>
       <SelectTrigger className="inline-flex capitalize font-semibold  rounded-md bg-yellow-50 px-2 py-1 text-xs text-yellow-700 border border-yellow-500 items-center">
-        <SelectValue
-          placeholder={
-            purchaseOrderStatusMapping[curStatus]
-          }
-        />
+        <SelectValue placeholder={purchaseOrderStatusMapping[curStatus]} />
       </SelectTrigger>
       <SelectContent className="bg-white text-xs p-2 space-y-2 ">
         {allStatus.map((status, index) => (
@@ -182,16 +177,19 @@ const PrintButton = () => {
   );
 };
 
-
-const ItemList = ({ label, children }: { label?: string, children: React.ReactNode }) => {
+const ItemList = ({
+  label,
+  children,
+}: {
+  label?: string;
+  children: React.ReactNode;
+}) => {
   return (
     <div className="col-span-12 pt-2">
       <div className=" flex justify-between items-center">
-        {
-          label && <p className="text-sm leading-6 text-gray-600">{label}</p>
-        }
+        {label && <p className="text-sm leading-6 text-gray-600">{label}</p>}
         {children}
       </div>
     </div>
-  )
-}
+  );
+};

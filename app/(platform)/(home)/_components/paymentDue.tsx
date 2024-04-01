@@ -1,0 +1,94 @@
+"use client";
+import React from "react";
+import CardWrapper from "./card-wrapper";
+import TableLists from "@/components/table-lists";
+import { QuotationWithBuyer } from "@/types";
+import {
+  purchaseOrderStatusMapping,
+  quotationStatusMapping,
+} from "@/app/config";
+import { PurchaseOrderWithVendor } from "../admin.page";
+
+type Props<T> = {
+  data: T[];
+  label: string;
+  type: "quotations" | "purchase-orders";
+};
+
+const QT_columns = [
+  { name: "รหัส", key: "code" },
+  {
+    name: "ลูกค้า",
+    key: "buyer.name",
+    render: (item: QuotationWithBuyer) => {
+      return <div className="">{item.contact.name}</div>;
+    },
+  },
+  {
+    name: "กำหนดชำระ",
+    key: "paymentDue",
+    render: (item: QuotationWithBuyer) => {
+      const isLate = new Date(item.paymentDue ?? "") < new Date();
+
+      return (
+        <p className={isLate ? "text-red-500" : "text-yellow-500"}>
+          {new Date(item.paymentDue ?? "").toLocaleDateString("th-TH", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })}
+        </p>
+      );
+    },
+  },
+  {
+    name: "สถานะ",
+    key: "status",
+    render: (item: QuotationWithBuyer) => {
+      return <p className="">{quotationStatusMapping[item.status].label}</p>;
+    },
+  },
+];
+const PO_columns = [
+  { name: "รหัส", key: "code" },
+  {
+    name: "ร้านค้า",
+    key: "vendor.name",
+    render: (item: PurchaseOrderWithVendor) => {
+      return <div className="">{item.vendor.name}</div>;
+    },
+  },
+  {
+    name: "กำหนดชำระ",
+    key: "paymentDue",
+    render: (item: PurchaseOrderWithVendor) => {
+      const isLate = new Date(item.paymentDue ?? "") < new Date();
+
+      return (
+        <p className={isLate ? "text-red-500" : "text-yellow-500"}>
+          {new Date(item.paymentDue ?? "").toLocaleDateString("th-TH", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })}
+        </p>
+      );
+    },
+  },
+  {
+    name: "สถานะ",
+    key: "status",
+    render: (item: PurchaseOrderWithVendor) => {
+      return <p className="">{purchaseOrderStatusMapping[item.status]}</p>;
+    },
+  },
+];
+export default function PaymentDue<T>(props: Readonly<Props<T>>) {
+  const { data, label, type } = props;
+  const columns = type === "quotations" ? QT_columns : PO_columns;
+  return (
+    <CardWrapper title={label}>
+      <TableLists<T> columns={columns} data={data} link={`/${type}`} />
+    </CardWrapper>
+  );
+}

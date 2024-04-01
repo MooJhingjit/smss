@@ -18,8 +18,6 @@ export async function GET(req: NextRequest) {
     let conditions = {};
     // check if filter provided
 
-
-    
     if (type && type !== "all") {
       conditions = { ...conditions, type };
     }

@@ -46,13 +46,7 @@ export const QuotationListModal = () => {
   const p = defaultData?.percentage?.toString() ?? "";
   const refs = modal.refs;
   const isProduct = refs?.quotationRef?.type === QuotationType.product;
-  const {
-    register,
-    watch,
-    reset,
-    getValues,
-    setValue,
-  } = useForm<FormInput>({
+  const { register, watch, reset, getValues, setValue } = useForm<FormInput>({
     mode: "onChange",
   });
 
@@ -111,7 +105,7 @@ export const QuotationListModal = () => {
     const quantity = formData.get("quantity") as string;
     const withholdingTax = formData.get("withholdingTax") as string;
     const withholdingTaxPercent = formData.get(
-      "withholdingTaxPercent"
+      "withholdingTaxPercent",
     ) as string;
 
     const product = productId
@@ -213,7 +207,6 @@ export const QuotationListModal = () => {
   const subItems = getValues("subItems");
 
   if (!modal.isOpen) return;
-
 
   const renderProductForm = () => {
     return (
@@ -395,7 +388,7 @@ export const QuotationListModal = () => {
                   "ml-2 inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ",
                   isProduct
                     ? "bg-gray-100 text-gray-800"
-                    : "bg-green-100 text-green-800"
+                    : "bg-green-100 text-green-800",
                 )}
               >
                 {quotationTypeMapping[refs?.quotationRef.type]}
@@ -403,9 +396,7 @@ export const QuotationListModal = () => {
             )}
           </DialogTitle>
         </DialogHeader>
-        {
-          renderProductForm()
-        }
+        {renderProductForm()}
       </DialogContent>
     </Dialog>
   );
@@ -420,9 +411,9 @@ const SubItems = ({
 }) => {
   const [subItems, setSubItems] = useState<
     | {
-      label: string;
-      quantity: string;
-    }[]
+        label: string;
+        quantity: string;
+      }[]
     | null
   >(null);
 
@@ -430,7 +421,6 @@ const SubItems = ({
     if (!defaultSubItems) return;
     setSubItems(JSON.parse(defaultSubItems));
   }, [defaultSubItems]);
-
 
   const handleAdd = () => {
     setSubItems([...(subItems || []), { label: "", quantity: "" }]);

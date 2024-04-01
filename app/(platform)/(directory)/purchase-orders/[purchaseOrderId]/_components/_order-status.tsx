@@ -3,10 +3,9 @@ import { PurchaseOrderStatus, Quotation } from "@prisma/client";
 import Link from "next/link";
 
 type Props = {
-
   quotation: Quotation;
-  status: PurchaseOrderStatus
-}
+  status: PurchaseOrderStatus;
+};
 export default function OrderStatus(props: Readonly<Props>) {
   const { status, quotation } = props;
   return (
@@ -18,7 +17,8 @@ export default function OrderStatus(props: Readonly<Props>) {
         <Link
           href={`/quotations/${quotation.id}`}
           target="_blank"
-          className="inline-flex font-semibold items-center rounded-md bg-blue-100 px-2 py-1 text-xs text-blue-700 underline cursor-pointer">
+          className="inline-flex font-semibold items-center rounded-md bg-blue-100 px-2 py-1 text-xs text-blue-700 underline cursor-pointer"
+        >
           {quotation.code}
         </Link>
       </div>

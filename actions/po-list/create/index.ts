@@ -7,13 +7,7 @@ import { revalidatePath } from "next/cache";
 import { PurchaseOrderItem } from "@prisma/client";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-  const {
-    purchaseOrderId,
-    name,
-    price,
-    quantity,
-    productId
-  } = data;
+  const { purchaseOrderId, name, price, quantity, productId } = data;
 
   let purchaseOrderItem: PurchaseOrderItem;
   try {
@@ -22,8 +16,8 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         purchaseOrderId,
         name,
         price,
-        quantity
-      }
+        quantity,
+      },
     });
 
     await Promise.all(
@@ -34,13 +28,11 @@ const handler = async (data: InputType): Promise<ReturnType> => {
               productId,
               purchaseOrderItemId: purchaseOrderItem.id,
               name: name,
-              cost: price
+              cost: price,
             },
-          })
-      )
+          }),
+      ),
     );
-
-
   } catch (error) {
     console.log("error", error);
     return {

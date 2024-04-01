@@ -10,10 +10,10 @@ const post = (data: Record<string, any>) => {
     method: "POST",
     body: JSON.stringify(data),
   });
-}
+};
 
 export default {
   get,
-  post
-//   updateStatus,
+  post,
+  //   updateStatus,
 };

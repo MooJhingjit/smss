@@ -32,9 +32,8 @@ interface Props {
 
 const getAssociateOrders = async (
   quotationId: number | null,
-  excluded: number
+  excluded: number,
 ) => {
-
   if (!quotationId) {
     return [];
   }
@@ -101,7 +100,9 @@ export default async function PurchaseOrderDetails(props: Readonly<Props>) {
             quotationCode={data.quotation?.code ?? ""}
             status={data.status}
             paymentDue={
-              data.paymentDue ? new Date(data.paymentDue).toISOString().split("T")[0] : ""
+              data.paymentDue
+                ? new Date(data.paymentDue).toISOString().split("T")[0]
+                : ""
             }
             paymentType={data.paymentType}
           />

@@ -14,7 +14,7 @@ interface DataTableProps<TData, TValue> {
 }
 
 export default function PurchaseOrderTable<TData, TValue>(
-  props: DataTableProps<TData, TValue>
+  props: DataTableProps<TData, TValue>,
 ) {
   const { columns, data } = props;
   const modal = usePurchaseOrderModal();

@@ -146,7 +146,7 @@ export const ItemModal = () => {
             label="หมายเหตุ"
             type="text"
             defaultValue={item?.description}
-          // errors={fieldErrors}
+            // errors={fieldErrors}
           />
           {/* <FormSelect
             id="status"

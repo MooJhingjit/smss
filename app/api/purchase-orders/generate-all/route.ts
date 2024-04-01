@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
 
     // group quotation lists by vendor
     const quotationListsByVendor = getQuotationGroupByVendor(
-      quotationLists as QuotationListWithRelations[]
+      quotationLists as QuotationListWithRelations[],
     );
 
     let sumTotalPrice: number = 0;
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
         });
 
         return purchaseOrder;
-      })
+      }),
     );
 
     // update total price, tax and total discount for quotation
@@ -109,15 +109,15 @@ export async function POST(req: NextRequest) {
                         name: quotationList.product.name,
                         cost: quotationList.cost,
                       },
-                    })
-                )
+                    }),
+                ),
               );
 
               return purchaseOrderItem;
-            }
-          )
+            },
+          ),
         );
-      })
+      }),
     );
 
     // lock quotation

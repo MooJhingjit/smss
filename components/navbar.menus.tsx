@@ -35,20 +35,23 @@ export default function MenuItems({ userRole }: { userRole: UserRole }) {
   return (
     <div className="hidden md:flex items-center space-x-4 text-sm text-slate-700">
       {links
-      .filter((link) => link.permission.includes(userRole) || link.permission.includes("*"))
-      .map((link) => (
-        <Link
-          key={link.href}
-          href={link.href}
-          className={classNames(
-            isActive(link.href)
-              ? "text-primary-600 font-semibold"
-              : "text-gray-500 font-semibold"
-          )}
-        >
-          {link.label}
-        </Link>
-      ))}
+        .filter(
+          (link) =>
+            link.permission.includes(userRole) || link.permission.includes("*"),
+        )
+        .map((link) => (
+          <Link
+            key={link.href}
+            href={link.href}
+            className={classNames(
+              isActive(link.href)
+                ? "text-primary-600 font-semibold"
+                : "text-gray-500 font-semibold",
+            )}
+          >
+            {link.label}
+          </Link>
+        ))}
       {/* <Link
         href="/quotations"
         className={classNames(

@@ -19,8 +19,6 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       where: { id },
       data: { remark },
     });
-
-  
   } catch (error) {
     console.log("error", error);
     return {
@@ -28,7 +26,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     };
   }
 
-  revalidatePath("/quotations/[quotationId]")
+  revalidatePath("/quotations/[quotationId]");
 
   return { data: quotation };
 };

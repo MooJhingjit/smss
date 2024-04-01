@@ -14,45 +14,47 @@ export type Order = {
   cost: string;
 };
 
-export const columns: ColumnDef<PurchaseOrderWithRelations & {
-  _count: {
-    purchaseOrderItems: number;
-  };
-}>[] = [
-    {
-      accessorKey: "code",
-      header: "ใบสั่งซื้อ",
+export const columns: ColumnDef<
+  PurchaseOrderWithRelations & {
+    _count: {
+      purchaseOrderItems: number;
+    };
+  }
+>[] = [
+  {
+    accessorKey: "code",
+    header: "ใบสั่งซื้อ",
+  },
+  {
+    accessorKey: "quotation.code",
+    header: "ใบเสนอราคา",
+  },
+  {
+    accessorKey: "vendor.name",
+    header: "ผู้ขาย/ร้านค้า",
+    cell: ({ row }) => {
+      const { vendor } = row.original;
+      return vendor?.name;
     },
-    {
-      accessorKey: "quotation.code",
-      header: "ใบเสนอราคา",
-    },
-    {
-      accessorKey: "vendor.name",
-      header: "ผู้ขาย/ร้านค้า",
-      cell: ({ row }) => {
-        const { vendor } = row.original;
-        return vendor?.name;
-      }
-    },
+  },
 
-    {
-      accessorKey: "discount",
-      header: "ส่วนลด",
+  {
+    accessorKey: "discount",
+    header: "ส่วนลด",
+  },
+  {
+    accessorKey: "tax",
+    header: "ภาษี",
+  },
+  {
+    accessorKey: "createdAt",
+    header: "สร้างเมื่อ",
+    cell: ({ row }) => {
+      const { createdAt } = row.original;
+      return getDateFormat(createdAt);
     },
-    {
-      accessorKey: "tax",
-      header: "ภาษี",
-    },
-    {
-      accessorKey: "createdAt",
-      header: "สร้างเมื่อ",
-      cell: ({ row }) => {
-        const { createdAt } = row.original
-        return getDateFormat(createdAt);
-      }
-    },
-    {
-      id: "actions",
-    },
-  ];
+  },
+  {
+    id: "actions",
+  },
+];

@@ -21,7 +21,7 @@ import { classNames } from "@/lib/utils";
 import { Select } from "@/components/ui/select";
 import { FormSelect } from "@/components/form/form-select";
 
-interface Props { }
+interface Props {}
 
 type QuotationWithCounts = QuotationWithBuyer & {
   _count: {
@@ -191,52 +191,79 @@ export default function BoardContainer(props: Props) {
                 color="yellow"
                 items={queries[1].data ?? ([] as QuotationWithBuyer[])}
                 columnKey={QuotationStatus.pending_approval}
-                label={quotationStatusMapping[QuotationStatus.pending_approval].label}
-                progress={quotationStatusMapping[QuotationStatus.pending_approval].progress}
+                label={
+                  quotationStatusMapping[QuotationStatus.pending_approval].label
+                }
+                progress={
+                  quotationStatusMapping[QuotationStatus.pending_approval]
+                    .progress
+                }
               />
               <BoardColumn
                 color="yellow"
                 items={queries[2].data ?? ([] as QuotationWithBuyer[])}
                 columnKey={QuotationStatus.offer}
                 label={quotationStatusMapping[QuotationStatus.offer].label}
-                progress={quotationStatusMapping[QuotationStatus.offer].progress}
+                progress={
+                  quotationStatusMapping[QuotationStatus.offer].progress
+                }
               />
               <BoardColumn
                 color="yellow"
                 items={queries[3].data ?? ([] as QuotationWithBuyer[])}
                 columnKey={QuotationStatus.approved}
                 label={quotationStatusMapping[QuotationStatus.approved].label}
-                progress={quotationStatusMapping[QuotationStatus.approved].progress}
+                progress={
+                  quotationStatusMapping[QuotationStatus.approved].progress
+                }
               />
               <BoardColumn
                 items={queries[4].data ?? ([] as QuotationWithBuyer[])}
                 columnKey={QuotationStatus.po_preparing}
-                label={quotationStatusMapping[QuotationStatus.po_preparing].label}
-                progress={quotationStatusMapping[QuotationStatus.po_preparing].progress}
+                label={
+                  quotationStatusMapping[QuotationStatus.po_preparing].label
+                }
+                progress={
+                  quotationStatusMapping[QuotationStatus.po_preparing].progress
+                }
               />
               <BoardColumn
                 items={queries[5].data ?? ([] as QuotationWithBuyer[])}
                 columnKey={QuotationStatus.po_sent}
                 label={quotationStatusMapping[QuotationStatus.po_sent].label}
-                progress={quotationStatusMapping[QuotationStatus.po_sent].progress}
+                progress={
+                  quotationStatusMapping[QuotationStatus.po_sent].progress
+                }
               />
               <BoardColumn
                 items={queries[6].data ?? ([] as QuotationWithBuyer[])}
                 columnKey={QuotationStatus.product_received}
-                label={quotationStatusMapping[QuotationStatus.product_received].label}
-                progress={quotationStatusMapping[QuotationStatus.product_received].progress}
+                label={
+                  quotationStatusMapping[QuotationStatus.product_received].label
+                }
+                progress={
+                  quotationStatusMapping[QuotationStatus.product_received]
+                    .progress
+                }
               />
               <BoardColumn
                 items={queries[7].data ?? ([] as QuotationWithBuyer[])}
                 columnKey={QuotationStatus.order_preparing}
-                label={quotationStatusMapping[QuotationStatus.order_preparing].label}
-                progress={quotationStatusMapping[QuotationStatus.order_preparing].progress}
+                label={
+                  quotationStatusMapping[QuotationStatus.order_preparing].label
+                }
+                progress={
+                  quotationStatusMapping[QuotationStatus.order_preparing]
+                    .progress
+                }
               />
               <BoardColumn
                 items={queries[8].data ?? ([] as QuotationWithBuyer[])}
                 columnKey={QuotationStatus.delivered}
                 label={quotationStatusMapping[QuotationStatus.delivered].label}
-                progress={quotationStatusMapping[QuotationStatus.delivered].progress}
+                progress={
+                  quotationStatusMapping[QuotationStatus.delivered].progress
+                }
               />
               {provided.placeholder}
               <div className="flex-shrink-0 w-1" />
@@ -312,7 +339,7 @@ const BoardColumn = ({
       <div
         className={classNames(
           "w-full rounded-md  shadow-md pb-2 h-full",
-          color === "yellow" ? "bg-yellow-50" : "bg-green-50"
+          color === "yellow" ? "bg-yellow-50" : "bg-green-50",
         )}
       >
         <div className="flex justify-between items-center px-3 pt-2 pb-4">
@@ -320,9 +347,7 @@ const BoardColumn = ({
             <p className="text-sm font-semibold text-[#4a4a4a] whitespace-nowrap">
               {label}
             </p>
-            <p className="text-xs text-[#4a4a4a]">
-              ความคืบหน้า{" "} {progress}%
-            </p>
+            <p className="text-xs text-[#4a4a4a]">ความคืบหน้า {progress}%</p>
           </div>
           <div className="text-xs font-semibold text-[#4a4a4a]">
             ({items.length})
@@ -375,7 +400,7 @@ const BoardCard = ({
                     "inline-flex items-center capitalize rounded bg-gray-100  py-0.5 text-xs font-medium text-gray-700 underline",
                     item.type === QuotationType.product
                       ? "bg-white"
-                      : "bg-green-100"
+                      : "bg-green-100",
                   )}
                 >
                   {item.isLocked && (

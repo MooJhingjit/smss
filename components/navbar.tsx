@@ -30,7 +30,7 @@ export default async function MainNavbar(props: { showMenu?: boolean }) {
           "bg-primary-50 bg-gradient-to-r  from-primary-400 via-primary-100  to-primary-50 shadow-lg",
         showMenu &&
           !isAdmin &&
-          "bg-primary-50 bg-gradient-to-r  from-yellow-400 via-yellow-100  to-yellow-50 shadow-lg"
+          "bg-primary-50 bg-gradient-to-r  from-yellow-400 via-yellow-100  to-yellow-50 shadow-lg",
       )}
     >
       {!showMenu && (
@@ -43,7 +43,7 @@ export default async function MainNavbar(props: { showMenu?: boolean }) {
           href="/"
           className={classNames(
             "font-semibold text-lg",
-            showMenu ? "text-gray-700" : "text-white"
+            showMenu ? "text-gray-700" : "text-white",
           )}
         >
           <Image src={LOGO} width={80} height={80} alt="Logo" />
@@ -53,7 +53,7 @@ export default async function MainNavbar(props: { showMenu?: boolean }) {
           <div
             className={classNames(
               "hidden md:flex text-xs text-gray-500 text-right capitalize md:justify-center md:items-center space-x-1 ",
-              showMenu ? "text-gray-700" : "text-white"
+              showMenu ? "text-gray-700" : "text-white",
             )}
           >
             <p>{info?.name}</p>

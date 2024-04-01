@@ -8,11 +8,19 @@ import { PurchaseOrder, User } from "@prisma/client";
 import StatisticCard from "./_components/statistics";
 import Tasks from "./_components/tasks";
 import { currentUser } from "@/lib/auth";
+import { quotationStatusMapping } from "@/app/config";
+import PaymentDue from "./_components/paymentDue";
 
 export type PurchaseOrderWithVendor = PurchaseOrder & { vendor: User };
 
 async function getData(): Promise<
-  [QuotationWithBuyer[], PurchaseOrderWithVendor[], QuotationWithBuyer[]]
+  [
+    QuotationWithBuyer[],
+    PurchaseOrderWithVendor[],
+    QuotationWithBuyer[],
+    QuotationWithBuyer[],
+    PurchaseOrderWithVendor[],
+  ]
 > {
   const quotations = db.quotation.findMany({
     include: {
@@ -47,12 +55,55 @@ async function getData(): Promise<
     },
   });
 
-  const data = await Promise.all([quotations, purchaseOrders, tasks]);
+  const dateToAlert = new Date();
+  dateToAlert.setDate(dateToAlert.getDate() + 5);
+
+  const quotationsDueDate = db.quotation.findMany({
+    include: {
+      contact: true,
+    },
+    where: {
+      paymentDue: {
+        lte: dateToAlert,
+      },
+    },
+    orderBy: {
+      paymentDue: "desc",
+    },
+  });
+
+  const purchaseOrdersDueDate = db.purchaseOrder.findMany({
+    include: {
+      vendor: true,
+    },
+    where: {
+      paymentDue: {
+        lte: dateToAlert,
+      },
+    },
+    orderBy: {
+      paymentDue: "desc",
+    },
+  });
+
+  const data = await Promise.all([
+    quotations,
+    purchaseOrders,
+    tasks,
+    quotationsDueDate,
+    purchaseOrdersDueDate,
+  ]);
   return data;
 }
 
 export default async function AdminHomePage() {
-  const [quotations, purchaseOrders, tasks] = await getData();
+  const [
+    quotations,
+    purchaseOrders,
+    tasks,
+    quotationsDueDate,
+    purchaseOrdersDueDate,
+  ] = await getData();
   const user = await currentUser();
   // console.log('server get session >>>>>', user);
   return (
@@ -66,7 +117,24 @@ export default async function AdminHomePage() {
         </div>
       </div>
       <div className="md:col-span-6 col-span-12">
-        <Tasks data={tasks} />
+        <Tasks
+          data={tasks}
+          label={`งานที่ต้องตรวจสอบ สถานะ: ${quotationStatusMapping["offer"].label}`}
+        />
+      </div>
+      <div className="lg:col-span-6 col-span-12">
+        <PaymentDue<QuotationWithBuyer>
+          type="quotations"
+          data={quotationsDueDate}
+          label={`ถึงกำหนดชำระ (QT Credit)`}
+        />
+      </div>
+      <div className="lg:col-span-6 col-span-12">
+        <PaymentDue<PurchaseOrderWithVendor>
+          type="purchase-orders"
+          data={purchaseOrdersDueDate}
+          label={`ถึงกำหนดชำระ (PO Credit)`}
+        />
       </div>
       <div className="lg:col-span-6 col-span-12">
         <Quotations data={quotations} />

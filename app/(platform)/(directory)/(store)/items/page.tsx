@@ -20,7 +20,7 @@ async function getData(): Promise<Item[]> {
         include: {
           purchaseOrder: true,
         },
-      }
+      },
     },
     // take: 10,
     // skip: 0,

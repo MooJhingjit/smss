@@ -3,5 +3,5 @@ import { z } from "zod";
 // get data from QuotationType enum
 export const schema = z.object({
   id: z.number(),
-  remark: z.string().optional()
+  remark: z.string().optional(),
 });

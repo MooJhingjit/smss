@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import { useUserModal } from "@/hooks/use-user-modal";
 import { User } from "@prisma/client";
 import React from "react";

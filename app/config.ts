@@ -3,7 +3,7 @@ export const routeName = {
   quotations: "quotations",
   users: "users",
   products: "products",
-}
+};
 
 export const quotationStatusMapping = {
   open: {
@@ -41,13 +41,13 @@ export const quotationStatusMapping = {
   delivered: {
     label: "ส่งสินค้า / ปิดงาน",
     progress: 90,
-  }
-}
+  },
+};
 
 export const paymentTypeMapping = {
   cash: "เงินสด",
   credit: "เครดิต",
-}
+};
 
 export const purchaseOrderStatusMapping = {
   draft: "กำลังตรวจสอบ",
@@ -55,14 +55,14 @@ export const purchaseOrderStatusMapping = {
   // preparing: "เตรียมสินค้า",
   // sent: "ส่งสินค้า",
   // delivered: "ส่งสินค้า / ปิดงาน",
-}
+};
 
 export const purchaseOrderItemStatusMapping = {
   pending: "รอสินค้า",
   confirmed: "รับสินค้า",
-}
+};
 
 export const quotationTypeMapping = {
   product: "สินค้า",
   service: "บริการ",
-}
+};

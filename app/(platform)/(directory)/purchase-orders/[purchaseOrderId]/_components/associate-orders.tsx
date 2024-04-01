@@ -7,9 +7,12 @@ import { PurchaseOrderWithRelations } from "@/types";
 import TableLists from "@/components/table-lists";
 import { purchaseOrderColumns } from "../..";
 
-export default function AssociateOrders({ data, quotationCode }: {
-  data: PurchaseOrderWithRelations[],
-  quotationCode: string
+export default function AssociateOrders({
+  data,
+  quotationCode,
+}: {
+  data: PurchaseOrderWithRelations[];
+  quotationCode: string;
 }) {
   return (
     <PageComponentWrapper
@@ -24,7 +27,7 @@ export default function AssociateOrders({ data, quotationCode }: {
       <div className="overflow-x-scroll">
         <TableLists<PurchaseOrderWithRelations>
           // remove vendor name
-          columns={purchaseOrderColumns.filter(i => i.key !== 'name')}
+          columns={purchaseOrderColumns.filter((i) => i.key !== "name")}
           data={data}
         />
       </div>

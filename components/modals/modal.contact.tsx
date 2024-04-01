@@ -152,12 +152,9 @@ export const ContactModal = () => {
             </div>
           )}
 
-          <div className={
-            classNames(
-              !isAdmin && "col-span-2",
-              "flex justify-end",
-            )
-          }>
+          <div
+            className={classNames(!isAdmin && "col-span-2", "flex justify-end")}
+          >
             <FormSubmit>
               {contact ? "บันทึกการเปลี่ยนแปลง" : "สร้างใหม่"}
             </FormSubmit>

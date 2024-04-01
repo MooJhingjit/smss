@@ -10,13 +10,33 @@ import { UserSchema } from "./schema";
 import bcrypt from "bcrypt";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-  const { id, taxId, role, name, email, phone, contact, fax, address, password } = data;
+  const {
+    id,
+    taxId,
+    role,
+    name,
+    email,
+    phone,
+    contact,
+    fax,
+    address,
+    password,
+  } = data;
   let user;
   try {
-    const payload: any = { role, taxId, name, email, phone, contact, fax, address }
+    const payload: any = {
+      role,
+      taxId,
+      name,
+      email,
+      phone,
+      contact,
+      fax,
+      address,
+    };
     if (password || password === "") {
       const hashPassword = password ? await bcrypt.hash(password, 10) : "";
-      payload.password = hashPassword
+      payload.password = hashPassword;
     }
 
     user = await db.user.update({
