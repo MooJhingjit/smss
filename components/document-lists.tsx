@@ -12,7 +12,7 @@ import {
   queryClient,
 } from "@/components/providers/query-provider";
 import { toast } from "sonner";
-import Image from "next/image";
+// import Image from "next/image";
 
 const docs = [
   {
@@ -103,11 +103,11 @@ export default function DocumentItems(props: Props) {
     }
 
     if (ext === "jpg" || ext === "jpeg" || ext === "png") {
-      return <Image src={doc.url} alt="preview" className="w-full rounded-lg" />;
+      return <img  src={doc.url} alt="preview" className="w-full rounded-lg" />;
     }
     return (
       <div className="flex items-center justify-center w-16 h-16 bg-gray-100 rounded-md">
-        <Image src="/file.svg" alt="file" className="w-8 h-8" />
+        <img width="64" src="/file.svg" alt="file" className="w-8 h-8" />
       </div>
     );
   };

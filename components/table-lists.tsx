@@ -69,7 +69,7 @@ export default function TableLists<T>(props: Readonly<Props<T>>) {
           {columns.map((column: any) => (
             <TableHead
               key={column.key}
-              className="px-3 py-3 text-left text-xs font-semibold text-gray-900"
+              className="px-3 py-3 text-left text-sm font-semibold text-gray-900"
             >
               {column.name}
             </TableHead>
@@ -82,7 +82,7 @@ export default function TableLists<T>(props: Readonly<Props<T>>) {
             {columns.map((column: any) => (
               <TableCell
                 key={column.key}
-                className="whitespace-nowrap px-3 py-2.5 text-xs text-gray-500 capitalize"
+                className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500 capitalize"
               >
                 {getFormatValue(item, column, rowIdx)}
               </TableCell>
@@ -93,14 +93,14 @@ export default function TableLists<T>(props: Readonly<Props<T>>) {
                 <Button
                   onClick={() => onManage(item)}
                   variant="secondary"
-                  className="text-xs h-6"
+                  className="text-sm h-6"
                 >
                   จัดการ
                 </Button>
               </TableCell>
             )}
             {link && (
-              <TableCell className="whitespace-nowrap px-3 py-2.5 text-xs text-gray-500">
+              <TableCell className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
                 <Link target="_blank" href={`${link}/${item.id}`} passHref>
                   <ExternalLink className="h-3.5 w-3.5 text-gray-400" />
                 </Link>

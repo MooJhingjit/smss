@@ -25,7 +25,7 @@ export default function SignInPage() {
       </div>
       <div className="w-full max-w-md space-y-10 relative z-20 backdrop-blur-sm bg-white/40 p-20 rounded">
         <div className="flex items-center space-x-4 justify-center">
-          <Image className="h-20 w-auto" src={LOGO.src} alt="Workflow" />
+          <Image width="100" height="80" src={LOGO.src} alt="Workflow" />
           <span className="text-2xl font-semibold text-white">เข้าสู่ระบบ</span>
         </div>
         <form action={dispatch} className="space-y-6">
