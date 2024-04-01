@@ -6,7 +6,7 @@ import { db } from "@/lib/db";
 import { QuotationWithBuyer } from "@/types";
 import { useUser } from "@/hooks/use-user";
 
-async function getData(): Promise<QuotationWithBuyer[]> {
+async function GetData(): Promise<QuotationWithBuyer[]> {
   const { info } = await useUser();
 
   if (!info?.id) {
@@ -29,7 +29,7 @@ async function getData(): Promise<QuotationWithBuyer[]> {
   return data;
 }
 export default async function SellerHomePage() {
-  const quotations = await getData();
+  const quotations = await GetData();
 
   return (
     <div className="h-screen grid grid-cols-12 gap-6 ">

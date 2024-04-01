@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import LOGO from "@/public/logo.png";
 import { useFormState, useFormStatus } from "react-dom";
 import { authenticate } from "@/actions/auth";
+import Image from "next/image";
 
 export default function SignInPage() {
   const [errorMessage, dispatch] = useFormState(authenticate, undefined);
@@ -24,7 +25,7 @@ export default function SignInPage() {
       </div>
       <div className="w-full max-w-md space-y-10 relative z-20 backdrop-blur-sm bg-white/40 p-20 rounded">
         <div className="flex items-center space-x-4 justify-center">
-          <img className="h-20 w-auto" src={LOGO.src} alt="Workflow" />
+          <Image className="h-20 w-auto" src={LOGO.src} alt="Workflow" />
           <span className="text-2xl font-semibold text-white">เข้าสู่ระบบ</span>
         </div>
         <form action={dispatch} className="space-y-6">

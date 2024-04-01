@@ -102,7 +102,7 @@ export default function BillingInfo({
     if (isDirty) {
       onChange();
     }
-  }, [isDirty, discount, extraCost]);
+  }, [isDirty, discount, extraCost, onChange]);
 
   const priceBeforeTax =
     Number(totalPrice) - Number(discount) + Number(extraCost);

@@ -6,8 +6,8 @@ export async function GET(
   req: NextRequest,
   // { params }: { params: { search: string } }
 ) {
+  const { isSeller, info } = await useUser();
   try {
-    const { isSeller, info } = await useUser();
     const search = req.nextUrl.searchParams.get("search");
 
     if (!info?.id) {

@@ -4,8 +4,8 @@ import { usePurchaseOrderModal } from "@/hooks/use-po-modal";
 import CardWrapper from "./card-wrapper";
 import { PurchaseOrder, PurchaseOrderPaymentType } from "@prisma/client";
 import TableLists from "@/components/table-lists";
-import { PurchaseOrderWithVendor } from "../page";
 import { paymentTypeMapping, purchaseOrderStatusMapping } from "@/app/config";
+import { PurchaseOrderWithVendor } from "../admin.page";
 
 type Props = {
   data: PurchaseOrderWithVendor[];

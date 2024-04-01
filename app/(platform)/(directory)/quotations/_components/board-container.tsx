@@ -80,7 +80,7 @@ export default function BoardContainer(props: Props) {
     // This function will invalidate queries related to quotations
     // whenever searchParams change
     invalidateQuotationQueries();
-  }, [searchParams, queryClient]); // Dependency array includes searchParams to trigger effect when it changes
+  }, [searchParams]); // Dependency array includes searchParams to trigger effect when it changes
 
   const { mutate } = useMutation<
     MutationResponseType,
@@ -389,7 +389,7 @@ const BoardCard = ({
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           ref={provided.innerRef}
-          className="w-full rounded-md bg-white shadow mb-3 cursor-move bg-white"
+          className="w-full rounded-md bg-white shadow mb-3 cursor-move"
         >
           <div className="p-2 text-xs">
             <div className="flex justify-between items-center">

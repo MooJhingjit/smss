@@ -12,7 +12,7 @@ const pages = [
   },
 ];
 
-async function getData(): Promise<any[]> {
+async function GetData(): Promise<any[]> {
   const { info } = await useUser();
 
   if (!info?.id) {
@@ -36,7 +36,7 @@ async function getData(): Promise<any[]> {
 }
 
 export default async function QuotationTablePage() {
-  const data = await getData();
+  const data = await GetData();
 
   return (
     <>

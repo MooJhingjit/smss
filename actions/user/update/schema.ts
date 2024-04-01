@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const UserSchema = z.object({
   id: z.number(),
-  role: z.enum(["buyer", "vendor", "sale", "admin"]),
+  role: z.enum(["buyer", "vendor", "sale", "seller", "admin"]),
   taxId: z.string(),
   name: z
     .string({
