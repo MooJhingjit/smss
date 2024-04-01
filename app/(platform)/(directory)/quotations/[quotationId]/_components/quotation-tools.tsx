@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { FormInput } from "@/components/form/form-input";
 import { customRevalidatePath } from "@/actions/revalidateTag";
 import PaymentOptionControl from "@/components/payment-option-control";
+import ConfirmActionButton from "@/components/confirm-action";
 
 type Props = {
   purchaseOrderRef: string;
@@ -206,17 +207,20 @@ const QuotationApprovalButton = ({
   console.log("🚀 ~ currentStatus:", currentStatus);
   if (currentStatus === QuotationStatus.open) {
     return (
-      <Button
-        variant="default"
-        disabled={!hasList}
-        onClick={() => {
+      <ConfirmActionButton
+        onConfirm={() => {
           onApprove(QuotationStatus.pending_approval);
         }}
-        className="inline-flex items-center px-2 py-1 rounded-md  text-xs h-full"
       >
-        <Send className="w-4 h-4 mr-1" />
-        <span>ส่งอนุมัติ</span>
-      </Button>
+        <Button
+          variant="default"
+          disabled={!hasList}
+          className="inline-flex items-center px-2 py-1 rounded-md  text-xs h-full"
+        >
+          <Send className="w-4 h-4 mr-1" />
+          <span>ส่งอนุมัติ</span>
+        </Button>
+      </ConfirmActionButton>
     );
   } else if (currentStatus === QuotationStatus.pending_approval) {
     return (
@@ -233,14 +237,15 @@ const QuotationApprovalButton = ({
           <p className="text-sm text-green-700 ">
             ได้รับการอนุมัติ: สามารถนำส่งให้ลูกค้าได้
           </p>
-          <button
-            className="text-xs text-orange-400 hover:text-orange-500 underline mt-1 cursor-pointer "
-            onClick={() => {
+          <ConfirmActionButton
+            onConfirm={() => {
               onApprove(QuotationStatus.approved);
             }}
           >
-            ยืนยันการอนุมัติจากลูกค้า
-          </button>
+            <button className="text-xs text-orange-400 hover:text-orange-500 underline mt-1 cursor-pointer ">
+              ยืนยันการอนุมัติจากลูกค้า
+            </button>
+          </ConfirmActionButton>
         </div>
       </div>
     );
@@ -253,12 +258,14 @@ const QuotationApprovalButton = ({
   );
 };
 
-const PrintButton = ({ quotationId, hasList }: { quotationId: number, hasList: boolean }) => {
-
-  const { mutate } = useMutation<
-    MutationResponseType,
-    Error
-  >({
+const PrintButton = ({
+  quotationId,
+  hasList,
+}: {
+  quotationId: number;
+  hasList: boolean;
+}) => {
+  const { mutate } = useMutation<MutationResponseType, Error>({
     mutationFn: async (fields) => {
       const res = await QT_SERVICES.generateInvoice(quotationId);
       return res;
@@ -272,7 +279,7 @@ const PrintButton = ({ quotationId, hasList }: { quotationId: number, hasList: b
 
   const onPrintClick = () => {
     mutate();
-  }
+  };
   return (
     <Button
       // onClick={onPrintClick}

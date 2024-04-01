@@ -4,8 +4,11 @@ import { createSafeAction } from "@/lib/create-safe-action";
 import { InputType, ReturnType } from "./types";
 import { schema } from "./schema";
 import { generateCode } from "@/lib/utils";
+import { currentUser } from "@/lib/auth";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
+  const userSession = await currentUser();
+
   const { buyerId, type } = data;
   let quotation;
   try {
@@ -19,6 +22,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       data: {
         type,
         code: "",
+        sellerId: parseInt(userSession?.id ?? ""),
         contactId: buyerId,
       },
     });

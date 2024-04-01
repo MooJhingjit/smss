@@ -26,7 +26,7 @@ export default function ConfirmActionButton(props: Props) {
             setIsPending(true);
           }}
           type="button"
-          className="relative inline-flex items-center gap-x-1.5 rounded-l-md text-white bg-red-600 px-8 py-2 text-sm font-semibold ring-0  focus:z-10"
+          className="relative inline-flex items-center gap-x-1.5 rounded-l-md text-white bg-red-600 px-8 py-1 text-xs  ring-0  focus:z-10"
         >
           ยืนยัน
         </button>
@@ -34,7 +34,7 @@ export default function ConfirmActionButton(props: Props) {
           <button
             onClick={() => setShowConfirm(false)}
             type="button"
-            className="relative -ml-px inline-flex items-center rounded-r-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10"
+            className="relative -ml-px inline-flex items-center rounded-r-md bg-white px-3 py-1 text-xs  text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10"
           >
             ยกเลิก
           </button>
