@@ -23,6 +23,9 @@ import { MinusCircle, PlusCircle } from "lucide-react";
 import { quotationTypeMapping } from "@/app/config";
 import { classNames } from "@/lib/utils";
 import { ProductWithRelations } from "@/types";
+import { Button } from "../ui/button";
+import ConfirmActionButton from "../confirm-action";
+import { deleteQuotationList } from "@/actions/quotation-list/delete";
 
 type FormInput = {
   productId: string;
@@ -96,6 +99,17 @@ export const QuotationListModal = () => {
     },
   });
 
+  const handleDelete = useAction(deleteQuotationList, {
+    onSuccess: (data) => {
+      toast.success("สำเร็จ");
+      modal.onClose();
+    },
+    onError: (error) => {
+      toast.error(error);
+      console.log("error", error);
+    },
+  });
+
   const onSubmit = async (formData: FormData) => {
     const productId = formData.get("productId") as string;
     const name = formData.get("name") as string;
@@ -105,7 +119,7 @@ export const QuotationListModal = () => {
     const quantity = formData.get("quantity") as string;
     const withholdingTax = formData.get("withholdingTax") as string;
     const withholdingTaxPercent = formData.get(
-      "withholdingTaxPercent",
+      "withholdingTaxPercent"
     ) as string;
 
     const product = productId
@@ -366,10 +380,20 @@ export const QuotationListModal = () => {
 
         <SubItems setValue={setValue} defaultSubItems={subItems} />
 
-        <div className="col-start-4 col-span-1 flex justify-end space-x-2">
-          {/* <Button variant="destructive" size="sm">
-              ลบ
-            </Button> */}
+        <div className="col-start-4 col-span-1 flex justify-end space-x-3">
+          {defaultData?.id && (
+            <ConfirmActionButton
+              onConfirm={() =>
+                handleDelete.execute({
+                  id: defaultData.id,
+                })
+              }
+            >
+              <Button variant="link" size="sm" className="text-red-500">
+                ลบ
+              </Button>
+            </ConfirmActionButton>
+          )}
           <FormSubmit>{defaultData?.id ? "อัพเดท" : "สร้างใหม่"}</FormSubmit>
         </div>
       </form>
@@ -388,7 +412,7 @@ export const QuotationListModal = () => {
                   "ml-2 inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ",
                   isProduct
                     ? "bg-gray-100 text-gray-800"
-                    : "bg-green-100 text-green-800",
+                    : "bg-green-100 text-green-800"
                 )}
               >
                 {quotationTypeMapping[refs?.quotationRef.type]}

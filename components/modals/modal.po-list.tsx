@@ -17,8 +17,11 @@ import { Item } from "@prisma/client";
 import { PackagePlus } from "lucide-react";
 import { updateItem } from "@/actions/item/update";
 import { createPurchaseItem } from "@/actions/po-list/create";
+import { deletePurchaseItem } from "@/actions/po-list/delete";
 import { FormSearchAsync } from "../form/form-search-async";
 import { ProductWithRelations } from "@/types";
+import ConfirmActionButton from "../confirm-action";
+import { Button } from "../ui/button";
 
 type FormInput = {
   productId: string;
@@ -51,6 +54,17 @@ export const PurchaseOrderListModal = () => {
     },
     onError: (error) => {
       toast.error(error);
+    },
+  });
+
+  const handleDelete = useAction(deletePurchaseItem, {
+    onSuccess: (data) => {
+      toast.success("สำเร็จ");
+      modal.onClose();
+    },
+    onError: (error) => {
+      toast.error(error);
+      console.log("error", error);
     },
   });
 
@@ -164,6 +178,20 @@ export const PurchaseOrderListModal = () => {
                   </div>
                 </div>
               </div>
+
+              {defaultData?.id && (
+                <div className="col-start-4 col-span-1 flex justify-end space-x-3">
+                  <ConfirmActionButton
+                    onConfirm={() => {
+                      handleDelete.execute({ id: defaultData.id });
+                    }}
+                  >
+                    <Button variant="link" size="sm" className="text-red-500">
+                      ลบทั้งหมด
+                    </Button>
+                  </ConfirmActionButton>
+                </div>
+              )}
             </>
           )}
         </div>

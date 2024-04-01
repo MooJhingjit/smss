@@ -34,20 +34,21 @@ const columns = [
     name: "รับเข้า",
     key: "quantity",
     render: (item: PurchaseOrderItemWithRelations) => {
+      const total = item.items.filter((i) => !!i.serialNumber).length;
       return (
         <p>
-          {item.items.length}/{item.quantity}
+          {total}/{item.quantity}
         </p>
       );
     },
   },
-  {
-    name: "สถานะ",
-    key: "status",
-    render: (item: PurchaseOrderItemWithRelations) => {
-      return purchaseOrderItemStatusMapping[item.status];
-    },
-  },
+  // {
+  //   name: "สถานะ",
+  //   key: "status",
+  //   render: (item: PurchaseOrderItemWithRelations) => {
+  //     return purchaseOrderItemStatusMapping[item.status];
+  //   },
+  // },
   // {
   //   name: "รับสินค้า",
   //   key: "action",
@@ -102,7 +103,7 @@ export default function PurchaseOrderItems({
           onManage={(purchaseOrderItem) => {
             modal.onOpen(
               purchaseOrderItem as PurchaseOrderItemWithRelations,
-              data,
+              data
             );
           }}
         />

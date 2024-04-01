@@ -149,7 +149,7 @@ export default async function QuotationDetails(
                   <div className="flex space-x-1 items-center text-sm">
                     <p>ใบเสนอราคาต้องอยู่ในสถานะได้รับการอนุมัติ</p>
                     <span className="inline-flex items-center rounded-md bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800 border-yellow-400 border">
-                      อนุมัติ QT
+                      ลูกค้าอนุมัติ QT แล้ว
                     </span>
                     <p>ถึงจะสามารถสร้างใบ PO ได้</p>
                   </div>
