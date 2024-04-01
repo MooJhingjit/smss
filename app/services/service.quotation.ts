@@ -5,6 +5,12 @@ const get = (params?: Record<string, any>) => {
   return fetcher(`/api/quotations?${queries}`);
 };
 
+// const post = (data: Record<string, any>) => {
+//   return fetcher(`/api/quotations`, {
+//     method: "POST",
+//     body: JSON.stringify(data),
+//   });
+// };
 const put = (id: number, data: Record<string, any>) => {
   return fetcher(`/api/quotations/${id}`, {
     method: "PUT",
@@ -12,8 +18,16 @@ const put = (id: number, data: Record<string, any>) => {
   });
 };
 
+const generateInvoice = (id: number) => {
+  return fetcher(`/api/quotations/invoice/${id}`, {
+    method: "POST",
+  });
+}
+
 export default {
   get,
   put,
+  // post,
+  generateInvoice
   //   updateStatus,
 };

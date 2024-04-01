@@ -154,7 +154,7 @@ export default function QuotationTools(props: Props) {
         )}
 
         <ItemList>
-          <PrintButton hasList={hasList} />
+          <PrintButton quotationId={quotationId} hasList={hasList} />
         </ItemList>
       </div>
     </div>
@@ -253,9 +253,29 @@ const QuotationApprovalButton = ({
   );
 };
 
-const PrintButton = ({ hasList }: { hasList: boolean }) => {
+const PrintButton = ({ quotationId, hasList }: { quotationId: number, hasList: boolean }) => {
+
+  const { mutate } = useMutation<
+    MutationResponseType,
+    Error
+  >({
+    mutationFn: async (fields) => {
+      const res = await QT_SERVICES.generateInvoice(quotationId);
+      return res;
+    },
+    onSuccess: async (n) => {
+      toast.success("สำเร็จ");
+      // open new tab
+      window.open(`/quotations/invoices/result-${quotationId}.pdf`, "_blank");
+    },
+  });
+
+  const onPrintClick = () => {
+    mutate();
+  }
   return (
     <Button
+      // onClick={onPrintClick}
       disabled={!hasList}
       variant="outline"
       className="inline-flex items-center px-2 py-1 rounded-md bg-gray-100 text-gray-700 text-xs h-full"
