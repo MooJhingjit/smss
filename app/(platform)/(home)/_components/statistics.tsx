@@ -22,6 +22,10 @@ ChartJS.register(
   Legend,
 );
 import { Line } from "react-chartjs-2";
+import { Button } from "@/components/ui/button";
+
+import STAT_SERVICE from '@/app/services/service.stat';
+import { useQuery } from "@tanstack/react-query";
 
 const labels = [
   "January",
@@ -74,8 +78,36 @@ const data = {
 };
 
 export default function StatisticCard() {
+  const [showReport, setShowReport] = React.useState(false);
+
+  const handleShowReport = () => {
+
+    setShowReport(true);
+  }
+
+  const { data } = useQuery({
+    queryKey: ['full-year-stats'],
+    queryFn: async () => {
+      return await STAT_SERVICE.get();
+    },
+  });
+  console.log(data)
+
+  if (!showReport) {
+
+    return (
+      <CardWrapper title="ยอดขาย และยอดสั่งซื้อทั้งปี">
+        <div className="h-auto relative overflow-hidden w-full flex items-center justify-center pt-6">
+          <Button
+            onClick={handleShowReport}
+            variant="secondary">ดูรายงาน</Button>
+        </div>
+      </CardWrapper>
+    );
+  }
+
   return (
-    <CardWrapper title="ยอดขาย และยอกสั่งซื้อทั้งปี">
+    <CardWrapper title="ยอดขาย และยอดสั่งซื้อทั้งปี">
       <Line options={options} data={data} />
     </CardWrapper>
   );
