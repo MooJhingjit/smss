@@ -20,6 +20,8 @@ async function getData(): Promise<
     QuotationWithBuyer[],
     QuotationWithBuyer[],
     PurchaseOrderWithVendor[],
+    { _sum: { totalPrice: number | null } },
+    { _sum: { totalPrice: number | null } }
   ]
 > {
   const quotations = db.quotation.findMany({
@@ -86,12 +88,37 @@ async function getData(): Promise<
     },
   });
 
+  // count all total price for current month
+  const saleTotal = db.quotation.aggregate({
+    _sum: {
+      totalPrice: true,
+    },
+    where: {
+      updatedAt: {
+        gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+      },
+    },
+  });
+
+  const orderAmount = db.purchaseOrder.aggregate({
+    _sum: {
+      totalPrice: true,
+    },
+    where: {
+      updatedAt: {
+        gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+      },
+    },
+  });
+
   const data = await Promise.all([
     quotations,
     purchaseOrders,
     tasks,
     quotationsDueDate,
     purchaseOrdersDueDate,
+    saleTotal,
+    orderAmount
   ]);
   return data;
 }
@@ -103,8 +130,10 @@ export default async function AdminHomePage() {
     tasks,
     quotationsDueDate,
     purchaseOrdersDueDate,
+    saleTotal,
+    orderAmount
   ] = await getData();
-  const user = await currentUser();
+  // const user = await currentUser();
   // console.log('server get session >>>>>', user);
   return (
     <div className="grid grid-cols-12 gap-6">
@@ -112,7 +141,10 @@ export default async function AdminHomePage() {
         <div className="relative h-full p-4 rounded-xl overflow-hidden shadow-lg">
           <div className="absolute inset-0 bg-gray-700 opacity-10 z-10 h-full"></div>
           <div className="h-full w-full">
-            <ShortcutMenus />
+            <ShortcutMenus
+              saleTotal={saleTotal._sum.totalPrice ?? 0}
+              orderAmount={orderAmount._sum.totalPrice ?? 0}
+            />
           </div>
         </div>
       </div>

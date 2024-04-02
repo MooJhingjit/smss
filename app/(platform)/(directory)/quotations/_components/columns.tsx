@@ -5,6 +5,7 @@ import {
   quotationStatusMapping,
   quotationTypeMapping,
 } from "@/app/config";
+import CodeBadge from "@/components/badges/code-badge";
 import { classNames, getDateFormat } from "@/lib/utils";
 import { Contact, Quotation } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
@@ -16,10 +17,10 @@ export const columns: ColumnDef<Quotation & { contact?: Contact }>[] = [
     accessorKey: "code",
     header: "รหัส",
     cell: ({ row }) => {
-      const { code } = row.original;
+      const { code, isLocked} = row.original;
       return (
         <Link href={`/quotations/${row.original.id}`} className="">
-          <p className="text-sm font-semibold underline">{code}</p>
+          <CodeBadge code={code} isLocked={isLocked} />
 
           <div className="flex space-x-2 items-center mt-2">
             <span

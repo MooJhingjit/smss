@@ -1,9 +1,15 @@
 import React from "react";
 import { KanbanSquare, Box, Users } from "lucide-react";
 import Link from "next/link";
+import { getDateFormat, getPriceFormat } from "@/lib/utils";
 // import { create } from '@/actions/create-user'
 
-export default function ShortcutMenus() {
+type Props = {
+  saleTotal: number;
+};
+
+export default function ShortcutMenus(props: Props) {
+  const { saleTotal } = props;
   return (
     <div className="">
       <div className="grid grid-cols-3 gap-4">
@@ -41,7 +47,7 @@ export default function ShortcutMenus() {
         />
       </div>
       <div className="mt-4">
-        <Stats />
+        <Stats saleTotal={saleTotal} />
       </div>
     </div>
   );
@@ -68,33 +74,21 @@ const MenuItem = (props: {
   );
 };
 
-const Stats = () => {
+const Stats = ({ saleTotal }: { saleTotal: number }) => {
+  const firstDay = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  const lastDay = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)
+
   return (
     <div className="col-span-3 lg:flex  relative py-2">
-      {/* <div className="absolute inset-0 bg-gray-100  rounded-lg opacity-10 z-10 h-full"></div> */}
-
       <div className=" lg:border-gray-900/5 lg:border-t-0 mb-4 lg:mb-0">
-        <dt className="text-sm font-medium leading-6 text-slate-800">
+        <dt className="text-sm font-medium leading-6 text-slate-800 flex items-center space-x-2">
           <p>ยอดขายรวม</p>
+          <p>{`${getDateFormat(firstDay)} - ${getDateFormat(lastDay)}`}</p>
         </dt>
         <dd className="w-full flex-none text-3xl font-medium leading-10 tracking-tight text-gray-900">
-          ฿405,091.00
+          {getPriceFormat(saleTotal)}
         </dd>
       </div>
-      {/* <div className="justify-center border-gray-900/5 lg:border-t-0 ">
-        <dt className="text font-medium leading-6  flex space-x-1 text-slate-700">
-          <p>ยอดสั่งซื้อ</p>
-        </dt>
-        <dd className="mt-2 w-full flex-none text-xl font-medium text-slate-700 ">
-          ฿???
-        </dd>
-      </div> */}
-
-      {/* <div className="absolute top-2 right-2">
-        <p className='text-[10px] text-gray-50 relative'>
-          <sub className='absolute top-[5px] left-[-6px]'>*</sub>
-          Last 30 days summary</p>
-      </div> */}
     </div>
   );
 };

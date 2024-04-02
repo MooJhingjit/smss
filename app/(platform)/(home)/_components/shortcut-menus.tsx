@@ -2,9 +2,19 @@
 import React from "react";
 import { KanbanSquare, Receipt, Box, Users, PackageOpen } from "lucide-react";
 import Link from "next/link";
+import { getDateFormat, getPriceFormat } from "@/lib/utils";
 // import { create } from '@/actions/create-user'
 
-export default function ShortcutMenus() {
+type StatProps = {
+  saleTotal: number;
+  orderAmount: number;
+}
+type Props = StatProps
+
+export default function ShortcutMenus({
+  saleTotal,
+  orderAmount
+}: Props) {
   return (
     <div className="grid grid-cols-5 gap-4">
       <MenuItem
@@ -83,7 +93,10 @@ export default function ShortcutMenus() {
 
         </form>
       </div> */}
-      <Stats />
+      <Stats
+        saleTotal={saleTotal}
+        orderAmount={orderAmount}
+      />
     </div>
   );
 }
@@ -109,35 +122,39 @@ const MenuItem = (props: {
   );
 };
 
-const Stats = () => {
+const Stats = ({
+  saleTotal,
+  orderAmount
+}: StatProps) => {
+
+  const firstDay = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  const lastDay = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)
+
+
   return (
-    <div className="col-span-4 lg:flex justify-between relative lg:p-4 p-2">
+    <div className="col-span-4 lg:p-4 p-2 relative">
       <div className="absolute inset-0 bg-gray-100  rounded-lg opacity-10 z-10 h-full"></div>
-
-      <div className=" lg:border-gray-900/5 lg:border-t-0 mb-4 lg:mb-0">
-        <dt className="text font-medium leading-6 flex space-x-1 text-slate-700 ">
-          {/* <CircleDollarSign className='w-5 h-5' strokeWidth={1.5} /> */}
-          <p>ยอดขาย</p>
-        </dt>
-        <dd className="mt-2 w-full flex-none text-xl font-medium  text-slate-700 ">
-          ฿405,091.00
-        </dd>
+      <p>{`${getDateFormat(firstDay)} - ${getDateFormat(lastDay)}`}</p>
+      <div className=" lg:flex justify-between ">
+        <div className=" lg:border-gray-900/5 lg:border-t-0 mb-4 lg:mb-0 z-20">
+          <dt className="text font-medium leading-6 flex space-x-1 text-slate-700 ">
+            {/* <CircleDollarSign className='w-5 h-5' strokeWidth={1.5} /> */}
+            <p>ยอดขาย</p>
+          </dt>
+          <dd className="mt-2 w-full flex-none text-xl font-medium  text-slate-700 ">
+            {getPriceFormat(saleTotal)}
+          </dd>
+        </div>
+        <div className="justify-center border-gray-900/5 lg:border-t-0 ">
+          <dt className="text font-medium leading-6  flex space-x-1 text-slate-700">
+            {/* <CircleDollarSign className='w-5 h-5 ' strokeWidth={1.5} /> */}
+            <p>ยอดสั่งซื้อ</p>
+          </dt>
+          <dd className="mt-2 w-full flex-none text-xl font-medium text-slate-700 ">
+            {getPriceFormat(orderAmount)}
+          </dd>
+        </div>
       </div>
-      <div className="justify-center border-gray-900/5 lg:border-t-0 ">
-        <dt className="text font-medium leading-6  flex space-x-1 text-slate-700">
-          {/* <CircleDollarSign className='w-5 h-5 ' strokeWidth={1.5} /> */}
-          <p>ยอดสั่งซื้อ</p>
-        </dt>
-        <dd className="mt-2 w-full flex-none text-xl font-medium text-slate-700 ">
-          ฿305,091.00
-        </dd>
-      </div>
-
-      {/* <div className="absolute top-2 right-2">
-        <p className='text-[10px] text-gray-50 relative'>
-          <sub className='absolute top-[5px] left-[-6px]'>*</sub>
-          Last 30 days summary</p>
-      </div> */}
     </div>
   );
 };

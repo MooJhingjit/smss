@@ -14,15 +14,18 @@ export function generateCode(id: number, prefix: "QT" | "PO") {
   return `${prefix}-${id.toString().padStart(codeLength, "0")}`;
 }
 
-export function getDateFormat(date: Date | string) {
+export function getDateFormat(date: Date | string, format?: string) {
   if (typeof date === "string") {
     date = new Date(date);
   }
   const day = date.getDate().toString().padStart(2, "0");
   const month = (date.getMonth() + 1).toString().padStart(2, "0");
   const year = date.getFullYear();
+  // if (!format) {
+  // }
+  return `${day}/${month}/${year}`;
 
-  return `${year}-${month}-${day}`;
+  // return `${year}-${month}-${day}`;
 }
 
 export const debounce = <T extends unknown[]>(
@@ -35,3 +38,11 @@ export const debounce = <T extends unknown[]>(
     timer = setTimeout(() => func(...args), delay);
   };
 };
+
+
+export const getPriceFormat = (price: number) => {
+  return price.toLocaleString("th-TH", {
+    style: "currency",
+    currency: "THB",
+  });
+}

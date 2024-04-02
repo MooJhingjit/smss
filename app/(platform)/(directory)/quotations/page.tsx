@@ -14,5 +14,6 @@ export default async function QuotationBoard() {
     );
   }
 
+  // for seller
   return <QuotationTablePage />;
 }

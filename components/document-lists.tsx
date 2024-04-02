@@ -12,26 +12,6 @@ import {
   queryClient,
 } from "@/components/providers/query-provider";
 import { toast } from "sonner";
-// import Image from "next/image";
-
-const docs = [
-  {
-    name: "PO1.pdf",
-    created_at: "2023/12/30",
-  },
-  {
-    name: "inv.pdf",
-    created_at: "2023/12/25",
-  },
-  // {
-  //   name: "PO1.pdf",
-  //   created_at: "2023/12/5",
-  // },
-  // {
-  //   name: "PO4.pdf",
-  //   created_at: "2023/12/5",
-  // },
-];
 type Props = {
   refType: string;
   refId: number;
@@ -103,7 +83,7 @@ export default function DocumentItems(props: Props) {
     }
 
     if (ext === "jpg" || ext === "jpeg" || ext === "png") {
-      return <img  src={doc.url} alt="preview" className="w-full rounded-lg" />;
+      return <img src={doc.url} alt="preview" className="w-full rounded-lg" />;
     }
     return (
       <div className="flex items-center justify-center w-16 h-16 bg-gray-100 rounded-md">

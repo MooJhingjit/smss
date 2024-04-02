@@ -6,13 +6,19 @@ import { QuotationWithBuyer } from "@/types";
 import TableLists from "@/components/table-lists";
 import { paymentTypeMapping, quotationStatusMapping } from "@/app/config";
 import { PurchaseOrderPaymentType } from "@prisma/client";
+import CodeBadge from "@/components/badges/code-badge";
 
 type Props = {
   data: QuotationWithBuyer[];
 };
 
 const columns = [
-  { name: "รหัส", key: "code" },
+  {
+    name: "รหัส", key: "code",
+    render: (item: QuotationWithBuyer) => {
+      return <CodeBadge code={item.code} isLocked={item.isLocked} />;
+    }
+  },
   {
     name: "ลูกค้า",
     key: "buyer.name",
