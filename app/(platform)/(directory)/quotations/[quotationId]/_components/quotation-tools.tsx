@@ -115,7 +115,7 @@ export default function QuotationTools(props: Props) {
             )}
             {isAdmin ? (
               <div className="">
-                <ItemStatus
+                <QuotationStatusDropdown
                   onStatusChange={(s) => {
                     handleItemChange({ status: s });
                   }}
@@ -162,7 +162,7 @@ export default function QuotationTools(props: Props) {
   );
 }
 
-const ItemStatus = ({
+export const QuotationStatusDropdown = ({
   curStatus,
   onStatusChange,
 }: {

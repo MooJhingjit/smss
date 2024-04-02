@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { LockIcon, PrinterIcon } from "lucide-react";
-import { PurchaseOrderPaymentType, PurchaseOrderStatus } from "@prisma/client";
+import { PurchaseOrderPaymentType, PurchaseOrderStatus, QuotationStatus } from "@prisma/client";
 // import * as Select from '@radix-ui/react-select';
 import { purchaseOrderStatusMapping } from "@/app/config";
 import { MutationResponseType } from "@/components/providers/query-provider";
@@ -19,6 +19,7 @@ import Link from "next/link";
 import { customRevalidatePath } from "@/actions/revalidateTag";
 import PO_SERVICES from "@/app/services/service.purchase-order";
 import PaymentOptionControl from "@/components/payment-option-control";
+import { QuotationStatusDropdown } from "../../../quotations/[quotationId]/_components/quotation-tools";
 
 type Props = {
   orderId: number;
@@ -28,6 +29,7 @@ type Props = {
   isLocked?: boolean;
   paymentType: PurchaseOrderPaymentType;
   paymentDue: string;
+  quotationStatus: QuotationStatus | undefined
 };
 
 export default function PurchaseOrderTools(props: Props) {
@@ -39,6 +41,7 @@ export default function PurchaseOrderTools(props: Props) {
     isLocked,
     paymentDue,
     paymentType,
+    quotationStatus
   } = props;
 
   const { mutate } = useMutation<
@@ -93,7 +96,7 @@ export default function PurchaseOrderTools(props: Props) {
         {/* <div className="inline-flex capitalize font-semibold rounded-md bg-gray-100 px-2 py-1 text-xs text-gray-700 items-center">
           <span>{type}</span>
         </div> */}
-        <ItemList label="สถานะ">
+        <ItemList label="สถานะ (PO)">
           <div className=" text-sm leading-6 text-gray-700 flex space-x-2">
             {isLocked && (
               <div className="col-span-1 flex items-center">
@@ -111,6 +114,34 @@ export default function PurchaseOrderTools(props: Props) {
           </div>
         </ItemList>
 
+        {
+          quotationStatus && (
+            <ItemList label="สถานะ (QT)">
+              <div className=" text-sm leading-6 text-gray-700 flex space-x-2">
+                {/* {isLocked && (
+                  <div className="col-span-1 flex items-center">
+                    <LockIcon className="w-4 h-4 text-yellow-500" />
+                  </div>
+                )} */}
+                <div className="flex items-center space-x-2">
+                  <Link
+                    href={`/quotations/${quotationId}`}
+                    className="ml-1.5 text-yellow-600 underline whitespace-nowrap"
+                  >
+                    {quotationCode}
+                  </Link>
+                  <QuotationStatusDropdown
+                    onStatusChange={(s) => {
+                      // handleChange({ status: s });
+                    }}
+                    curStatus={quotationStatus}
+                  />
+                </div>
+              </div>
+            </ItemList>
+          )
+        }
+
         <ItemList label="การชำระเงิน">
           <PaymentOptionControl
             onUpdate={handleChange}
@@ -121,7 +152,7 @@ export default function PurchaseOrderTools(props: Props) {
 
         <ItemList>
           <div className="space-x-3 flex items-center">
-            {quotationId && (
+            {/* {quotationId && (
               <div className="inline-flex items-center rounded-md bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-600">
                 <span>QT:</span>
                 <Link
@@ -131,7 +162,7 @@ export default function PurchaseOrderTools(props: Props) {
                   {quotationCode}
                 </Link>
               </div>
-            )}
+            )} */}
             <PrintButton />
           </div>
         </ItemList>
@@ -151,7 +182,7 @@ const ItemStatus = ({
 
   return (
     <Select onValueChange={onStatusChange}>
-      <SelectTrigger className="inline-flex capitalize font-semibold  rounded-md bg-yellow-50 px-2 py-1 text-xs text-yellow-700 border border-yellow-500 items-center">
+      <SelectTrigger className="inline-flex capitalize font-semibold  rounded-md bg-blue-50 px-2 py-1 text-xs text-blue-700 border border-blue-500 items-center">
         <SelectValue placeholder={purchaseOrderStatusMapping[curStatus]} />
       </SelectTrigger>
       <SelectContent className="bg-white text-xs p-2 space-y-2 ">

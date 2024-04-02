@@ -98,6 +98,7 @@ export default async function PurchaseOrderDetails(props: Readonly<Props>) {
             orderId={data.id}
             quotationId={data.quotationId}
             quotationCode={data.quotation?.code ?? ""}
+            quotationStatus={data.quotation?.status}
             status={data.status}
             paymentDue={
               data.paymentDue
