@@ -278,11 +278,12 @@ const PrintButton = ({
   });
 
   const onPrintClick = () => {
-    mutate();
+    // mutate();
+    window.open(`/result-${1}.pdf`, "_blank");
   };
   return (
     <Button
-      // onClick={onPrintClick}
+      onClick={onPrintClick}
       disabled={!hasList}
       variant="outline"
       className="inline-flex items-center px-2 py-1 rounded-md bg-gray-100 text-gray-700 text-xs h-full"

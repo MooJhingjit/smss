@@ -124,20 +124,20 @@ async function getData(): Promise<
 }
 
 export default async function AdminHomePage() {
-  // const [
-  //   quotations,
-  //   purchaseOrders,
-  //   tasks,
-  //   quotationsDueDate,
-  //   purchaseOrdersDueDate,
-  //   saleTotal,
-  //   orderAmount
-  // ] = await getData();
+  const [
+    quotations,
+    purchaseOrders,
+    tasks,
+    quotationsDueDate,
+    purchaseOrdersDueDate,
+    saleTotal,
+    orderAmount
+  ] = await getData();
   // const user = await currentUser();
   // console.log('server get session >>>>>', user);
   return (
     <div className="grid grid-cols-12 gap-6">
-      {/* <div className="md:col-span-6 col-span-12">
+      <div className="md:col-span-6 col-span-12">
         <div className="relative h-full p-4 rounded-xl overflow-hidden shadow-lg">
           <div className="absolute inset-0 bg-gray-700 opacity-10 z-10 h-full"></div>
           <div className="h-full w-full">
@@ -173,7 +173,7 @@ export default async function AdminHomePage() {
       </div>
       <div className="lg:col-span-6 col-span-12">
         <PurchaseOrders data={purchaseOrders} />
-      </div> */}
+      </div>
       <div className="col-span-12">
         <StatisticCard />
       </div>

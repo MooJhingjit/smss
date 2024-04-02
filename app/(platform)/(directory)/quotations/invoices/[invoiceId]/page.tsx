@@ -1,7 +1,5 @@
 import React from 'react'
 
 export default function QuotationInvoice() {
-  return (
-    <div>page</div>
-  )
+  return <iframe src={'./result-1.pdf'} />
 }
