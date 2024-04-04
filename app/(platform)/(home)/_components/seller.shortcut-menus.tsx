@@ -80,8 +80,8 @@ const Stats = ({ saleTotal }: { saleTotal: number }) => {
 
   return (
     <div className="col-span-3 lg:flex  relative py-2">
-      <div className=" lg:border-gray-900/5 lg:border-t-0 mb-4 lg:mb-0">
-        <dt className="leading-6 text-white flex items-center space-x-2">
+      <div className=" lg:border-gray-900/5 lg:border-t-0 lg:mb-0 text-center lg:text-left">
+        <dt className="leading-6 text-white flex items-center space-x-2 justify-center lg:justify-start">
           <p>ยอดขายรวม</p>
           <p>{`${getDateFormat(firstDay)} - ${getDateFormat(lastDay)}`}</p>
         </dt>

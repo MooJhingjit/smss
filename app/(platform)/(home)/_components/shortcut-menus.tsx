@@ -16,7 +16,7 @@ export default function ShortcutMenus({
   orderAmount
 }: Props) {
   return (
-    <div className="grid grid-cols-5 gap-4">
+    <div className="grid  grid-cols-4 lg:grid-cols-5 gap-4">
       <MenuItem
         icon={
           <KanbanSquare
@@ -134,9 +134,9 @@ const Stats = ({
   return (
     <div className="col-span-4 lg:p-4 p-2 relative">
       <div className="absolute inset-0 bg-gray-100  rounded-lg opacity-10 z-10 h-full"></div>
-      <p>{`${getDateFormat(firstDay)} - ${getDateFormat(lastDay)}`}</p>
-      <div className=" lg:flex justify-between ">
-        <div className=" lg:border-gray-900/5 lg:border-t-0 mb-4 lg:mb-0 z-20">
+      <p className="text-center">สรุปรายเดือน {`${getDateFormat(firstDay)} - ${getDateFormat(lastDay)}`}</p>
+      <div className="flex justify-evenly mt-4 ">
+        <div className=" lg:border-gray-900/5 lg:border-t-0 lg:mb-0 z-20">
           <dt className="text font-medium leading-6 flex space-x-1 text-slate-700 ">
             {/* <CircleDollarSign className='w-5 h-5' strokeWidth={1.5} /> */}
             <p>ยอดขาย</p>
