@@ -8,6 +8,7 @@ import {
   quotationStatusMapping,
 } from "@/app/config";
 import { PurchaseOrderWithVendor } from "../admin.page";
+import StatusBadge from "@/components/badges/status-badge";
 
 type Props<T> = {
   data: T[];
@@ -45,7 +46,7 @@ const QT_columns = [
     name: "สถานะ",
     key: "status",
     render: (item: QuotationWithBuyer) => {
-      return <p className="">{quotationStatusMapping[item.status].label}</p>;
+      return <StatusBadge status={quotationStatusMapping[item.status].label} />
     },
   },
 ];
@@ -79,7 +80,7 @@ const PO_columns = [
     name: "สถานะ",
     key: "status",
     render: (item: PurchaseOrderWithVendor) => {
-      return <p className="">{purchaseOrderStatusMapping[item.status]}</p>;
+      return <StatusBadge status={purchaseOrderStatusMapping[item.status]} />
     },
   },
 ];

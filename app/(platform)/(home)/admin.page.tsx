@@ -151,7 +151,7 @@ export default async function AdminHomePage() {
       <div className="md:col-span-6 col-span-12">
         <Tasks
           data={tasks}
-          label={`งานที่ต้องตรวจสอบ สถานะ: ${quotationStatusMapping["offer"].label}`}
+          label={`รออนุมัติ สถานะ: ${quotationStatusMapping["offer"].label}`}
         />
       </div>
       <div className="lg:col-span-6 col-span-12">

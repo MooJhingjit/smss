@@ -23,11 +23,11 @@ export const quotationStatusMapping = {
     progress: 40,
   },
   po_preparing: {
-    label: "เตรียม PO (ผู้ขาย)",
+    label: "เตรียม PO (ผู้ขาย/ร้านค้า)",
     progress: 50,
   },
   po_sent: {
-    label: "ส่ง PO (ผู้ขาย)",
+    label: "ส่ง PO (ผู้ขาย/ร้านค้า)",
     progress: 60,
   },
   product_received: {

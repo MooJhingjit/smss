@@ -42,7 +42,7 @@ const columns = [
     },
   },
   {
-    name: "ผู้ขาย",
+    name: "ผู้ขาย/ร้านค้า",
     key: "vendor",
     render: (item: QuotationListWithRelations) => {
       return item.product.vendor?.name;
@@ -110,10 +110,10 @@ export default function QuotationLists(props: Props) {
               })
             }
             disabled={isLocked}
-            variant="secondary"
-            className="flex items-center justify-center  h-5 rounded  "
+            variant="default"
+            className="flex items-center justify-center  h-5 rounded bg-yellow-50 hover:bg-yellow-500 border border-yellow-600"
           >
-            <Plus className="w-4 h-4 text-gray-400 hover:text-gray-600  cursor-pointer font-semibold" />
+            <Plus className="w-4 h-4 text-yellow-700  cursor-pointer font-semibold" />
           </Button>
         )
       }
@@ -261,12 +261,12 @@ const Remark = ({ id, remark }: { id: number; remark: string | null }) => {
     <form action={onSubmit} className="h-full relative">
       <FormTextarea
         id="remark"
-        placeholder="Remark"
+        placeholder="หมายเหตุ"
         className="w-full h-full border p-2 rounded-lg"
         register={register}
         rows={12}
       />
-      <div className="absolute bottom-2 right-2">
+      <div className="absolute bottom-6 right-2">
         {isDirty && (
           <FormSubmit variant="default" className="text-xs">
             บันทึก

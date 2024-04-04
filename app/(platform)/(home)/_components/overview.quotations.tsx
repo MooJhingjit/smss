@@ -7,6 +7,8 @@ import TableLists from "@/components/table-lists";
 import { paymentTypeMapping, quotationStatusMapping } from "@/app/config";
 import { PurchaseOrderPaymentType } from "@prisma/client";
 import CodeBadge from "@/components/badges/code-badge";
+import PaymentBadge from "@/components/badges/payment-badge";
+import StatusBadge from "@/components/badges/status-badge";
 
 type Props = {
   data: QuotationWithBuyer[];
@@ -31,7 +33,7 @@ const columns = [
     key: "paymentType",
     render: (item: QuotationWithBuyer) => {
       const paymentType = item.paymentType as PurchaseOrderPaymentType;
-      return <p className="">{paymentTypeMapping[paymentType]}</p>;
+      return <PaymentBadge paymentType={paymentType} />;
     },
   },
 
@@ -40,9 +42,7 @@ const columns = [
     key: "status",
     render: (item: QuotationWithBuyer) => {
       return (
-        <span className="inline-flex items-center rounded-md bg-yellow-100 px-2 py-0.5 text-xs text-yellow-700">
-          {quotationStatusMapping[item.status].label}
-        </span>
+        <StatusBadge status={quotationStatusMapping[item.status].label}/>
       );
     },
   },

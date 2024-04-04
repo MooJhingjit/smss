@@ -79,7 +79,7 @@ export const QuotationListModal = () => {
 
   const handleCreate = useAction(createQuotationList, {
     onSuccess: (data) => {
-      toast.success("New list created");
+      toast.success("สำเร็จ");
       modal.onClose();
     },
     onError: (error) => {

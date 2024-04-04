@@ -307,7 +307,7 @@ const BoardFilters = (props: BoardFiltersProps) => {
 
         <FormInput id="code" type="search" placeholder="รหัส" />
         <FormInput id="buyer" type="search" placeholder="ชื่อลูกค้า" />
-        <FormInput id="vendor" type="search" placeholder="ชื่อผู้ขาย" />
+        <FormInput id="vendor" type="search" placeholder="ชื่อผู้ขาย/ร้านค้า" />
         <div className="py-0.5 w-full h-full mt-1">
           <button
             type="submit"

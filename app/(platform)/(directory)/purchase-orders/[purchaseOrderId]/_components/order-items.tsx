@@ -166,7 +166,7 @@ const Remarks = ({ id, remark }: { id: number; remark: string | null }) => {
     <form action={onSubmit} className="relative">
       <FormTextarea
         id="remark"
-        placeholder="Remark"
+        placeholder="หมายเหตุ"
         className="w-full h-full border p-2 rounded-lg"
         register={register}
         rows={12}

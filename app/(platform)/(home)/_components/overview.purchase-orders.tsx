@@ -6,6 +6,8 @@ import { PurchaseOrder, PurchaseOrderPaymentType } from "@prisma/client";
 import TableLists from "@/components/table-lists";
 import { paymentTypeMapping, purchaseOrderStatusMapping } from "@/app/config";
 import { PurchaseOrderWithVendor } from "../admin.page";
+import StatusBadge from "@/components/badges/status-badge";
+import PaymentBadge from "@/components/badges/payment-badge";
 
 type Props = {
   data: PurchaseOrderWithVendor[];
@@ -14,7 +16,7 @@ type Props = {
 const columns = [
   { name: "รหัส", key: "code" },
   {
-    name: "ผู้ขาย",
+    name: "ผู้ขาย/ร้านค้า",
     key: "vendorId",
     render: (item: PurchaseOrderWithVendor) => {
       return <p>{item.vendor.name}</p>;
@@ -26,7 +28,7 @@ const columns = [
     key: "paymentType",
     render: (item: PurchaseOrderWithVendor) => {
       const paymentType = item.paymentType as PurchaseOrderPaymentType;
-      return <p className="">{paymentTypeMapping[paymentType]}</p>;
+      return <PaymentBadge paymentType={paymentType} />
     },
   },
   {
@@ -34,9 +36,7 @@ const columns = [
     key: "status",
     render: (item: PurchaseOrder) => {
       return (
-        <span className="inline-flex items-center rounded-md bg-yellow-100 px-2 py-0.5 text-xs text-yellow-700">
-          {purchaseOrderStatusMapping[item.status]}
-        </span>
+        <StatusBadge status={purchaseOrderStatusMapping[item.status]} />
       );
     },
   },

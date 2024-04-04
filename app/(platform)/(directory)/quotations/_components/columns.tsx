@@ -1,15 +1,16 @@
 "use client";
 
 import {
-  paymentTypeMapping,
   quotationStatusMapping,
   quotationTypeMapping,
 } from "@/app/config";
 import CodeBadge from "@/components/badges/code-badge";
+import PaymentBadge from "@/components/badges/payment-badge";
+import StatusBadge from "@/components/badges/status-badge";
+import { Button } from "@/components/ui/button";
 import { classNames, getDateFormat } from "@/lib/utils";
 import { Contact, Quotation } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
-import { Coins, CreditCard } from "lucide-react";
 import Link from "next/link";
 
 export const columns: ColumnDef<Quotation & { contact?: Contact }>[] = [
@@ -17,7 +18,7 @@ export const columns: ColumnDef<Quotation & { contact?: Contact }>[] = [
     accessorKey: "code",
     header: "รหัส",
     cell: ({ row }) => {
-      const { code, isLocked} = row.original;
+      const { code, isLocked } = row.original;
       return (
         <Link href={`/quotations/${row.original.id}`} className="">
           <CodeBadge code={code} isLocked={isLocked} />
@@ -33,14 +34,7 @@ export const columns: ColumnDef<Quotation & { contact?: Contact }>[] = [
             >
               {quotationTypeMapping[row.original.type]}
             </span>
-            <span className="inline-flex items-center rounded-md  px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
-              {row.original.paymentType === "credit" ? (
-                <CreditCard className="w-4 h-4 mr-1" />
-              ) : (
-                <Coins className="w-4 h-4 mr-1" />
-              )}
-              {paymentTypeMapping[row.original.paymentType]}
-            </span>
+            <PaymentBadge paymentType={row.original.paymentType} />
           </div>
         </Link>
       );
@@ -51,7 +45,7 @@ export const columns: ColumnDef<Quotation & { contact?: Contact }>[] = [
     header: "สถานะ",
     cell: ({ row }) => {
       const { status } = row.original;
-      return <p>{quotationStatusMapping[status].label}</p>;
+      return <StatusBadge status={quotationStatusMapping[status].label} />;
     },
   },
   {
@@ -118,6 +112,22 @@ export const columns: ColumnDef<Quotation & { contact?: Contact }>[] = [
     cell: ({ row }) => {
       const { createdAt } = row.original;
       return <p>{getDateFormat(createdAt)}</p>;
+    },
+  },
+  {
+    accessorKey: "id",
+    header: "",
+    cell: ({ row }) => {
+      return (
+        <Link href={`/quotations/${row.original.id}`} className="">
+          <Button
+            className="text-xs h-8"
+            variant="secondary"
+          >
+            จัดการ
+          </Button>
+        </Link>
+      )
     },
   },
 ];
