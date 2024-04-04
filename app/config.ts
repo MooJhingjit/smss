@@ -44,7 +44,7 @@ export const quotationStatusMapping = {
   },
   paid: {
     label: "ชำระเงินแล้ว/ปิดงาน",
-    progress: 90,
+    progress: 100,
   },
 };
 

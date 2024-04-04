@@ -21,7 +21,7 @@ import { classNames } from "@/lib/utils";
 import { Select } from "@/components/ui/select";
 import { FormSelect } from "@/components/form/form-select";
 
-interface Props {}
+interface Props { }
 
 type QuotationWithCounts = QuotationWithBuyer & {
   _count: {
@@ -258,11 +258,21 @@ export default function BoardContainer(props: Props) {
                 }
               />
               <BoardColumn
+                color="yellow"
                 items={queries[8].data ?? ([] as QuotationWithBuyer[])}
                 columnKey={QuotationStatus.delivered}
                 label={quotationStatusMapping[QuotationStatus.delivered].label}
                 progress={
                   quotationStatusMapping[QuotationStatus.delivered].progress
+                }
+              />
+              <BoardColumn
+                color="green"
+                items={queries[9].data ?? ([] as QuotationWithBuyer[])}
+                columnKey={QuotationStatus.paid}
+                label={quotationStatusMapping[QuotationStatus.paid].label}
+                progress={
+                  quotationStatusMapping[QuotationStatus.paid].progress
                 }
               />
               {provided.placeholder}
@@ -338,8 +348,9 @@ const BoardColumn = ({
     <div className="h-auto min-w-[220px] select-none">
       <div
         className={classNames(
-          "w-full rounded-md  shadow-md pb-2 h-full",
-          color === "yellow" ? "bg-yellow-50" : "bg-gray-50",
+          "w-full rounded-md  shadow-md pb-2 h-full bg-gray-50",
+          color === "yellow" && "bg-yellow-50",
+          color === "green" && "bg-green-50",
         )}
       >
         <div className="flex justify-between items-center px-3 pt-2 pb-4">
