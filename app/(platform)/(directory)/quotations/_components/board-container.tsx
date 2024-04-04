@@ -181,7 +181,7 @@ export default function BoardContainer(props: Props) {
               className="flex gap-x-3 h-full"
             >
               <BoardColumn
-                color="yellow"
+                color="gray"
                 items={queries[0].data ?? ([] as QuotationWithBuyer[])}
                 columnKey={QuotationStatus.open}
                 label={quotationStatusMapping[QuotationStatus.open].label}
@@ -200,7 +200,7 @@ export default function BoardContainer(props: Props) {
                 }
               />
               <BoardColumn
-                color="yellow"
+                color="gray"
                 items={queries[2].data ?? ([] as QuotationWithBuyer[])}
                 columnKey={QuotationStatus.offer}
                 label={quotationStatusMapping[QuotationStatus.offer].label}
@@ -332,14 +332,14 @@ const BoardColumn = ({
   label: string;
   items: QuotationWithCounts[];
   progress: number;
-  color?: "yellow" | "green";
+  color?: "yellow" | "green" | "gray";
 }) => {
   return (
     <div className="h-auto min-w-[220px] select-none">
       <div
         className={classNames(
           "w-full rounded-md  shadow-md pb-2 h-full",
-          color === "yellow" ? "bg-yellow-50" : "bg-green-50",
+          color === "yellow" ? "bg-yellow-50" : "bg-gray-50",
         )}
       >
         <div className="flex justify-between items-center px-3 pt-2 pb-4">

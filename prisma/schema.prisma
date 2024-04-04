@@ -120,6 +120,7 @@ enum QuotationStatus {
   product_received
   order_preparing
   delivered
+  paid
 }
 
 model Quotation {
@@ -192,6 +193,9 @@ model QuotationItem {
 
 enum PurchaseOrderStatus {
   draft
+  po_sent
+  product_received
+  paid
 }
 
 enum PurchaseOrderPaymentType {

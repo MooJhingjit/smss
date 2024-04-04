@@ -31,7 +31,7 @@ export const quotationStatusMapping = {
     progress: 60,
   },
   product_received: {
-    label: "รับสินค้า",
+    label: "รับสินค้าแล้ว",
     progress: 70,
   },
   order_preparing: {
@@ -39,7 +39,11 @@ export const quotationStatusMapping = {
     progress: 80,
   },
   delivered: {
-    label: "ส่งสินค้า / ปิดงาน",
+    label: "ส่งสินค้าแล้ว/รอชำระเงิน",
+    progress: 90,
+  },
+  paid: {
+    label: "ชำระเงินแล้ว/ปิดงาน",
     progress: 90,
   },
 };
@@ -51,10 +55,9 @@ export const paymentTypeMapping = {
 
 export const purchaseOrderStatusMapping = {
   draft: "กำลังตรวจสอบ",
-  // open: "เปิด PO",
-  // preparing: "เตรียมสินค้า",
-  // sent: "ส่งสินค้า",
-  // delivered: "ส่งสินค้า / ปิดงาน",
+  po_sent: "ส่ง PO แล้ว",
+  product_received: "รับสินค้าแล้ว",
+  paid: "ชำระเงินแล้ว",
 };
 
 export const purchaseOrderItemStatusMapping = {

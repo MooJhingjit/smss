@@ -47,13 +47,13 @@ export default async function SellerHomePage() {
 
   return (
     <div className="h-screen grid grid-cols-12 gap-6 ">
-      <div className="md:col-span-6 col-span-12">
+      <div className="md:col-span-4 col-span-12">
         <div className="relative p-5 rounded-xl overflow-hidden shadow-lg">
           <div className="absolute inset-0 bg-gray-700 opacity-10 z-10 h-full"></div>
           <ShortcutMenus saleTotal={stats._sum.totalPrice ?? 0} />
         </div>
       </div>
-      <div className="md:col-span-6 col-span-12">
+      <div className="md:col-span-8 col-span-12">
         <Quotations data={quotations} />
       </div>
       <div className="col-span-12 ">

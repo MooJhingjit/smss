@@ -12,7 +12,7 @@ export const purchaseOrderColumns = [
       return item.vendor?.name;
     },
   },
-  { name: "ส่วนลด", key: "discount" },
+  // { name: "ส่วนลด", key: "discount" },
   { name: "ราคาสั่งซื้อ", key: "grandTotal" },
   {
     name: "สร้างเมื่อ",

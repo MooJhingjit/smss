@@ -23,6 +23,8 @@ import { FormInput } from "@/components/form/form-input";
 import { customRevalidatePath } from "@/actions/revalidateTag";
 import PaymentOptionControl from "@/components/payment-option-control";
 import ConfirmActionButton from "@/components/confirm-action";
+import StatusBadge from "@/components/badges/status-badge";
+import PaymentBadge from "@/components/badges/payment-badge";
 
 type Props = {
   purchaseOrderRef: string;
@@ -154,6 +156,14 @@ export default function QuotationTools(props: Props) {
           </ItemList>
         )}
 
+        {!isAdmin && (
+          <ItemList label="การชำระเงิน">
+            <div className="flex space-x-3 items-center">
+              <PaymentBadge paymentType={paymentType} paymentDue={paymentDue} />
+            </div>
+          </ItemList>
+        )}
+
         <ItemList>
           <PrintButton quotationId={quotationId} hasList={hasList} />
         </ItemList>
@@ -170,6 +180,41 @@ export const QuotationStatusDropdown = ({
   onStatusChange: (status: QuotationStatus) => void;
 }) => {
   const allStatus = Object.keys(QuotationStatus) as QuotationStatus[];
+
+
+  if (curStatus === QuotationStatus.pending_approval) {
+    return (
+      <div className="flex space-x-3">
+        <StatusBadge status={quotationStatusMapping[curStatus].label} />
+
+        <ConfirmActionButton
+          onConfirm={() => {
+            onStatusChange(QuotationStatus.offer);
+          }}
+        >
+          <Button
+            variant="default"
+            color="green"
+            className="inline-flex items-center px-2 py-1 rounded-md  text-xs h-full"
+          >
+            <span>อนุมัติ</span>
+          </Button>
+        </ConfirmActionButton>
+        <ConfirmActionButton
+          onConfirm={() => {
+            onStatusChange(QuotationStatus.open);
+          }}
+        >
+          <Button
+            variant="destructive"
+            className="inline-flex items-center px-2 py-1 rounded-md  text-xs h-full"
+          >
+            <span>ยกเลิก</span>
+          </Button>
+        </ConfirmActionButton>
+      </div>
+    )
+  }
 
   return (
     <Select onValueChange={onStatusChange}>

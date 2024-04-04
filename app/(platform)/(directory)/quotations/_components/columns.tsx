@@ -34,20 +34,12 @@ export const columns: ColumnDef<Quotation & { contact?: Contact }>[] = [
             >
               {quotationTypeMapping[row.original.type]}
             </span>
-            <PaymentBadge paymentType={row.original.paymentType} />
           </div>
         </Link>
       );
     },
   },
-  {
-    accessorKey: "status",
-    header: "สถานะ",
-    cell: ({ row }) => {
-      const { status } = row.original;
-      return <StatusBadge status={quotationStatusMapping[status].label} />;
-    },
-  },
+
   {
     accessorKey: "contact.name",
     header: "ลูกค้า",
@@ -97,15 +89,30 @@ export const columns: ColumnDef<Quotation & { contact?: Contact }>[] = [
       );
     },
   },
-
   {
-    accessorKey: "updatedAt",
-    header: "แก้ไขล่าสุด",
+    accessorKey: "paymentType",
+    header: "การชำระเงิน",
     cell: ({ row }) => {
-      const { updatedAt } = row.original;
-      return <p>{getDateFormat(updatedAt)}</p>;
+      const { paymentType, paymentDue } = row.original;
+      return <PaymentBadge paymentType={paymentType} paymentDue={paymentDue ?? ""} />;
     },
   },
+  {
+    accessorKey: "status",
+    header: "สถานะ",
+    cell: ({ row }) => {
+      const { status } = row.original;
+      return <StatusBadge status={quotationStatusMapping[status].label} />;
+    },
+  },
+  // {
+  //   accessorKey: "updatedAt",
+  //   header: "แก้ไขล่าสุด",
+  //   cell: ({ row }) => {
+  //     const { updatedAt } = row.original;
+  //     return <p>{getDateFormat(updatedAt)}</p>;
+  //   },
+  // },
   {
     accessorKey: "createdAt",
     header: "วันที่สร้าง",

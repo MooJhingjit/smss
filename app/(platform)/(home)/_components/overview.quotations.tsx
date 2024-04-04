@@ -33,7 +33,7 @@ const columns = [
     key: "paymentType",
     render: (item: QuotationWithBuyer) => {
       const paymentType = item.paymentType as PurchaseOrderPaymentType;
-      return <PaymentBadge paymentType={paymentType} />;
+      return <PaymentBadge paymentType={paymentType} paymentDue={item.paymentDue ?? ""} />;
     },
   },
 

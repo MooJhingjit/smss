@@ -20,6 +20,7 @@ import { customRevalidatePath } from "@/actions/revalidateTag";
 import PO_SERVICES from "@/app/services/service.purchase-order";
 import PaymentOptionControl from "@/components/payment-option-control";
 import { QuotationStatusDropdown } from "../../../quotations/[quotationId]/_components/quotation-tools";
+import QT_SERVICES from "@/app/services/service.quotation";
 
 type Props = {
   orderId: number;
@@ -60,8 +61,29 @@ export default function PurchaseOrderTools(props: Props) {
       return res;
     },
     onSuccess: async (n) => {
-      toast.success("สำเร็จ");
-      // invalidate query
+      toast.success("อัพเดทสถานะ PO สำเร็จ");
+      customRevalidatePath(`/purchase-orders/${orderId}`);
+    },
+  });
+
+  // quotation mutation
+  const { mutate: qtMutate } = useMutation<
+    MutationResponseType,
+    Error,
+    {
+      status?: QuotationStatus;
+    }
+  >({
+    mutationFn: async (fields) => {
+      if (!quotationId) {
+        return;
+      }
+      return await QT_SERVICES.put(quotationId, {
+        ...fields,
+      });
+    },
+    onSuccess: async (n) => {
+      toast.success("อัพเดทสถานะ QT สำเร็จ");
       customRevalidatePath(`/purchase-orders/${orderId}`);
     },
   });
@@ -107,6 +129,21 @@ export default function PurchaseOrderTools(props: Props) {
               <ItemStatus
                 onStatusChange={(s) => {
                   handleChange({ status: s });
+
+                  // sync status to quotation
+                  let qtStatus: QuotationStatus | undefined;
+                  if (s === "draft") {
+                    qtStatus = "draft" as QuotationStatus;
+                  } else if (s === "po_sent") {
+                    qtStatus = "po_sent" as QuotationStatus;
+                  } else if (s === "product_received") {
+                    qtStatus = "product_received" as QuotationStatus;
+                  }
+
+                  if (!qtStatus) {
+                    return;
+                  }
+                  qtMutate({ status: qtStatus });
                 }}
                 curStatus={status}
               />
@@ -133,6 +170,7 @@ export default function PurchaseOrderTools(props: Props) {
                   <QuotationStatusDropdown
                     onStatusChange={(s) => {
                       // handleChange({ status: s });
+                      qtMutate({ status: s });
                     }}
                     curStatus={quotationStatus}
                   />
@@ -187,7 +225,14 @@ const ItemStatus = ({
       </SelectTrigger>
       <SelectContent className="bg-white text-xs p-2 space-y-2 ">
         {allStatus.map((status, index) => (
-          <SelectItem value={status} key={index}>
+          <SelectItem
+
+            className={
+              status === curStatus
+                ? "bg-blue-100 text-blue-700"
+                : "text-gray-700"
+            }
+            value={status} key={index}>
             {purchaseOrderStatusMapping[status]}
           </SelectItem>
         ))}
