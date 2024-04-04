@@ -2,7 +2,7 @@
 import React from "react";
 import { usePurchaseOrderModal } from "@/hooks/use-po-modal";
 import CardWrapper from "./card-wrapper";
-import { PurchaseOrder, PurchaseOrderPaymentType } from "@prisma/client";
+import { PurchaseOrder, PurchaseOrderPaymentType, PurchaseOrderStatus } from "@prisma/client";
 import TableLists from "@/components/table-lists";
 import { paymentTypeMapping, purchaseOrderStatusMapping } from "@/app/config";
 import { PurchaseOrderWithVendor } from "../admin.page";
@@ -36,7 +36,11 @@ const columns = [
     key: "status",
     render: (item: PurchaseOrder) => {
       return (
-        <StatusBadge status={purchaseOrderStatusMapping[item.status]} />
+        <StatusBadge status={purchaseOrderStatusMapping[item.status]}
+
+          isWarning={item.status === PurchaseOrderStatus.product_received}
+          isSuccess={item.status === PurchaseOrderStatus.paid} />
+
       );
     },
   },

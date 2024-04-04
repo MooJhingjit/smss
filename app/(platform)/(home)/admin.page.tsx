@@ -4,7 +4,7 @@ import ShortcutMenus from "./_components/shortcut-menus";
 import PurchaseOrders from "./_components/overview.purchase-orders";
 import { db } from "@/lib/db";
 import { QuotationWithBuyer } from "@/types";
-import { PurchaseOrder, User } from "@prisma/client";
+import { PurchaseOrder, PurchaseOrderStatus, QuotationStatus, User } from "@prisma/client";
 import StatisticCard from "./_components/statistics";
 import Tasks from "./_components/tasks";
 import { currentUser } from "@/lib/auth";
@@ -68,6 +68,9 @@ async function getData(): Promise<
       paymentDue: {
         lte: dateToAlert,
       },
+      status: {
+        notIn: [QuotationStatus.paid],
+      }
     },
     orderBy: {
       paymentDue: "desc",
@@ -82,6 +85,9 @@ async function getData(): Promise<
       paymentDue: {
         lte: dateToAlert,
       },
+      status: {
+        notIn: [PurchaseOrderStatus.paid],
+      }
     },
     orderBy: {
       paymentDue: "desc",

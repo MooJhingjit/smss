@@ -5,13 +5,30 @@ import StatisticCard from "./_components/statistics";
 import { db } from "@/lib/db";
 import { QuotationWithBuyer } from "@/types";
 import { useUser } from "@/hooks/use-user";
+import Tasks from "./_components/tasks";
+import { quotationStatusMapping } from "@/app/config";
 
-async function GetData(): Promise<[QuotationWithBuyer[], { _sum: { totalPrice: number | null } }]> {
+async function GetData(): Promise<[QuotationWithBuyer[], QuotationWithBuyer[], { _sum: { totalPrice: number | null } }]> {
   const { info } = await useUser();
 
   if (!info?.id) {
-    return [[], { _sum: { totalPrice: 0 } }];
+    return [[], [], { _sum: { totalPrice: 0 } }];
   }
+
+  const tasks = db.quotation.findMany({
+    include: {
+      contact: true,
+    },
+    where: {
+      status: "offer",
+      sellerId: parseInt(info.id),
+    },
+    take: 5,
+    orderBy: {
+      updatedAt: "desc",
+    },
+  });
+
   const quotations = db.quotation.findMany({
     include: {
       contact: true,
@@ -38,26 +55,34 @@ async function GetData(): Promise<[QuotationWithBuyer[], { _sum: { totalPrice: n
     },
   });
 
-  const res = await Promise.all([quotations, saleTotal]);
+  const res = await Promise.all([tasks, quotations, saleTotal]);
   return res;
 
 }
 export default async function SellerHomePage() {
-  const [quotations, stats] = await GetData();
+  const [tasks, quotations, stats] = await GetData();
 
   return (
-    <div className="h-screen grid grid-cols-12 gap-6 ">
-      <div className="md:col-span-4 col-span-12">
-        <div className="relative p-5 rounded-xl overflow-hidden shadow-lg">
-          <div className="absolute inset-0 bg-gray-700 opacity-10 z-10 h-full"></div>
-          <ShortcutMenus saleTotal={stats._sum.totalPrice ?? 0} />
+    <div className="h-screen ">
+      <div className="grid grid-cols-12 gap-6 ">
+        <div className="md:col-span-5 col-span-12">
+          <div className="relative p-5 rounded-xl overflow-hidden shadow-lg">
+            <div className="absolute inset-0 bg-gray-700 opacity-10 z-10 h-full"></div>
+            <ShortcutMenus saleTotal={stats._sum.totalPrice ?? 0} />
+          </div>
         </div>
-      </div>
-      <div className="md:col-span-8 col-span-12">
-        <Quotations data={quotations} />
-      </div>
-      <div className="col-span-12 ">
-        <StatisticCard />
+        <div className="md:col-span-7 col-span-12">
+          <Tasks
+            data={tasks}
+            label={`QT ที่ได้รับการอนุมัติแล้ว พร้อมส่งใบเสนอราคาให้ลูกค้า`}
+          />
+        </div>
+        <div className="col-span-12">
+          <Quotations data={quotations} />
+        </div>
+        <div className="col-span-12 ">
+          <StatisticCard />
+        </div>
       </div>
     </div>
   );

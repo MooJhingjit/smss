@@ -5,7 +5,7 @@ import CardWrapper from "./card-wrapper";
 import { QuotationWithBuyer } from "@/types";
 import TableLists from "@/components/table-lists";
 import { paymentTypeMapping, quotationStatusMapping } from "@/app/config";
-import { PurchaseOrderPaymentType } from "@prisma/client";
+import { PurchaseOrderPaymentType, QuotationStatus } from "@prisma/client";
 import CodeBadge from "@/components/badges/code-badge";
 import PaymentBadge from "@/components/badges/payment-badge";
 import StatusBadge from "@/components/badges/status-badge";
@@ -42,7 +42,10 @@ const columns = [
     key: "status",
     render: (item: QuotationWithBuyer) => {
       return (
-        <StatusBadge status={quotationStatusMapping[item.status].label}/>
+        <StatusBadge status={quotationStatusMapping[item.status].label}
+          isWarning={item.status === QuotationStatus.delivered }
+          isSuccess={item.status === QuotationStatus.paid}
+        />
       );
     },
   },

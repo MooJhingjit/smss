@@ -5,6 +5,7 @@ import CardWrapper from "./card-wrapper";
 import TableLists from "@/components/table-lists";
 import { QuotationWithBuyer } from "@/types";
 import { quotationStatusMapping } from "@/app/config";
+import PaymentBadge from "@/components/badges/payment-badge";
 
 type Props = {
   data: QuotationWithBuyer[];
@@ -20,54 +21,20 @@ const taskColumns = [
       return <div className="">{item.contact.name}</div>;
     },
   },
+  // {
+  //   name: "รหัสพนักงาน",
+  //   key: "sellerId",
+  //   render: (item: QuotationWithBuyer) => {
+  //     const paymentType = item.paymentType as PurchaseOrderPaymentType;
+  //     return <p className="">{paymentTypeMapping[paymentType]}</p>;
+  //   },
+  // },
   {
-    name: "รหัสพนักงาน",
-    key: "sellerId",
-    // render: (item: QuotationWithBuyer) => {
-    //   const paymentType = item.paymentType as PurchaseOrderPaymentType;
-    //   return <p className="">{paymentTypeMapping[paymentType]}</p>;
-    // },
-  },
-  {
-    name: "อัพเดทล่าสุด",
-    key: "updatedAt",
+    name: "การชำระเงิน",
+    key: "paymentType",
     render: (item: QuotationWithBuyer) => {
-      return (
-        <p className="">
-          {new Date(item.updatedAt).toLocaleDateString("th-TH", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })}
-        </p>
-      );
-    },
-  },
-];
-const paymentDueColumns = [
-  { name: "รหัส", key: "code" },
-  {
-    name: "กำหนดชำระ",
-    key: "paymentDue",
-    render: (item: QuotationWithBuyer) => {
-      const isLate = new Date(item.paymentDue ?? "") < new Date();
-
-      return (
-        <p className={isLate ? "text-red-500" : "text-yellow-500"}>
-          {new Date(item.paymentDue ?? "").toLocaleDateString("th-TH", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })}
-        </p>
-      );
-    },
-  },
-  {
-    name: "สถานะ",
-    key: "status",
-    render: (item: QuotationWithBuyer) => {
-      return <p className="">{quotationStatusMapping[item.status].label}</p>;
+      const paymentType = item.paymentType
+      return <PaymentBadge paymentType={paymentType} paymentDue={item.paymentDue ?? ""} />;
     },
   },
   {
@@ -92,7 +59,7 @@ export default function Tasks(props: Readonly<Props>) {
   // const { onOpen } = usePurchaseOrderModal();
 
   return (
-    <CardWrapper title={label}>
+    <CardWrapper title={label} actionNeed>
       <TableLists<QuotationWithBuyer>
         columns={taskColumns}
         data={data}

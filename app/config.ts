@@ -56,7 +56,7 @@ export const paymentTypeMapping = {
 export const purchaseOrderStatusMapping = {
   draft: "กำลังตรวจสอบ",
   po_sent: "ส่ง PO แล้ว",
-  product_received: "รับสินค้าแล้ว",
+  product_received: "รับสินค้าแล้ว/รอชำระเงิน",
   paid: "ชำระเงินแล้ว",
 };
 

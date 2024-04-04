@@ -88,7 +88,7 @@ export default function PaymentDue<T>(props: Readonly<Props<T>>) {
   const { data, label, type } = props;
   const columns = type === "quotations" ? QT_columns : PO_columns;
   return (
-    <CardWrapper title={label}>
+    <CardWrapper title={label} actionNeed>
       <TableLists<T> columns={columns} data={data} link={`/${type}`} />
     </CardWrapper>
   );
