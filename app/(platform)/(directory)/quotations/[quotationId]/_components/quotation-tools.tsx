@@ -318,13 +318,13 @@ const PrintButton = ({
     onSuccess: async (n) => {
       toast.success("สำเร็จ");
       // open new tab
-      window.open(`/quotations/invoices/result-${quotationId}.pdf`, "_blank");
+      window.open(`/result-${quotationId}.pdf`, "_blank");
     },
   });
 
   const onPrintClick = () => {
-    // mutate();
-    window.open(`/result-${1}.pdf`, "_blank");
+    mutate();
+    // window.open(`/result-${1}.pdf`, "_blank");
   };
   return (
     <Button

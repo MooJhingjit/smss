@@ -18,20 +18,24 @@ export async function POST(
     const existingPdfBytes = await fs.readFile(existingPdfPath);
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
     const page = pdfDoc.getPage(0); // Get the first page
-    // const helveticaFont = await pdfDoc.embedFont(PDFDocument.Font.Helvetica);
+    
     page.drawText('Hello, World!', {
-      x: 50,
-      y: 50,
+      x: 0,
+      y: 0,
       size: 24,
-      // font: helveticaFont,
       color: rgb(0, 0, 0),
     });
     const modifiedPdfBytes = await pdfDoc.save();
 
-    const modifiedPdfPath = `app/(platform)/(directory)/quotations/invoices/result-${id}.pdf`; // Path to save modified PDF
-    await fs.writeFile(modifiedPdfPath, modifiedPdfBytes);
+    const modifiedPdfPath = `public/result-${id}.pdf`; // Path to save modified PDF
 
-    // return new NextResponse("Success", { status: 200 });
+    // remove existing file if exists
+    try {
+      await fs.unlink(modifiedPdfPath);
+      await fs.writeFile(modifiedPdfPath, modifiedPdfBytes);
+    } catch (error) {
+      console.log("error", error);
+    }
 
     const successResult = {
       message: "Success",
