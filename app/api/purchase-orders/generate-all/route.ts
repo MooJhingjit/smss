@@ -94,6 +94,8 @@ export async function POST(req: NextRequest) {
                   name: quotationList.product.name,
                   price: quotationList.cost,
                   quantity: quotationList.quantity,
+                  description: quotationList.product.description,
+                  type: quotationList.product.type,
                   status: "pending",
                 },
               });
