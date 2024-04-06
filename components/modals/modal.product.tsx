@@ -14,10 +14,15 @@ import { toast } from "sonner";
 import { updateProduct } from "@/actions/product/update";
 import { FormSearchAsync } from "../form/form-search-async";
 import { FormTextarea } from "../form/form-textarea";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Label } from "@radix-ui/react-label";
+import { useRef } from "react";
+import { ProductType } from "@prisma/client";
 
 export const NewProductModal = () => {
   const modal = useProductModal();
   const product = modal.data;
+  const typeRef = useRef<ProductType>(ProductType.product);
 
   const handleCreate = useAction(createProduct, {
     onSuccess: (data) => {
@@ -53,17 +58,22 @@ export const NewProductModal = () => {
         id: product.id,
         percentage,
         cost,
-        description
+        description,
       });
       return;
     }
     handleCreate.execute({
       name,
+      type: typeRef.current,
       vendorId: parseInt(vendor),
       cost: cost,
       percentage: percentage,
       description,
     });
+  };
+
+  const onTypeChange = (value: ProductType) => {
+    typeRef.current = value;
   };
 
   const fieldErrors = (product?.id ? handleUpdate : handleCreate).fieldErrors;
@@ -79,6 +89,29 @@ export const NewProductModal = () => {
           {/* <DialogDescription>Please select the vendor.</DialogDescription> */}
         </DialogHeader>
         <form action={onSubmit} className="grid grid-cols-2 gap-3">
+          <div className="col-span-2">
+            <Tabs defaultValue={product?.type} className="w-full">
+              <Label className="text-xs">ประเภท</Label>
+              <TabsList className="w-full flex">
+                <TabsTrigger
+                  disabled={product?.id ? true : false}
+                  className="flex-1 text-xs"
+                  value="product"
+                  onClick={() => onTypeChange(ProductType.product)}
+                >
+                  สินค้า
+                </TabsTrigger>
+                <TabsTrigger
+                  disabled={product?.id ? true : false}
+                  className="flex-1 text-xs"
+                  value="service"
+                  onClick={() => onTypeChange(ProductType.service)}
+                >
+                  บริการ
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
           <div className="">
             <FormSearchAsync
               disabled={product?.id ? true : false}
@@ -90,7 +123,7 @@ export const NewProductModal = () => {
                   role: "vendor",
                 },
               }}
-              onSelected={(data) => { }}
+              onSelected={(data) => {}}
               defaultValue={
                 product?.vendor
                   ? { value: product.vendor.id, label: product.vendor.name }

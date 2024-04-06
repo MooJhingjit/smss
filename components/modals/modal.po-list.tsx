@@ -13,7 +13,7 @@ import { useEffect } from "react";
 import { FormSubmit } from "../form/form-submit";
 import { useAction } from "@/hooks/use-action";
 import { toast } from "sonner";
-import { Item } from "@prisma/client";
+import { Item, ProductType } from "@prisma/client";
 import { PackagePlus } from "lucide-react";
 import { updateItem } from "@/actions/item/update";
 import { createPurchaseItem } from "@/actions/po-list/create";
@@ -22,12 +22,17 @@ import { FormSearchAsync } from "../form/form-search-async";
 import { ProductWithRelations } from "@/types";
 import ConfirmActionButton from "../confirm-action";
 import { Button } from "../ui/button";
+import { FormTextarea } from "../form/form-textarea";
+import ProductBadge from "../badges/product-badge";
+import { Label } from "../ui/label";
 
 type FormInput = {
   productId: string;
   name: string;
   price: string;
   quantity: string;
+  description: string;
+  type: ProductType;
 };
 export const PurchaseOrderListModal = () => {
   const modal = usePurchaseOrderListModal();
@@ -43,6 +48,8 @@ export const PurchaseOrderListModal = () => {
       name: defaultData?.name ?? "",
       price: defaultData?.price ? defaultData.price.toString() : "",
       quantity: defaultData?.quantity ? defaultData.quantity.toString() : "",
+      description: defaultData?.description ?? "",
+      type: defaultData?.type,
     };
     reset(formData);
   }, [defaultData, reset]);
@@ -79,10 +86,11 @@ export const PurchaseOrderListModal = () => {
       productId: Number(productId),
       price: Number(formData.get("price")),
       quantity: Number(formData.get("quantity")),
+      description: formData.get("description") as string,
+      type: getValues("type"),
       purchaseOrderId: purchaseOrderRelations.id,
     });
   };
-
   const isNewItem = !defaultData;
   return (
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
@@ -94,6 +102,14 @@ export const PurchaseOrderListModal = () => {
         </DialogHeader>
         <div className="grid grid-cols-4 gap-3 mt-3">
           <form action={onSubmit} className="grid col-span-4 gap-3">
+            <FormInput
+              id="type"
+              type="hidden"
+              readOnly
+              register={register}
+              defaultValue={defaultData?.type}
+            />
+
             <div className="col-span-4">
               {isNewItem ? (
                 <FormSearchAsync
@@ -121,16 +137,19 @@ export const PurchaseOrderListModal = () => {
                     setValue("price", item.data.cost?.toString() ?? "");
                     setValue("productId", item.value);
                     setValue("name", item.data.name);
+                    setValue("description", item.data.description ?? "");
+                    setValue("type", item.data.type);
                   }}
                   errors={handleCreate.fieldErrors}
                 />
               ) : (
-                <FormInput
-                  id="name"
-                  label="ชื่อสินค้า"
-                  register={register}
-                  readOnly={!isNewItem}
-                />
+                <div className="p-2 border border-gray-200 rounded-md bg-gray-100">
+                  <Label className="text-xs">ชื่อสินค้า</Label>
+                  <ProductBadge
+                    name={defaultData.name}
+                    type={defaultData.type}
+                  />
+                </div>
               )}
             </div>
 
@@ -155,13 +174,25 @@ export const PurchaseOrderListModal = () => {
                 errors={handleCreate.fieldErrors}
               />
             </div>
+            <div className="col-span-4">
+              <FormTextarea
+                id="description"
+                label="รายละเอียด"
+                disabled={!isNewItem}
+                errors={handleCreate.fieldErrors}
+                register={register}
+                defaultValue={defaultData?.description ?? ""}
+                rows={10}
+              />
+            </div>
+
             {isNewItem && (
               <div className="col-span-4 flex justify-end">
                 <FormSubmit>สร้างรายการใหม่</FormSubmit>
               </div>
             )}
           </form>
-          {!!defaultData?.items && (
+          {!!defaultData?.items.length && (
             <>
               <div className="col-span-2 flex items-center space-x-2">
                 <PackagePlus size={16} className="" />

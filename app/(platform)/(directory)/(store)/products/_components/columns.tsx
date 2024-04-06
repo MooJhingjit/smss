@@ -1,6 +1,8 @@
 "use client";
 
+import { productTypeMapping } from "@/app/config";
 import { Button } from "@/components/ui/button";
+import { ProductType } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 
 // This type is used to define the shape of our data.
@@ -9,6 +11,7 @@ export type Product = {
   id: number;
   name: string;
   vendor: string;
+  type: ProductType;
   itemCount: number;
   cost: string;
   percentage: string;
@@ -22,6 +25,14 @@ export const columns: ColumnDef<Product>[] = [
   {
     accessorKey: "name",
     header: "ชื่อสินค้า",
+  },
+  {
+    accessorKey: "type",
+    header: "ประเภท",
+    cell: ({ row }) => {
+      const { type } = row.original;
+      return productTypeMapping[type];
+    },
   },
   {
     accessorKey: "vendor.name",

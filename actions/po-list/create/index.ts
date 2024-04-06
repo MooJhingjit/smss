@@ -7,7 +7,15 @@ import { revalidatePath } from "next/cache";
 import { PurchaseOrderItem } from "@prisma/client";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-  const { purchaseOrderId, name, price, quantity, productId } = data;
+  const {
+    purchaseOrderId,
+    name,
+    price,
+    quantity,
+    type,
+    description,
+    productId,
+  } = data;
 
   let purchaseOrderItem: PurchaseOrderItem;
   try {
@@ -16,23 +24,27 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         purchaseOrderId,
         name,
         price,
+        description,
         quantity,
+        type,
       },
     });
 
-    await Promise.all(
-      Array.from({ length: quantity ?? 1 }).map(
-        async () =>
-          await db.item.create({
-            data: {
-              productId,
-              purchaseOrderItemId: purchaseOrderItem.id,
-              name: name,
-              cost: price,
-            },
-          }),
-      ),
-    );
+    if (type === "product") {
+      await Promise.all(
+        Array.from({ length: quantity ?? 1 }).map(
+          async () =>
+            await db.item.create({
+              data: {
+                productId,
+                purchaseOrderItemId: purchaseOrderItem.id,
+                name: name,
+                cost: price,
+              },
+            })
+        )
+      );
+    }
   } catch (error) {
     console.log("error", error);
     return {

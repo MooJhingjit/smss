@@ -250,9 +250,11 @@ export const QuotationListModal = () => {
               label: defaultData?.product.name,
             }}
             onSelected={(item) => {
+              console.log(item);
               setValue("name", item.data.name);
               setValue("percentage", item.data.percentage);
               setValue("cost", item.data.cost);
+              setValue("description", item.data.description);
             }}
             errors={fieldErrors}
           />
@@ -373,6 +375,7 @@ export const QuotationListModal = () => {
             id="description"
             label="รายละเอียด"
             errors={fieldErrors}
+            register={register}
             defaultValue={defaultData?.description ?? ""}
             rows={6}
           />

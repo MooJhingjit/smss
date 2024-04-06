@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { FormSubmit } from "@/components/form/form-submit";
 import { Button } from "@/components/ui/button";
 import { QuotationType } from "@prisma/client";
+import ProductBadge from "@/components/badges/product-badge";
 
 type Props = {
   quotationId: number;
@@ -29,7 +30,7 @@ const columns = [
     render: (item: QuotationListWithRelations) => {
       return (
         <div className="">
-          <p className="text-xs font-semibold">{item.product.name}</p>
+          <ProductBadge name={item.product.name} type={item.product.type} />
           {item.subItems && !!JSON.parse(item.subItems).length && (
             <div className="text-xs text-gray-400">
               <span>+</span>

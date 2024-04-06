@@ -18,6 +18,7 @@ import { purchaseOrderItemStatusMapping } from "@/app/config";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BillingInfo from "./billing-info";
+import ProductBadge from "@/components/badges/product-badge";
 
 const columns = [
   { name: "#", key: "index" },
@@ -25,7 +26,8 @@ const columns = [
     name: "ชื่อสินค้า",
     key: "name",
     render: (item: PurchaseOrderItemWithRelations) => {
-      return item.name;
+      const { name, type } = item;
+      return <ProductBadge name={name} type={type} />;
     },
   },
   { name: "ราคา", key: "price" },

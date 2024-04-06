@@ -61,6 +61,11 @@ model Contact {
   @@index([sellerId])
 }
 
+enum ProductType {
+  product
+  service
+}
+
 model Product {
   id             Int             @id @default(autoincrement())
   name           String
@@ -69,6 +74,7 @@ model Product {
   description    String?         @db.Text
   cost           Float?
   percentage     Decimal?
+  type           ProductType     @default(product)
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   items          Item[]
@@ -241,6 +247,8 @@ model PurchaseOrderItem {
   name            String
   price           Float?
   quantity        Int?
+  description     String?                 @db.Text
+  type            ProductType             @default(product)
   status          PurchaseOrderItemStatus @default(pending)
   items           Item[]
   createdAt       DateTime                @default(now())

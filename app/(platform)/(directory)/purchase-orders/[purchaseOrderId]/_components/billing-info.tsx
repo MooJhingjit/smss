@@ -29,7 +29,7 @@ export default function BillingInfo({
     setValue,
     handleSubmit,
     control,
-    formState: { isDirty },
+    formState: { isDirty, errors },
   } = useForm<FormInput>({
     mode: "onChange",
     defaultValues: {
@@ -41,6 +41,7 @@ export default function BillingInfo({
       grandTotal: data.grandTotal ?? 0,
     },
   });
+  console.log(errors);
 
   // when discount or extraCost change
   const onChange = () => {
@@ -59,12 +60,13 @@ export default function BillingInfo({
     const totalPrice = tPrice - discountNum + extraCostNum;
     const vat = totalPrice * 0.07;
     const tax = totalPrice * 0.03;
-    const grandTotal = totalPrice + vat - tax;
+    // const grandTotal = totalPrice + vat - tax;
 
     // setValue("totalPrice", totalPrice);
     setValue("vat", vat);
     setValue("tax", tax);
-    setValue("grandTotal", grandTotal);
+
+    // setValue("grandTotal", grandTotal);
   };
 
   const discount = useWatch({ name: "discount", control });
@@ -84,11 +86,13 @@ export default function BillingInfo({
   });
 
   const onSubmit = (formData: FormInput) => {
+    // console.log("onSubmit", formData);
     handleUpdate.execute({
       ...formData,
       totalPrice: Number(formData.totalPrice),
       discount: Number(formData.discount),
       extraCost: Number(formData.extraCost),
+      tax: Number(formData.tax),
       id: data.id,
       formType: "billing",
     });
@@ -102,7 +106,19 @@ export default function BillingInfo({
     if (isDirty) {
       onChange();
     }
-  }, [isDirty, discount, extraCost, onChange]);
+  }, [totalPrice, discount, extraCost]);
+  
+  React.useEffect(() => {
+   // update grandTotal when tax change
+    const { tax, totalPrice } = getValues();
+
+    const vat = Number(totalPrice) * 0.07;
+    const grandTotal = Number(totalPrice) + vat - Number(tax);
+    
+    setValue("grandTotal", grandTotal);
+    setValue("tax", tax);
+
+  }, [tax]);
 
   const priceBeforeTax =
     Number(totalPrice) - Number(discount) + Number(extraCost);
@@ -180,10 +196,18 @@ export default function BillingInfo({
         <div className="flex items-center justify-between py-1">
           <dt className="text-gray-600">หัก ณ ที่จ่าย 3%</dt>
           <dd className="font-medium text-yellow-600">
-            {tax?.toLocaleString("th-TH", {
+            {/* {tax?.toLocaleString("th-TH", {
               style: "currency",
               currency: "THB",
-            }) ?? 0}
+            }) ?? 0} */}
+            <Input
+              id="tax"
+              {...register("tax")}
+              step={0.01}
+              type="number"
+              className="h-[30px] border border-gray-300 text-right px-2 text-xs focus:ring-0"
+              defaultValue={0}
+            />
           </dd>
         </div>
         <div className="flex items-center justify-between pt-4">

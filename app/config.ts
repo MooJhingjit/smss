@@ -69,3 +69,7 @@ export const quotationTypeMapping = {
   product: "สินค้า",
   service: "บริการ",
 };
+export const productTypeMapping = {
+  product: "สินค้า",
+  service: "บริการ",
+};

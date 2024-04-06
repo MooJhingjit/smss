@@ -80,7 +80,7 @@ export default function PurchaseOrders(props: {
 
   if (!data?.length) {
     return (
-      <div className="mt-6 bg-gray-50 w-full h-40 rounded flex items-center justify-center">
+      <div className="mt-6 bg-yellow-50 border border-yellow-400 w-full h-40 rounded flex items-center justify-center">
         <Button
           onClick={previewPurchaseOrders}
           variant="outline"
