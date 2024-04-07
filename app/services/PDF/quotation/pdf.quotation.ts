@@ -13,14 +13,20 @@ import fontkit from "@pdf-lib/fontkit";
 
 const PAGE_FONT_SIZE = 8;
 
-export const loadQuotation = async (id?: number) => {
+export const loadQuotation = async (id: number) => {
   try {
+    if (!id) {
+      throw new Error("Invalid quotation ID");
+    }
+
+    console.log('id', id);
     const quotationLists = await db.quotationList.findMany({
       where: {
-        quotationId: 6,
+        quotationId: parseInt(id.toString()),
       },
     });
 
+    console.log(quotationLists);
     const { pdfDoc, font } = await initTemplate();
 
     const page = pdfDoc.getPage(0); // First page
@@ -37,6 +43,7 @@ export const loadQuotation = async (id?: number) => {
       pdfPath: modifiedPdfPath,
     };
   } catch (error) {
+    console.log(error);
     throw new Error("Error writing PDF file");
   }
 };
