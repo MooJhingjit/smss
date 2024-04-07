@@ -57,7 +57,7 @@ const columns = [
     name: "ราคาต่อหน่วย",
     key: "unitPrice",
     render: (item: QuotationListWithRelations) => {
-      return `(+${item.percentage}%) ${item.unitPrice}`;
+      return `(+${item.percentage}%) ${item.unitPrice?.toLocaleString()}`;
     },
   },
   { name: "จำนวน", key: "quantity" },
@@ -66,7 +66,7 @@ const columns = [
     name: "ภาษี",
     key: "withholdingTaxPercent",
     render: (item: QuotationListWithRelations) => {
-      return `(+${item.withholdingTaxPercent}%) ${item.withholdingTax}`;
+      return `(+${item.withholdingTaxPercent}%) ${item.withholdingTax?.toLocaleString()}`;
     },
   },
   {
@@ -77,7 +77,7 @@ const columns = [
     name: "ยอดรวม",
     key: "totalPrice",
     render: (item: QuotationListWithRelations) => {
-      return item.totalPrice;
+      return item.totalPrice?.toLocaleString();
     },
   },
 

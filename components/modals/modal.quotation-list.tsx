@@ -229,7 +229,7 @@ export const QuotationListModal = () => {
         action={onSubmit}
         className="grid grid-cols-4 gap-3 mt-3"
       >
-        <div className="col-span-4">
+        <div className="col-span-2">
           <FormSearchAsync
             id="productId"
             label="ค้นหาชื่อสินค้า/บริการ"
@@ -260,10 +260,10 @@ export const QuotationListModal = () => {
           />
         </div>
 
-        <div className="hidden">
+        <div className="col-span-4">
           <FormInput
             id="name"
-            label="ชื่อสินค้า/บริการ"
+            label="ชื่อสินค้า/บริการ (ชื่อเต็มแสดงในใบเสนอราคา)"
             type="text"
             register={register}
             defaultValue={defaultData?.name}
