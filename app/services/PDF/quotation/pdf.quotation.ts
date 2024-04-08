@@ -19,7 +19,6 @@ export const loadQuotation = async (id: number) => {
       throw new Error("Invalid quotation ID");
     }
 
-    console.log('id', id);
     const quotationLists = await db.quotationList.findMany({
       where: {
         quotationId: parseInt(id.toString()),
