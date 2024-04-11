@@ -7,6 +7,7 @@ import {
   PDFPage,
   rgb,
   breakTextIntoLines,
+  PDFEmbeddedPage,
 } from "pdf-lib";
 import fs from "fs/promises"; // Node.js file system module with promises
 import fontkit from "@pdf-lib/fontkit";
@@ -19,44 +20,19 @@ export const generateInvoice = async (id: number) => {
       throw new Error("Invalid quotation ID");
     }
 
-    // debug
+    const quotationLists = await db.quotationList.findMany({
+      where: {
+        quotationId: parseInt(id.toString()),
+      },
+    });
 
-    // Assuming fs.promises is used for readFile to return a Promise.
-    const [existingPdfBytes, fontData] = await Promise.all([
-      fs.readFile("app/services/PDF/quotation/quotation-template.pdf"),
-      fs.readFile("assets/Sarabun-Regular.ttf"),
-    ]);
-
-
-    // const pdfDoc = await PDFDocument.load(existingPdfBytes);
-    const pdfDoc = await PDFDocument.create();
-    pdfDoc.registerFontkit(fontkit);
-    const myFont = await pdfDoc.embedFont(fontData, { subset: true });
+    return generate(id, quotationLists)
 
 
-    const template = await PDFDocument.load(existingPdfBytes)
 
-
-    let page = pdfDoc.addPage()
-    page.drawText('page 1', {
-      font: myFont
-    })
-    page = pdfDoc.addPage()
-    page.drawText('page 2', {
-      font: myFont
-    })
-
-
-    const templatePage = await pdfDoc.embedPage(template.getPages()[0])
-    pdfDoc.getPages().map((page, index) => {
-      console.log(`Page ${index + 1}`)
-      page.drawPage(templatePage)
-    }
-    )
-
-
-    // First page
-    // page2.drawPage(templatePage)
+    const { pdfDoc, font } = await initTemplate();
+    drawPage(pdfDoc, quotationLists, font)
+    // drawTemplate(pdfDoc)
 
     const modifiedPdfBytes = await pdfDoc.save();
     const modifiedPdfPath = `public/result-${id}.pdf`; // Path to save modified PDF
@@ -64,59 +40,30 @@ export const generateInvoice = async (id: number) => {
     return {
       pdfPath: modifiedPdfPath,
     };
-
-
-
-    return;
-
-    // const quotationLists = await db.quotationList.findMany({
-    //   where: {
-    //     quotationId: parseInt(id.toString()),
-    //   },
-    // });
-
-    // console.log(quotationLists);
-    // const { pdfDoc, font } = await initTemplate();
-
-    // const page = pdfDoc.getPage(0); // First page
-    // drawHeaderInfo(page, font);
-    // drawCustomerInfo(page, font);
-    // drawOfferInfo(page, font);
-    // drawLists(pdfDoc, quotationLists, page, font);
-    // drawRemarkInfo(page, font);
-
-    // const modifiedPdfBytes = await pdfDoc.save();
-    // const modifiedPdfPath = `public/result-${id}.pdf`; // Path to save modified PDF
-    // await fs.writeFile(modifiedPdfPath, modifiedPdfBytes);
-    // return {
-    //   pdfPath: modifiedPdfPath,
-    // };
   } catch (error) {
     console.log(error);
     throw new Error("Error writing PDF file");
   }
 };
 
+
+
 const initTemplate = async () => {
   // Assuming fs.promises is used for readFile to return a Promise.
-  const [existingPdfBytes, fontData] = await Promise.all([
-    fs.readFile("app/services/PDF/quotation/quotation-template.pdf"),
+  const [fontData] = await Promise.all([
     fs.readFile("assets/Sarabun-Regular.ttf"),
   ]);
 
-  const pdfDoc = await PDFDocument.load(existingPdfBytes);
+  const pdfDoc = await PDFDocument.create();
   pdfDoc.registerFontkit(fontkit);
-
-  // This can only be done after pdfDoc is loaded, so it's not part of the initial Promise.all
   const myFont = await pdfDoc.embedFont(fontData, { subset: true });
 
   return { pdfDoc, font: myFont };
 };
 
-const drawLists = (
+const drawPage = async (
   pdfDoc: PDFDocument,
   quotationDataLists: QuotationList[],
-  page: PDFPage,
   font: PDFFont
 ) => {
   const ITEM_Y_Start = 545;
@@ -135,8 +82,6 @@ const drawLists = (
     size: PAGE_FONT_SIZE,
     lineHeight: 11,
   };
-
-  const breakLineHeight = 11;
 
   const writeMainItem = (
     index: number,
@@ -215,6 +160,7 @@ const drawLists = (
 
     return bounding.height / 10;
   };
+
   const writeSubItem = (
     subItem: { label: string; quantity: string },
     lineStart: number
@@ -245,9 +191,33 @@ const drawLists = (
     return bounding.height / 10;
   };
 
+
   let lineStart = ITEM_Y_Start;
+  const endPosition = 300
+  let currentPageNumber = 1;
+
+
+
+
+  let page = pdfDoc.addPage();
+  drawHeaderInfo(page, font, currentPageNumber);
+  drawCustomerInfo(page, font);
+  drawOfferInfo(page, font);
+  drawRemarkInfo(page, font);
 
   quotationDataLists.forEach((list, index) => {
+
+    if (lineStart < endPosition) {
+      currentPageNumber++;
+      page = pdfDoc.addPage();
+      drawHeaderInfo(page, font, currentPageNumber);
+      drawCustomerInfo(page, font);
+      drawOfferInfo(page, font);
+      drawRemarkInfo(page, font);
+
+      lineStart = ITEM_Y_Start;
+    }
+
     if (index > 0) {
       lineStart -= config.lineHeight; // space between main items
     }
@@ -268,7 +238,7 @@ const drawLists = (
       subItems.forEach(
         (subItem: { label: string; quantity: string }, idx: number) => {
           heightUsed = writeSubItem(subItem, lineStart);
-          console.log("sub item height", heightUsed);
+          // console.log("sub item height", heightUsed);
 
           lineStart -= heightUsed;
         }
@@ -276,10 +246,31 @@ const drawLists = (
     }
   });
 
-  // console.log(quotationItems);
+
+  const [existingPdfBytes] = await Promise.all([
+    fs.readFile("app/services/PDF/quotation/quotation-template.pdf"),
+  ]);
+  const template = await PDFDocument.load(existingPdfBytes)
+
+
+  const templatePage = await pdfDoc.embedPage(template.getPages()[0])
+  console.log("templatePage", templatePage)
+
+  pdfDoc.getPages().map((p, index) => {
+    p.drawPage(templatePage)
+  })
 };
 
-const drawHeaderInfo = (page: PDFPage, font: PDFFont) => {
+// const drawTemplate = async (pdfDoc: PDFDocument) => {
+//   const existingPdfBytes = await fs.readFile("app/services/PDF/quotation/quotation-template.pdf")
+//   const template = await PDFDocument.load(existingPdfBytes)
+//   const templatePage = await pdfDoc.embedPage(template.getPages()[0])
+//   pdfDoc.getPages().map((page, index) => {
+//     page.drawPage(templatePage)
+//   })
+// }
+
+const drawHeaderInfo = (page: PDFPage, font: PDFFont, currentPageNumber: number) => {
   const quotation = {
     code: "QT-2021-0001",
     date: "2021-01-01",
@@ -305,7 +296,7 @@ const drawHeaderInfo = (page: PDFPage, font: PDFFont) => {
     maxWidth: 100,
     ...config,
   });
-  page.drawText(quotation.page, {
+  page.drawText(currentPageNumber.toString(), {
     x: X_Start,
     y: Y_Start - config.lineHeight * 2,
     maxWidth: 100,
@@ -457,4 +448,258 @@ function getBoundingBox(
   //const textHeight = lines.length * fontSize * (lineHeight / fontSize);
 
   return { width: textWidth, height: textHeight };
+}
+
+
+
+
+
+const generate = async (id: number, data: QuotationList[]) => {
+
+  // list start position
+  const ITEM_Y_Start = 545;
+  const ITEM_X_Start = 60;
+
+  // horizontal position
+  const columnPosition = {
+    index: ITEM_X_Start,
+    description: ITEM_X_Start + 20,
+    quantity: ITEM_X_Start + 355,
+    unitPrice: ITEM_X_Start + 410,
+    amount: ITEM_X_Start + 458,
+  };
+
+  const [pdfDoc, fontData, existingPdfBytes] = await Promise.all([
+    PDFDocument.create(),
+    fs.readFile("assets/Sarabun-Regular.ttf"),
+    fs.readFile("app/services/PDF/quotation/quotation-template.pdf")
+  ]);
+  pdfDoc.registerFontkit(fontkit);
+  const myFont = await pdfDoc.embedFont(fontData, { subset: true });
+  const template = await PDFDocument.load(existingPdfBytes)
+  const templatePage = await pdfDoc.embedPage(template.getPages()[0])
+
+  const config = {
+    size: PAGE_FONT_SIZE,
+    lineHeight: 11,
+    font: myFont
+  };
+
+  const writeMainItem = (
+    currentPage: PDFPage,
+    index: number,
+    data: QuotationList,
+    lineStart: number
+  ) => {
+    // Description
+    currentPage.drawText((index + 1).toString(), {
+      x: columnPosition.index,
+      y: lineStart,
+      maxWidth: 20,
+      ...config,
+    });
+    currentPage.drawText(data.name, {
+      x: columnPosition.description,
+      y: lineStart,
+      maxWidth: 600,
+      ...config,
+      // lineHeight: breakLineHeight,
+    });
+
+    // Quantity
+    currentPage.drawText(data.quantity ? data.quantity.toString() : "", {
+      x: columnPosition.quantity,
+      y: lineStart,
+      maxWidth: 20,
+      ...config,
+    });
+
+    // Unit Price
+    currentPage.drawText(data.unitPrice ? data.unitPrice.toLocaleString() : "", {
+      x: columnPosition.unitPrice,
+      y: lineStart,
+      maxWidth: 50,
+      ...config,
+    });
+
+    // Amount
+    currentPage.drawText(data.totalPrice ? data.totalPrice.toLocaleString() : "", {
+      x: columnPosition.amount,
+      y: lineStart,
+      maxWidth: 50,
+      ...config,
+    });
+
+    const bounding = getBoundingBox(
+      data.name,
+      pdfDoc,
+      myFont,
+      PAGE_FONT_SIZE,
+      config.lineHeight + 4,
+      600
+    );
+
+    return bounding.height / 10;
+  };
+
+  const writeMainDescription = (currentPage: PDFPage, description: string, lineStart: number) => {
+    currentPage.drawText(description, {
+      x: columnPosition.description + 12, // indent
+      y: lineStart,
+      maxWidth: 300,
+      ...config,
+      opacity: 0.5,
+    });
+
+    const bounding = getBoundingBox(
+      description,
+      pdfDoc,
+      myFont,
+      PAGE_FONT_SIZE,
+      config.lineHeight + 4,
+      300
+    );
+
+    return bounding.height / 10;
+  };
+
+  const writeSubItem = (
+    currentPage: PDFPage,
+    subItem: { label: string; quantity: string },
+    lineStart: number
+  ) => {
+    currentPage.drawText(subItem.label, {
+      x: columnPosition.description + 12, // indent
+      y: lineStart,
+      maxWidth: 300,
+      ...config,
+      // lineHeight: breakLineHeight,
+    });
+    currentPage.drawText(subItem.quantity, {
+      x: columnPosition.quantity, // indent
+      y: lineStart,
+      maxWidth: 50,
+      ...config,
+    });
+
+    const bounding = getBoundingBox(
+      subItem.label,
+      pdfDoc,
+      myFont,
+      PAGE_FONT_SIZE,
+      config.lineHeight + 4,
+      300
+    );
+
+    return bounding.height / 10;
+  };
+
+  let page = pdfDoc.addPage()
+  page.drawPage(templatePage)
+
+  drawHeaderInfo(page, myFont, 1);
+  drawCustomerInfo(page, myFont);
+  drawOfferInfo(page, myFont);
+  drawRemarkInfo(page, myFont);
+
+  let lineStart = ITEM_Y_Start;
+
+  data.forEach((list, index) => {
+
+    if (index > 0) {
+      lineStart -= config.lineHeight; // space between main items
+    }
+
+    // let heightUsed = writeMainItem(index, list, lineStart);
+    // // console.log("main item height", heightUsed);
+    // lineStart -= heightUsed;
+
+    lineStart = validatePageArea(
+      page,
+      pdfDoc,
+      templatePage,
+      myFont,
+      lineStart,
+      ITEM_Y_Start,
+      config.lineHeight,
+      (currentPage: PDFPage, currentLineStart: number) => writeMainItem(currentPage, index, list, currentLineStart))
+
+    if (list.description) {
+      // heightUsed = writeMainDescription(list.description, lineStart);
+      // // console.log("desc item height", heightUsed);
+      // lineStart -= heightUsed;
+
+      lineStart = validatePageArea(
+        page,
+        pdfDoc,
+        templatePage,
+        myFont,
+        lineStart,
+        ITEM_Y_Start,
+        config.lineHeight,
+        (currentPage: PDFPage, currentLineStart: number) => writeMainDescription(currentPage, list.description ?? "", currentLineStart))
+    }
+
+    // write subItems
+    const subItems = JSON.parse(list.subItems ?? "[{}]");
+    if (subItems.length > 0) {
+      subItems.forEach(
+        (subItem: { label: string; quantity: string }, idx: number) => {
+          // heightUsed = writeSubItem(subItem, lineStart);
+          // // console.log("sub item height", heightUsed);
+          // lineStart -= heightUsed;
+
+          lineStart = validatePageArea(
+            page,
+            pdfDoc,
+            templatePage,
+            myFont,
+            lineStart,
+            ITEM_Y_Start,
+            config.lineHeight,
+            (currentPage: PDFPage, currentLineStart: number) => writeSubItem(currentPage, subItem, currentLineStart))
+        }
+      );
+    }
+
+  });
+
+  const modifiedPdfBytes = await pdfDoc.save();
+  const modifiedPdfPath = `public/result-${id}.pdf`; // Path to save modified PDF
+  await fs.writeFile(modifiedPdfPath, modifiedPdfBytes);
+  return {
+    pdfPath: modifiedPdfPath,
+  };
+}
+
+const END_POSITION = 350
+let currentPageNumber = 1;
+const validatePageArea = (
+  page: PDFPage,
+  pdfDoc: PDFDocument,
+  templatePage: PDFEmbeddedPage,
+  myFont: PDFFont,
+  lineStart: number,
+  ITEM_Y_Start: number,
+  lineHeight: number,
+  exc: any) => {
+
+  if (lineStart < END_POSITION) {
+    currentPageNumber++;
+    const newPage = pdfDoc.addPage();
+    newPage.drawPage(templatePage)
+    drawHeaderInfo(newPage, myFont, currentPageNumber);
+    drawCustomerInfo(newPage, myFont);
+    drawOfferInfo(newPage, myFont);
+    drawRemarkInfo(newPage, myFont);
+
+    lineStart = (ITEM_Y_Start + lineHeight);
+
+    let heightUsed = exc(newPage, lineStart)
+    return lineStart - heightUsed;
+    // return lineStart
+  }
+
+  let heightUsed = exc(page, lineStart)
+  return lineStart - heightUsed;
 }
