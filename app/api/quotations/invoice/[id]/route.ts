@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
-import { loadQuotation } from "@/app/services/PDF/quotation/pdf.quotation";
+import { generateInvoice } from "@/app/services/PDF/quotation/pdf.quotation";
 
 export async function POST(
   req: NextRequest,
@@ -7,7 +7,7 @@ export async function POST(
 ) {
   const { id } = context.params;
   try {
-    const { pdfPath } = await loadQuotation(id);
+    const { pdfPath } = await generateInvoice(id);
     const successResult = {
       message: "Success",
       pdfPath,

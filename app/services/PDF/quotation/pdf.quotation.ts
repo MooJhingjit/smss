@@ -13,27 +13,50 @@ import fontkit from "@pdf-lib/fontkit";
 
 const PAGE_FONT_SIZE = 8;
 
-export const loadQuotation = async (id: number) => {
+export const generateInvoice = async (id: number) => {
   try {
     if (!id) {
       throw new Error("Invalid quotation ID");
     }
 
-    const quotationLists = await db.quotationList.findMany({
-      where: {
-        quotationId: parseInt(id.toString()),
-      },
-    });
+    // debug
 
-    console.log(quotationLists);
-    const { pdfDoc, font } = await initTemplate();
+    // Assuming fs.promises is used for readFile to return a Promise.
+    const [existingPdfBytes, fontData] = await Promise.all([
+      fs.readFile("app/services/PDF/quotation/quotation-template.pdf"),
+      fs.readFile("assets/Sarabun-Regular.ttf"),
+    ]);
 
-    const page = pdfDoc.getPage(0); // First page
-    drawHeaderInfo(page, font);
-    drawCustomerInfo(page, font);
-    drawOfferInfo(page, font);
-    drawLists(pdfDoc, quotationLists, page, font);
-    drawRemarkInfo(page, font);
+
+    // const pdfDoc = await PDFDocument.load(existingPdfBytes);
+    const pdfDoc = await PDFDocument.create();
+    pdfDoc.registerFontkit(fontkit);
+    const myFont = await pdfDoc.embedFont(fontData, { subset: true });
+
+
+    const template = await PDFDocument.load(existingPdfBytes)
+
+
+    let page = pdfDoc.addPage()
+    page.drawText('page 1', {
+      font: myFont
+    })
+    page = pdfDoc.addPage()
+    page.drawText('page 2', {
+      font: myFont
+    })
+
+
+    const templatePage = await pdfDoc.embedPage(template.getPages()[0])
+    pdfDoc.getPages().map((page, index) => {
+      console.log(`Page ${index + 1}`)
+      page.drawPage(templatePage)
+    }
+    )
+
+
+    // First page
+    // page2.drawPage(templatePage)
 
     const modifiedPdfBytes = await pdfDoc.save();
     const modifiedPdfPath = `public/result-${id}.pdf`; // Path to save modified PDF
@@ -41,6 +64,33 @@ export const loadQuotation = async (id: number) => {
     return {
       pdfPath: modifiedPdfPath,
     };
+
+
+
+    return;
+
+    // const quotationLists = await db.quotationList.findMany({
+    //   where: {
+    //     quotationId: parseInt(id.toString()),
+    //   },
+    // });
+
+    // console.log(quotationLists);
+    // const { pdfDoc, font } = await initTemplate();
+
+    // const page = pdfDoc.getPage(0); // First page
+    // drawHeaderInfo(page, font);
+    // drawCustomerInfo(page, font);
+    // drawOfferInfo(page, font);
+    // drawLists(pdfDoc, quotationLists, page, font);
+    // drawRemarkInfo(page, font);
+
+    // const modifiedPdfBytes = await pdfDoc.save();
+    // const modifiedPdfPath = `public/result-${id}.pdf`; // Path to save modified PDF
+    // await fs.writeFile(modifiedPdfPath, modifiedPdfBytes);
+    // return {
+    //   pdfPath: modifiedPdfPath,
+    // };
   } catch (error) {
     console.log(error);
     throw new Error("Error writing PDF file");
