@@ -13,6 +13,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     discount,
     extraCost,
     totalPrice,
+    price,
     tax,
     vat,
     grandTotal,
@@ -31,6 +32,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         data: {
           discount,
           extraCost,
+          price,
           totalPrice,
           tax,
           vat,
@@ -50,7 +52,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     };
   }
 
-  revalidatePath("/purchases/[purchaseOrderId]");
+  revalidatePath("/purchase-orders/[purchaseOrderId]");
 
   return { data: purchaseOrder };
 };

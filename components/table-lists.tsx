@@ -93,7 +93,7 @@ export default function TableLists<T>(props: Readonly<Props<T>>) {
                 <Button
                   onClick={() => onManage(item)}
                   variant="secondary"
-                  className="text-sm h-6"
+                  className="text-xs h-6"
                 >
                   จัดการ
                 </Button>

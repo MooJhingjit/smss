@@ -1,11 +1,13 @@
 import React from "react";
 import { Loader } from "lucide-react";
+import { classNames } from "@/lib/utils";
 type Props = {
+  disabled?: boolean;
   onConfirm: () => void;
   children: React.ReactNode;
 };
 export default function ConfirmActionButton(props: Props) {
-  const { onConfirm, children } = props;
+  const { onConfirm, children, disabled } = props;
   const [showConfirm, setShowConfirm] = React.useState(false);
   const [isPending, setIsPending] = React.useState(false);
 
@@ -43,5 +45,13 @@ export default function ConfirmActionButton(props: Props) {
     );
   }
 
-  return <button onClick={() => setShowConfirm(true)}>{children}</button>;
+  return (
+    <button
+      disabled={disabled}
+      className={classNames(disabled && "cursor-not-allowed opacity-50")}
+      onClick={() => !disabled && setShowConfirm(true)}
+    >
+      {children}
+    </button>
+  );
 }

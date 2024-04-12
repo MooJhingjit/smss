@@ -220,6 +220,7 @@ model PurchaseOrder {
   vendor             User                     @relation(fields: [vendorId], references: [id], name: "vendor")
   discount           Float?
   extraCost          Float?
+  price              Float?
   totalPrice         Float?
   tax                Float?
   vat                Float?
@@ -245,22 +246,31 @@ enum PurchaseOrderItemStatus {
 }
 
 model PurchaseOrderItem {
-  id                    Int                     @id @default(autoincrement())
-  purchaseOrderId       Int
-  purchaseOrder         PurchaseOrder           @relation(fields: [purchaseOrderId], references: [id])
-  name                  String
-  price                 Float?
-  quantity              Int?
-  description           String?                 @db.Text
-  type                  ProductType             @default(product)
-  status                PurchaseOrderItemStatus @default(pending)
-  withholdingTaxEnabled Boolean                 @default(true)
-  billedDate            DateTime?
-  items                 Item[]
-  createdAt             DateTime                @default(now())
-  updatedAt             DateTime                @updatedAt
+  id                       Int                       @id @default(autoincrement())
+  purchaseOrderId          Int
+  purchaseOrder            PurchaseOrder             @relation(fields: [purchaseOrderId], references: [id])
+  name                     String
+  price                    Float?
+  quantity                 Int?
+  description              String?                   @db.Text
+  type                     ProductType               @default(product)
+  status                   PurchaseOrderItemStatus   @default(pending)
+  withholdingTaxEnabled    Boolean                   @default(false)
+  withholdingTax           Float?
+  receiptId                Int?
+  purchaseOrderItemReceipt PurchaseOrderItemReceipt? @relation(fields: [receiptId], references: [id])
+  items                    Item[]
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
 
   @@index([purchaseOrderId])
+}
+
+model PurchaseOrderItemReceipt {
+  id                 Int                 @id @default(autoincrement())
+  purchaseOrderItems PurchaseOrderItem[]
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
 }
 
 model Media {

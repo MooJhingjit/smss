@@ -8,51 +8,26 @@ import {
 } from "@/types";
 import TableLists from "@/components/table-lists";
 import { usePurchaseOrderListModal } from "@/hooks/use-po-list-modal";
+import { usePurchaseOrderReceiptModal } from "@/hooks/use-po-receipt-modal";
 import { FormTextarea } from "@/components/form/form-textarea";
 import { FormSubmit } from "@/components/form/form-submit";
 import { useAction } from "@/hooks/use-action";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { updatePurchaseOrder } from "@/actions/po/update";
-import { purchaseOrderItemStatusMapping } from "@/app/config";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BillingInfo from "./billing-info";
 import ProductBadge from "@/components/badges/product-badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useMutation } from "@tanstack/react-query";
+import { MutationResponseType } from "@/components/providers/query-provider";
+import { customRevalidatePath } from "@/actions/revalidateTag";
+import PO_ITEM_SERVICES from "@/app/services/service.purchase-order-items";
 
-const columns = [
-  { name: "#", key: "index" },
-  {
-    name: "ชื่อสินค้า",
-    key: "name",
-    render: (item: PurchaseOrderItemWithRelations) => {
-      const { name, type } = item;
-      return <ProductBadge name={name} type={type} />;
-    },
-  },
-  { name: "ราคา", key: "price" },
-  { name: "จำนวน", key: "quantity" },
-  {
-    name: "รับเข้า",
-    key: "quantity",
-    render: (item: PurchaseOrderItemWithRelations) => {
-      const total = item.items.filter((i) => !!i.serialNumber).length;
-      return (
-        <p>
-          {total}/{item.quantity}
-        </p>
-      );
-    },
-  },
-  {
-    name: "หัก ณ ที่จ่าย",
-    key: "withholdingTaxEnabled",
-  },
-  {
-    name: "ออกบิล",
-    key: "billedDate",
-  },
-];
+type Payload = {
+  withholdingTaxEnabled: boolean;
+};
 
 export default function PurchaseOrderItems({
   data,
@@ -60,7 +35,120 @@ export default function PurchaseOrderItems({
   data: PurchaseOrderWithRelations;
 }) {
   const { purchaseOrderItems, vendor } = data;
-  const modal = usePurchaseOrderListModal();
+  const poListModal = usePurchaseOrderListModal();
+  const poReceiptModal = usePurchaseOrderReceiptModal();
+
+  const { mutate } = useMutation<
+    MutationResponseType,
+    Error,
+    { id: number; payload: Payload }
+  >({
+    mutationFn: async (fields) => {
+      return await PO_ITEM_SERVICES.put(fields.id, {
+        ...fields.payload,
+      });
+    },
+    onSuccess: async () => {
+      toast.success("สำเร็จ");
+      customRevalidatePath(`/purchase-orders/${data.id}`);
+    },
+  });
+
+  const columns = [
+    { name: "#", key: "index" },
+    {
+      name: "ชื่อสินค้า",
+      key: "name",
+      render: (item: PurchaseOrderItemWithRelations) => {
+        const { name, type } = item;
+        return <ProductBadge name={name} type={type} />;
+      },
+    },
+    {
+      name: "ราคา",
+      key: "price",
+      render: (item: PurchaseOrderItemWithRelations) => {
+        return (
+          <p>
+            {item.price?.toLocaleString("th-TH", {
+              style: "currency",
+              currency: "THB",
+            })}
+          </p>
+        );
+      },
+    },
+    {
+      name: "รับเข้า",
+      key: "quantity",
+      render: (item: PurchaseOrderItemWithRelations) => {
+        const total = item.items.filter((i) => !!i.serialNumber).length;
+        return (
+          <p>
+            {total}/{item.quantity}
+          </p>
+        );
+      },
+    },
+    {
+      name: "หัก ณ ที่จ่าย",
+      key: "withholdingTaxEnabled",
+      render: (item: PurchaseOrderItemWithRelations) => {
+        return (
+          <div className="flex items-center justify-start pl-8 space-x-3">
+            <Checkbox
+              defaultChecked={item.withholdingTaxEnabled}
+              disabled={!!item.receiptId}
+              onCheckedChange={(checked) => {
+                console.log("onCheckedChange", checked);
+                mutate({
+                  id: item.id,
+                  payload: {
+                    withholdingTaxEnabled: !!checked,
+                  },
+                });
+              }}
+            />
+            {item.withholdingTaxEnabled && (
+              <p className="text-xs">
+                (-
+                {item.withholdingTax?.toLocaleString("th-TH", {
+                  style: "currency",
+                  currency: "THB",
+                })}
+                )
+              </p>
+            )}
+          </div>
+        );
+      },
+    },
+    {
+      name: "การออกบิล",
+      key: "receiptId",
+      render: (item: PurchaseOrderItemWithRelations) => {
+        if (item.receiptId) {
+          return (
+            <Button variant="ghost" className="text-xs h-6">
+              ออกใบเสร็จแล้ว
+            </Button>
+          );
+        }
+
+        return (
+          <Button
+            variant="default"
+            className="text-xs h-6"
+            onClick={() => {
+              poReceiptModal.onOpen(item, data);
+            }}
+          >
+            ออกใบเสร็จ
+          </Button>
+        );
+      },
+    },
+  ];
 
   if (!purchaseOrderItems) {
     return (
@@ -75,7 +163,7 @@ export default function PurchaseOrderItems({
       headerIcon={
         !data.quotationId && (
           <Button
-            onClick={() => modal.onOpen(null, data)}
+            onClick={() => poListModal.onOpen(null, data)}
             variant="secondary"
             className="flex items-center justify-center  h-5 rounded  "
           >
@@ -89,7 +177,7 @@ export default function PurchaseOrderItems({
           columns={columns}
           data={purchaseOrderItems}
           onManage={(purchaseOrderItem) => {
-            modal.onOpen(
+            poListModal.onOpen(
               purchaseOrderItem as PurchaseOrderItemWithRelations,
               data
             );
@@ -170,59 +258,59 @@ const Remarks = ({ id, remark }: { id: number; remark: string | null }) => {
   );
 };
 
-const TaxInfo = () => {
-  return (
-    <div className=" grid grid-cols-3 gap-2">
-      <div>
-        <label
-          htmlFor="price"
-          className="block text-sm font-medium leading-6 text-gray-900"
-        >
-          ราคาก่อนหักภาษี
-        </label>
-        <div className="relative mt-2 rounded-md shadow-sm">
-          <Input type="text" name="price" id="price" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-            <span className="text-gray-500 sm:text-sm" id="price-currency">
-              บาท
-            </span>
-          </div>
-        </div>
-      </div>
+// const TaxInfo = () => {
+//   return (
+//     <div className=" grid grid-cols-3 gap-2">
+//       <div>
+//         <label
+//           htmlFor="price"
+//           className="block text-sm font-medium leading-6 text-gray-900"
+//         >
+//           ราคาก่อนหักภาษี
+//         </label>
+//         <div className="relative mt-2 rounded-md shadow-sm">
+//           <Input type="text" name="price" id="price" />
+//           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+//             <span className="text-gray-500 sm:text-sm" id="price-currency">
+//               บาท
+//             </span>
+//           </div>
+//         </div>
+//       </div>
 
-      <div>
-        <label
-          htmlFor="price"
-          className="block text-sm font-medium leading-6 text-gray-900"
-        >
-          หัก ณ ที่จ่าย 3%
-        </label>
-        <div className="relative mt-2 rounded-md shadow-sm">
-          <Input type="text" name="price" id="price" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-            <span className="text-gray-500 sm:text-sm" id="price-currency">
-              บาท
-            </span>
-          </div>
-        </div>
-      </div>
+//       <div>
+//         <label
+//           htmlFor="price"
+//           className="block text-sm font-medium leading-6 text-gray-900"
+//         >
+//           หัก ณ ที่จ่าย 3%
+//         </label>
+//         <div className="relative mt-2 rounded-md shadow-sm">
+//           <Input type="text" name="price" id="price" />
+//           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+//             <span className="text-gray-500 sm:text-sm" id="price-currency">
+//               บาท
+//             </span>
+//           </div>
+//         </div>
+//       </div>
 
-      <div>
-        <label
-          htmlFor="price"
-          className="block text-sm font-medium leading-6 text-gray-900"
-        >
-          ราคาหลังจากหัก ณ ที่จ่าย
-        </label>
-        <div className="relative mt-2 rounded-md shadow-sm">
-          <Input type="text" name="price" id="price" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-            <span className="text-gray-500 sm:text-sm" id="price-currency">
-              บาท
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+//       <div>
+//         <label
+//           htmlFor="price"
+//           className="block text-sm font-medium leading-6 text-gray-900"
+//         >
+//           ราคาหลังจากหัก ณ ที่จ่าย
+//         </label>
+//         <div className="relative mt-2 rounded-md shadow-sm">
+//           <Input type="text" name="price" id="price" />
+//           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+//             <span className="text-gray-500 sm:text-sm" id="price-currency">
+//               บาท
+//             </span>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };

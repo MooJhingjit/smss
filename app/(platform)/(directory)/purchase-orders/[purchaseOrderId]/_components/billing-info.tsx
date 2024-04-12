@@ -10,10 +10,11 @@ import { Input } from "@/components/ui/input";
 type FormInput = {
   discount: number;
   extraCost: number;
-  totalPrice: number;
+  price: number;
   tax: number;
   vat: number;
   grandTotal: number;
+  totalPrice: number;
 };
 export default function BillingInfo({
   isManual,
@@ -35,13 +36,26 @@ export default function BillingInfo({
     defaultValues: {
       discount: data.discount ?? 0,
       extraCost: data.extraCost ?? 0,
+      price: data.price ?? 0,
       totalPrice: data.totalPrice ?? 0,
       tax: data.tax ?? 0, // -3%
       vat: data.vat ?? 0, // +7%
       grandTotal: data.grandTotal ?? 0,
     },
   });
-  console.log(errors);
+
+  // reset when data change
+  React.useEffect(() => {
+    reset({
+      discount: data.discount ?? 0,
+      extraCost: data.extraCost ?? 0,
+      price: data.price ?? 0,
+      totalPrice: data.totalPrice ?? 0,
+      tax: data.tax ?? 0, // -3%
+      vat: data.vat ?? 0, // +7%
+      grandTotal: data.grandTotal ?? 0,
+    });
+  }, [data]);
 
   // when discount or extraCost change
   const onChange = () => {
@@ -51,18 +65,18 @@ export default function BillingInfo({
     const discountNum = Number(discount);
     const extraCostNum = Number(extraCost);
 
-    let tPrice = data.totalPrice ?? 0;
+    let tPrice = data.price ?? 0;
 
     // if manual input
     if (isManual) {
-      tPrice = Number(getValues("totalPrice"));
+      tPrice = Number(getValues("price"));
     }
     const totalPrice = tPrice - discountNum + extraCostNum;
     const vat = totalPrice * 0.07;
     const tax = totalPrice * 0.03;
-    // const grandTotal = totalPrice + vat - tax;
+    // const grandTotal = price + vat - tax;
 
-    // setValue("totalPrice", totalPrice);
+    setValue("totalPrice", totalPrice);
     setValue("vat", vat);
     setValue("tax", tax);
 
@@ -71,7 +85,7 @@ export default function BillingInfo({
 
   const discount = useWatch({ name: "discount", control });
   const extraCost = useWatch({ name: "extraCost", control });
-  const totalPrice = useWatch({ name: "totalPrice", control });
+  const price = useWatch({ name: "price", control });
   const tax = useWatch({ name: "tax", control });
   const vat = useWatch({ name: "vat", control });
   const grandTotal = useWatch({ name: "grandTotal", control });
@@ -90,6 +104,7 @@ export default function BillingInfo({
     handleUpdate.execute({
       ...formData,
       totalPrice: Number(formData.totalPrice),
+      price: Number(formData.price),
       discount: Number(formData.discount),
       extraCost: Number(formData.extraCost),
       tax: Number(formData.tax),
@@ -106,7 +121,7 @@ export default function BillingInfo({
     if (isDirty) {
       onChange();
     }
-  }, [totalPrice, discount, extraCost]);
+  }, [price, discount, extraCost]);
   
   React.useEffect(() => {
    // update grandTotal when tax change
@@ -120,8 +135,7 @@ export default function BillingInfo({
 
   }, [tax]);
 
-  const priceBeforeTax =
-    Number(totalPrice) - Number(discount) + Number(extraCost);
+  const priceBeforeTax = getValues("totalPrice")
 
   return (
     <form
@@ -134,15 +148,15 @@ export default function BillingInfo({
           <dd className="font-medium text-gray-900">
             {isManual ? (
               <Input
-                id="totalPrice"
-                {...register("totalPrice")}
+                id="price"
+                {...register("price")}
                 step={0.01}
                 type="number"
                 className="h-[30px] border border-gray-300 text-right px-2 text-xs focus:ring-0"
                 defaultValue={0}
               />
             ) : (
-              totalPrice?.toLocaleString("th-TH", {
+              price?.toLocaleString("th-TH", {
                 style: "currency",
                 currency: "THB",
               }) ?? 0

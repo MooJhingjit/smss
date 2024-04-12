@@ -45,14 +45,14 @@ export async function POST(req: NextRequest) {
         sumDiscount += discount;
         sumTotalTax += tax;
 
-        const PO_tax = totalCost * 0.03;
+        const PO_tax = 0 // totalCost * 0.03;
         const PO_vat = totalCost * 0.07;
         const purchaseOrder = await db.purchaseOrder.create({
           data: {
             code: "DRAFT-PO-" + Math.floor(Math.random() * 1000000),
             vendorId: Number(vendorId),
             quotationId: body.quotationId,
-            totalPrice: totalCost,
+            price: totalCost,
             grandTotal: totalCost - PO_tax + PO_vat,
             tax: PO_tax,
             vat: PO_vat,
