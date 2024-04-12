@@ -1,18 +1,35 @@
-import { NextResponse, NextRequest } from "next/server";
 import { db } from "@/lib/db";
-import { QuotationList } from "@prisma/client";
-import {
-  PDFDocument,
-  PDFFont,
-  PDFPage,
-  rgb,
-  breakTextIntoLines,
-  PDFEmbeddedPage,
-} from "pdf-lib";
+import { Contact, Quotation, QuotationList, User } from "@prisma/client";
+import { PDFDocument, PDFFont, PDFPage, rgb, PDFEmbeddedPage } from "pdf-lib";
 import fs from "fs/promises"; // Node.js file system module with promises
 import fontkit from "@pdf-lib/fontkit";
+import { getBoundingBox } from "../pdf.helpers";
+import { getDateFormat } from "@/lib/utils";
 
 const PAGE_FONT_SIZE = 8;
+
+type QuotationWithRelations = Quotation & {
+  lists: QuotationList[];
+  seller: User | null;
+  contact: Contact;
+};
+
+const getQuotation = async (
+  id: number
+): Promise<QuotationWithRelations | null> => {
+  const quotation = await db.quotation.findUnique({
+    include: {
+      lists: true,
+      seller: true,
+      contact: true,
+    },
+    where: {
+      id: parseInt(id.toString()),
+    },
+  });
+
+  return quotation;
+};
 
 export const generateInvoice = async (id: number) => {
   try {
@@ -20,262 +37,31 @@ export const generateInvoice = async (id: number) => {
       throw new Error("Invalid quotation ID");
     }
 
-    const quotationLists = await db.quotationList.findMany({
-      where: {
-        quotationId: parseInt(id.toString()),
-      },
-    });
+    const quotation = await getQuotation(id);
 
-    return generate(id, quotationLists)
+    if (!quotation) {
+      throw new Error("Quotation not found");
+    }
 
-
-
-    const { pdfDoc, font } = await initTemplate();
-    drawPage(pdfDoc, quotationLists, font)
-    // drawTemplate(pdfDoc)
-
-    const modifiedPdfBytes = await pdfDoc.save();
-    const modifiedPdfPath = `public/result-${id}.pdf`; // Path to save modified PDF
-    await fs.writeFile(modifiedPdfPath, modifiedPdfBytes);
-    return {
-      pdfPath: modifiedPdfPath,
-    };
+    return generate(id, quotation);
   } catch (error) {
     console.log(error);
     throw new Error("Error writing PDF file");
   }
 };
 
-
-
-const initTemplate = async () => {
-  // Assuming fs.promises is used for readFile to return a Promise.
-  const [fontData] = await Promise.all([
-    fs.readFile("assets/Sarabun-Regular.ttf"),
-  ]);
-
-  const pdfDoc = await PDFDocument.create();
-  pdfDoc.registerFontkit(fontkit);
-  const myFont = await pdfDoc.embedFont(fontData, { subset: true });
-
-  return { pdfDoc, font: myFont };
-};
-
-const drawPage = async (
-  pdfDoc: PDFDocument,
-  quotationDataLists: QuotationList[],
-  font: PDFFont
+const drawHeaderInfo = (
+  page: PDFPage,
+  font: PDFFont,
+  currentPageNumber: number,
+  {
+    code,
+    date,
+  }: {
+    code: string;
+    date: string;
+  }
 ) => {
-  const ITEM_Y_Start = 545;
-  const ITEM_X_Start = 60;
-
-  const columnPosition = {
-    index: ITEM_X_Start,
-    description: ITEM_X_Start + 20,
-    quantity: ITEM_X_Start + 355,
-    unitPrice: ITEM_X_Start + 410,
-    amount: ITEM_X_Start + 458,
-  };
-
-  const config = {
-    font,
-    size: PAGE_FONT_SIZE,
-    lineHeight: 11,
-  };
-
-  const writeMainItem = (
-    index: number,
-    data: QuotationList,
-    lineStart: number
-  ) => {
-    // Description
-    page.drawText((index + 1).toString(), {
-      x: columnPosition.index,
-      y: lineStart,
-      maxWidth: 20,
-      ...config,
-    });
-    page.drawText(data.name, {
-      x: columnPosition.description,
-      y: lineStart,
-      maxWidth: 600,
-      ...config,
-      // lineHeight: breakLineHeight,
-    });
-
-    // Quantity
-    page.drawText(data.quantity ? data.quantity.toString() : "", {
-      x: columnPosition.quantity,
-      y: lineStart,
-      maxWidth: 20,
-      ...config,
-    });
-
-    // Unit Price
-    page.drawText(data.unitPrice ? data.unitPrice.toLocaleString() : "", {
-      x: columnPosition.unitPrice,
-      y: lineStart,
-      maxWidth: 50,
-      ...config,
-    });
-
-    // Amount
-    page.drawText(data.totalPrice ? data.totalPrice.toLocaleString() : "", {
-      x: columnPosition.amount,
-      y: lineStart,
-      maxWidth: 50,
-      ...config,
-    });
-
-    const bounding = getBoundingBox(
-      data.name,
-      pdfDoc,
-      font,
-      PAGE_FONT_SIZE,
-      config.lineHeight + 4,
-      600
-    );
-
-    return bounding.height / 10;
-  };
-
-  const writeMainDescription = (description: string, lineStart: number) => {
-    page.drawText(description, {
-      x: columnPosition.description + 12, // indent
-      y: lineStart,
-      maxWidth: 300,
-      ...config,
-      opacity: 0.5,
-      // lineHeight: breakLineHeight,
-    });
-
-    const bounding = getBoundingBox(
-      description,
-      pdfDoc,
-      font,
-      PAGE_FONT_SIZE,
-      config.lineHeight + 4,
-      300
-    );
-
-    return bounding.height / 10;
-  };
-
-  const writeSubItem = (
-    subItem: { label: string; quantity: string },
-    lineStart: number
-  ) => {
-    page.drawText(subItem.label, {
-      x: columnPosition.description + 12, // indent
-      y: lineStart,
-      maxWidth: 300,
-      ...config,
-      // lineHeight: breakLineHeight,
-    });
-    page.drawText(subItem.quantity, {
-      x: columnPosition.quantity, // indent
-      y: lineStart,
-      maxWidth: 50,
-      ...config,
-    });
-
-    const bounding = getBoundingBox(
-      subItem.label,
-      pdfDoc,
-      font,
-      PAGE_FONT_SIZE,
-      config.lineHeight + 4,
-      300
-    );
-
-    return bounding.height / 10;
-  };
-
-
-  let lineStart = ITEM_Y_Start;
-  const endPosition = 300
-  let currentPageNumber = 1;
-
-
-
-
-  let page = pdfDoc.addPage();
-  drawHeaderInfo(page, font, currentPageNumber);
-  drawCustomerInfo(page, font);
-  drawOfferInfo(page, font);
-  drawRemarkInfo(page, font);
-
-  quotationDataLists.forEach((list, index) => {
-
-    if (lineStart < endPosition) {
-      currentPageNumber++;
-      page = pdfDoc.addPage();
-      drawHeaderInfo(page, font, currentPageNumber);
-      drawCustomerInfo(page, font);
-      drawOfferInfo(page, font);
-      drawRemarkInfo(page, font);
-
-      lineStart = ITEM_Y_Start;
-    }
-
-    if (index > 0) {
-      lineStart -= config.lineHeight; // space between main items
-    }
-    let heightUsed = writeMainItem(index, list, lineStart);
-    console.log("main item height", heightUsed);
-    lineStart -= heightUsed; //config.lineHeight;
-
-    if (list.description) {
-      heightUsed = writeMainDescription(list.description, lineStart);
-      console.log("desc item height", heightUsed);
-
-      lineStart -= heightUsed;
-    }
-
-    // write subItems
-    const subItems = JSON.parse(list.subItems ?? "[{}]");
-    if (subItems.length > 0) {
-      subItems.forEach(
-        (subItem: { label: string; quantity: string }, idx: number) => {
-          heightUsed = writeSubItem(subItem, lineStart);
-          // console.log("sub item height", heightUsed);
-
-          lineStart -= heightUsed;
-        }
-      );
-    }
-  });
-
-
-  const [existingPdfBytes] = await Promise.all([
-    fs.readFile("app/services/PDF/quotation/quotation-template.pdf"),
-  ]);
-  const template = await PDFDocument.load(existingPdfBytes)
-
-
-  const templatePage = await pdfDoc.embedPage(template.getPages()[0])
-  console.log("templatePage", templatePage)
-
-  pdfDoc.getPages().map((p, index) => {
-    p.drawPage(templatePage)
-  })
-};
-
-// const drawTemplate = async (pdfDoc: PDFDocument) => {
-//   const existingPdfBytes = await fs.readFile("app/services/PDF/quotation/quotation-template.pdf")
-//   const template = await PDFDocument.load(existingPdfBytes)
-//   const templatePage = await pdfDoc.embedPage(template.getPages()[0])
-//   pdfDoc.getPages().map((page, index) => {
-//     page.drawPage(templatePage)
-//   })
-// }
-
-const drawHeaderInfo = (page: PDFPage, font: PDFFont, currentPageNumber: number) => {
-  const quotation = {
-    code: "QT-2021-0001",
-    date: "2021-01-01",
-    page: "1",
-  };
   const X_Start = 480;
   const Y_Start = 750;
 
@@ -284,13 +70,13 @@ const drawHeaderInfo = (page: PDFPage, font: PDFFont, currentPageNumber: number)
     size: PAGE_FONT_SIZE,
     lineHeight: 14,
   };
-  page.drawText(quotation.date, {
+  page.drawText(date, {
     x: X_Start,
     y: Y_Start,
     maxWidth: 100,
     ...config,
   });
-  page.drawText(quotation.code, {
+  page.drawText(code, {
     x: X_Start,
     y: Y_Start - config.lineHeight,
     maxWidth: 100,
@@ -304,18 +90,7 @@ const drawHeaderInfo = (page: PDFPage, font: PDFFont, currentPageNumber: number)
   });
 };
 
-const drawCustomerInfo = (page: PDFPage, font: PDFFont) => {
-  const customer = {
-    id: 1,
-    name: "Chanwanich Security Printing Company Limite",
-    address:
-      "อาคารกองบุญมา 699 ถนนสีลม แขวงสีลมเขตบางรัก กรุงเทพฯ 10500 เลขที่ภาษี105533079571",
-    phone: "111-555-5555",
-    contact: "Mr. Chanwanich Security Printing Company Limite",
-  };
-
-  // const { width, height } = page.getSize();
-
+const drawCustomerInfo = (page: PDFPage, font: PDFFont, contact: Contact) => {
   const config = {
     font,
     size: PAGE_FONT_SIZE,
@@ -324,28 +99,28 @@ const drawCustomerInfo = (page: PDFPage, font: PDFFont) => {
 
   const Y_Start = 670;
   const X_Start = 80;
-  page.drawText(customer.name, {
+  page.drawText(contact.name, {
     x: X_Start,
     y: Y_Start,
     maxWidth: 600,
     ...config,
   });
 
-  page.drawText(customer.address, {
+  page.drawText(contact.address ?? "", {
     x: X_Start,
     y: Y_Start - config.lineHeight,
     maxWidth: 300,
     ...config,
   });
 
-  page.drawText(customer.contact, {
+  page.drawText(contact.contact ?? "", {
     x: X_Start,
     y: Y_Start - config.lineHeight * 3, // the third line
     maxWidth: 300,
     ...config,
   });
 
-  page.drawText(customer.phone, {
+  page.drawText(contact.phone ?? "", {
     x: 440,
     y: 657,
     maxWidth: 100,
@@ -353,39 +128,46 @@ const drawCustomerInfo = (page: PDFPage, font: PDFFont) => {
   });
 };
 
-const drawOfferInfo = (page: PDFPage, font: PDFFont) => {
-  const offerer = {
-    name: "จันทินี นาวีว่อง",
-    paymentDue: "15 วัน",
-    deliveryPeriod: "60 วัน",
-    validPricePeriod: "15 วัน",
-  };
-
+const drawOfferInfo = (
+  page: PDFPage,
+  font: PDFFont,
+  {
+    sellerName,
+    paymentDue,
+    deliveryPeriod,
+    validPricePeriod,
+  }: {
+    sellerName: string;
+    paymentDue: string;
+    deliveryPeriod: string;
+    validPricePeriod: string;
+  }
+) => {
   const config = {
     font,
     size: PAGE_FONT_SIZE,
     lineHeight: 14,
   };
 
-  page.drawText(offerer.name, {
+  page.drawText(sellerName, {
     x: 65,
     y: 594,
     maxWidth: 150,
     ...config,
   });
-  page.drawText(offerer.paymentDue, {
+  page.drawText(paymentDue, {
     x: 260,
     y: 594,
     maxWidth: 500,
     ...config,
   });
-  page.drawText(offerer.deliveryPeriod, {
+  page.drawText(deliveryPeriod, {
     x: 430,
     y: 594,
     maxWidth: 100,
     ...config,
   });
-  page.drawText(offerer.validPricePeriod, {
+  page.drawText(validPricePeriod, {
     x: 500,
     y: 594,
     maxWidth: 100,
@@ -393,7 +175,7 @@ const drawOfferInfo = (page: PDFPage, font: PDFFont) => {
   });
 };
 
-const drawRemarkInfo = (page: PDFPage, font: PDFFont) => {
+const drawRemarkInfo = (page: PDFPage, font: PDFFont, text: string) => {
   const config = {
     font,
     size: PAGE_FONT_SIZE,
@@ -401,61 +183,74 @@ const drawRemarkInfo = (page: PDFPage, font: PDFFont) => {
     color: rgb(255 / 255, 0 / 255, 0 / 255),
   };
 
-  page.drawText(
-    "Exclude : Rollout Client *** Warranty 30 day after install: Rollout Client",
-    {
-      x: 60,
-      y: 160,
-      maxWidth: 350,
-      ...config,
-    }
-  );
+  page.drawText(text, {
+    x: 60,
+    y: 160,
+    maxWidth: 350,
+    ...config,
+  });
 };
 
-function getBoundingBox(
-  text: string,
-  doc: PDFDocument,
+const drawPriceInfo = (
+  page: PDFPage,
   font: PDFFont,
-  fontSize: number,
-  lineHeight: number,
-  maxWidth: number
-) {
-  // Function to measure the width of a length of text. Lifted from the 'drawText' source.
-  // font refers to an instance of PDFFont
-  const measureWidth = (s: any) => font.widthOfTextAtSize(s, fontSize);
+  {
+    totalPrice,
+    discount,
+    tax,
+    grandTotal
+  }: {
+    totalPrice: string;
+    discount: string;
+    tax: string;
+    grandTotal: string;
+  }
+) => {
+  const config = {
+    font,
+    size: PAGE_FONT_SIZE,
+    lineHeight: 14,
+  };
 
-  // We split the text into an array of lines
-  // doc refers to an instance of PDFDocument
-  const lines = breakTextIntoLines(
-    text,
-    doc.defaultWordBreaks,
-    maxWidth,
-    measureWidth
-  );
+  const columnPosition = 520;
 
-  // We get the index of the longest line
-  const longestLine = lines.reduce(
-    (prev, val, idx) => (val.length > lines[prev].length ? idx : prev),
-    0
-  );
-  // The width of our bounding box will be the width of the longest line of text
-  const textWidth = measureWidth(lines[longestLine]);
-  // The height of our bounding box will be the number of lines * the font size * line height
-  const textHeight = lines.length * fontSize * lineHeight;
+  page.drawText(totalPrice, {
+    x: columnPosition + 44 - getTextWidth(totalPrice, config),
+    y: 163,
+    maxWidth: 100,
+    ...config,
+  });
 
-  // Note: In my code I express the line height like in CSS (e.g. 1.15), if you express your line height in
-  // a PDF-LIB compatible way, you'd do it like this:
-  //const textHeight = lines.length * fontSize * (lineHeight / fontSize);
+  page.drawText(discount, {
+    x: columnPosition + 44 - getTextWidth(discount, config),
+    y: 150,
+    maxWidth: 100,
+    ...config,
+  });
 
-  return { width: textWidth, height: textHeight };
-}
+  page.drawText(tax, {
+    x: columnPosition + 44 - getTextWidth(tax, config),
+    y: 123,
+    maxWidth: 100,
+    ...config,
+  });
 
+ 
+  page.drawText(grandTotal, {
+    x: columnPosition + 44 - getTextWidth(grandTotal, config),
+    y: 108,
+    maxWidth: 100,
+    ...config,
+  });
+};
 
+type ListConfig = {
+  size: number;
+  lineHeight: number;
+  font: PDFFont;
+};
 
-
-
-const generate = async (id: number, data: QuotationList[]) => {
-
+const generate = async (id: number, data: QuotationWithRelations) => {
   // list start position
   const ITEM_Y_Start = 545;
   const ITEM_X_Start = 60;
@@ -465,24 +260,24 @@ const generate = async (id: number, data: QuotationList[]) => {
     index: ITEM_X_Start,
     description: ITEM_X_Start + 20,
     quantity: ITEM_X_Start + 355,
-    unitPrice: ITEM_X_Start + 410,
-    amount: ITEM_X_Start + 458,
+    unitPrice: ITEM_X_Start + 408,
+    amount: ITEM_X_Start + 460,
   };
 
   const [pdfDoc, fontData, existingPdfBytes] = await Promise.all([
     PDFDocument.create(),
     fs.readFile("assets/Sarabun-Regular.ttf"),
-    fs.readFile("app/services/PDF/quotation/quotation-template.pdf")
+    fs.readFile("app/services/PDF/quotation/quotation-template.pdf"),
   ]);
   pdfDoc.registerFontkit(fontkit);
   const myFont = await pdfDoc.embedFont(fontData, { subset: true });
-  const template = await PDFDocument.load(existingPdfBytes)
-  const templatePage = await pdfDoc.embedPage(template.getPages()[0])
+  const template = await PDFDocument.load(existingPdfBytes);
+  const templatePage = await pdfDoc.embedPage(template.getPages()[0]);
 
-  const config = {
+  const config: ListConfig = {
     size: PAGE_FONT_SIZE,
     lineHeight: 11,
-    font: myFont
+    font: myFont,
   };
 
   const writeMainItem = (
@@ -514,17 +309,27 @@ const generate = async (id: number, data: QuotationList[]) => {
       ...config,
     });
 
+    // page.drawRectangle({
+    //   x: columnPosition.unitPrice,
+    //   y: lineStart,
+    //   width: 44,
+    //   height: 10,
+    //   borderColor: rgb(1, 0, 0),
+    // });
+
     // Unit Price
-    currentPage.drawText(data.unitPrice ? data.unitPrice.toLocaleString() : "", {
-      x: columnPosition.unitPrice,
+    const unitPriceText = data.unitPrice ? data.unitPrice.toLocaleString() : "";
+    currentPage.drawText(unitPriceText, {
+      x: columnPosition.unitPrice + 44 - getTextWidth(unitPriceText, config),
       y: lineStart,
       maxWidth: 50,
       ...config,
     });
 
     // Amount
-    currentPage.drawText(data.totalPrice ? data.totalPrice.toLocaleString() : "", {
-      x: columnPosition.amount,
+    const amountText = data.totalPrice ? data.totalPrice.toLocaleString() : "";
+    currentPage.drawText(amountText, {
+      x: columnPosition.amount + 44 - getTextWidth(amountText, config),
       y: lineStart,
       maxWidth: 50,
       ...config,
@@ -542,7 +347,11 @@ const generate = async (id: number, data: QuotationList[]) => {
     return bounding.height / 10;
   };
 
-  const writeMainDescription = (currentPage: PDFPage, description: string, lineStart: number) => {
+  const writeMainDescription = (
+    currentPage: PDFPage,
+    description: string,
+    lineStart: number
+  ) => {
     currentPage.drawText(description, {
       x: columnPosition.description + 12, // indent
       y: lineStart,
@@ -568,6 +377,8 @@ const generate = async (id: number, data: QuotationList[]) => {
     subItem: { label: string; quantity: string },
     lineStart: number
   ) => {
+    // get current page number
+    console.log();
     currentPage.drawText(subItem.label, {
       x: columnPosition.description + 12, // indent
       y: lineStart,
@@ -594,50 +405,51 @@ const generate = async (id: number, data: QuotationList[]) => {
     return bounding.height / 10;
   };
 
-  let page = pdfDoc.addPage()
-  page.drawPage(templatePage)
+  let page = pdfDoc.addPage();
+  page.drawPage(templatePage);
 
-  drawHeaderInfo(page, myFont, 1);
-  drawCustomerInfo(page, myFont);
-  drawOfferInfo(page, myFont);
-  drawRemarkInfo(page, myFont);
+  drawStaticInfo(page, myFont, 1, data);
 
   let lineStart = ITEM_Y_Start;
 
-  data.forEach((list, index) => {
-
+  data.lists?.forEach((list, index) => {
     if (index > 0) {
       lineStart -= config.lineHeight; // space between main items
     }
 
-    // let heightUsed = writeMainItem(index, list, lineStart);
-    // // console.log("main item height", heightUsed);
-    // lineStart -= heightUsed;
-
-    lineStart = validatePageArea(
+    const mainItemRes = validatePageArea(
       page,
       pdfDoc,
       templatePage,
       myFont,
       lineStart,
       ITEM_Y_Start,
-      config.lineHeight,
-      (currentPage: PDFPage, currentLineStart: number) => writeMainItem(currentPage, index, list, currentLineStart))
+      data,
+      (currentPage: PDFPage, currentLineStart: number) =>
+        writeMainItem(currentPage, index, list, currentLineStart)
+    );
+    lineStart = mainItemRes.lineStart;
+    page = mainItemRes.page;
 
     if (list.description) {
-      // heightUsed = writeMainDescription(list.description, lineStart);
-      // // console.log("desc item height", heightUsed);
-      // lineStart -= heightUsed;
-
-      lineStart = validatePageArea(
+      const mainDescriptionRes = validatePageArea(
         page,
         pdfDoc,
         templatePage,
         myFont,
         lineStart,
         ITEM_Y_Start,
-        config.lineHeight,
-        (currentPage: PDFPage, currentLineStart: number) => writeMainDescription(currentPage, list.description ?? "", currentLineStart))
+        data,
+        (currentPage: PDFPage, currentLineStart: number) =>
+          writeMainDescription(
+            currentPage,
+            list.description ?? "",
+            currentLineStart
+          )
+      );
+
+      lineStart = mainDescriptionRes.lineStart;
+      page = mainDescriptionRes.page;
     }
 
     // write subItems
@@ -645,23 +457,23 @@ const generate = async (id: number, data: QuotationList[]) => {
     if (subItems.length > 0) {
       subItems.forEach(
         (subItem: { label: string; quantity: string }, idx: number) => {
-          // heightUsed = writeSubItem(subItem, lineStart);
-          // // console.log("sub item height", heightUsed);
-          // lineStart -= heightUsed;
-
-          lineStart = validatePageArea(
+          const subItemRes = validatePageArea(
             page,
             pdfDoc,
             templatePage,
             myFont,
             lineStart,
             ITEM_Y_Start,
-            config.lineHeight,
-            (currentPage: PDFPage, currentLineStart: number) => writeSubItem(currentPage, subItem, currentLineStart))
+            data,
+            (currentPage: PDFPage, currentLineStart: number) =>
+              writeSubItem(currentPage, subItem, currentLineStart)
+          );
+
+          lineStart = subItemRes.lineStart;
+          page = subItemRes.page;
         }
       );
     }
-
   });
 
   const modifiedPdfBytes = await pdfDoc.save();
@@ -670,9 +482,9 @@ const generate = async (id: number, data: QuotationList[]) => {
   return {
     pdfPath: modifiedPdfPath,
   };
-}
+};
 
-const END_POSITION = 350
+const END_POSITION = 210;
 let currentPageNumber = 1;
 const validatePageArea = (
   page: PDFPage,
@@ -681,25 +493,60 @@ const validatePageArea = (
   myFont: PDFFont,
   lineStart: number,
   ITEM_Y_Start: number,
-  lineHeight: number,
-  exc: any) => {
-
+  data: QuotationWithRelations,
+  exc: any
+) => {
   if (lineStart < END_POSITION) {
     currentPageNumber++;
     const newPage = pdfDoc.addPage();
-    newPage.drawPage(templatePage)
-    drawHeaderInfo(newPage, myFont, currentPageNumber);
-    drawCustomerInfo(newPage, myFont);
-    drawOfferInfo(newPage, myFont);
-    drawRemarkInfo(newPage, myFont);
+    newPage.drawPage(templatePage);
+    drawStaticInfo(newPage, myFont, currentPageNumber, data);
 
-    lineStart = (ITEM_Y_Start + lineHeight);
+    lineStart = ITEM_Y_Start;
 
-    let heightUsed = exc(newPage, lineStart)
-    return lineStart - heightUsed;
+    let heightUsed = exc(newPage, lineStart);
+    return {
+      page: newPage,
+      lineStart: lineStart - heightUsed,
+    };
     // return lineStart
   }
 
-  let heightUsed = exc(page, lineStart)
-  return lineStart - heightUsed;
-}
+  let heightUsed = exc(page, lineStart);
+  return {
+    page: page,
+    lineStart: lineStart - heightUsed,
+  };
+};
+
+const getTextWidth = (text: string, config: ListConfig) => {
+  return config.font.widthOfTextAtSize(text, config.size);
+};
+
+const drawStaticInfo = (
+  page: PDFPage,
+  font: PDFFont,
+  currentPageNumber: number,
+  data: QuotationWithRelations
+) => {
+  drawHeaderInfo(page, font, currentPageNumber, {
+    code: data.code,
+    date: data.createdAt.toDateString(),
+  });
+  drawCustomerInfo(page, font, data.contact);
+  drawOfferInfo(page, font, {
+    sellerName: data.seller?.name ?? "",
+    paymentDue: data.paymentDue
+      ? "ไม่เกิน " + getDateFormat(data.paymentDue)
+      : "",
+    deliveryPeriod: data.deliveryPeriod?.toString() ?? "",
+    validPricePeriod: data.validPricePeriod?.toString() ?? "",
+  });
+  drawRemarkInfo(page, font, data.remark ?? "");
+  drawPriceInfo(page, font, {
+    discount: data.discount?.toLocaleString() ?? "",
+    tax: data.tax?.toLocaleString() ?? "",
+    totalPrice: data.totalPrice?.toLocaleString() ?? "",
+    grandTotal: data.grandTotal?.toLocaleString() ?? "",
+  });
+};

@@ -78,6 +78,7 @@ export async function POST(req: NextRequest) {
         totalPrice: sumTotalPrice,
         discount: sumDiscount,
         tax: sumTotalTax,
+        grandTotal: sumTotalPrice - sumDiscount + sumTotalTax,
       },
     });
 

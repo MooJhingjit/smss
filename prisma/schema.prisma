@@ -140,6 +140,7 @@ model Quotation {
   seller                User?                    @relation(fields: [sellerId], references: [id], name: "seller")
   discount              Float?
   totalPrice            Float?
+  grandTotal            Float?
   tax                   Float?
   paymentType           PurchaseOrderPaymentType @default(cash)
   paymentDue            DateTime?

@@ -170,10 +170,10 @@ const BillingInfo = (props: BillingProps) => {
       acc.subtotal += price;
       acc.discount += discount;
       acc.vat += item.withholdingTax ?? 0;
-      acc.totalPrice += totalPrice;
+      acc.grandTotal += totalPrice;
       return acc;
     },
-    { subtotal: 0, discount: 0, total: 0, vat: 0, totalPrice: 0 },
+    { subtotal: 0, discount: 0, total: 0, vat: 0, grandTotal: 0 },
   );
 
   // TODO save to db
@@ -210,7 +210,7 @@ const BillingInfo = (props: BillingProps) => {
         <div className="flex items-center justify-between pt-4">
           <dt className="font-medium text-gray-900">Grand Total</dt>
           <dd className="font-medium text-primary-600">
-            {summary.totalPrice.toLocaleString("th-TH", {
+            {summary.grandTotal.toLocaleString("th-TH", {
               style: "currency",
               currency: "THB",
             })}
