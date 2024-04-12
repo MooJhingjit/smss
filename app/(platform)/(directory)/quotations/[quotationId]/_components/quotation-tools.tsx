@@ -3,6 +3,7 @@ import React from "react";
 import { LockIcon, PrinterIcon, Send, Clock, CheckCircle } from "lucide-react";
 import {
   PurchaseOrderPaymentType,
+  Quotation,
   QuotationStatus,
   QuotationType,
 } from "@prisma/client";
@@ -27,11 +28,11 @@ import StatusBadge from "@/components/badges/status-badge";
 import PaymentBadge from "@/components/badges/payment-badge";
 
 type Props = {
-  purchaseOrderRef: string;
-  quotationId: number;
-  type: QuotationType;
-  status: QuotationStatus;
-  isLocked: boolean;
+  // quotationId: number;
+  // type: QuotationType;
+  // status: QuotationStatus;
+  // isLocked: boolean;
+  data: Quotation;
   isAdmin: boolean;
   hasList: boolean;
   paymentType: PurchaseOrderPaymentType;
@@ -39,16 +40,18 @@ type Props = {
 };
 
 export default function QuotationTools(props: Props) {
+  const { hasList, data, paymentDue, paymentType } = props;
+  const isAdmin = props.isAdmin;
+
   const {
-    hasList,
-    purchaseOrderRef,
-    quotationId,
+    id: quotationId,
     status,
     isLocked,
-    paymentDue,
-    paymentType,
-  } = props;
-  const isAdmin = props.isAdmin;
+    purchaseOrderRef,
+    deliveryPeriod,
+    validPricePeriod,
+  } = data;
+
   const { mutate } = useMutation<
     MutationResponseType,
     Error,
@@ -77,6 +80,8 @@ export default function QuotationTools(props: Props) {
     paymentDue?: string;
     paymentType?: PurchaseOrderPaymentType;
     purchaseOrderRef?: string;
+    deliveryPeriod?: string;
+    validPricePeriod?: string;
   }) => {
     // update what is provided
     let payloadBody: any = {};
@@ -97,17 +102,25 @@ export default function QuotationTools(props: Props) {
       payloadBody["purchaseOrderRef"] = payload.purchaseOrderRef;
     }
 
+    if (payload.deliveryPeriod || payload.deliveryPeriod === "") {
+      payloadBody["deliveryPeriod"] = payload.deliveryPeriod
+        ? parseInt(payload.deliveryPeriod)
+        : null;
+    }
+
+    if (payload.validPricePeriod || payload.validPricePeriod === "") {
+      payloadBody["validPricePeriod"] = payload.validPricePeriod
+        ? parseInt(payload.validPricePeriod)
+        : null;
+    }
+
     // call mutation
     mutate(payloadBody);
   };
 
   return (
     <div className="space-y-2">
-      <div className="grid grid-cols-12 divide-y divide-gray-100 gap-2 ">
-        {/* <div className="inline-flex capitalize font-semibold rounded-md bg-gray-100 px-2 py-1 text-xs text-gray-700 items-center">
-          <span>{type}</span>
-        </div> */}
-
+      <div className="grid grid-cols-12 col-span-2 divide-y divide-gray-100 gap-2 ">
         <ItemList label="สถานะ">
           <div className=" text-sm leading-6 text-gray-700 flex space-x-2">
             {isLocked && (
@@ -138,24 +151,42 @@ export default function QuotationTools(props: Props) {
           </div>
         </ItemList>
 
+        <ItemList label="ระยะเวลาการส่งมอบ">
+          <div className="flex space-x-3 items-center">
+            <FormInput
+              id="deliveryPeriod"
+              className="text-xs w-full"
+              placeholder="จำนวนวัน"
+              defaultValue={deliveryPeriod}
+              onBlur={(e) => {
+                const deliveryPeriod = e.target.value ?? "";
+                handleItemChange({ deliveryPeriod });
+              }}
+            />
+          </div>
+        </ItemList>
+        <ItemList label="ระยะเวลาการยืนราคา">
+          <div className="flex space-x-3 items-center">
+            <FormInput
+              id="validPricePeriod"
+              className="text-xs w-full"
+              placeholder="จำนวนวัน"
+              defaultValue={validPricePeriod}
+              onBlur={(e) => {
+                const validPricePeriod = e.target.value ?? "";
+                handleItemChange({ validPricePeriod });
+              }}
+            />
+          </div>
+        </ItemList>
         <ItemList label="อ้างอิงใบสั่งซื้อ">
-          <div className="-mt-1 w-[150px]">
+          <div className="-mt-1 ">
             <PurchaseOrderRefInput
-              defaultValue={purchaseOrderRef}
+              defaultValue={purchaseOrderRef ?? ""}
               onUpdate={handleItemChange}
             />
           </div>
         </ItemList>
-        {isAdmin && (
-          <ItemList label="การชำระเงิน">
-            <PaymentOptionControl
-              onUpdate={handleItemChange}
-              paymentType={paymentType}
-              paymentDue={paymentDue}
-            />
-          </ItemList>
-        )}
-
         {!isAdmin && (
           <ItemList label="การชำระเงิน">
             <div className="flex space-x-3 items-center">
@@ -165,7 +196,18 @@ export default function QuotationTools(props: Props) {
         )}
 
         <ItemList>
-          <PrintButton quotationId={quotationId} hasList={hasList} />
+          <div className="space-x-8 flex items-center">
+            {isAdmin && (
+              <PaymentOptionControl
+                paymentType={paymentType}
+                paymentDue={paymentDue}
+                onUpdate={handleItemChange}
+              />
+            )}
+            <div className="h-full">
+              <PrintButton quotationId={quotationId} hasList={hasList} />
+            </div>
+          </div>
         </ItemList>
       </div>
     </div>
@@ -180,7 +222,6 @@ export const QuotationStatusDropdown = ({
   onStatusChange: (status: QuotationStatus) => void;
 }) => {
   const allStatus = Object.keys(QuotationStatus) as QuotationStatus[];
-
 
   if (curStatus === QuotationStatus.pending_approval) {
     return (
@@ -213,7 +254,7 @@ export const QuotationStatusDropdown = ({
           </Button>
         </ConfirmActionButton>
       </div>
-    )
+    );
   }
 
   return (
@@ -296,7 +337,8 @@ const QuotationApprovalButton = ({
   }
 
   return (
-    <StatusBadge status={quotationStatusMapping[currentStatus].label}
+    <StatusBadge
+      status={quotationStatusMapping[currentStatus].label}
       isSuccess={currentStatus === QuotationStatus.paid}
       isWarning={currentStatus === QuotationStatus.delivered}
     />
@@ -331,7 +373,7 @@ const PrintButton = ({
       onClick={onPrintClick}
       disabled={!hasList}
       variant="outline"
-      className="inline-flex items-center px-2 py-1 rounded-md bg-gray-100 text-gray-700 text-xs h-full"
+      className="inline-flex items-center px-2 py-2 rounded-md bg-gray-100 text-gray-700 text-xs h-full"
     >
       <PrinterIcon className="w-4 h-4 mr-1" />
       <span>พิมพ์ใบเสนอราคา</span>
@@ -346,18 +388,16 @@ const PurchaseOrderRefInput = ({
   onUpdate: (payload: { purchaseOrderRef: string }) => void;
   defaultValue: string;
 }) => {
-  const inputRef = React.useRef<HTMLInputElement>(null);
   return (
     <FormInput
       id="Ref_PO"
       label=""
-      ref={inputRef}
       className="text-xs w-full"
       placeholder="PO-xxxxxx"
       defaultValue={defaultValue}
-      onBlur={() => {
+      onBlur={(e) => {
         // get current value
-        const purchaseOrderRef = inputRef.current?.value || "";
+        const purchaseOrderRef = e.target?.value || "";
 
         // check if value is different from default
         if (purchaseOrderRef === defaultValue) return;
@@ -376,8 +416,8 @@ const ItemList = ({
   children: React.ReactNode;
 }) => {
   return (
-    <div className="col-span-12 pt-2">
-      <div className=" flex justify-between items-center">
+    <div className="col-span-6 pt-2">
+      <div className=" flex justify-between items-center px-6 h-full">
         {label && <p className="text-sm leading-6 text-gray-600">{label}</p>}
         {children}
       </div>

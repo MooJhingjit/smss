@@ -5,7 +5,7 @@ import { QuotationStatus } from "@prisma/client";
 // PUT /api/quotations/:id
 export async function PUT(
   req: NextRequest,
-  context: { params: { id: number } },
+  context: { params: { id: number } }
 ) {
   try {
     // console.log("req.query", req.query);
@@ -20,6 +20,8 @@ export async function PUT(
       "purchaseOrderRef",
       "paymentDue",
       "paymentType",
+      "deliveryPeriod",
+      "validPricePeriod",
     ];
 
     // check if body has any keys that are not in the whitelist

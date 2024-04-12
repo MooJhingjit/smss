@@ -147,6 +147,8 @@ model Quotation {
   withholdingTaxPercent Float?
   status                QuotationStatus          @default(open)
   remark                String?                  @db.Text
+  deliveryPeriod        Int?
+  validPricePeriod      Int?
   isLocked              Boolean                  @default(false)
   createdAt             DateTime                 @default(now())
   updatedAt             DateTime                 @updatedAt
@@ -225,6 +227,8 @@ model PurchaseOrder {
   status             PurchaseOrderStatus      @default(draft)
   paymentType        PurchaseOrderPaymentType @default(cash)
   paymentDue         DateTime?
+  deliveryPeriod     Int?
+  validPricePeriod   Int?
   remark             String?                  @db.Text
   createdAt          DateTime                 @default(now())
   updatedAt          DateTime                 @updatedAt
@@ -241,18 +245,20 @@ enum PurchaseOrderItemStatus {
 }
 
 model PurchaseOrderItem {
-  id              Int                     @id @default(autoincrement())
-  purchaseOrderId Int
-  purchaseOrder   PurchaseOrder           @relation(fields: [purchaseOrderId], references: [id])
-  name            String
-  price           Float?
-  quantity        Int?
-  description     String?                 @db.Text
-  type            ProductType             @default(product)
-  status          PurchaseOrderItemStatus @default(pending)
-  items           Item[]
-  createdAt       DateTime                @default(now())
-  updatedAt       DateTime                @updatedAt
+  id                    Int                     @id @default(autoincrement())
+  purchaseOrderId       Int
+  purchaseOrder         PurchaseOrder           @relation(fields: [purchaseOrderId], references: [id])
+  name                  String
+  price                 Float?
+  quantity              Int?
+  description           String?                 @db.Text
+  type                  ProductType             @default(product)
+  status                PurchaseOrderItemStatus @default(pending)
+  withholdingTaxEnabled Boolean                 @default(true)
+  billedDate            DateTime?
+  items                 Item[]
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
 
   @@index([purchaseOrderId])
 }

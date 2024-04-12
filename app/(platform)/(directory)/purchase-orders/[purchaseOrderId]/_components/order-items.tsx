@@ -44,28 +44,14 @@ const columns = [
       );
     },
   },
-  // {
-  //   name: "สถานะ",
-  //   key: "status",
-  //   render: (item: PurchaseOrderItemWithRelations) => {
-  //     return purchaseOrderItemStatusMapping[item.status];
-  //   },
-  // },
-  // {
-  //   name: "รับสินค้า",
-  //   key: "action",
-  //   render: (item: PurchaseOrderItem) => {
-  //     return (
-  //       <div className="ml-3 ">
-  //         <PackagePlus
-  //           size={24}
-  //           className="hover:text-green-600 cursor-pointer"
-  //           onClick={}
-  //         />
-  //       </div>
-  //     );
-  //   },
-  // },
+  {
+    name: "หัก ณ ที่จ่าย",
+    key: "withholdingTaxEnabled",
+  },
+  {
+    name: "ออกบิล",
+    key: "billedDate",
+  },
 ];
 
 export default function PurchaseOrderItems({

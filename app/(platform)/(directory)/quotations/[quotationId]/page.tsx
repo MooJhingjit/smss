@@ -99,18 +99,19 @@ export default async function QuotationDetails(
     <>
       <Breadcrumbs pages={pages} />
       <div className="grid  grid-cols-5 gap-8 mt-6">
-        <div className="col-span-5 md:col-span-3">
+        <div className="col-span-5 md:col-span-2">
           {contact && <CustomerInfo data={contact} />}
         </div>
-        <div className="col-span-5 md:col-span-2">
+        <div className="col-span-5 md:col-span-3">
           <QuotationTools
+            data={data}
             hasList={lists.length > 0}
             isAdmin={isAdmin}
-            purchaseOrderRef={data.purchaseOrderRef ?? ""}
-            isLocked={data.isLocked}
-            quotationId={data.id}
-            status={data.status}
-            type={data.type}
+            // purchaseOrderRef={data.purchaseOrderRef ?? ""}
+            // isLocked={data.isLocked}
+            // quotationId={data.id}
+            // status={data.status}
+            // type={data.type}
             paymentType={paymentType}
             paymentDue={
               paymentDue ? new Date(paymentDue).toISOString().split("T")[0] : ""

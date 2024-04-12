@@ -21,7 +21,7 @@ interface FormInputProps {
   className?: string;
   defaultValue?: any;
   readOnly?: boolean;
-  onBlur?: () => void;
+  onBlur?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   register?: UseFormRegister<any>;
   step?: string;
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
