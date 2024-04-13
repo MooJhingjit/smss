@@ -19,9 +19,11 @@ const put = (id: number, data: Record<string, any>) => {
   });
 };
 
-export default {
+
+const APIs = {
   get,
   generatePOs,
   put,
-  //   updateStatus,
 };
+
+export default APIs;

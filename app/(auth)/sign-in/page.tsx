@@ -17,7 +17,7 @@ export default function SignInPage() {
       {/* image bg */}
 
       <div className="absolute w-full z-10 inset-0  	">
-        <img
+        <Image
           className="h-full w-full object-cover "
           src="https://smartss9168.com/wp-content/uploads/2018/08/network-2402637_1280.jpg"
           alt=""

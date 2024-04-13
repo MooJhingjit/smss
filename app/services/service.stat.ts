@@ -5,6 +5,8 @@ const get = (params?: Record<string, any>) => {
   return fetcher(`/api/stats`);
 };
 
-export default {
+const APIs = {
   get,
 };
+
+export default APIs;

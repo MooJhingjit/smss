@@ -18,16 +18,16 @@ const put = (id: number, data: Record<string, any>) => {
   });
 };
 
-const generateInvoice = (id: number) => {
-  return fetcher(`/api/quotations/invoice/${id}`, {
-    method: "POST",
-  });
-}
+// const generateInvoice = (id: number) => {
+//   return fetcher(`/api/quotations/invoice/${id}`, {
+//     method: "POST",
+//   });
+// }
 
-export default {
+const APIs = {
   get,
-  put,
-  // post,
-  generateInvoice
-  //   updateStatus,
+  put
+  // generateInvoice
 };
+
+export default APIs;

@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { PurchaseOrderWithRelations } from "@/types";
-import React from "react";
+import React, { useCallback } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { useAction } from "@/hooks/use-action";
 import { updatePurchaseOrder } from "@/actions/po/update";
@@ -55,10 +55,10 @@ export default function BillingInfo({
       vat: data.vat ?? 0, // +7%
       grandTotal: data.grandTotal ?? 0,
     });
-  }, [data]);
+  }, [data, reset]);
 
   // when discount or extraCost change
-  const onChange = () => {
+  const onChange = useCallback(() => {
     const { discount, extraCost } = getValues();
 
     // convert to number
@@ -71,17 +71,15 @@ export default function BillingInfo({
     if (isManual) {
       tPrice = Number(getValues("price"));
     }
+
     const totalPrice = tPrice - discountNum + extraCostNum;
     const vat = totalPrice * 0.07;
     const tax = totalPrice * 0.03;
-    // const grandTotal = price + vat - tax;
 
     setValue("totalPrice", totalPrice);
     setValue("vat", vat);
     setValue("tax", tax);
-
-    // setValue("grandTotal", grandTotal);
-  };
+  }, [getValues, setValue, data.price, isManual]);
 
   const discount = useWatch({ name: "discount", control });
   const extraCost = useWatch({ name: "extraCost", control });
@@ -121,7 +119,7 @@ export default function BillingInfo({
     if (isDirty) {
       onChange();
     }
-  }, [price, discount, extraCost]);
+  }, [price, discount, extraCost, isDirty, onChange]);
   
   React.useEffect(() => {
    // update grandTotal when tax change
@@ -133,7 +131,7 @@ export default function BillingInfo({
     setValue("grandTotal", grandTotal);
     setValue("tax", tax);
 
-  }, [tax]);
+  }, [tax, getValues, setValue]);
 
   const priceBeforeTax = getValues("totalPrice")
 

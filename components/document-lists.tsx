@@ -12,6 +12,7 @@ import {
   queryClient,
 } from "@/components/providers/query-provider";
 import { toast } from "sonner";
+import Image from "next/image";
 type Props = {
   refType: string;
   refId: number;
@@ -87,7 +88,7 @@ export default function DocumentItems(props: Props) {
     }
     return (
       <div className="flex items-center justify-center w-16 h-16 bg-gray-100 rounded-md">
-        <img width="64" src="/file.svg" alt="file" className="w-8 h-8" />
+        <Image width="64" height="64" src="/file.svg" alt="file" className="w-8 h-8" />
       </div>
     );
   };

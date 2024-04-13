@@ -7,6 +7,8 @@ const put = (id: number, data: Record<string, any>) => {
   });
 };
 
-export default {
+const APIs = {
   put,
 };
+
+export default APIs;

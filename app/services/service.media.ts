@@ -12,8 +12,9 @@ const post = (data: Record<string, any>) => {
   });
 };
 
-export default {
+const APIs = {
   get,
   post,
-  //   updateStatus,
 };
+
+export default APIs;
