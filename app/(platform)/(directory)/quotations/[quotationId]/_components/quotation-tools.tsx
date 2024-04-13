@@ -360,7 +360,7 @@ const PrintButton = ({
     onSuccess: async (n) => {
       toast.success("สำเร็จ");
       // open new tab
-      window.open(`/result-${quotationId}.pdf`, "_blank");
+      window.open(`/quotation.pdf`, "_blank");
     },
   });
 
