@@ -5,6 +5,8 @@ import fs from "fs/promises"; // Node.js file system module with promises
 import fontkit from "@pdf-lib/fontkit";
 import { getBoundingBox } from "../pdf.helpers";
 import { getDateFormat } from "@/lib/utils";
+import path from 'path';
+import { readFile } from 'fs/promises';
 
 const PAGE_FONT_SIZE = 8;
 
@@ -264,11 +266,15 @@ const generate = async (id: number, data: QuotationWithRelations) => {
     amount: ITEM_X_Start + 460,
   };
 
+  const basePath = process.cwd(); // Gets the base path of your project
+  const fontPath = path.join(basePath, 'public/fonts/Sarabun-Regular.ttf');
+  const pdfTemplatePath = path.join(basePath, 'public/pdf/quotation-template.pdf');
   const [pdfDoc, fontData, existingPdfBytes] = await Promise.all([
     PDFDocument.create(),
-    fs.readFile("assets/Sarabun-Regular.ttf"),
-    fs.readFile("app/services/PDF/quotation/quotation-template.pdf"),
+    readFile(fontPath),
+    readFile(pdfTemplatePath),
   ]);
+
   pdfDoc.registerFontkit(fontkit);
   const myFont = await pdfDoc.embedFont(fontData, { subset: true });
   const template = await PDFDocument.load(existingPdfBytes);
