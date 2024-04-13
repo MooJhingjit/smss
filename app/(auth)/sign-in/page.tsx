@@ -18,6 +18,10 @@ export default function SignInPage() {
 
       <div className="absolute w-full z-10 inset-0  	">
         <Image
+          width={0}
+          height={0}
+          sizes="100vw"
+          style={{ width: "100%", height: "auto" }} // optional
           className="h-full w-full object-cover "
           src="https://smartss9168.com/wp-content/uploads/2018/08/network-2402637_1280.jpg"
           alt=""
