@@ -483,10 +483,11 @@ const generate = async (id: number, data: QuotationWithRelations) => {
   });
 
   const modifiedPdfBytes = await pdfDoc.save();
-  const modifiedPdfPath = `public/quotation.pdf`; // Path to save modified PDF
-  await fs.writeFile(modifiedPdfPath, modifiedPdfBytes);
+  // const modifiedPdfPath = `public/quotation.pdf`; // Path to save modified PDF
+  // await fs.writeFile(modifiedPdfPath, modifiedPdfBytes);
   return {
-    pdfPath: modifiedPdfPath,
+    // pdfPath: modifiedPdfPath,
+    pdfBytes: modifiedPdfBytes
   };
 };
 

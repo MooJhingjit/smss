@@ -352,21 +352,32 @@ const PrintButton = ({
   quotationId: number;
   hasList: boolean;
 }) => {
-  const { mutate } = useMutation<MutationResponseType, Error>({
-    mutationFn: async (fields) => {
-      const res = await QT_SERVICES.generateInvoice(quotationId);
-      return res;
-    },
-    onSuccess: async (n) => {
-      toast.success("สำเร็จ");
-      // open new tab
-      window.open(`/quotation.pdf`, "_blank");
-    },
-  });
-
   const onPrintClick = () => {
-    mutate();
-    // window.open(`/result-${1}.pdf`, "_blank");
+    try {
+      fetch(`/api/quotations/invoice/${quotationId}`, { method: "POST" })
+        .then((res) => res.blob())
+        .then((blob) => URL.createObjectURL(blob))
+        .then((url) => {
+          // Create an anchor element and use it to navigate to the URL
+          const a = document.createElement("a");
+          a.href = url;
+          a.target = "_blank"; // Ensure it opens in a new tab
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+
+          // Optionally, you might not want to revoke the URL immediately
+          // since the file might still be loading in the new tab
+          // window.URL.revokeObjectURL(url);
+
+          // You might want to revoke it later or based on some other conditions
+          setTimeout(() => {
+            window.URL.revokeObjectURL(url); // Clean up the blob URL after it's no longer needed
+          }, 60000); // for example, after 1 minute
+        });
+    } catch (error) {
+      console.log("error", error);
+    }
   };
   return (
     <Button

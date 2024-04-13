@@ -7,12 +7,11 @@ export async function POST(
 ) {
   const { id } = context.params;
   try {
-    const { pdfPath } = await generateInvoice(id);
-    const successResult = {
-      message: "Success",
-      pdfPath,
-    };
-    return NextResponse.json(successResult);
+    const { pdfBytes } = await generateInvoice(id);
+    const headers = new Headers()
+    headers.set('Content-Type', 'application/pdf')
+    headers.set('Content-Disposition', 'attachment; filename="download.pdf"')
+    return new NextResponse(pdfBytes, { status: 200, statusText: "OK", headers });
   } catch (err: unknown) {
     if (err instanceof Error) {
       console.log("error", err);
