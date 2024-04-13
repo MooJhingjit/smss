@@ -13,8 +13,10 @@ export async function POST(
       pdfPath,
     };
     return NextResponse.json(successResult);
-  } catch (error) {
-    console.log("error", error);
-    return new NextResponse("Internal Error", { status: 500 });
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      console.log("error", err);
+       return NextResponse.json({ error: err.message }, { status: 500 })
+    }
   }
 }
