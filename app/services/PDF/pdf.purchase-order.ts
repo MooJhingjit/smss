@@ -1,36 +1,51 @@
 import { db } from "@/lib/db";
-import { Contact, Quotation, QuotationList, User } from "@prisma/client";
+import {
+  Contact,
+  PurchaseOrder,
+  PurchaseOrderItem,
+  Quotation,
+  QuotationList,
+  User,
+} from "@prisma/client";
 import { PDFDocument, PDFFont, PDFPage, rgb, PDFEmbeddedPage } from "pdf-lib";
-import fs from "fs/promises"; // Node.js file system module with promises
 import fontkit from "@pdf-lib/fontkit";
-import { getBoundingBox } from "../pdf.helpers";
+import { getBoundingBox } from "./pdf.helpers";
 import { getDateFormat } from "@/lib/utils";
-import path from 'path';
-import { readFile } from 'fs/promises';
+import path from "path";
+import { readFile } from "fs/promises";
 
 const PAGE_FONT_SIZE = 8;
 
-type QuotationWithRelations = Quotation & {
-  lists: QuotationList[];
-  seller: User | null;
-  contact: Contact;
+const CURRENCY_FORMAT = {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
 };
 
-const getQuotation = async (
+const TODAY = new Date().toLocaleDateString("en-GB", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+});
+
+type PurchaseOrderWithRelations = PurchaseOrder & {
+  purchaseOrderItems?: PurchaseOrderItem[];
+  vendor: User | null;
+};
+
+const getData = async (
   id: number
-): Promise<QuotationWithRelations | null> => {
-  const quotation = await db.quotation.findUnique({
+): Promise<PurchaseOrderWithRelations | null> => {
+  const purchaseOrder = await db.purchaseOrder.findUnique({
     include: {
-      lists: true,
-      seller: true,
-      contact: true,
+      purchaseOrderItems: true,
+      vendor: true,
     },
     where: {
       id: parseInt(id.toString()),
     },
   });
 
-  return quotation;
+  return purchaseOrder;
 };
 
 export const generateInvoice = async (id: number) => {
@@ -39,13 +54,13 @@ export const generateInvoice = async (id: number) => {
       throw new Error("Invalid quotation ID");
     }
 
-    const quotation = await getQuotation(id);
+    const purchaseOrder = await getData(id);
 
-    if (!quotation) {
-      throw new Error("Quotation not found");
+    if (!purchaseOrder) {
+      throw new Error("PurchaseOrder not found");
     }
 
-    return generate(id, quotation);
+    return generate(id, purchaseOrder);
   } catch (error) {
     console.log(error);
     throw new Error("Error writing PDF file");
@@ -65,12 +80,12 @@ const drawHeaderInfo = (
   }
 ) => {
   const X_Start = 480;
-  const Y_Start = 750;
+  const Y_Start = 790;
 
   const config = {
     font,
     size: PAGE_FONT_SIZE,
-    lineHeight: 14,
+    lineHeight: 16,
   };
   page.drawText(date, {
     x: X_Start,
@@ -92,86 +107,61 @@ const drawHeaderInfo = (
   });
 };
 
-const drawCustomerInfo = (page: PDFPage, font: PDFFont, contact: Contact) => {
+const drawVendorInfo = (page: PDFPage, font: PDFFont, vendor: User) => {
   const config = {
     font,
     size: PAGE_FONT_SIZE,
-    lineHeight: 13,
+    lineHeight: 15,
   };
 
-  const Y_Start = 670;
+  const Y_Start = 717;
   const X_Start = 80;
-  page.drawText(contact.name, {
+  page.drawText(vendor.name, {
     x: X_Start,
     y: Y_Start,
     maxWidth: 600,
     ...config,
   });
 
-  page.drawText(contact.address ?? "", {
+  page.drawText(vendor.address ?? "", {
     x: X_Start,
     y: Y_Start - config.lineHeight,
     maxWidth: 300,
     ...config,
   });
 
-  page.drawText(contact.contact ?? "", {
+  page.drawText(vendor.contact ?? "", {
     x: X_Start,
     y: Y_Start - config.lineHeight * 3, // the third line
     maxWidth: 300,
     ...config,
   });
 
-  page.drawText(contact.phone ?? "", {
+  page.drawText(vendor.phone ?? "", {
     x: 440,
-    y: 657,
+    y: Y_Start - config.lineHeight * 3,
     maxWidth: 100,
     ...config,
   });
 };
 
-const drawOfferInfo = (
-  page: PDFPage,
-  font: PDFFont,
-  {
-    sellerName,
-    paymentDue,
-    deliveryPeriod,
-    validPricePeriod,
-  }: {
-    sellerName: string;
-    paymentDue: string;
-    deliveryPeriod: string;
-    validPricePeriod: string;
-  }
-) => {
+const drawOrdererInfo = (page: PDFPage, font: PDFFont) => {
   const config = {
     font,
     size: PAGE_FONT_SIZE,
     lineHeight: 14,
   };
 
-  page.drawText(sellerName, {
-    x: 65,
-    y: 594,
-    maxWidth: 150,
-    ...config,
-  });
-  page.drawText(paymentDue, {
-    x: 260,
-    y: 594,
+  page.drawText("จันทินี นาวีว่อง  08-1868-3146", {
+    x: 125,
+    y: 640,
     maxWidth: 500,
     ...config,
   });
-  page.drawText(deliveryPeriod, {
-    x: 430,
-    y: 594,
-    maxWidth: 100,
-    ...config,
-  });
-  page.drawText(validPricePeriod, {
+
+  page.drawText(TODAY, {
     x: 500,
-    y: 594,
+    y: 640,
     maxWidth: 100,
     ...config,
   });
@@ -186,8 +176,8 @@ const drawRemarkInfo = (page: PDFPage, font: PDFFont, text: string) => {
   };
 
   page.drawText(text, {
-    x: 60,
-    y: 160,
+    x: 35,
+    y: 175,
     maxWidth: 350,
     ...config,
   });
@@ -197,13 +187,15 @@ const drawPriceInfo = (
   page: PDFPage,
   font: PDFFont,
   {
-    totalPrice,
+    price,
     discount,
+    totalPrice,
     tax,
-    grandTotal
+    grandTotal,
   }: {
-    totalPrice: string;
+    price: string;
     discount: string;
+    totalPrice: string;
     tax: string;
     grandTotal: string;
   }
@@ -216,31 +208,37 @@ const drawPriceInfo = (
 
   const columnPosition = 520;
 
-  page.drawText(totalPrice, {
-    x: columnPosition + 44 - getTextWidth(totalPrice, config),
-    y: 163,
+  page.drawText(price, {
+    x: columnPosition + 48 - getTextWidth(price, config),
+    y: 187,
     maxWidth: 100,
     ...config,
   });
 
   page.drawText(discount, {
-    x: columnPosition + 44 - getTextWidth(discount, config),
-    y: 150,
+    x: columnPosition + 48 - getTextWidth(discount, config),
+    y: 167,
+    maxWidth: 100,
+    ...config,
+  });
+
+  page.drawText(totalPrice, {
+    x: columnPosition + 48 - getTextWidth(totalPrice, config),
+    y: 148,
     maxWidth: 100,
     ...config,
   });
 
   page.drawText(tax, {
-    x: columnPosition + 44 - getTextWidth(tax, config),
-    y: 123,
+    x: columnPosition + 48 - getTextWidth(tax, config),
+    y: 128,
     maxWidth: 100,
     ...config,
   });
 
- 
   page.drawText(grandTotal, {
-    x: columnPosition + 44 - getTextWidth(grandTotal, config),
-    y: 108,
+    x: columnPosition + 48 - getTextWidth(grandTotal, config),
+    y: 111,
     maxWidth: 100,
     ...config,
   });
@@ -252,23 +250,26 @@ type ListConfig = {
   font: PDFFont;
 };
 
-const generate = async (id: number, data: QuotationWithRelations) => {
+const generate = async (id: number, data: PurchaseOrderWithRelations) => {
   // list start position
-  const ITEM_Y_Start = 545;
-  const ITEM_X_Start = 60;
+  const ITEM_Y_Start = 585;
+  const ITEM_X_Start = 44;
 
   // horizontal position
   const columnPosition = {
     index: ITEM_X_Start,
-    description: ITEM_X_Start + 20,
-    quantity: ITEM_X_Start + 355,
-    unitPrice: ITEM_X_Start + 408,
-    amount: ITEM_X_Start + 460,
+    description: ITEM_X_Start + 30,
+    quantity: ITEM_X_Start + 359,
+    unitPrice: ITEM_X_Start + 410,
+    amount: ITEM_X_Start + 480,
   };
 
   const basePath = process.cwd(); // Gets the base path of your project
-  const fontPath = path.join(basePath, 'public/fonts/Sarabun-Regular.ttf');
-  const pdfTemplatePath = path.join(basePath, 'public/pdf/quotation-template.pdf');
+  const fontPath = path.join(basePath, "public/fonts/Sarabun-Regular.ttf");
+  const pdfTemplatePath = path.join(
+    basePath,
+    "public/pdf/purchase-order-template.pdf"
+  );
   const [pdfDoc, fontData, existingPdfBytes] = await Promise.all([
     PDFDocument.create(),
     readFile(fontPath),
@@ -289,10 +290,9 @@ const generate = async (id: number, data: QuotationWithRelations) => {
   const writeMainItem = (
     currentPage: PDFPage,
     index: number,
-    data: QuotationList,
+    data: PurchaseOrderItem,
     lineStart: number
   ) => {
-    // Description
     currentPage.drawText((index + 1).toString(), {
       x: columnPosition.index,
       y: lineStart,
@@ -315,25 +315,9 @@ const generate = async (id: number, data: QuotationWithRelations) => {
       ...config,
     });
 
-    // page.drawRectangle({
-    //   x: columnPosition.unitPrice,
-    //   y: lineStart,
-    //   width: 44,
-    //   height: 10,
-    //   borderColor: rgb(1, 0, 0),
-    // });
-
-    // Unit Price
-    const unitPriceText = data.unitPrice ? data.unitPrice.toLocaleString() : "";
-    currentPage.drawText(unitPriceText, {
-      x: columnPosition.unitPrice + 44 - getTextWidth(unitPriceText, config),
-      y: lineStart,
-      maxWidth: 50,
-      ...config,
-    });
-
-    // Amount
-    const amountText = data.totalPrice ? data.totalPrice.toLocaleString() : "";
+    const amountText = data.price
+      ? data.price.toLocaleString("th-TH", CURRENCY_FORMAT)
+      : "";
     currentPage.drawText(amountText, {
       x: columnPosition.amount + 44 - getTextWidth(amountText, config),
       y: lineStart,
@@ -378,39 +362,6 @@ const generate = async (id: number, data: QuotationWithRelations) => {
     return bounding.height / 10;
   };
 
-  const writeSubItem = (
-    currentPage: PDFPage,
-    subItem: { label: string; quantity: string },
-    lineStart: number
-  ) => {
-    // get current page number
-    console.log();
-    currentPage.drawText(subItem.label, {
-      x: columnPosition.description + 12, // indent
-      y: lineStart,
-      maxWidth: 300,
-      ...config,
-      // lineHeight: breakLineHeight,
-    });
-    currentPage.drawText(subItem.quantity, {
-      x: columnPosition.quantity, // indent
-      y: lineStart,
-      maxWidth: 50,
-      ...config,
-    });
-
-    const bounding = getBoundingBox(
-      subItem.label,
-      pdfDoc,
-      myFont,
-      PAGE_FONT_SIZE,
-      config.lineHeight + 4,
-      300
-    );
-
-    return bounding.height / 10;
-  };
-
   let page = pdfDoc.addPage();
   page.drawPage(templatePage);
 
@@ -418,7 +369,7 @@ const generate = async (id: number, data: QuotationWithRelations) => {
 
   let lineStart = ITEM_Y_Start;
 
-  data.lists?.forEach((list, index) => {
+  data.purchaseOrderItems?.forEach((list, index) => {
     if (index > 0) {
       lineStart -= config.lineHeight; // space between main items
     }
@@ -457,37 +408,11 @@ const generate = async (id: number, data: QuotationWithRelations) => {
       lineStart = mainDescriptionRes.lineStart;
       page = mainDescriptionRes.page;
     }
-
-    // write subItems
-    const subItems = JSON.parse(list.subItems ?? "[{}]");
-    if (subItems.length > 0) {
-      subItems.forEach(
-        (subItem: { label: string; quantity: string }, idx: number) => {
-          const subItemRes = validatePageArea(
-            page,
-            pdfDoc,
-            templatePage,
-            myFont,
-            lineStart,
-            ITEM_Y_Start,
-            data,
-            (currentPage: PDFPage, currentLineStart: number) =>
-              writeSubItem(currentPage, subItem, currentLineStart)
-          );
-
-          lineStart = subItemRes.lineStart;
-          page = subItemRes.page;
-        }
-      );
-    }
   });
 
   const modifiedPdfBytes = await pdfDoc.save();
-  // const modifiedPdfPath = `public/quotation.pdf`; // Path to save modified PDF
-  // await fs.writeFile(modifiedPdfPath, modifiedPdfBytes);
   return {
-    // pdfPath: modifiedPdfPath,
-    pdfBytes: modifiedPdfBytes
+    pdfBytes: modifiedPdfBytes,
   };
 };
 
@@ -500,7 +425,7 @@ const validatePageArea = (
   myFont: PDFFont,
   lineStart: number,
   ITEM_Y_Start: number,
-  data: QuotationWithRelations,
+  data: PurchaseOrderWithRelations,
   exc: any
 ) => {
   if (lineStart < END_POSITION) {
@@ -534,26 +459,24 @@ const drawStaticInfo = (
   page: PDFPage,
   font: PDFFont,
   currentPageNumber: number,
-  data: QuotationWithRelations
+  data: PurchaseOrderWithRelations
 ) => {
   drawHeaderInfo(page, font, currentPageNumber, {
     code: data.code,
-    date: data.createdAt.toDateString(),
+    date: TODAY,
   });
-  drawCustomerInfo(page, font, data.contact);
-  drawOfferInfo(page, font, {
-    sellerName: data.seller?.name ?? "",
-    paymentDue: data.paymentDue
-      ? "ไม่เกิน " + getDateFormat(data.paymentDue)
-      : "",
-    deliveryPeriod: data.deliveryPeriod?.toString() ?? "",
-    validPricePeriod: data.validPricePeriod?.toString() ?? "",
-  });
+  if (data.vendor) {
+    drawVendorInfo(page, font, data.vendor);
+  }
+
+  drawOrdererInfo(page, font);
   drawRemarkInfo(page, font, data.remark ?? "");
+
   drawPriceInfo(page, font, {
-    discount: data.discount?.toLocaleString() ?? "",
-    tax: data.tax?.toLocaleString() ?? "",
-    totalPrice: data.totalPrice?.toLocaleString() ?? "",
-    grandTotal: data.grandTotal?.toLocaleString() ?? "",
+    price: data.price?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
+    discount: data.discount?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
+    totalPrice: data.totalPrice?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
+    tax: data.tax?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
+    grandTotal: data.grandTotal?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
   });
 };

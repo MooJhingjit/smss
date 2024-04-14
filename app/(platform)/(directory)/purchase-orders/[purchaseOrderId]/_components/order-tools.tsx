@@ -1,7 +1,11 @@
 "use client";
 import React from "react";
 import { LockIcon, PrinterIcon } from "lucide-react";
-import { PurchaseOrderPaymentType, PurchaseOrderStatus, QuotationStatus } from "@prisma/client";
+import {
+  PurchaseOrderPaymentType,
+  PurchaseOrderStatus,
+  QuotationStatus,
+} from "@prisma/client";
 // import * as Select from '@radix-ui/react-select';
 import { purchaseOrderStatusMapping } from "@/app/config";
 import { MutationResponseType } from "@/components/providers/query-provider";
@@ -30,7 +34,7 @@ type Props = {
   isLocked?: boolean;
   paymentType: PurchaseOrderPaymentType;
   paymentDue: string;
-  quotationStatus: QuotationStatus | undefined
+  quotationStatus: QuotationStatus | undefined;
 };
 
 export default function PurchaseOrderTools(props: Props) {
@@ -42,7 +46,7 @@ export default function PurchaseOrderTools(props: Props) {
     isLocked,
     paymentDue,
     paymentType,
-    quotationStatus
+    quotationStatus,
   } = props;
 
   const { mutate } = useMutation<
@@ -151,34 +155,32 @@ export default function PurchaseOrderTools(props: Props) {
           </div>
         </ItemList>
 
-        {
-          quotationStatus && (
-            <ItemList label="สถานะ (QT)">
-              <div className=" text-sm leading-6 text-gray-700 flex space-x-2">
-                {/* {isLocked && (
+        {quotationStatus && (
+          <ItemList label="สถานะ (QT)">
+            <div className=" text-sm leading-6 text-gray-700 flex space-x-2">
+              {/* {isLocked && (
                   <div className="col-span-1 flex items-center">
                     <LockIcon className="w-4 h-4 text-yellow-500" />
                   </div>
                 )} */}
-                <div className="flex items-center space-x-2">
-                  <Link
-                    href={`/quotations/${quotationId}`}
-                    className="ml-1.5 text-yellow-600 underline whitespace-nowrap"
-                  >
-                    {quotationCode}
-                  </Link>
-                  <QuotationStatusDropdown
-                    onStatusChange={(s) => {
-                      // handleChange({ status: s });
-                      qtMutate({ status: s });
-                    }}
-                    curStatus={quotationStatus}
-                  />
-                </div>
+              <div className="flex items-center space-x-2">
+                <Link
+                  href={`/quotations/${quotationId}`}
+                  className="ml-1.5 text-yellow-600 underline whitespace-nowrap"
+                >
+                  {quotationCode}
+                </Link>
+                <QuotationStatusDropdown
+                  onStatusChange={(s) => {
+                    // handleChange({ status: s });
+                    qtMutate({ status: s });
+                  }}
+                  curStatus={quotationStatus}
+                />
               </div>
-            </ItemList>
-          )
-        }
+            </div>
+          </ItemList>
+        )}
 
         <ItemList label="การชำระเงิน">
           <PaymentOptionControl
@@ -201,7 +203,7 @@ export default function PurchaseOrderTools(props: Props) {
                 </Link>
               </div>
             )} */}
-            <PrintButton />
+            <PrintButton orderId={orderId} />
           </div>
         </ItemList>
       </div>
@@ -226,13 +228,14 @@ const ItemStatus = ({
       <SelectContent className="bg-white text-xs p-2 space-y-2 ">
         {allStatus.map((status, index) => (
           <SelectItem
-
             className={
               status === curStatus
                 ? "bg-blue-100 text-blue-700"
                 : "text-gray-700"
             }
-            value={status} key={index}>
+            value={status}
+            key={index}
+          >
             {purchaseOrderStatusMapping[status]}
           </SelectItem>
         ))}
@@ -241,9 +244,38 @@ const ItemStatus = ({
   );
 };
 
-const PrintButton = () => {
+const PrintButton = ({ orderId }: { orderId: number }) => {
+  const onPrintClick = () => {
+    try {
+      fetch(`/api/purchase-orders/invoice/${orderId}`, { method: "POST" })
+        .then((res) => res.blob())
+        .then((blob) => URL.createObjectURL(blob))
+        .then((url) => {
+          // Create an anchor element and use it to navigate to the URL
+          const a = document.createElement("a");
+          a.href = url;
+          a.target = "_blank"; // Ensure it opens in a new tab
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+
+          // Optionally, you might not want to revoke the URL immediately
+          // since the file might still be loading in the new tab
+          // window.URL.revokeObjectURL(url);
+
+          // You might want to revoke it later or based on some other conditions
+          setTimeout(() => {
+            window.URL.revokeObjectURL(url); // Clean up the blob URL after it's no longer needed
+          }, 60000); // for example, after 1 minute
+        });
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
+
   return (
     <Button
+      onClick={onPrintClick}
       variant="outline"
       className="inline-flex items-center px-2 py-1 rounded-md bg-gray-100 text-gray-700 text-xs h-full"
     >
