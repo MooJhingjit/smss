@@ -7,18 +7,19 @@ import DocumentItems from "@/components/document-lists";
 import PurchaseOrders from "./_components/purchase-orders";
 import { db } from "@/lib/db";
 import { QuotationListWithRelations } from "@/types";
-import { QuotationStatus, QuotationType } from "@prisma/client";
+import {  QuotationType } from "@prisma/client";
 import { InfoIcon } from "lucide-react";
 import { classNames } from "@/lib/utils";
 import { quotationTypeMapping } from "@/app/config";
 import { useUser } from "@/hooks/use-user";
-import Link from "next/link";
 import DataNotfound from "@/components/data-notfound";
 
-const getData = async (quotationId: string) => {
-  const { isAdmin, info } = await useUser();
-
-  if (!info?.id) {
+const getData = async (
+  quotationId: string,
+  isAdmin: boolean,
+  userId?: string
+) => {
+  if (!userId) {
     return null;
   }
 
@@ -29,7 +30,7 @@ const getData = async (quotationId: string) => {
 
   // If the user is not an admin, add the sellerId condition
   if (!isAdmin) {
-    where.sellerId = parseInt(info.id);
+    where.sellerId = parseInt(userId);
   }
 
   const data = await db.quotation.findUnique({
@@ -66,8 +67,8 @@ export default async function QuotationDetails(
   props: Readonly<QuotationIdPageProps>
 ) {
   const { params } = props;
-  const data = await getData(params.quotationId);
-  const { isAdmin } = await useUser();
+  const { isAdmin, info } = await useUser();
+  const data = await getData(params.quotationId, isAdmin, info?.id);
 
   const pages = [
     {
@@ -100,9 +101,7 @@ export default async function QuotationDetails(
   ];
 
   if (!data) {
-    return (
-      <DataNotfound link="/quotations"/>
-    );
+    return <DataNotfound link="/quotations" />;
   }
 
   const { contact, lists, status, paymentType, paymentDue } = data;
