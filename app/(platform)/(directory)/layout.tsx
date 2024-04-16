@@ -9,7 +9,7 @@ export default function HomeLayout(props: Props) {
   return (
     <div className="">
       <MainNavbar showMenu />
-      <div className="pt-20 pb-20 mx-auto max-w-7xl px-2 xl:px-0 ">
+      <div className="pt-20 pb-20 mx-auto  px-2 xl:px-10 ">
         <div className="">{children}</div>
       </div>
     </div>

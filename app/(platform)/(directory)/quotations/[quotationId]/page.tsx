@@ -12,12 +12,28 @@ import { InfoIcon } from "lucide-react";
 import { classNames } from "@/lib/utils";
 import { quotationTypeMapping } from "@/app/config";
 import { useUser } from "@/hooks/use-user";
+import Link from "next/link";
+import DataNotfound from "@/components/data-notfound";
 
 const getData = async (quotationId: string) => {
+  const { isAdmin, info } = await useUser();
+
+  if (!info?.id) {
+    return null;
+  }
+
+  // Start with an empty where clause
+  const where: { id: number; sellerId?: number } = {
+    id: parseInt(quotationId), // Always include the id
+  };
+
+  // If the user is not an admin, add the sellerId condition
+  if (!isAdmin) {
+    where.sellerId = parseInt(info.id);
+  }
+
   const data = await db.quotation.findUnique({
-    where: {
-      id: parseInt(quotationId),
-    },
+    where,
     include: {
       contact: true,
       seller: true,
@@ -47,7 +63,7 @@ interface QuotationIdPageProps {
 }
 
 export default async function QuotationDetails(
-  props: Readonly<QuotationIdPageProps>,
+  props: Readonly<QuotationIdPageProps>
 ) {
   const { params } = props;
   const data = await getData(params.quotationId);
@@ -67,7 +83,7 @@ export default async function QuotationDetails(
             <p
               className={classNames(
                 "rounded bg-gray-100 px-2 py-0.5 text-xs tracking-wide text-gray-600 space-x-2",
-                data?.type === QuotationType.service ? "text-green-600" : "",
+                data?.type === QuotationType.service ? "text-green-600" : ""
               )}
             >
               <span>{data?.code}</span>
@@ -85,9 +101,7 @@ export default async function QuotationDetails(
 
   if (!data) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <p className="text-gray-500 text-sm">Quotation not found</p>
-      </div>
+      <DataNotfound link="/quotations"/>
     );
   }
 

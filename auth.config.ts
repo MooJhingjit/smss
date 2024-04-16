@@ -1,6 +1,7 @@
 import { UserRole } from "@prisma/client";
 import type { NextAuthConfig } from "next-auth";
 import { db } from "./lib/db";
+import { protectedRoutes } from "./config/protectedRoutes";
 // ref. https://nextjs.org/learn/dashboard-app/adding-authentication
 
 const getUserById = async (id: number) => {
@@ -20,14 +21,29 @@ export const authConfig = {
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
+      const isAdmin = auth?.user.role === "admin";
       const isOnDashboard = nextUrl.pathname !== SIGN_IN_ROUTE;
-      if (isOnDashboard) {
-        if (isLoggedIn) return true;
-        return false; // Redirect unauthenticated users to login page
-      } else if (isLoggedIn) {
+      const isOnSignIn = nextUrl.pathname === SIGN_IN_ROUTE;
+
+      if (!isLoggedIn) {
+        if (isOnDashboard) return false; // Redirect unauthenticated users to login page
+        
+        // Allow unauthenticated users to access the login page
+        return true;
+      }
+
+      if (isOnSignIn) return Response.redirect(new URL("/", nextUrl));
+
+      // Allow authenticated users to access the dashboard
+      if (isAdmin) return true;
+
+      // non-admin users can't access protected routes
+      if (protectedRoutes.includes(nextUrl.pathname)) {
         return Response.redirect(new URL("/", nextUrl));
       }
+
       return true;
+
     },
     async jwt({ token, session }) {
       // Persist the OAuth access_token to the token right after signin\
