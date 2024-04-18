@@ -2,7 +2,6 @@ import { getDateFormat } from "@/lib/utils";
 import { PurchaseOrderWithRelations } from "@/types";
 import { ExternalLink } from "lucide-react";
 import Link from "next/link";
-import { render } from "react-dom";
 
 export const purchaseOrderColumns = [
   { name: "Code", key: "code" },
