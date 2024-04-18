@@ -1,7 +1,6 @@
 "use client";
 import React, { useEffect } from "react";
 import PageComponentWrapper from "@/components/page-component-wrapper";
-import { Input } from "@/components/ui/input";
 import {
   PurchaseOrderItemWithRelations,
   PurchaseOrderWithRelations,
@@ -62,6 +61,31 @@ export default function PurchaseOrderItems({
       render: (item: PurchaseOrderItemWithRelations) => {
         const { name, type } = item;
         return <ProductBadge name={name} type={type} />;
+      },
+    },
+    {
+      name: "ราคาต่อหน่วย",
+      key: "unitPrice",
+      render: (item: PurchaseOrderItemWithRelations) => {
+        return (
+          <p>
+            {item.unitPrice?.toLocaleString("th-TH", {
+              style: "currency",
+              currency: "THB",
+            })}
+          </p>
+        );
+      },
+    },
+    {
+      name: "จำนวน",
+      key: "quantity",
+      render: (item: PurchaseOrderItemWithRelations) => {
+        return (
+          <p>
+            {item.quantity} {item.unit} 
+          </p>
+        );
       },
     },
     {

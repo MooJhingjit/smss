@@ -41,6 +41,18 @@ export const columns: ColumnDef<Product>[] = [
   {
     accessorKey: "cost",
     header: "ต้นทุน",
+    cell: ({ row }) => {
+      const { cost } = row.original;
+      
+      return parseInt(cost)?.toLocaleString("th-TH", {
+        style: "currency",
+        currency: "THB",
+      }) ?? 0
+    }
+  },
+  {
+    accessorKey: "unit",
+    header: "หน่วย",
   },
   {
     accessorKey: "percentage",

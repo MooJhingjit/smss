@@ -20,8 +20,8 @@ export const getQuotationTotalPrice = (items: QuotationListWithRelations[]) => {
     (acc, curr) => {
       const quantity = curr.quantity ?? 0;
       return {
-        totalCost: acc.totalCost + (curr.cost ?? 0) * quantity,
-        totalPrice: acc.totalPrice + (curr.price ?? 0) * quantity,
+        totalCost: acc.totalCost + (curr.cost ?? 0) * quantity, // excluded interest (%) to generate PO
+        totalPrice: acc.totalPrice + (curr.unitPrice ?? 0) * quantity, // included interest (%)
         discount: acc.discount + (curr.discount ?? 0),
         quantity: acc.quantity + quantity,
         tax: acc.tax + (curr.withholdingTax ?? 0),

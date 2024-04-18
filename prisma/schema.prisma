@@ -73,6 +73,7 @@ model Product {
   vendorId       Int
   description    String?         @db.Text
   cost           Float?
+  unit           String?
   percentage     Decimal?
   type           ProductType     @default(product)
   createdAt      DateTime        @default(now())
@@ -252,6 +253,8 @@ model PurchaseOrderItem {
   purchaseOrder            PurchaseOrder             @relation(fields: [purchaseOrderId], references: [id])
   name                     String
   price                    Float?
+  unitPrice                Float?
+  unit                     String?
   quantity                 Int?
   description              String?                   @db.Text
   type                     ProductType               @default(product)

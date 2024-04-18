@@ -50,6 +50,7 @@ export const NewProductModal = () => {
     const name = formData.get("name") as string;
     const cost = formData.get("cost") as string;
     const percentage = formData.get("percentage") as string;
+    const unit = formData.get("unit") as string;
     const vendor = formData.get("vendor") as string;
     const description = formData.get("description") as string;
 
@@ -57,6 +58,7 @@ export const NewProductModal = () => {
       handleUpdate.execute({
         id: product.id,
         percentage,
+        unit,
         cost,
         description,
       });
@@ -68,6 +70,7 @@ export const NewProductModal = () => {
       vendorId: parseInt(vendor),
       cost: cost,
       percentage: percentage,
+      unit: unit,
       description,
     });
   };
@@ -157,6 +160,14 @@ export const NewProductModal = () => {
               label="กำไร(%)"
               type="number"
               defaultValue={product?.percentage}
+              errors={fieldErrors}
+            />
+          </div>
+          <div className="">
+            <FormInput
+              id="unit"
+              label="หน่วย"
+              defaultValue={product?.unit}
               errors={fieldErrors}
             />
           </div>

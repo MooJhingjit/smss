@@ -122,6 +122,9 @@ export default function BillingInfo({
   }, [price, discount, extraCost, isDirty, onChange]);
   
   React.useEffect(() => {
+
+    if (!isDirty) return;
+
    // update grandTotal when tax change
     const { tax, totalPrice } = getValues();
 
@@ -131,7 +134,7 @@ export default function BillingInfo({
     setValue("grandTotal", grandTotal);
     setValue("tax", tax);
 
-  }, [tax, getValues, setValue]);
+  }, [isDirty, tax, getValues, setValue]);
 
   const priceBeforeTax = getValues("totalPrice")
 

@@ -12,5 +12,6 @@ export const ProductSchema = z.object({
   //   }),
   cost: z.string().optional(),
   percentage: z.string().optional(),
+  unit: z.string().optional(),
   description: z.string().optional(),
 });

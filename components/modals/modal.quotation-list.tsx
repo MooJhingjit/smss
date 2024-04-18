@@ -113,7 +113,8 @@ export const QuotationListModal = () => {
   const onSubmit = async (formData: FormData) => {
     const productId = formData.get("productId") as string;
     const name = formData.get("name") as string;
-    const price = formData.get("price") as string;
+    // const price = formData.get("price") as string;
+    const unitPrice = formData.get("unitPrice") as string;
     const cost = formData.get("cost") as string;
     const percentage = formData.get("percentage") as string;
     const quantity = formData.get("quantity") as string;
@@ -139,8 +140,8 @@ export const QuotationListModal = () => {
       quotationId: refs.quotationRef.id,
       productId: product,
       name,
-      price: parseFloat(price),
-      unitPrice: parseFloat(price),
+      price: parseFloat(unitPrice) * parseFloat(quantity),
+      unitPrice: parseFloat(unitPrice),
       cost: parseFloat(cost),
       percentage: parseFloat(percentage),
       quantity: parseFloat(quantity),
@@ -180,7 +181,7 @@ export const QuotationListModal = () => {
       if (quantity) {
         totalPrice = unitPrice * parseFloat(quantity);
       }
-      setValue("price", unitPrice.toString());
+      setValue("unitPrice", unitPrice.toString());
 
       // calculate tax 7%
       const tax = (totalPrice * 7) / 100;
@@ -296,8 +297,8 @@ export const QuotationListModal = () => {
         </div>
         <div className="">
           <FormInput
-            key={`price_${refs?.timestamps}`}
-            id="price"
+            key={`unitPrice_${refs?.timestamps}`}
+            id="unitPrice"
             label="ราคาขายต่อหน่วย"
             required
             type="number"

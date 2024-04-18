@@ -6,6 +6,8 @@ export const schema = z.object({
   name: z.string(), // product name
   productId: z.number({ invalid_type_error: "Please select a product" }),
   price: z.number().positive(),
+  unitPrice: z.number().positive(),
+  unit: z.string(),
   quantity: z.number().positive(),
   description: z.string().optional(),
   type: z.enum(["product", "service"]),

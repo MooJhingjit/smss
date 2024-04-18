@@ -190,13 +190,13 @@ const drawPriceInfo = (
     price,
     discount,
     totalPrice,
-    tax,
+    vat,
     grandTotal,
   }: {
     price: string;
     discount: string;
     totalPrice: string;
-    tax: string;
+    vat: string;
     grandTotal: string;
   }
 ) => {
@@ -229,8 +229,8 @@ const drawPriceInfo = (
     ...config,
   });
 
-  page.drawText(tax, {
-    x: columnPosition + 48 - getTextWidth(tax, config),
+  page.drawText(vat, {
+    x: columnPosition + 48 - getTextWidth(vat, config),
     y: 128,
     maxWidth: 100,
     ...config,
@@ -260,8 +260,9 @@ const generate = async (id: number, data: PurchaseOrderWithRelations) => {
     index: ITEM_X_Start,
     description: ITEM_X_Start + 30,
     quantity: ITEM_X_Start + 359,
-    unitPrice: ITEM_X_Start + 410,
-    amount: ITEM_X_Start + 480,
+    unit: ITEM_X_Start + 390,
+    unitPrice: ITEM_X_Start + 420,
+    amount: ITEM_X_Start + 485,
   };
 
   const basePath = process.cwd(); // Gets the base path of your project
@@ -310,6 +311,24 @@ const generate = async (id: number, data: PurchaseOrderWithRelations) => {
     // Quantity
     currentPage.drawText(data.quantity ? data.quantity.toString() : "", {
       x: columnPosition.quantity,
+      y: lineStart,
+      maxWidth: 20,
+      ...config,
+    });
+
+    currentPage.drawText(data.unit ?? "", {
+      x: columnPosition.unit,
+      y: lineStart,
+      maxWidth: 20,
+      ...config,
+    });
+
+    const unitPrice = data.unitPrice
+    ? data.unitPrice.toLocaleString("th-TH", CURRENCY_FORMAT)
+    : "";
+
+    currentPage.drawText(data.unitPrice?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "", {
+      x: columnPosition.unitPrice + 44 - getTextWidth(unitPrice, config),
       y: lineStart,
       maxWidth: 20,
       ...config,
@@ -476,7 +495,7 @@ const drawStaticInfo = (
     price: data.price?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
     discount: data.discount?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
     totalPrice: data.totalPrice?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
-    tax: data.tax?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
+    vat: data.vat?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
     grandTotal: data.grandTotal?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
   });
 };

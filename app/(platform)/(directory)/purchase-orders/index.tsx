@@ -2,6 +2,7 @@ import { getDateFormat } from "@/lib/utils";
 import { PurchaseOrderWithRelations } from "@/types";
 import { ExternalLink } from "lucide-react";
 import Link from "next/link";
+import { render } from "react-dom";
 
 export const purchaseOrderColumns = [
   { name: "Code", key: "code" },
@@ -13,7 +14,26 @@ export const purchaseOrderColumns = [
     },
   },
   // { name: "ส่วนลด", key: "discount" },
-  { name: "ราคาสั่งซื้อ", key: "grandTotal" },
+  {
+    name: "ราคาสั่งซื้อ", key: "totalPrice",
+    render: (item: PurchaseOrderWithRelations) => {
+      return item.totalPrice?.toLocaleString("th-TH", {
+        style: "currency",
+        currency: "THB",
+      });
+    }
+
+  },
+  {
+    name: "ราคาสั่งซื้อรวม vat", key: "grandTotal",
+    render: (item: PurchaseOrderWithRelations) => {
+      return item.grandTotal?.toLocaleString("th-TH", {
+        style: "currency",
+        currency: "THB",
+      });
+    }
+
+  },
   {
     name: "สร้างเมื่อ",
     key: "createdAt",

@@ -13,6 +13,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
+
     // get all quotation items from quotationId
     const quotationLists = await db.quotationList.findMany({
       where: {
@@ -27,6 +28,10 @@ export async function POST(req: NextRequest) {
     const quotationListsByVendor = getQuotationGroupByVendor(
       quotationLists as QuotationListWithRelations[],
     );
+
+    // console.log('quotationListsByVendor', quotationListsByVendor);
+    // return;
+
 
     let sumTotalPrice: number = 0;
     let sumDiscount: number = 0;
@@ -86,6 +91,8 @@ export async function POST(req: NextRequest) {
     const res = await Promise.all(
       purchaseOrders.map(async (purchaseOrder) => {
         const quotationLists = quotationListsByVendor[purchaseOrder.vendorId];
+
+        console.log('quotationLists', quotationLists);
         return Promise.all(
           quotationLists.map(
             async (quotationList: QuotationListWithRelations) => {
@@ -93,28 +100,32 @@ export async function POST(req: NextRequest) {
                 data: {
                   purchaseOrderId: purchaseOrder.id,
                   name: quotationList.product.name,
-                  price: quotationList.cost,
                   quantity: quotationList.quantity,
                   description: quotationList.product.description,
+                  unit: quotationList.product.unit,
+                  price: (quotationList.cost ?? 0) * (quotationList.quantity ?? 1),
+                  unitPrice: quotationList.cost,
                   type: quotationList.product.type,
                   status: "pending",
                 },
               });
 
               // generate Items based on purchaseOrder item quantity
-              await Promise.all(
-                Array.from({ length: purchaseOrderItem.quantity ?? 1 }).map(
-                  async () =>
-                    await db.item.create({
-                      data: {
-                        productId: quotationList.productId ?? 0,
-                        purchaseOrderItemId: purchaseOrderItem.id,
-                        name: quotationList.product.name,
-                        cost: quotationList.cost,
-                      },
-                    }),
-                ),
-              );
+              if (quotationList.product.type === "product") {
+                await Promise.all(
+                  Array.from({ length: purchaseOrderItem.quantity ?? 1 }).map(
+                    async () =>
+                      await db.item.create({
+                        data: {
+                          productId: quotationList.productId ?? 0,
+                          purchaseOrderItemId: purchaseOrderItem.id,
+                          name: quotationList.product.name,
+                          cost: quotationList.cost,
+                        },
+                      }),
+                  ),
+                );
+              }
 
               return purchaseOrderItem;
             },
