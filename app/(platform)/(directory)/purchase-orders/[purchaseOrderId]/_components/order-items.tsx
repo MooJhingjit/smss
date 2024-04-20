@@ -22,7 +22,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useMutation } from "@tanstack/react-query";
 import { MutationResponseType } from "@/components/providers/query-provider";
 import { customRevalidatePath } from "@/actions/revalidateTag";
-import PO_ITEM_SERVICES from "@/app/services/service.purchase-order-items";
+import PO_ITEM_SERVICES from "@/app/services/api.purchase-order-items";
 
 type Payload = {
   withholdingTaxEnabled: boolean;

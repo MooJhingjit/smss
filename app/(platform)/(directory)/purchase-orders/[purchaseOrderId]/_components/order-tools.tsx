@@ -21,10 +21,10 @@ import {
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { customRevalidatePath } from "@/actions/revalidateTag";
-import PO_SERVICES from "@/app/services/service.purchase-order";
+import PO_SERVICES from "@/app/services/api.purchase-order";
 import PaymentOptionControl from "@/components/payment-option-control";
 import { QuotationStatusDropdown } from "../../../quotations/[quotationId]/_components/quotation-tools";
-import QT_SERVICES from "@/app/services/service.quotation";
+import QT_SERVICES from "@/app/services/api.quotation";
 
 type Props = {
   orderId: number;

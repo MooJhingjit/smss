@@ -14,6 +14,7 @@ import { FormSubmit } from "@/components/form/form-submit";
 import { Button } from "@/components/ui/button";
 import { QuotationType } from "@prisma/client";
 import ProductBadge from "@/components/badges/product-badge";
+import { calculateQuotationItemPrice } from "@/app/services/service.quotation";
 
 type Props = {
   quotationId: number;
@@ -159,23 +160,23 @@ type BillingProps = {
 const BillingInfo = (props: BillingProps) => {
   const { data } = props;
 
-  const summary = data.reduce(
-    (acc, item: QuotationListWithRelations) => {
-      const discount = item.discount ?? 0;
-      let price = item.price ?? 0;
-      const quantity = item.quantity ?? 1;
-      price = price * quantity;
-      const totalPrice = item.totalPrice ?? 0;
+  // const summary = data.reduce(
+  //   (acc, item: QuotationListWithRelations) => {
+  //     const discount = item.discount ?? 0;
+  //     let price = item.price ?? 0;
+  //     const quantity = item.quantity ?? 1;
+  //     price = price * quantity;
+  //     const totalPrice = item.totalPrice ?? 0;
 
-      acc.subtotal += price;
-      acc.discount += discount;
-      acc.vat += item.withholdingTax ?? 0;
-      acc.grandTotal += totalPrice;
-      return acc;
-    },
-    { subtotal: 0, discount: 0, total: 0, vat: 0, grandTotal: 0 },
-  );
-
+  //     acc.subtotal += price;
+  //     acc.discount += discount;
+  //     acc.vat += item.withholdingTax ?? 0;
+  //     acc.grandTotal += totalPrice;
+  //     return acc;
+  //   },
+  //   { subtotal: 0, discount: 0, total: 0, vat: 0, grandTotal: 0 },
+  // );
+  const summary = calculateQuotationItemPrice(data);
   // TODO save to db
   return (
     <div className="bg-gray-100 p-4 w-full sm:rounded-lg sm:px-6">
@@ -183,7 +184,7 @@ const BillingInfo = (props: BillingProps) => {
         <div className="flex items-center justify-between py-4">
           <dt className="text-gray-600">Subtotal</dt>
           <dd className="font-medium text-gray-900">
-            {summary.subtotal.toLocaleString("th-TH", {
+            {summary.totalPrice.toLocaleString("th-TH", {
               style: "currency",
               currency: "THB",
             })}
@@ -201,7 +202,7 @@ const BillingInfo = (props: BillingProps) => {
         <div className="flex items-center justify-between py-4">
           <dt className="text-gray-600">7% Vat</dt>
           <dd className="font-medium text-gray-900">
-            {summary.vat.toLocaleString("th-TH", {
+            {summary.tax.toLocaleString("th-TH", {
               style: "currency",
               currency: "THB",
             })}

@@ -1,11 +1,10 @@
 import { NextResponse, NextRequest } from "next/server";
 import { db } from "@/lib/db";
-import { QuotationList } from "@prisma/client";
 import { generateCode } from "@/lib/utils";
 import {
-  getQuotationGroupByVendor,
-  getQuotationTotalPrice,
-} from "@/lib/quotation.helper";
+  groupQuotationByVendor,
+  calculateQuotationItemPrice,
+} from "@/app/services/service.quotation";
 import { QuotationListWithRelations } from "@/types";
 
 // PUT /api/quotations/:id
@@ -13,8 +12,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-
-    // get all quotation items from quotationId
+    // get all quotation items
     const quotationLists = await db.quotationList.findMany({
       where: {
         quotationId: body.quotationId,
@@ -25,32 +23,24 @@ export async function POST(req: NextRequest) {
     });
 
     // group quotation lists by vendor
-    const quotationListsByVendor = getQuotationGroupByVendor(
-      quotationLists as QuotationListWithRelations[],
+    const quotationListsByVendor = groupQuotationByVendor(
+      quotationLists as QuotationListWithRelations[]
     );
 
-    // console.log('quotationListsByVendor', quotationListsByVendor);
-    // return;
+    // const { sumTotalPrice, sumDiscount, sumTotalTax, grandTotal } =
+    //   summarizeQuotationTotalPrice(quotationListsByVendor);
 
-
-    let sumTotalPrice: number = 0;
-    let sumDiscount: number = 0;
-    let sumTotalTax: number = 0;
+    // const { totalPrice, tax, discount } = calculateQuotationItemPrice(quotationLists)
 
     // create purchase orders for each vendor
     const purchaseOrders = await Promise.all(
       Object.keys(quotationListsByVendor).map(async (vendorId) => {
-        const vendorIdNum = Number(vendorId);
-        const lists = quotationListsByVendor[vendorIdNum];
-        const { totalCost, totalPrice, discount, tax } =
-          getQuotationTotalPrice(lists);
+        const lists = quotationListsByVendor[Number(vendorId)];
 
-        // summary for quotation
-        sumTotalPrice += totalPrice;
-        sumDiscount += discount;
-        sumTotalTax += tax;
+        // all lists are from the same vendor
+        const { totalCost } = calculateQuotationItemPrice(lists);
 
-        const PO_tax = 0 // totalCost * 0.03;
+        const PO_tax = 0; // totalCost * 0.03;
         const PO_vat = totalCost * 0.07;
         const purchaseOrder = await db.purchaseOrder.create({
           data: {
@@ -73,17 +63,19 @@ export async function POST(req: NextRequest) {
         });
 
         return purchaseOrder;
-      }),
+      })
     );
+
+    const quotationSummary = calculateQuotationItemPrice(quotationLists)
 
     // update total price, tax and total discount for quotation
     await db.quotation.update({
       where: { id: body.quotationId },
       data: {
-        totalPrice: sumTotalPrice,
-        discount: sumDiscount,
-        tax: sumTotalTax,
-        grandTotal: sumTotalPrice - sumDiscount + sumTotalTax,
+        totalPrice: quotationSummary.totalPrice,
+        discount: quotationSummary.discount,
+        tax: quotationSummary.tax,
+        grandTotal: quotationSummary.grandTotal,
       },
     });
 
@@ -92,7 +84,6 @@ export async function POST(req: NextRequest) {
       purchaseOrders.map(async (purchaseOrder) => {
         const quotationLists = quotationListsByVendor[purchaseOrder.vendorId];
 
-        console.log('quotationLists', quotationLists);
         return Promise.all(
           quotationLists.map(
             async (quotationList: QuotationListWithRelations) => {
@@ -103,7 +94,8 @@ export async function POST(req: NextRequest) {
                   quantity: quotationList.quantity,
                   description: quotationList.product.description,
                   unit: quotationList.product.unit,
-                  price: (quotationList.cost ?? 0) * (quotationList.quantity ?? 1),
+                  price:
+                    (quotationList.cost ?? 0) * (quotationList.quantity ?? 1),
                   unitPrice: quotationList.cost,
                   type: quotationList.product.type,
                   status: "pending",
@@ -122,16 +114,16 @@ export async function POST(req: NextRequest) {
                           name: quotationList.product.name,
                           cost: quotationList.cost,
                         },
-                      }),
-                  ),
+                      })
+                  )
                 );
               }
 
               return purchaseOrderItem;
-            },
-          ),
+            }
+          )
         );
-      }),
+      })
     );
 
     // lock quotation

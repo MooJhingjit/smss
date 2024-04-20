@@ -9,7 +9,7 @@ import {
   queryClient,
 } from "@/components/providers/query-provider";
 import { toast } from "sonner";
-import QT_SERVICES from "@/app/services/service.quotation";
+import QT_SERVICES from "@/app/services/api.quotation";
 import Link from "next/link";
 import { FormInput } from "@/components/form/form-input";
 import { useSearchParams } from "next/navigation";

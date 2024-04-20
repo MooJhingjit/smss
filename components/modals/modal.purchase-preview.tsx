@@ -14,7 +14,7 @@ import { Label } from "../ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/components/providers/query-provider";
-import PURCHASE_ORDER_SERVICES from "@/app/services/service.purchase-order";
+import PURCHASE_ORDER_SERVICES from "@/app/services/api.purchase-order";
 import { toast } from "sonner";
 import TableLists from "@/components/table-lists";
 import { PurchaseOrderPreview } from "@/types";

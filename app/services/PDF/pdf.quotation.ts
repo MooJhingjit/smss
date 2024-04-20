@@ -1,12 +1,24 @@
 import { db } from "@/lib/db";
-import { Contact, Quotation, QuotationList, User } from "@prisma/client";
+import {
+  Contact,
+  Product,
+  Quotation,
+  QuotationList,
+  User,
+} from "@prisma/client";
 import { PDFDocument, PDFFont, PDFPage, rgb, PDFEmbeddedPage } from "pdf-lib";
 import fs from "fs/promises"; // Node.js file system module with promises
 import fontkit from "@pdf-lib/fontkit";
 import { getBoundingBox } from "./pdf.helpers";
 import { getDateFormat } from "@/lib/utils";
-import path from 'path';
-import { readFile } from 'fs/promises';
+import path from "path";
+import { readFile } from "fs/promises";
+import { QuotationListWithRelations } from "@/types";
+import {
+  calculateQuotationItemPrice,
+  groupQuotationByVendor,
+  // summarizeQuotationTotalPrice,
+} from "../service.quotation";
 
 const PAGE_FONT_SIZE = 8;
 const CURRENCY_FORMAT = {
@@ -25,7 +37,11 @@ const getQuotation = async (
 ): Promise<QuotationWithRelations | null> => {
   const quotation = await db.quotation.findUnique({
     include: {
-      lists: true,
+      lists: {
+        include: {
+          product: true,
+        },
+      },
       seller: true,
       contact: true,
     },
@@ -49,7 +65,28 @@ export const generateInvoice = async (id: number) => {
       throw new Error("Quotation not found");
     }
 
-    return generate(id, quotation);
+    let temporaryQuotationTotalPrice = {};
+    // check if total price is not yet calculated
+    if (!quotation.grandTotal) {
+      // const quotationListsByVendor = groupQuotationByVendor(
+      //   quotation.lists as QuotationListWithRelations[]
+      // );
+
+      // const { sumTotalPrice, sumDiscount, sumTotalTax, grandTotal } =
+      //   summarizeQuotationTotalPrice(quotationListsByVendor);
+
+      const { totalPrice, discount, tax, grandTotal } =
+        calculateQuotationItemPrice(quotation.lists);
+
+      temporaryQuotationTotalPrice = {
+        totalPrice,
+        discount,
+        tax,
+        grandTotal,
+      };
+    }
+
+    return generate(id, { ...quotation, ...temporaryQuotationTotalPrice });
   } catch (error) {
     console.log(error);
     throw new Error("Error writing PDF file");
@@ -204,7 +241,7 @@ const drawPriceInfo = (
     totalPrice,
     discount,
     tax,
-    grandTotal
+    grandTotal,
   }: {
     totalPrice: string;
     discount: string;
@@ -241,7 +278,6 @@ const drawPriceInfo = (
     ...config,
   });
 
- 
   page.drawText(grandTotal, {
     x: columnPosition + 46 - getTextWidth(grandTotal, config),
     y: 106,
@@ -271,8 +307,11 @@ const generate = async (id: number, data: QuotationWithRelations) => {
   };
 
   const basePath = process.cwd(); // Gets the base path of your project
-  const fontPath = path.join(basePath, 'public/fonts/Sarabun-Regular.ttf');
-  const pdfTemplatePath = path.join(basePath, 'public/pdf/quotation-template.pdf');
+  const fontPath = path.join(basePath, "public/fonts/Sarabun-Regular.ttf");
+  const pdfTemplatePath = path.join(
+    basePath,
+    "public/pdf/quotation-template.pdf"
+  );
   const [pdfDoc, fontData, existingPdfBytes] = await Promise.all([
     PDFDocument.create(),
     readFile(fontPath),
@@ -320,7 +359,9 @@ const generate = async (id: number, data: QuotationWithRelations) => {
     });
 
     // Unit Price
-    const unitPriceText = data.unitPrice ? data.unitPrice.toLocaleString("th-TH", CURRENCY_FORMAT) : "";
+    const unitPriceText = data.unitPrice
+      ? data.unitPrice.toLocaleString("th-TH", CURRENCY_FORMAT)
+      : "";
     currentPage.drawText(unitPriceText, {
       x: columnPosition.unitPrice + 44 - getTextWidth(unitPriceText, config),
       y: lineStart,
@@ -329,7 +370,9 @@ const generate = async (id: number, data: QuotationWithRelations) => {
     });
 
     // Amount
-    const amountText = data.totalPrice ? data.totalPrice.toLocaleString("th-TH", CURRENCY_FORMAT) : "";
+    const amountText = data.totalPrice
+      ? data.totalPrice.toLocaleString("th-TH", CURRENCY_FORMAT)
+      : "";
     currentPage.drawText(amountText, {
       x: columnPosition.amount + 44 - getTextWidth(amountText, config),
       y: lineStart,
@@ -483,7 +526,7 @@ const generate = async (id: number, data: QuotationWithRelations) => {
   // await fs.writeFile(modifiedPdfPath, modifiedPdfBytes);
   return {
     // pdfPath: modifiedPdfPath,
-    pdfBytes: modifiedPdfBytes
+    pdfBytes: modifiedPdfBytes,
   };
 };
 

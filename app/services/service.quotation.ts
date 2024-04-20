@@ -1,33 +1,69 @@
-import { fetcher } from "@/lib/fetcher";
+import { QuotationListWithRelations } from "@/types";
+import { QuotationList } from "@prisma/client";
 
-const get = (params?: Record<string, any>) => {
-  const queries = new URLSearchParams(params);
-  return fetcher(`/api/quotations?${queries}`);
+export const groupQuotationByVendor = (
+  quotationLists: QuotationListWithRelations[]
+) => {
+  return quotationLists.reduce<{ [key: number]: QuotationListWithRelations[] }>(
+    (acc, curr) => {
+      if (!acc[curr.product.vendorId]) {
+        acc[curr.product.vendorId] = [];
+      }
+      acc[curr.product.vendorId].push(curr);
+      return acc;
+    },
+    {}
+  );
 };
 
-// const post = (data: Record<string, any>) => {
-//   return fetcher(`/api/quotations`, {
-//     method: "POST",
-//     body: JSON.stringify(data),
+export const calculateQuotationItemPrice = (
+  items: QuotationList[]
+) => {
+  // get total price and discount for each vendor
+  const summary = items.reduce(
+    (acc, curr) => {
+      const quantity = curr.quantity ?? 0;
+      return {
+        totalCost: acc.totalCost + (curr.cost ?? 0) * quantity, // excluded interest (%) to generate PO
+        totalPrice: acc.totalPrice + (curr.unitPrice ?? 0) * quantity, // included interest (%)
+        discount: acc.discount + (curr.discount ?? 0),
+        quantity: acc.quantity + quantity,
+        tax: acc.tax + (curr.withholdingTax ?? 0),
+      };
+    },
+    {
+      totalCost: 0,
+      totalPrice: 0,
+      discount: 0,
+      quantity: 0,
+      tax: 0,
+    }
+  );
+
+  const grandTotal = summary.totalPrice - summary.discount + summary.tax;
+  return { ...summary, grandTotal}
+};
+
+// export const summarizeQuotationTotalPrice = (quotationListsByVendor: {
+//   [key: number]: QuotationListWithRelations[];
+// }) => {
+//   let sumTotalPrice: number = 0;
+//   let sumDiscount: number = 0;
+//   let sumTotalTax: number = 0;
+
+//   Object.keys(quotationListsByVendor).map((vendorId) => {
+//     // loop through each vendor
+
+//     const lists = quotationListsByVendor[Number(vendorId)];
+//     const { totalPrice, discount, tax } =
+//       calculateQuotationItemPrice(lists);
+
+//     // summary for all quotations (all vendors)
+//     sumTotalPrice += totalPrice;
+//     sumDiscount += discount;
+//     sumTotalTax += tax;
 //   });
+
+//   const grandTotal = sumTotalPrice - sumDiscount + sumTotalTax
+//   return { sumTotalPrice, sumDiscount, sumTotalTax, grandTotal };
 // };
-const put = (id: number, data: Record<string, any>) => {
-  return fetcher(`/api/quotations/${id}`, {
-    method: "PUT",
-    body: JSON.stringify(data),
-  });
-};
-
-// const generateInvoice = (id: number) => {
-//   return fetcher(`/api/quotations/invoice/${id}`, {
-//     method: "POST",
-//   });
-// }
-
-const APIs = {
-  get,
-  put
-  // generateInvoice
-};
-
-export default APIs;

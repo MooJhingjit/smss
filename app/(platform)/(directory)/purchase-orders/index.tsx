@@ -14,9 +14,9 @@ export const purchaseOrderColumns = [
   },
   // { name: "ส่วนลด", key: "discount" },
   {
-    name: "ราคาสั่งซื้อ", key: "totalPrice",
+    name: "ราคาสั่งซื้อ", key: "price",
     render: (item: PurchaseOrderWithRelations) => {
-      return item.totalPrice?.toLocaleString("th-TH", {
+      return item.price?.toLocaleString("th-TH", {
         style: "currency",
         currency: "THB",
       });

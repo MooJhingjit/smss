@@ -6,7 +6,7 @@ import PageComponentWrapper from "@/components/page-component-wrapper";
 import ImageUpload from "@/components/form/form-image-upload";
 import { Media } from "@prisma/client";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import MEDIA_SERVICES from "@/app/services/service.media";
+import MEDIA_SERVICES from "@/app/services/api.media";
 import {
   MutationResponseType,
   queryClient,

@@ -2,7 +2,7 @@
 import React from "react";
 import { PenLineIcon, FileEdit, ExternalLink } from "lucide-react";
 import PageComponentWrapper from "@/components/page-component-wrapper";
-import PURCHASE_ORDER_SERVICES from "@/app/services/service.purchase-order";
+import PURCHASE_ORDER_SERVICES from "@/app/services/api.purchase-order";
 import {
   PurchaseOrderWithRelations,
   QuotationListWithRelations,
@@ -13,9 +13,9 @@ import TableLists from "@/components/table-lists";
 import { getDateFormat } from "@/lib/utils";
 import Link from "next/link";
 import {
-  getQuotationGroupByVendor,
-  getQuotationTotalPrice,
-} from "@/lib/quotation.helper";
+  groupQuotationByVendor,
+  calculateQuotationItemPrice,
+} from "@/app/services/service.quotation";
 import { usePurchasePreviewModal } from "@/hooks/use-po-preview-modal";
 import { Button } from "@/components/ui/button";
 import { purchaseOrderColumns } from "../../../purchase-orders";
@@ -40,13 +40,15 @@ export default function PurchaseOrders(props: {
   });
 
   const previewPurchaseOrders = () => {
-    const quotationListsByVendor = getQuotationGroupByVendor(quotationLists);
+    const quotationListsByVendor = groupQuotationByVendor(quotationLists);
     const purchaseOrderPreview = Object.keys(quotationListsByVendor).map(
       (vendorId) => {
         const vendorIdNum = Number(vendorId);
 
         const lists = quotationListsByVendor[vendorIdNum];
-        const { totalCost, quantity } = getQuotationTotalPrice(lists);
+
+        // all lists are from the same vendor
+        const { totalCost, quantity } = calculateQuotationItemPrice(lists);
 
         return {
           id: vendorIdNum,

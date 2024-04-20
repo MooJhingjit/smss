@@ -10,7 +10,7 @@ import {
 import { quotationStatusMapping } from "@/app/config";
 import { MutationResponseType } from "@/components/providers/query-provider";
 import { useMutation } from "@tanstack/react-query";
-import QT_SERVICES from "@/app/services/service.quotation";
+import QT_SERVICES from "@/app/services/api.quotation";
 import { toast } from "sonner";
 import {
   Select,
