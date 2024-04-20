@@ -59,13 +59,21 @@ export default function TableLists<T>(props: Readonly<Props<T>>) {
       // Default return for other types
       return value;
     },
-    [],
+    []
   );
 
   return (
     <Table className="min-w-full divide-y divide-gray-300">
       <TableHeader className="">
         <TableRow>
+          {link && (
+            <TableHead
+              key="link"
+              className="px-3 py-3 text-left text-sm font-semibold text-gray-900"
+            >
+            </TableHead>
+          )}
+
           {columns.map((column: any) => (
             <TableHead
               key={column.key}
@@ -79,6 +87,13 @@ export default function TableLists<T>(props: Readonly<Props<T>>) {
       <TableBody className="divide-y divide-gray-200 bg-white">
         {data.map((item: any, rowIdx) => (
           <TableRow key={item.id} className="hover:bg-gray-50">
+            {link && (
+              <TableCell className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
+                <Link target="_blank" href={`${link}/${item.id}`} passHref>
+                  <ExternalLink className="h-3.5 w-3.5 text-gray-400" />
+                </Link>
+              </TableCell>
+            )}
             {columns.map((column: any) => (
               <TableCell
                 key={column.key}
@@ -97,13 +112,6 @@ export default function TableLists<T>(props: Readonly<Props<T>>) {
                 >
                   จัดการ
                 </Button>
-              </TableCell>
-            )}
-            {link && (
-              <TableCell className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
-                <Link target="_blank" href={`${link}/${item.id}`} passHref>
-                  <ExternalLink className="h-3.5 w-3.5 text-gray-400" />
-                </Link>
               </TableCell>
             )}
           </TableRow>

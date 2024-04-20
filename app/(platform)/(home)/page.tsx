@@ -8,13 +8,13 @@ export default async function HomePage() {
 
   if (isAdmin) {
     return (
-      <div className="mx-auto max-w-6xl px-2 xl:px-0">
+      <div className="mx-auto max-w-7xl px-2 xl:px-0">
         <AdminHomePage />{" "}
       </div>
     );
   }
   return (
-    <div className="mx-auto max-w-6xl px-2 xl:px-0">
+    <div className="mx-auto max-w-7xl px-2 xl:px-0">
       <SellerHomePage />
     </div>
   );
