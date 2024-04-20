@@ -83,7 +83,7 @@ export default function PurchaseOrderItems({
       render: (item: PurchaseOrderItemWithRelations) => {
         return (
           <p>
-            {item.quantity} {item.unit} 
+            {item.quantity} {item.unit}
           </p>
         );
       },
@@ -187,7 +187,9 @@ export default function PurchaseOrderItems({
       headerIcon={
         !data.quotationId && (
           <Button
-            onClick={() => poListModal.onOpen(null, data)}
+            onClick={() =>
+              poListModal.onOpen(null, { ...data, timestamps: Date.now() })
+            }
             variant="secondary"
             className="flex items-center justify-center  h-5 rounded  "
           >
@@ -203,7 +205,7 @@ export default function PurchaseOrderItems({
           onManage={(purchaseOrderItem) => {
             poListModal.onOpen(
               purchaseOrderItem as PurchaseOrderItemWithRelations,
-              data
+              { ...data, timestamps: Date.now() }
             );
           }}
         />

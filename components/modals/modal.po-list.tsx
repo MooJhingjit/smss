@@ -9,7 +9,7 @@ import {
 import { usePurchaseOrderListModal } from "@/hooks/use-po-list-modal";
 import { FormInput } from "../form/form-input";
 import { useForm } from "react-hook-form";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { FormSubmit } from "../form/form-submit";
 import { useAction } from "@/hooks/use-action";
 import { toast } from "sonner";
@@ -17,6 +17,7 @@ import { Item, ProductType } from "@prisma/client";
 import { PackagePlus } from "lucide-react";
 import { updateItem } from "@/actions/item/update";
 import { createPurchaseItem } from "@/actions/po-list/create";
+import { updatePurchaseItem } from "@/actions/po-list/update";
 import { deletePurchaseItem } from "@/actions/po-list/delete";
 import { FormSearchAsync } from "../form/form-search-async";
 import { ProductWithRelations } from "@/types";
@@ -40,7 +41,7 @@ export const PurchaseOrderListModal = () => {
   const modal = usePurchaseOrderListModal();
   const defaultData = modal.data;
   const purchaseOrderRelations = modal.refs;
-
+  // const timestamps = useRef<string | undefined>();
   const { register, reset, setValue, getValues, watch } = useForm<FormInput>({
     mode: "onChange",
   });
@@ -49,19 +50,29 @@ export const PurchaseOrderListModal = () => {
     const formData = {
       name: defaultData?.name ?? "",
       unitPrice: defaultData?.unitPrice ? defaultData.unitPrice.toString() : "",
-      unit: 'Unit',
+      unit: defaultData?.unit ?? "",
       price: defaultData?.price ? defaultData.price.toString() : "",
       quantity: defaultData?.quantity ? defaultData.quantity.toString() : "",
       description: defaultData?.description ?? "",
       type: defaultData?.type,
     };
     reset(formData);
-  }, [defaultData, reset]);
+
+  }, [purchaseOrderRelations?.timestamps]);
 
   const handleCreate = useAction(createPurchaseItem, {
     onSuccess: (data) => {
       toast.success("สำเร็จ");
       modal.onClose();
+    },
+    onError: (error) => {
+      toast.error(error);
+    },
+  });
+
+  const handleUpdate = useAction(updatePurchaseItem, {
+    onSuccess: (data) => {
+      toast.success("สำเร็จ");
     },
     onError: (error) => {
       toast.error(error);
@@ -87,7 +98,19 @@ export const PurchaseOrderListModal = () => {
 
     const unitPrice = Number(formData.get("unitPrice"));
     const quantity = Number(formData.get("quantity"));
-    const totalPrice = unitPrice * quantity
+    const totalPrice = unitPrice * quantity;
+
+    if (defaultData?.id) {
+      handleUpdate.execute({
+        id: defaultData.id,
+        unitPrice: unitPrice,
+        unit: formData.get("unit") as string,
+        quantity,
+        description: formData.get("description") as string,
+        price: totalPrice,
+      });
+      return;
+    }
 
     handleCreate.execute({
       name: name,
@@ -106,11 +129,12 @@ export const PurchaseOrderListModal = () => {
   useEffect(() => {
     const unitPrice = Number(getValues("unitPrice"));
     const quantity = Number(getValues("quantity"));
-    console.log('first', (unitPrice * quantity).toString())
     setValue("price", (unitPrice * quantity).toString());
   }, [watch("unitPrice"), watch("quantity")]);
 
   const isNewItem = !defaultData;
+
+
   return (
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
       <DialogContent className="sm:max-w-[425px] md:max-w-[600px]">
@@ -177,13 +201,8 @@ export const PurchaseOrderListModal = () => {
             <div className="col-span-1">
               <FormInput
                 id="unitPrice"
+                key={`cost_${new Date().getTime().toString()}`}
                 label="ราคาต่อหน่วย"
-                // onChange={(e) => {
-                //   console.log('change')
-                //   // const quantity = Number(getValues("quantity"));
-                //   // const unitPrice = Number(e.target.value);
-                //   // setValue("price", (unitPrice * quantity).toString());
-                // }}
                 type="number"
                 readOnly={!isNewItem}
                 register={register}
@@ -210,7 +229,7 @@ export const PurchaseOrderListModal = () => {
               <FormInput
                 id="unit"
                 label="หน่วย"
-                readOnly={!isNewItem}
+                // readOnly={!isNewItem}
                 register={register}
                 defaultValue={defaultData?.unit}
                 errors={handleCreate.fieldErrors}
@@ -231,7 +250,7 @@ export const PurchaseOrderListModal = () => {
               <FormTextarea
                 id="description"
                 label="รายละเอียด"
-                disabled={!isNewItem}
+                // disabled={!isNewItem}
                 errors={handleCreate.fieldErrors}
                 register={register}
                 defaultValue={defaultData?.description ?? ""}
@@ -244,10 +263,31 @@ export const PurchaseOrderListModal = () => {
                 <FormSubmit>สร้างรายการใหม่</FormSubmit>
               </div>
             )}
+
+            {defaultData?.id && (
+              <div className="col-span-4  flex justify-end space-x-3">
+                {!purchaseOrderRelations?.quotationId && (
+                  <ConfirmActionButton
+                    onConfirm={() => {
+                      handleDelete.execute({ id: defaultData.id });
+                    }}
+                  >
+                    <Button variant="link" size="sm" className="text-red-500">
+                      ลบรายการ
+                    </Button>
+                  </ConfirmActionButton>
+                )}
+
+                <div className="">
+                  <FormSubmit>อัพเดท</FormSubmit>
+                </div>
+              </div>
+            )}
           </form>
+
           {!!defaultData?.items.length && (
-            <>
-              <div className="col-span-2 flex items-center space-x-2">
+            <div className="bg-green-50 w-full col-span-4 gird grid-cols-4 p-4 gap-4">
+              <div className="col-span-2 flex items-center space-x-2 mb-2">
                 <PackagePlus size={16} className="" />
                 <p className="font-medium cursor-default text-xs capitalize">
                   รับสินค้าเข้าระบบ
@@ -262,21 +302,7 @@ export const PurchaseOrderListModal = () => {
                   </div>
                 </div>
               </div>
-
-              {defaultData?.id && (
-                <div className="col-start-4 col-span-1 flex justify-end space-x-3">
-                  <ConfirmActionButton
-                    onConfirm={() => {
-                      handleDelete.execute({ id: defaultData.id });
-                    }}
-                  >
-                    <Button variant="link" size="sm" className="text-red-500">
-                      ลบทั้งหมด
-                    </Button>
-                  </ConfirmActionButton>
-                </div>
-              )}
-            </>
+            </div>
           )}
         </div>
       </DialogContent>
@@ -350,8 +376,8 @@ const NewItemForm = ({ data }: { data: Item }) => {
           label="ชื่อรุ่น"
           type="text"
           register={register}
-        // defaultValue={item?.serialNumber}
-        // errors={fieldErrors}
+          // defaultValue={item?.serialNumber}
+          // errors={fieldErrors}
         />
       </div>
       <div className="col-span-2">
@@ -360,8 +386,8 @@ const NewItemForm = ({ data }: { data: Item }) => {
           label="รหัส (SN)"
           type="text"
           register={register}
-        // defaultValue={item?.serialNumber}
-        // errors={fieldErrors}
+          // defaultValue={item?.serialNumber}
+          // errors={fieldErrors}
         />
       </div>
       <div className="col-span-2">
@@ -370,12 +396,12 @@ const NewItemForm = ({ data }: { data: Item }) => {
           label="ระยะเวลาการรับประกัน"
           type="date"
           register={register}
-        // defaultValue={
-        //   item?.warrantyDate
-        //     ? new Date(item.warrantyDate).toISOString().slice(0, 10)
-        //     : undefined
-        // }
-        // errors={fieldErrors}
+          // defaultValue={
+          //   item?.warrantyDate
+          //     ? new Date(item.warrantyDate).toISOString().slice(0, 10)
+          //     : undefined
+          // }
+          // errors={fieldErrors}
         />
       </div>
       <div className="col-span-2">
@@ -384,8 +410,8 @@ const NewItemForm = ({ data }: { data: Item }) => {
           label="หมายเหตุ"
           type="text"
           register={register}
-        // defaultValue={item?.name}
-        // errors={fieldErrors}
+          // defaultValue={item?.name}
+          // errors={fieldErrors}
         />
       </div>
       <div className="col-span-4 flex justify-end">
@@ -394,3 +420,4 @@ const NewItemForm = ({ data }: { data: Item }) => {
     </form>
   );
 };
+

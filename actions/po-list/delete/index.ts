@@ -20,7 +20,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       },
     });
 
-    revalidatePath("/purchases/[id]");
+    revalidatePath("/purchase-orders/[id]");
 
     return { data: true };
   } catch (error) {

@@ -7,10 +7,10 @@ import { create } from "zustand";
 type Store = {
   isOpen: boolean;
   data: PurchaseOrderItemWithRelations | null;
-  refs?: PurchaseOrderWithRelations;
+  refs?: PurchaseOrderWithRelations & { timestamps: number };
   onOpen: (
     data?: PurchaseOrderItemWithRelations | null,
-    refs?: PurchaseOrderWithRelations | null,
+    refs?: (PurchaseOrderWithRelations & { timestamps: number }) | null
   ) => void;
   onClose: () => void;
 };

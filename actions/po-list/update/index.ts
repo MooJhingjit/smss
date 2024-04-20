@@ -6,7 +6,7 @@ import { schema } from "./schema";
 import { revalidatePath } from "next/cache";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-  const { id, name } = data;
+  const { id, price, unitPrice, unit, quantity, description } = data;
 
   let purchaseOrderItem;
   try {
@@ -14,8 +14,12 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       where: {
         id,
       },
-      data: {
-        name,
+      data: { // do not allow to update quantity and type for now
+        // price,
+        // unitPrice,
+        unit,
+        // quantity,
+        description,
       },
     });
   } catch (error) {
@@ -25,7 +29,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     };
   }
 
-  revalidatePath("/purchases/[id]");
+  revalidatePath("/purchase-orders/[id]");
 
   return { data: purchaseOrderItem };
 };
