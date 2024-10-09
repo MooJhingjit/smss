@@ -57,30 +57,6 @@ export default function SignInPage() {
               />
             </div>
           </div>
-          {/* 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <Input
-                id="remember-me"
-                name="remember-me"
-                type="checkbox"
-                className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-600"
-              />
-              <Label
-                htmlFor="remember-me"
-                className="ml-3 block text-sm leading-6 text-gray-900"
-              >
-                จำฉันไว้
-              </Label>
-            </div>
-
-            <div className="text-sm leading-6">
-              <p className="font-semibold text-primary-600 hover:text-primary-500">
-                ลืมรหัสผ่าน?
-              </p>
-            </div>
-          </div> */}
-
           <div>
             <Button
               disabled={pending}
