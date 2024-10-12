@@ -25,7 +25,7 @@ type Column<T> = {
 
 type Props<T> = {
   data: T[];
-  columns: any;
+  columns: Column<T>[];
   onManage?: (item: T) => void;
   link?: string;
 };
@@ -62,6 +62,10 @@ export default function TableLists<T>(props: Readonly<Props<T>>) {
     []
   );
 
+  if (data.length === 0) {
+    return <TablePlaceholder />;
+  }
+
   return (
     <Table className="min-w-full divide-y divide-gray-300">
       <TableHeader className="">
@@ -70,8 +74,7 @@ export default function TableLists<T>(props: Readonly<Props<T>>) {
             <TableHead
               key="link"
               className="px-3 py-3 text-left text-sm font-semibold text-gray-900"
-            >
-            </TableHead>
+            ></TableHead>
           )}
 
           {columns.map((column: any) => (
@@ -120,3 +123,9 @@ export default function TableLists<T>(props: Readonly<Props<T>>) {
     </Table>
   );
 }
+
+const TablePlaceholder: React.FC = () => (
+  <div className="text-center   h-full flex items-center justify-center">
+    <p className="mt-10 text-muted-foreground">ไม่มีข้อมูล</p>
+  </div>
+);
