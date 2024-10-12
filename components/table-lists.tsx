@@ -12,10 +12,10 @@ import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { Button } from "./ui/button";
 
-type WithKey = {
-  id?: number;
-  [key: string]: any; // This line allows any string to be used as a key
-};
+// type WithKey = {
+//   id?: number;
+//   [key: string]: any; // This line allows any string to be used as a key
+// };
 
 type Column<T> = {
   name: string;
