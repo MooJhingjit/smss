@@ -46,7 +46,7 @@ const QT_columns = [
     name: "สถานะ",
     key: "status",
     render: (item: QuotationWithBuyer) => {
-      return <StatusBadge status={quotationStatusMapping[item.status].label} />
+      return <StatusBadge status={quotationStatusMapping[item.status].label} />;
     },
   },
 ];
@@ -80,16 +80,32 @@ const PO_columns = [
     name: "สถานะ",
     key: "status",
     render: (item: PurchaseOrderWithVendor) => {
-      return <StatusBadge status={purchaseOrderStatusMapping[item.status]} />
+      return <StatusBadge status={purchaseOrderStatusMapping[item.status]} />;
     },
   },
 ];
 export default function PaymentDue<T>(props: Readonly<Props<T>>) {
   const { data, label, type } = props;
-  const columns = type === "quotations" ? QT_columns : PO_columns;
+
+  if (type === "quotations") {
+    return (
+      <CardWrapper title={label} actionNeed>
+        <TableLists<QuotationWithBuyer>
+          columns={QT_columns}
+          data={data as QuotationWithBuyer[]}
+          link={`/${type}`}
+        />
+      </CardWrapper>
+    );
+  }
+
   return (
     <CardWrapper title={label} actionNeed>
-      <TableLists<T> columns={columns} data={data} link={`/${type}`} />
+      <TableLists<PurchaseOrderWithVendor>
+        columns={PO_columns}
+        data={data as PurchaseOrderWithVendor[]}
+        link={`/${type}`}
+      />
     </CardWrapper>
   );
 }

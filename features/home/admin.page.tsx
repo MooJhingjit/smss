@@ -159,14 +159,14 @@ export default async function AdminHomePage() {
         />
       </div>
       <div className="lg:col-span-6 col-span-12">
-        <PaymentDue<QuotationWithBuyer>
+        <PaymentDue
           type="quotations"
           data={quotationsDueDate}
           label={`ถึงกำหนดชำระ (QT Credit)`}
         />
       </div>
       <div className="lg:col-span-6 col-span-12">
-        <PaymentDue<PurchaseOrderWithVendor>
+        <PaymentDue
           type="purchase-orders"
           data={purchaseOrdersDueDate}
           label={`ถึงกำหนดชำระ (PO Credit)`}
