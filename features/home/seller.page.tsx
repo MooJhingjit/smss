@@ -1,11 +1,11 @@
 import React from "react";
-import Quotations from "./_components/overview.quotations";
-import ShortcutMenus from "./_components/seller.shortcut-menus";
-import StatisticCard from "./_components/statistics";
+import Quotations from "./components/overview.quotations";
+import ShortcutMenus from "./components/seller.shortcut-menus";
+import StatisticCard from "./components/statistics";
 import { db } from "@/lib/db";
 import { QuotationWithBuyer } from "@/types";
 import { useUser } from "@/hooks/use-user";
-import Tasks from "./_components/tasks";
+import Tasks from "./components/tasks";
 import { quotationStatusMapping } from "@/app/config";
 
 async function GetData(): Promise<[QuotationWithBuyer[], QuotationWithBuyer[], { _sum: { totalPrice: number | null } }]> {
@@ -64,10 +64,11 @@ export default async function SellerHomePage() {
 
   return (
     <div className="h-screen ">
+
+      
       <div className="grid grid-cols-12 gap-6 ">
         <div className="md:col-span-5 col-span-12">
-          <div className="relative p-5 rounded-xl overflow-hidden shadow-lg">
-            <div className="absolute inset-0 bg-gray-700 opacity-10 z-10 h-full"></div>
+          <div className="relative rounded-xl overflow-hidden ">
             <ShortcutMenus saleTotal={stats._sum.totalPrice ?? 0} />
           </div>
         </div>

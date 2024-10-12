@@ -45,8 +45,8 @@ export default function MenuItems({ userRole }: { userRole: UserRole }) {
             href={link.href}
             className={classNames(
               isActive(link.href)
-                ? "text-primary-600 font-semibold"
-                : "text-gray-500 font-semibold",
+                ? "text-white font-semibold"
+                : "text-gray-400 font-semibold",
             )}
           >
             {link.label}

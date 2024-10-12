@@ -16,7 +16,7 @@ export default function ShortcutMenus(props: Props) {
         <MenuItem
           icon={
             <KanbanSquare
-              className="w-4 h-4 lg:w-8 lg:h-8  text-white"
+              className="w-4 h-4 lg:w-8 lg:h-8"
               strokeWidth={1.5}
             />
           }
@@ -27,7 +27,7 @@ export default function ShortcutMenus(props: Props) {
         <MenuItem
           icon={
             <Box
-              className="w-4 h-4 lg:w-8 lg:h-8  text-white"
+              className="w-4 h-4 lg:w-8 lg:h-8"
               strokeWidth={1.5}
             />
           }
@@ -38,7 +38,7 @@ export default function ShortcutMenus(props: Props) {
         <MenuItem
           icon={
             <Users
-              className="w-4 h-4 lg:w-8 lg:h-8  text-white"
+              className="w-4 h-4 lg:w-8 lg:h-8"
               strokeWidth={1.5}
             />
           }
@@ -53,6 +53,7 @@ export default function ShortcutMenus(props: Props) {
   );
 }
 
+
 const MenuItem = (props: {
   link: string;
   icon: React.ReactNode;
@@ -66,13 +67,16 @@ const MenuItem = (props: {
     >
       <div className="absolute inset-0 bg-gray-700  rounded-lg opacity-10 z-10 h-full"></div>
 
-      <div className="flex items-center justify-center">{icon}</div>
-      <div className="mt-2 text-xs text-gray-100 group-hover:text-white hidden lg:block ">
+      <div className="flex items-center justify-center group-hover:text-primary">
+        {icon}
+      </div>
+      <div className="mt-2 text-xs   hidden lg:block group-hover:text-primary">
         {label}
       </div>
     </Link>
   );
 };
+
 
 const Stats = ({ saleTotal }: { saleTotal: number }) => {
   const firstDay = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
@@ -81,11 +85,11 @@ const Stats = ({ saleTotal }: { saleTotal: number }) => {
   return (
     <div className="col-span-3 lg:flex  relative py-2">
       <div className=" lg:border-gray-900/5 lg:border-t-0 lg:mb-0 text-center lg:text-left">
-        <dt className="leading-6 text-white flex items-center space-x-2 justify-center lg:justify-start">
+        <dt className="leading-6 flex items-center space-x-2 justify-center lg:justify-start">
           <p>ยอดขายรวม</p>
           <p>{`${getDateFormat(firstDay)} - ${getDateFormat(lastDay)}`}</p>
         </dt>
-        <dd className="w-full flex-none text-3xl font-medium leading-10 tracking-tight text-white">
+        <dd className="w-full flex-none text-3xl font-medium leading-10 tracking-tight ">
           {getPriceFormat(saleTotal)}
         </dd>
       </div>

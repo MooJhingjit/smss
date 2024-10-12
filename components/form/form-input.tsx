@@ -45,43 +45,41 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
       readOnly,
       step = "any",
     },
-    ref,
+    ref
   ) => {
     const { pending } = useFormStatus();
 
     return (
-      <div className="space-y-2 w-full">
-        <div className="space-y-1">
-          <div className="flex justify-between">
-            {label ? (
-              <Label htmlFor={id} className="text-xs capitalize">
-                {label}
-              </Label>
-            ) : null}
-            <FormErrors id={id} errors={errors} />
-          </div>
-          <Input
-            autoComplete="off"
-            onBlur={onBlur}
-            onChange={onChange}
-            defaultValue={defaultValue}
-            ref={ref}
-            required={required}
-            name={id}
-            id={id}
-            register={register}
-            placeholder={placeholder}
-            type={type}
-            readOnly={readOnly}
-            disabled={pending || disabled}
-            className={cn("text-xs", className)}
-            aria-describedby={`${id}-error`}
-            step={step}
-          />
+      <div className=" w-full">
+        <div className="flex justify-between">
+          {label ? (
+            <Label htmlFor={id} className="text-xs capitalize">
+              {label}
+            </Label>
+          ) : null}
+          <FormErrors id={id} errors={errors} />
         </div>
+        <Input
+          autoComplete="off"
+          onBlur={onBlur}
+          onChange={onChange}
+          defaultValue={defaultValue}
+          ref={ref}
+          required={required}
+          name={id}
+          id={id}
+          register={register}
+          placeholder={placeholder}
+          type={type}
+          readOnly={readOnly}
+          disabled={pending || disabled}
+          className={cn("text-xs", className)}
+          aria-describedby={`${id}-error`}
+          step={step}
+        />
       </div>
     );
-  },
+  }
 );
 
 FormInput.displayName = "FormInput";

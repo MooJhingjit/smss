@@ -8,13 +8,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {  UserRoundCog } from "lucide-react";
+import { UserRoundCog } from "lucide-react";
 import { useUser } from "@/hooks/use-user";
 import MenuItems from "./navbar.menus";
 import LogoutButton from "./logout-button";
 
-export default async function MainNavbar(props: { showMenu?: boolean }) {
-  const { showMenu = false } = props;
+export default async function MainNavbar(props: { withNavigation?: boolean }) {
+  const { withNavigation = false } = props;
 
   const { info, isAdmin } = await useUser();
   // console.log("client get session >>>>>", user);
@@ -22,18 +22,18 @@ export default async function MainNavbar(props: { showMenu?: boolean }) {
   return (
     <div
       className={classNames(
-        "fixed top-0 w-full h-14 px-4 shadow  flex items-center z-[999]",
-        showMenu &&
-          isAdmin &&
-          "bg-primary-50 bg-gradient-to-r  from-primary-400 via-primary-100  to-primary-50 shadow-lg",
-        showMenu &&
+        "fixed top-0 w-full h-14 px-4  flex items-center z-[999] bg-slate-700 shadow-lg",
+        // withNavigation &&
+        //   isAdmin &&
+        //   "bg-primary-50 bg-gradient-to-r  from-primary-400 via-primary-100  to-primary-50",
+        withNavigation &&
           !isAdmin &&
-          "bg-primary-50 bg-gradient-to-r  from-yellow-400 via-yellow-100  to-yellow-50 shadow-lg",
+          "bg-primary/50 bg-gradient-to-r  from-primary/40 via-primary  to-primary/50"
       )}
     >
-      {!showMenu && (
+      {/* {!withNavigation && (
         <div className="absolute inset-0 bg-gray-700 opacity-20 z-10"></div>
-      )}
+      )} */}
 
       <div className="relative z-20 mx-auto max-w-6xl flex items-center w-full justify-between">
         {/* <div className="w-8 h-8 bg-white"></div> */}
@@ -41,17 +41,17 @@ export default async function MainNavbar(props: { showMenu?: boolean }) {
           href="/"
           className={classNames(
             "font-semibold text-lg",
-            showMenu ? "text-gray-700" : "text-white",
+            withNavigation ? "text-gray-700" : "text-white"
           )}
         >
           <Image src={LOGO} width={80} height={80} alt="Logo" />
         </Link>
-        {showMenu && info?.role && <MenuItems userRole={info?.role} />}
+        {withNavigation && info?.role && <MenuItems userRole={info?.role} />}
         <div className="space-x-2 md:w-auto flex items-center justify-between">
           <div
             className={classNames(
               "hidden md:flex text-xs text-gray-500 text-right capitalize md:justify-center md:items-center space-x-1 ",
-              showMenu ? "text-gray-700" : "text-white",
+              withNavigation ? "text-gray-700" : "text-white"
             )}
           >
             <p>{info?.name}</p>
@@ -72,7 +72,7 @@ export default async function MainNavbar(props: { showMenu?: boolean }) {
                   </div>
                   <p className="text-sm text-gray-900">Profile</p>
                 </button> */}
-               <LogoutButton />
+                <LogoutButton />
               </div>
             </PopoverContent>
           </Popover>

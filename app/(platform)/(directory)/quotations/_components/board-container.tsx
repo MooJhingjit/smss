@@ -14,14 +14,22 @@ import Link from "next/link";
 import { FormInput } from "@/components/form/form-input";
 import { useSearchParams } from "next/navigation";
 import { quotationStatusMapping } from "@/app/config";
-import { Files, LockIcon, Paperclip, PlusIcon, Receipt } from "lucide-react";
+import {
+  Files,
+  ListFilter,
+  ListFilterIcon,
+  LockIcon,
+  Paperclip,
+  PlusIcon,
+  Receipt,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuotationModal } from "@/hooks/use-quotation-modal";
-import { classNames } from "@/lib/utils";
+import { classNames, cn } from "@/lib/utils";
 import { Select } from "@/components/ui/select";
 import { FormSelect } from "@/components/form/form-select";
 
-interface Props { }
+interface Props {}
 
 type QuotationWithCounts = QuotationWithBuyer & {
   _count: {
@@ -178,7 +186,7 @@ export default function BoardContainer(props: Props) {
             <div
               {...provided.droppableProps}
               ref={provided.innerRef}
-              className="flex gap-x-3 h-full"
+              className="flex gap-x-3 h-[calc(100vh-165px)] "
             >
               <BoardColumn
                 color="gray"
@@ -271,9 +279,7 @@ export default function BoardContainer(props: Props) {
                 items={queries[9].data ?? ([] as QuotationWithBuyer[])}
                 columnKey={QuotationStatus.paid}
                 label={quotationStatusMapping[QuotationStatus.paid].label}
-                progress={
-                  quotationStatusMapping[QuotationStatus.paid].progress
-                }
+                progress={quotationStatusMapping[QuotationStatus.paid].progress}
               />
               {provided.placeholder}
               <div className="flex-shrink-0 w-1" />
@@ -294,15 +300,16 @@ const BoardFilters = (props: BoardFiltersProps) => {
   const { onCreate, onSubmit } = props;
   return (
     <div className="gap-x-2 mb-3 border border-gray-100  p-2  rounded-lg bg-gray-50 flex justify-end">
-      <form onSubmit={onSubmit} className="grid grid-cols-6 gap-2 items-center">
-        <div className=" mt-1">
-          <Button variant={"default"} onClick={onCreate}>
-            <PlusIcon className="w-4 h-4 mr-1 text-white" />
-            QT ใหม่
-          </Button>
-        </div>
+      <form onSubmit={onSubmit} className="grid grid-cols-7 gap-2 items-center">
+        <Button variant={"default"} onClick={onCreate} className="p-2 h-auto">
+          <PlusIcon className="w-4 h-4 mr-1 text-white" />
+          QT ใหม่
+        </Button>
 
-        <div className="w-[200px]">
+        <div className="w-full ">
+          <ListFilterIcon className="w-4 h-4 text-gray-600 ml-auto" />
+        </div>
+        <div className="w-full">
           <FormSelect
             id="type"
             className="w-full"
@@ -318,7 +325,7 @@ const BoardFilters = (props: BoardFiltersProps) => {
         <FormInput id="code" type="search" placeholder="รหัส" />
         <FormInput id="buyer" type="search" placeholder="ชื่อลูกค้า" />
         <FormInput id="vendor" type="search" placeholder="ชื่อผู้ขาย/ร้านค้า" />
-        <div className="py-0.5 w-full h-full mt-1">
+        <div className=" w-full h-full ">
           <button
             type="submit"
             className="col-span-1 bg-gray-200 rounded-md  text-xs text-gray-600 font-semibold  h-full w-full"
@@ -345,15 +352,22 @@ const BoardColumn = ({
   color?: "yellow" | "green" | "gray";
 }) => {
   return (
-    <div className="h-auto min-w-[220px] select-none">
+    <div className="h-full min-w-[220px] select-none border-primary/10 border">
       <div
         className={classNames(
-          "w-full rounded-md  shadow-md pb-2 h-full bg-gray-50",
-          color === "yellow" && "bg-yellow-50",
-          color === "green" && "bg-green-50",
+          "w-full rounded-md  shadow-md pb-2 h-full bg-secondary relative"
+          // color === "yellow" && "bg-yellow-50",
+          // color === "green" && "bg-green-50",
         )}
       >
-        <div className="flex justify-between items-center px-3 pt-2 pb-4">
+        <div
+          className={cn(
+            "absolute h-1 right-0 left-0 top-0 bg-primary",
+            color === "yellow" && "bg-orange-400",
+            color === "green" && "bg-green-600"
+          )}
+        ></div>
+        <div className="flex justify-between items-center px-3 py-4 bg-secondary border-b border-dotted">
           <div className="">
             <p className="text-sm font-semibold text-[#4a4a4a] whitespace-nowrap">
               {label}
@@ -364,7 +378,7 @@ const BoardColumn = ({
             ({items.length})
           </div>
         </div>
-        <div className="h-full px-3">
+        <div className=" h-[calc(100%-70px)] p-3">
           <Droppable droppableId={columnKey} type="card">
             {(provided) => (
               <ul
@@ -411,7 +425,7 @@ const BoardCard = ({
                     "inline-flex items-center capitalize rounded bg-gray-100  py-0.5 text-xs font-medium text-gray-700 underline",
                     item.type === QuotationType.product
                       ? "bg-white"
-                      : "bg-green-100",
+                      : "bg-green-100"
                   )}
                 >
                   {item.isLocked && (

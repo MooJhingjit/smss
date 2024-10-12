@@ -1,7 +1,7 @@
 import React from "react";
 import { useUser } from "@/hooks/use-user";
-import AdminHomePage from "./admin.page";
-import SellerHomePage from "./seller.page";
+import AdminHomePage from "@home_features/admin.page";
+import SellerHomePage from "@home_features/seller.page";
 
 export default async function HomePage() {
   const { isAdmin } = await useUser();
@@ -9,10 +9,11 @@ export default async function HomePage() {
   if (isAdmin) {
     return (
       <div className="mx-auto max-w-7xl px-2 xl:px-0">
-        <AdminHomePage />{" "}
+        <AdminHomePage />
       </div>
     );
   }
+  
   return (
     <div className="mx-auto max-w-7xl px-2 xl:px-0">
       <SellerHomePage />

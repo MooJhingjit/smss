@@ -1,15 +1,15 @@
 import React from "react";
-import Quotations from "./_components/overview.quotations";
-import ShortcutMenus from "./_components/shortcut-menus";
-import PurchaseOrders from "./_components/overview.purchase-orders";
+import Quotations from "./components/overview.quotations";
+import ShortcutMenus from "./components/shortcut-menus";
+import PurchaseOrders from "./components/overview.purchase-orders";
 import { db } from "@/lib/db";
 import { QuotationWithBuyer } from "@/types";
 import { PurchaseOrder, PurchaseOrderStatus, QuotationStatus, User } from "@prisma/client";
-import StatisticCard from "./_components/statistics";
-import Tasks from "./_components/tasks";
+import StatisticCard from "./components/statistics";
+import Tasks from "./components/tasks";
 import { currentUser } from "@/lib/auth";
 import { quotationStatusMapping } from "@/app/config";
-import PaymentDue from "./_components/paymentDue";
+import PaymentDue from "./components/paymentDue";
 
 export type PurchaseOrderWithVendor = PurchaseOrder & { vendor: User };
 
@@ -139,13 +139,11 @@ export default async function AdminHomePage() {
     saleTotal,
     orderAmount
   ] = await getData();
-  // const user = await currentUser();
-  // console.log('server get session >>>>>', user);
+
   return (
     <div className="grid grid-cols-12 gap-6">
       <div className="md:col-span-6 col-span-12">
-        <div className="relative h-full p-4 rounded-xl overflow-hidden shadow-lg">
-          <div className="absolute inset-0 bg-gray-700 opacity-10 z-10 h-full"></div>
+        <div className="relative h-full rounded-xl overflow-hidden ">
           <div className="h-full w-full">
             <ShortcutMenus
               saleTotal={saleTotal._sum.totalPrice ?? 0}

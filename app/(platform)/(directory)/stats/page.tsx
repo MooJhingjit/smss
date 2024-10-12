@@ -1,5 +1,5 @@
 import React from "react";
-import CardWrapper from "../../(home)/_components/card-wrapper";
+import CardWrapper from "../../../../features/home/components/card-wrapper";
 
 import StatChart from "./_component/stat-chart";
 import { db } from "@/lib/db";

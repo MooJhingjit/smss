@@ -7,9 +7,11 @@ type Props = {
 export default function HomeLayout(props: Props) {
   const { children } = props;
   return (
-    <div className="bg-gradient-to-tl from-transparent via-blue-300 to-blue-500">
-      <MainNavbar />
-      <div className="pt-20 pb-20">{children}</div>
+    <div className="h-screen bg-gray-50">
+      <div className="relative">
+        <MainNavbar />
+      </div>
+      <div className="pt-24">{children}</div>
     </div>
   );
 }
