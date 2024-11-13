@@ -1,7 +1,6 @@
 import React from "react";
 import Breadcrumbs from "@/components/breadcrumbs";
 import CustomerInfo from "./_components/customer-details";
-import QuotationTools from "./_components/quotation-tools";
 import QuotationLists from "./_components/quotation-lists";
 import DocumentItems from "@/components/document-lists";
 import PurchaseOrders from "./_components/purchase-orders";
@@ -13,6 +12,7 @@ import { classNames } from "@/lib/utils";
 import { quotationTypeMapping } from "@/app/config";
 import { useUser } from "@/hooks/use-user";
 import DataNotfound from "@/components/data-notfound";
+import QuotationInfo from "./_components/quotation-info";
 
 const getData = async (
   quotationId: string,
@@ -104,7 +104,7 @@ export default async function QuotationDetails(
     return <DataNotfound link="/quotations" />;
   }
 
-  const { contact, lists, status, paymentType, paymentDue } = data;
+  const { contact, lists, status } = data;
 
   const isQT_Approved = !["open", "pending_approval", "offer"].includes(status);
   const isReadonly = ["pending_approval", "offer", "approved"].includes(status);
@@ -116,20 +116,18 @@ export default async function QuotationDetails(
           {contact && <CustomerInfo data={contact} />}
         </div>
         <div className="col-span-5 md:col-span-3">
-          <QuotationTools
+          {/* <QuotationTools
             data={data}
             hasList={lists.length > 0}
             isAdmin={isAdmin}
-            // purchaseOrderRef={data.purchaseOrderRef ?? ""}
-            // isLocked={data.isLocked}
-            // quotationId={data.id}
-            // status={data.status}
-            // type={data.type}
             paymentType={paymentType}
             paymentDue={
               paymentDue ? new Date(paymentDue).toISOString().split("T")[0] : ""
             }
-          />
+          /> */}
+          <QuotationInfo
+            data={data}
+          /> 
         </div>
         <div className="col-span-5">
           <QuotationLists

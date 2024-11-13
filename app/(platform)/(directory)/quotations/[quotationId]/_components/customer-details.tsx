@@ -13,13 +13,16 @@ export default function CustomerInfo(props: Readonly<Props>) {
   return (
     <div className="rounded-md bg-yellow-50 p-4 border border-yellow-400">
       <div className="">
-        <div className="flex space-x-2 items-center">
+        <div className="flex space-x-2 items-center justify-between">
+          <div className="flex items-center space-x-2">
+          <h3 className="text-sm font-medium text-yellow-800">ลูกค้า: </h3>
           <h3 className="text-sm font-medium text-yellow-800">{data.name}</h3>
+          </div>
           <button
             className="inline-flex cursor-pointer items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10"
             onClick={() => modal.onOpen(data)}
           >
-            Edit
+            แก้ไข
           </button>
         </div>
         <div className="mt-2 text-sm text-yellow-700 grid grid-cols-1 sm:grid-cols-2  gap-2">

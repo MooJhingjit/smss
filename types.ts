@@ -23,6 +23,15 @@ declare module "next-auth" {
 export type ProductWithRelations = Product & { items?: Item[]; vendor?: User };
 
 export type QuotationWithBuyer = Quotation & { contact: Contact };
+
+export type QuotationWithRelations = Quotation & {
+  contact?: Contact;
+  seller?: User;
+  purchaseOrders?: PurchaseOrder[];
+  lists?: QuotationList[];
+};
+
+
 export type ItemWithRefs = Item & {
   productRef: { id: number; name: string };
   vendorRef?: { id: number | undefined; name: string | undefined };

@@ -1,24 +1,24 @@
 "use client";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { useQuotationInfoModal } from "@/hooks/use-quotation-info-modal";
 import React from "react";
-import { LockIcon, PrinterIcon, Send, Clock, CheckCircle } from "lucide-react";
+import { LockIcon, PrinterIcon, Send, Clock, CheckCircle, PenBoxIcon, InfoIcon, Delete } from "lucide-react";
 import {
   PurchaseOrderPaymentType,
-  Quotation,
   QuotationStatus,
-  QuotationType,
 } from "@prisma/client";
 import { quotationStatusMapping } from "@/app/config";
 import { MutationResponseType } from "@/components/providers/query-provider";
 import { useMutation } from "@tanstack/react-query";
 import QT_SERVICES from "@/app/services/api.quotation";
-import { toast } from "sonner";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { FormInput } from "@/components/form/form-input";
 import { customRevalidatePath } from "@/actions/revalidateTag";
@@ -26,22 +26,68 @@ import PaymentOptionControl from "@/components/payment-option-control";
 import ConfirmActionButton from "@/components/confirm-action";
 import StatusBadge from "@/components/badges/status-badge";
 import PaymentBadge from "@/components/badges/payment-badge";
+import { useSession } from "next-auth/react";
+import { QuotationWithRelations } from "@/types";
+import QuotationStatusDropdown from "@/app/(platform)/(directory)/quotations/[quotationId]/_components/quotation-status-dropdown";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { useRouter } from "next/navigation";
 
-type Props = {
-  // quotationId: number;
-  // type: QuotationType;
-  // status: QuotationStatus;
-  // isLocked: boolean;
-  data: Quotation;
-  isAdmin: boolean;
-  hasList: boolean;
-  paymentType: PurchaseOrderPaymentType;
-  paymentDue: string;
+
+export const QuotationInfoModal = () => {
+  const modal = useQuotationInfoModal();
+  const data = modal.data;
+
+  if (!data) {
+    return null;
+  }
+
+  return (
+    <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>
+
+            <div className="flex space-x-1 items-center">
+              <PenBoxIcon className="w-5 h-5 " />
+              <span> {data?.code}</span>
+            </div>
+          </DialogTitle>
+          {/* <DialogDescription>เลือกชื่อลูกค้า และประเภทของ QT</DialogDescription> */}
+        </DialogHeader>
+
+        <QuotationForm
+          data={data}
+          hasList={data.lists ? data.lists.length > 0 : false}
+
+        />
+        <DialogFooter className="border-t pt-6">
+          <div className="flex w-full justify-center items-center">
+            <DeleteComponent
+              onDeleted={modal.onClose}
+              quotationId={data?.id}
+              hasList={data?.lists ? data.lists.length > 0 : false}
+            />
+          </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
 };
 
-export default function QuotationTools(props: Props) {
-  const { hasList, data, paymentDue, paymentType } = props;
-  const isAdmin = props.isAdmin;
+
+const QuotationForm = (props: {
+  data: QuotationWithRelations;
+  hasList: boolean;
+}) => {
+  const { hasList, data } = props;
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.role === "admin";
 
   const {
     id: quotationId,
@@ -50,6 +96,7 @@ export default function QuotationTools(props: Props) {
     purchaseOrderRef,
     deliveryPeriod,
     validPricePeriod,
+    type
   } = data;
 
   const { mutate } = useMutation<
@@ -82,6 +129,7 @@ export default function QuotationTools(props: Props) {
     purchaseOrderRef?: string;
     deliveryPeriod?: string;
     validPricePeriod?: string;
+    type?: "product" | "service";
   }) => {
     // update what is provided
     let payloadBody: any = {};
@@ -114,13 +162,47 @@ export default function QuotationTools(props: Props) {
         : null;
     }
 
+    if (payload.type) {
+      payloadBody["type"] = payload.type;
+    }
+
     // call mutation
     mutate(payloadBody);
   };
 
+
   return (
     <div className="space-y-2">
-      <div className="grid grid-cols-12 col-span-2 divide-y divide-gray-100 gap-2 ">
+      <div className="grid grid-cols-12   gap-6 ">
+        <ItemList label="ประเภท">
+          <div className="space-x-2 flex items-center w-[200px] ">
+            {
+              hasList && (
+                <HoverInfo message="ไม่สามารถเปลี่ยนประเภทได้ เนื่องจากมีรายการสินค้าแล้ว" />
+              )
+            }
+            <Tabs defaultValue={type} className="w-full" >
+              <TabsList className=" flex">
+                <TabsTrigger
+                  disabled={hasList}
+                  className="flex-1 text-xs"
+                  value="product"
+                  onClick={() => handleItemChange({ type: "product" })}
+                >
+                  สินค้า
+                </TabsTrigger>
+                <TabsTrigger
+                  disabled={hasList}
+                  className="flex-1 text-xs"
+                  value="service"
+                  onClick={() => handleItemChange({ type: "service" })}
+                >
+                  บริการ
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+        </ItemList>
         <ItemList label="สถานะ">
           <div className=" text-sm leading-6 text-gray-700 flex space-x-2">
             {isLocked && (
@@ -138,7 +220,7 @@ export default function QuotationTools(props: Props) {
                 />
               </div>
             ) : (
-              <QuotationApprovalButton
+              <ApprovalButton
                 hasList={hasList}
                 currentStatus={status}
                 onApprove={(s) => {
@@ -190,98 +272,39 @@ export default function QuotationTools(props: Props) {
         {!isAdmin && (
           <ItemList label="การชำระเงิน">
             <div className="flex space-x-3 items-center">
-              <PaymentBadge paymentType={paymentType} paymentDue={paymentDue} />
+              <PaymentBadge paymentType={data.paymentType} paymentDue={data.paymentDue ? new Date(data.paymentDue).toISOString().split("T")[0] : ""} />
             </div>
           </ItemList>
         )}
+        {isAdmin && (
+          <>
+            <ItemList label="การชำระเงิน">
+              <div className="space-x-8 flex items-center w-[200px] ">
 
-        <ItemList>
-          <div className="space-x-8 flex items-center">
-            {isAdmin && (
-              <PaymentOptionControl
-                paymentType={paymentType}
-                paymentDue={paymentDue}
-                onUpdate={handleItemChange}
-              />
-            )}
-            <div className="h-full">
-              <PrintButton quotationId={quotationId} hasList={hasList} />
-            </div>
-          </div>
-        </ItemList>
+                <PaymentOptionControl
+                  paymentType={data.paymentType}
+                  paymentDue={data.paymentDue ? new Date(data.paymentDue).toISOString().split("T")[0] : ""}
+                  onUpdate={handleItemChange}
+                />
+
+
+              </div>
+            </ItemList>
+
+            <ItemList label="">
+              <div className="space-x-8 flex items-center">
+                <PrintButton quotationId={quotationId} hasList={hasList} />
+              </div>
+            </ItemList>
+          </>
+
+        )}
       </div>
     </div>
   );
 }
 
-export const QuotationStatusDropdown = ({
-  curStatus,
-  onStatusChange,
-}: {
-  curStatus: QuotationStatus;
-  onStatusChange: (status: QuotationStatus) => void;
-}) => {
-  const allStatus = Object.keys(QuotationStatus) as QuotationStatus[];
-
-  if (curStatus === QuotationStatus.pending_approval) {
-    return (
-      <div className="flex space-x-3">
-        <StatusBadge status={quotationStatusMapping[curStatus].label} />
-
-        <ConfirmActionButton
-          onConfirm={() => {
-            onStatusChange(QuotationStatus.offer);
-          }}
-        >
-          <Button
-            variant="default"
-            color="green"
-            className="inline-flex items-center px-2 py-1 rounded-md  text-xs h-full"
-          >
-            <span>อนุมัติ</span>
-          </Button>
-        </ConfirmActionButton>
-        <ConfirmActionButton
-          onConfirm={() => {
-            onStatusChange(QuotationStatus.open);
-          }}
-        >
-          <Button
-            variant="destructive"
-            className="inline-flex items-center px-2 py-1 rounded-md  text-xs h-full"
-          >
-            <span>ยกเลิก</span>
-          </Button>
-        </ConfirmActionButton>
-      </div>
-    );
-  }
-
-  return (
-    <Select onValueChange={onStatusChange}>
-      <SelectTrigger className="inline-flex capitalize font-semibold  rounded-md bg-yellow-50 px-2 py-1 text-xs text-yellow-700 border border-yellow-500 items-center">
-        <SelectValue placeholder={quotationStatusMapping[curStatus].label} />
-      </SelectTrigger>
-      <SelectContent className="bg-white text-xs p-2 space-y-2 ">
-        {allStatus.map((status, index) => (
-          <SelectItem
-            value={status}
-            key={index}
-            className={
-              status === curStatus
-                ? "bg-yellow-100 text-yellow-700"
-                : "text-gray-700"
-            }
-          >
-            {quotationStatusMapping[status].label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
-};
-
-const QuotationApprovalButton = ({
+const ApprovalButton = ({
   hasList,
   onApprove,
   currentStatus,
@@ -427,7 +450,7 @@ const ItemList = ({
   children: React.ReactNode;
 }) => {
   return (
-    <div className="col-span-6 pt-2">
+    <div className="col-span-12 pt-2">
       <div className=" flex justify-between items-center px-6 h-full">
         {label && <p className="text-sm leading-6 text-gray-600">{label}</p>}
         {children}
@@ -436,70 +459,76 @@ const ItemList = ({
   );
 };
 
-// const PaymentOptionControl = ({
-//   paymentType,
-//   paymentDue,
-//   onUpdate
-// }: {
-//   paymentType: PurchaseOrderPaymentType;
-//   paymentDue: string;
-//   onUpdate: (payload: { paymentDue?: string, paymentType?: PurchaseOrderPaymentType }) => void;
-// }) => {
-//   const [paymentTypeState, setPaymentTypeState] = React.useState(paymentType);
+const HoverInfo = ({ message }: { message: string }) => {
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <InfoIcon className="w-4 h-4 text-orange-500" />
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{message}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  )
+}
 
-//   const onPaymentTypeUpdate = (type: PurchaseOrderPaymentType) => {
+const DeleteComponent = ({
+  quotationId,
+  hasList,
+  onDeleted,
+}: {
+  quotationId: number;
+  hasList: boolean;
+  onDeleted: () => void;
+}) => {
+  const router = useRouter();
 
-//     setPaymentTypeState(type);
-//     if (type === PurchaseOrderPaymentType.cash) {
-//       // reset payment due
-//       onUpdate({
-//         paymentDue: "",
-//         paymentType: PurchaseOrderPaymentType.cash
-//       });
-//     }
-//   }
+  const { mutate } = useMutation<
+    MutationResponseType,
+    Error,
+    { quotationId: number }
+  >({
+    mutationFn: async (fields) => {
+      const res = await QT_SERVICES.delete(fields.quotationId);
+      return res;
+    },
+    onSuccess: async (n) => {
+      toast.success("ลบสำเร็จ");
+      // invalidate query
+      // redirect to quotation list
+      customRevalidatePath(`/quotations`);
+      router.push("/quotations");
 
-//   return (
-//     <div className="flex space-x-2 items-center">
-//       {
-//         paymentTypeState == PurchaseOrderPaymentType.credit && (
-//           <div className="w-[140px] -mt-1">
-//             <FormInput
-//               id="paymentDue"
-//               label=""
-//               type="date"
-//               placeholder="กำหนดชำระ"
-//               defaultValue={paymentDue}
-//               onChange={(e) => {
-//                 const value = e.target.value;
-//                 if (!value || paymentDue === value) return;
-//                 onUpdate({
-//                   paymentDue: value,
-//                   paymentType: PurchaseOrderPaymentType.credit
-//                 });
-//               }}
-//             />
-//           </div>
-//         )
-//       }
-//       <Tabs defaultValue={paymentTypeState} className="w-[150px]">
-//         <TabsList className="w-full flex">
-//           <TabsTrigger
-//             className="flex-1 text-xs"
-//             value="cash"
-//             onClick={() => onPaymentTypeUpdate("cash")}
-//           >
-//             เงินสด
-//           </TabsTrigger>
-//           <TabsTrigger
-//             className="flex-1 text-xs"
-//             value="credit"
-//             onClick={() => onPaymentTypeUpdate("credit")}
-//           >
-//             เครดิต
-//           </TabsTrigger>
-//         </TabsList>
-//       </Tabs>
-//     </div>
-//   )
-// }
+      onDeleted();
+
+    },
+  });
+
+  const handleDelete = () => {
+    // router.push("/quotations");  
+    mutate({ quotationId });
+  };
+
+  if (hasList) {
+    return (
+      <span className="text-gray-500 text-xs">ไม่สามารถลบได้ เนื่องจากมีรายการสินค้าแล้ว</span>
+    )
+  }
+
+  return (
+    <ConfirmActionButton
+      onConfirm={handleDelete}
+    >
+      <Button
+        variant="outline"
+        disabled={hasList}
+        className="inline-flex items-center px-2 py-1 rounded-md  text-xs h-full"
+      >
+        <Delete className="w-4 h-4 mr-1" />
+        <span>ลบใบเสนอราคา</span>
+      </Button>
+    </ConfirmActionButton>
+  );
+}

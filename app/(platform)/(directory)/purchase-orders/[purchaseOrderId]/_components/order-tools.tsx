@@ -23,8 +23,8 @@ import Link from "next/link";
 import { customRevalidatePath } from "@/actions/revalidateTag";
 import PO_SERVICES from "@/app/services/api.purchase-order";
 import PaymentOptionControl from "@/components/payment-option-control";
-import { QuotationStatusDropdown } from "../../../quotations/[quotationId]/_components/quotation-tools";
 import QT_SERVICES from "@/app/services/api.quotation";
+import QuotationStatusDropdown from "../../../quotations/[quotationId]/_components/quotation-status-dropdown";
 
 type Props = {
   orderId: number;

@@ -12,9 +12,17 @@ const put = (id: number, data: Record<string, any>) => {
   });
 };
 
+const deleteItem = (id: number) => {
+  return fetcher(`/api/quotations/${id}`, {
+    method: "DELETE",
+  });
+}
+
+
 const APIs = {
   get,
-  put
+  put,
+  delete: deleteItem
 };
 
 export default APIs;

@@ -29,27 +29,9 @@ export default function PaymentOptionControl(props: Props) {
   };
 
   return (
-    <div className="flex space-x-2 items-center">
-      {paymentTypeState == PurchaseOrderPaymentType.credit && (
-        <div className="w-[140px] -mt-1">
-          <FormInput
-            id="paymentDue"
-            label=""
-            type="date"
-            placeholder="กำหนดชำระ"
-            defaultValue={paymentDue}
-            onChange={(e) => {
-              const value = e.target.value;
-              if (!value || paymentDue === value) return;
-              onUpdate({
-                paymentDue: value,
-                paymentType: PurchaseOrderPaymentType.credit,
-              });
-            }}
-          />
-        </div>
-      )}
-      <Tabs defaultValue={paymentTypeState} className="w-[150px]">
+    <div className="w-full flex flex-col items-end justify-between space-y-3">
+     
+      <Tabs defaultValue={paymentTypeState} className="w-full">
         <TabsList className="w-full flex">
           <TabsTrigger
             className="flex-1 text-xs"
@@ -67,6 +49,25 @@ export default function PaymentOptionControl(props: Props) {
           </TabsTrigger>
         </TabsList>
       </Tabs>
+      {paymentTypeState == PurchaseOrderPaymentType.credit && (
+        <div className="w-full -mt-1">
+          <FormInput
+            id="paymentDue"
+            label=""
+            type="date"
+            placeholder="กำหนดชำระ"
+            defaultValue={paymentDue}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (!value || paymentDue === value) return;
+              onUpdate({
+                paymentDue: value,
+                paymentType: PurchaseOrderPaymentType.credit,
+              });
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }

@@ -22,6 +22,7 @@ export async function PUT(
       "paymentType",
       "deliveryPeriod",
       "validPricePeriod",
+      "type"
     ];
 
     // check if body has any keys that are not in the whitelist
@@ -41,6 +42,29 @@ export async function PUT(
       },
     });
     return NextResponse.json(quotation);
+  } catch (error) {
+    console.log("error", error);
+    return new NextResponse("Internal Error", { status: 500 });
+  }
+}
+
+// delete 
+export async function DELETE(
+  req: NextRequest,
+  context: { params: { id: number } }
+) {
+  try {
+    const { id } = context.params;
+    if (!id) {
+      return new NextResponse("Missing id", { status: 400 });
+    }
+
+    await db.quotation.delete({
+      where: {
+        id: Number(id),
+      },
+    });
+    return new NextResponse("Deleted", { status: 204 });
   } catch (error) {
     console.log("error", error);
     return new NextResponse("Internal Error", { status: 500 });
