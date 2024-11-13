@@ -14,14 +14,14 @@ import { updateContact } from "@/actions/contact/update/index";
 import { useAction } from "@/hooks/use-action";
 import { FormTextarea } from "../form/form-textarea";
 import { Checkbox } from "../ui/checkbox";
-import { useSession } from "next-auth/react";
 import { classNames } from "@/lib/utils";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 export const ContactModal = () => {
   const modal = useContactModal();
   const contact = modal.data;
-  const { data: session, status } = useSession();
-  const isAdmin = session?.user?.role === "admin";
+  const isAdmin = useIsAdmin();
+
 
   const handleCreate = useAction(createContact, {
     onSuccess: (data) => {

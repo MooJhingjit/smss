@@ -1,22 +1,18 @@
 import { db } from "@/lib/db";
 import {
   Contact,
-  Product,
   Quotation,
   QuotationList,
   User,
 } from "@prisma/client";
 import { PDFDocument, PDFFont, PDFPage, rgb, PDFEmbeddedPage } from "pdf-lib";
-import fs from "fs/promises"; // Node.js file system module with promises
 import fontkit from "@pdf-lib/fontkit";
 import { getBoundingBox } from "./pdf.helpers";
 import { getDateFormat } from "@/lib/utils";
 import path from "path";
 import { readFile } from "fs/promises";
-import { QuotationListWithRelations } from "@/types";
 import {
   calculateQuotationItemPrice,
-  groupQuotationByVendor,
   // summarizeQuotationTotalPrice,
 } from "../service.quotation";
 

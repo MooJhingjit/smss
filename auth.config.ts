@@ -18,6 +18,9 @@ export const authConfig = {
   pages: {
     signIn: SIGN_IN_ROUTE,
   },
+   session: {
+    strategy: "jwt",
+  },
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
@@ -59,20 +62,23 @@ export const authConfig = {
 
       return token;
     },
-    async session({ session, token }) {
+    session({ session, token }) {
+      // console.log("session", session)
+      // console.log("token", token)
+
       if (token.sub && session.user) {
-        session.user.id = token.sub;
+        session.user.id = token.sub as string;
       }
 
       if (token.role && session.user) {
         session.user.role = token.role as UserRole;
       }
 
-      // Send properties to the client, like an access_token and user id from a provider.
+      // // Send properties to the client, like an access_token and user id from a provider.
       if (session.user) {
         session.user.name = token.name;
         session.user.email = token.email as string;
-        session.user.isOAuth = token.isOAuth as boolean;
+      //   session.user.isOAuth = token.isOAuth as boolean;
       }
       return session;
     },

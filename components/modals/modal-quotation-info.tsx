@@ -26,7 +26,6 @@ import PaymentOptionControl from "@/components/payment-option-control";
 import ConfirmActionButton from "@/components/confirm-action";
 import StatusBadge from "@/components/badges/status-badge";
 import PaymentBadge from "@/components/badges/payment-badge";
-import { useSession } from "next-auth/react";
 import { QuotationWithRelations } from "@/types";
 import QuotationStatusDropdown from "@/app/(platform)/(directory)/quotations/[quotationId]/_components/quotation-status-dropdown";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -37,6 +36,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { useRouter } from "next/navigation";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 
 export const QuotationInfoModal = () => {
@@ -86,9 +86,7 @@ const QuotationForm = (props: {
   hasList: boolean;
 }) => {
   const { hasList, data } = props;
-  const { data: session } = useSession();
-  const isAdmin = session?.user?.role === "admin";
-
+  const isAdmin = useIsAdmin();
   const {
     id: quotationId,
     status,

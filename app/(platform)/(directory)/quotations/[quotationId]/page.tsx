@@ -116,15 +116,6 @@ export default async function QuotationDetails(
           {contact && <CustomerInfo data={contact} />}
         </div>
         <div className="col-span-5 md:col-span-3">
-          {/* <QuotationTools
-            data={data}
-            hasList={lists.length > 0}
-            isAdmin={isAdmin}
-            paymentType={paymentType}
-            paymentDue={
-              paymentDue ? new Date(paymentDue).toISOString().split("T")[0] : ""
-            }
-          /> */}
           <QuotationInfo
             data={data}
           /> 

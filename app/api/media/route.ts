@@ -10,7 +10,6 @@ export async function GET(
     const refType = req.nextUrl.searchParams.get("refType");
     const refId = req.nextUrl.searchParams.get("refId");
     const field = getRefKey(refType ?? "");
-    console.log("field", field);
     if (!refType || !refId || !field) {
       return new NextResponse("Bad Request", { status: 400 });
     }
