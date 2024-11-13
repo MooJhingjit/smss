@@ -7,7 +7,7 @@ import { ContactSchema } from "./schema";
 import { currentUser } from "@/lib/auth";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-  const { taxId, name, email, phone, fax, address, isProtected } = data;
+  const { taxId, branchId, name, email, phone, fax, address, isProtected } = data;
 
   const userSession = await currentUser();
   console.log("🚀 ~ userSession:", userSession);
@@ -17,6 +17,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       data: {
         name,
         taxId,
+        branchId,
         email,
         phone,
         contact: data.contact,

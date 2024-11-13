@@ -16,6 +16,7 @@ export const ContactSchema = z.object({
     .email({
       message: "Email is invalid.",
     }),
+    branchId: z.string().optional(),
   phone: z.string().optional(),
   contact: z.string().optional(),
   fax: z.string().optional(),

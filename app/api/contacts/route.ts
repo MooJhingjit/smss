@@ -50,6 +50,11 @@ export async function GET(
               },
             },
             {
+              branchId: {
+                contains: search,
+              },
+            },
+            {
               name: {
                 contains: search,
               },

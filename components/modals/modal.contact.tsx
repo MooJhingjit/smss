@@ -56,6 +56,7 @@ export const ContactModal = () => {
     const isProtected = formData.get("isProtected") as string;
     const payload = {
       taxId,
+      branchId: formData.get("branchId") as string,
       name,
       email,
       phone,
@@ -89,6 +90,13 @@ export const ContactModal = () => {
             label="เลขผู้เสียภาษี"
             type="number"
             defaultValue={contact?.taxId}
+            errors={fieldErrors}
+          />
+          <FormInput
+            id="branchId"
+            label="สาขา"
+            type="number"
+            defaultValue={contact?.branchId}
             errors={fieldErrors}
           />
           <FormInput

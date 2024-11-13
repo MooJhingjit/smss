@@ -49,6 +49,7 @@ model Contact {
   name        String
   email       String      @unique
   taxId       String?     @unique
+  branchId    String?     @unique
   phone       String?
   address     String?     @db.Text
   contact     String?     @db.Text

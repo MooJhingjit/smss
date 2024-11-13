@@ -9,12 +9,13 @@ import { InputType, ReturnType } from "./types";
 import { ContactSchema } from "./schema";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-  const { id, taxId, name, email, phone, contact, fax, address, isProtected } =
+  const { id, taxId, branchId, name, email, phone, contact, fax, address, isProtected } =
     data;
   let buyer;
   try {
     const payload: any = {
       taxId,
+      branchId,
       name,
       email,
       phone,
@@ -37,7 +38,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         // https://www.prisma.io/docs/orm/reference/error-reference#error-codes
         return {
           error:
-            "There is a unique constraint violation, a new user cannot be created with this email",
+            "ข้อมูลซ้ำ กรุณาตรวจสอบ อีเมล์ สาขา หรือ เลขผู้เสียภาษี",
         };
       }
     }
