@@ -1,12 +1,33 @@
 "use client";
 import { cn } from "@/lib/utils";
+import { cva, type VariantProps } from "class-variance-authority";
 import React, { ReactNode } from "react";
+import { Button } from "./ui/button";
 
-type DataInfoProps = {
+
+const variants = cva(
+    "rounded-md p-4",
+    {
+        variants: {
+            variant: {
+                yellow: "bg-yellow-50  border border-yellow-400 text-yellow-800",
+                gray: "bg-gray-50  border border-gray-300 text-gray-800",
+                blue: "bg-blue-50  border border-blue-400 text-blue-800",
+            },
+        },
+        defaultVariants: {
+            variant: "gray",
+        },
+    },
+);
+
+
+type DataInfoProps = VariantProps<typeof variants> & {
     header: string;
     lists: { label: string; value: string | ReactNode }[];
     onEdit: () => void;
     className?: string; // optional prop for additional custom styles
+    columnClassName?: string; // optional prop for additional custom styles
 };
 
 export default function DataInfo({
@@ -14,22 +35,26 @@ export default function DataInfo({
     lists,
     onEdit,
     className = "",
+    columnClassName = "grid-cols-1  sm:grid-cols-3 md:grid-cols-4",
+    variant,
 }: Readonly<DataInfoProps>) {
     return (
-        <div className={cn(
-            `rounded-md p-4 border`,
-            className
-        )}>
+        <div className={cn(variants({ variant }), className)}>
             <div className="flex items-center justify-between">
-                <h3 className="text-sm font-medium text-yellow-800">{header}</h3>
-                <button
+                <h3 className="font-medium ">{header}</h3>
+                <Button
                     onClick={onEdit}
-                    className="inline-flex cursor-pointer items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10"
+                    variant={"link"}
                 >
-                    Edit
-                </button>
+                    แก้ไข
+                </Button>
             </div>
-            <div className="mt-2 text-sm text-yellow-700 grid grid-cols-1  sm:grid-cols-3 md:grid-cols-4 gap-2">
+            <div className={
+                cn(
+                    "mt-2 text-sm  grid  gap-2",
+                    columnClassName
+                )
+            }>
                 {lists.map((item, index) => (
                     <Item key={index} label={item.label} value={item.value} />
                 ))}
@@ -39,8 +64,8 @@ export default function DataInfo({
 }
 
 const Item = ({ label, value }: { label: string; value: string | ReactNode }) => (
-    <div className="bg-gray-50 p-2">
+    <div className="bg-white border p-2 overflow-hidden">
         <p className="text-gray-500 text-xs">{label}</p>
-        <div className="">{typeof value === "string" ? <p className="text-gray-500">{value}</p> : <>{value}</>}</div>
+        <div className="">{typeof value === "string" ? <p className="text-sm whitespace-nowrap truncate font-semibold" title={value}>{value}</p> : <>{value}</>}</div>
     </div>
 );

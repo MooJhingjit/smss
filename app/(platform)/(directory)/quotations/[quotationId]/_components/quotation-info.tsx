@@ -16,6 +16,7 @@ export default function QuotationInfo(props: Readonly<Props>) {
 
   return (
     <DataInfo
+      variant="gray"
       header={`QT: ${data.code}`}
       lists={[
         { label: "ประเภท", value: quotationTypeMapping[data.type] },
