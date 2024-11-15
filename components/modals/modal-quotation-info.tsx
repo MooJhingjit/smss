@@ -10,6 +10,13 @@ import {
 import { toast } from "sonner";
 import { useQuotationInfoModal } from "@/hooks/use-quotation-info-modal";
 import React from "react";
+import { ChevronsUpDown } from "lucide-react"
+
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 import { LockIcon, PrinterIcon, Send, Clock, CheckCircle, PenBoxIcon, InfoIcon, Delete } from "lucide-react";
 import {
   PurchaseOrderPaymentType,
@@ -37,11 +44,14 @@ import {
 } from "@/components/ui/tooltip"
 import { useRouter } from "next/navigation";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import { updateCodeVersion } from "@/lib/utils";
 
 
 export const QuotationInfoModal = () => {
   const modal = useQuotationInfoModal();
   const data = modal.data;
+  console.log(data)
+  const [isActionAreaOpen, setIsOpenActionArea] = React.useState(false)
 
   if (!data) {
     return null;
@@ -49,12 +59,12 @@ export const QuotationInfoModal = () => {
 
   return (
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>
 
             <div className="flex space-x-1 items-center">
-              <PenBoxIcon className="w-5 h-5 " />
+              {/* <PenBoxIcon className="w-5 h-5 " /> */}
               <span> {data?.code}</span>
             </div>
           </DialogTitle>
@@ -67,13 +77,45 @@ export const QuotationInfoModal = () => {
 
         />
         <DialogFooter className="border-t pt-6">
-          <div className="flex w-full justify-center items-center">
-            <DeleteComponent
-              onDeleted={modal.onClose}
-              quotationId={data?.id}
-              hasList={data?.lists ? data.lists.length > 0 : false}
-            />
-          </div>
+
+          <Collapsible
+            open={isActionAreaOpen}
+            onOpenChange={setIsOpenActionArea}
+            className="w-full space-y-2"
+          >
+            <CollapsibleTrigger asChild>
+                <div className="flex items-center space-x-1 justify-center cursor-pointer">
+                  <h4 className="text-sm font-semibold">
+                    ดำเนินการเพิ่มเติม
+                  </h4>
+                  <Button variant="ghost" size="sm" className="w-9 p-0">
+                    <ChevronsUpDown className="h-4 w-4" />
+                    <span className="sr-only">Toggle</span>
+                  </Button>
+                </div>
+              </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-2">
+              <div className="w-full grid grid-cols-2 gap-3">
+                <div className="bg-gray-50 p-2 flex items-center justify-center">
+                  <DeleteComponent
+                    onDeleted={modal.onClose}
+                    quotationId={data?.id}
+                    hasList={data?.lists ? data.lists.length > 0 : false}
+                  />
+                </div>
+                <div className="bg-gray-50 p-2 flex items-center justify-center">
+                  <VersionUpdate
+                    hasPo={!!data?.purchaseOrders?.length}
+                    currentVersion={data?.code}
+                    quotationId={data?.id}
+                  />
+                </div>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+
+
+
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -173,7 +215,7 @@ const QuotationForm = (props: {
     <div className="space-y-2">
       <div className="grid grid-cols-12   gap-6 ">
         <ItemList label="ประเภท">
-          <div className="space-x-2 flex items-center w-[200px] ">
+          <div className="space-x-2 flex items-center w-full ">
             {
               hasList && (
                 <HoverInfo message="ไม่สามารถเปลี่ยนประเภทได้ เนื่องจากมีรายการสินค้าแล้ว" />
@@ -202,14 +244,14 @@ const QuotationForm = (props: {
           </div>
         </ItemList>
         <ItemList label="สถานะ">
-          <div className=" text-sm leading-6 text-gray-700 flex space-x-2">
-            {isLocked && (
+          <div className=" text-sm leading-6 text-gray-700 flex space-x-2  w-full">
+            {/* {isLocked && (
               <div className="col-span-1 flex items-center">
                 <LockIcon className="w-4 h-4 text-yellow-500" />
               </div>
-            )}
+            )} */}
             {isAdmin ? (
-              <div className="">
+              <div className="w-full">
                 <QuotationStatusDropdown
                   onStatusChange={(s) => {
                     handleItemChange({ status: s });
@@ -451,7 +493,7 @@ const ItemList = ({
     <div className="col-span-12 pt-2">
       <div className=" flex justify-between items-center px-6 h-full">
         {label && <p className="text-sm leading-6 text-gray-600">{label}</p>}
-        {children}
+        <div className="w-[200px]">{children}</div>
       </div>
     </div>
   );
@@ -511,7 +553,7 @@ const DeleteComponent = ({
 
   if (hasList) {
     return (
-      <span className="text-gray-500 text-xs">ไม่สามารถลบได้ เนื่องจากมีรายการสินค้าแล้ว</span>
+      <span className="text-orange-500 text-xs">ไม่สามารถลบได้ เนื่องจากมีรายการสินค้าแล้ว</span>
     )
   }
 
@@ -520,13 +562,75 @@ const DeleteComponent = ({
       onConfirm={handleDelete}
     >
       <Button
-        variant="outline"
+        variant="link"
         disabled={hasList}
         className="inline-flex items-center px-2 py-1 rounded-md  text-xs h-full"
+        asChild
       >
-        <Delete className="w-4 h-4 mr-1" />
+        {/* <Delete className="w-4 h-4 mr-1" /> */}
         <span>ลบใบเสนอราคา</span>
       </Button>
     </ConfirmActionButton>
+  );
+}
+
+const VersionUpdate = ({
+  quotationId,
+  hasPo,
+  currentVersion,
+}: {
+  quotationId: number;
+  hasPo: boolean;
+  currentVersion: string;
+}) => {
+  const router = useRouter();
+
+  const { mutate, isPending } = useMutation<
+    MutationResponseType,
+    Error,
+    { quotationId: number, code: string }
+  >({
+    mutationFn: async (fields) => {
+      const res = await QT_SERVICES.put(
+        fields.quotationId,
+        {
+          code: fields.code,
+        }
+      );
+      return res;
+    },
+    onSuccess: async (n) => {
+      toast.success("อัพเดทเวอร์ชั่นสำเร็จ");
+      // invalidate query
+      // redirect to quotation list
+      customRevalidatePath(`/quotations`);
+    },
+  });
+
+  const handleUpdate = () => {
+    const newVersion = updateCodeVersion(currentVersion);
+    mutate({ quotationId, code: newVersion });
+  };
+
+  if (hasPo) {
+    return (
+      <span className="text-orange-500 text-xs">ไม่สามารถอัพเดทเวอร์ชั่นได้ เนื่องจากมีใบสั่งซื้อแล้ว</span>
+    )
+  }
+
+  return (
+    <ConfirmActionButton
+      disabled={isPending}
+      onConfirm={handleUpdate}
+    >
+      <Button
+        variant="link"
+        className="inline-flex items-center px-2 py-1 rounded-md  text-xs h-full"
+      >
+        <span>อัพเดทเวอร์ชั่น (R+1)</span>
+      </Button>
+    </ConfirmActionButton>
+
+
   );
 }

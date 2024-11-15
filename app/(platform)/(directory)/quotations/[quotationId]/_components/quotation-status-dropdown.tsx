@@ -60,7 +60,7 @@ export default function QuotationStatusDropdown({
 
     return (
         <Select onValueChange={onStatusChange}>
-            <SelectTrigger className="inline-flex capitalize font-semibold  rounded-md bg-yellow-50 px-2 py-1 text-xs text-yellow-700 border border-yellow-500 items-center">
+            <SelectTrigger className="inline-flex capitalize font-semibold  rounded-md bg-yellow-50 px-2 py-1 text-xs text-yellow-700 border  border-yellow-700 items-center">
                 <SelectValue placeholder={quotationStatusMapping[curStatus].label} />
             </SelectTrigger>
             <SelectContent className="bg-white text-xs p-2 space-y-2 ">

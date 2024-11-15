@@ -19,6 +19,26 @@ export function generateCode(id: number, prefix: "QT" | "PO", date: Date = new D
   return `${prefix}${year}${month}${formattedId}`;
 }
 
+export function updateCodeVersion(code: string): string {
+  // Split the ID by the dash
+  const parts = code.split("-");
+
+  if (parts.length > 2) {
+    return code;
+  }
+
+  const baseId = parts[0];
+  const currentVersion = parts[1];
+
+  let newVersion = "R1";
+  if (currentVersion) {
+    const versionNumber = parseInt(currentVersion.slice(1), 10) + 1;
+    newVersion = `R${versionNumber}`;
+  }
+
+  return `${baseId}-${newVersion}`;
+}
+
 export function getDateFormat(date: Date | string, format?: string) {
   if (typeof date === "string") {
     date = new Date(date);

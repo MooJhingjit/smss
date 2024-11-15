@@ -22,7 +22,8 @@ export async function PUT(
       "paymentType",
       "deliveryPeriod",
       "validPricePeriod",
-      "type"
+      "type",
+      "code"
     ];
 
     // check if body has any keys that are not in the whitelist
