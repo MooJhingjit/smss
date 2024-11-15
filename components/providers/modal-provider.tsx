@@ -14,6 +14,8 @@ import { ContactModal } from "../modals/modal.contact";
 
 import { PurchaseOrderReceiptModal } from "../modals/modal.purchase-order-receipt";
 import { QuotationInfoModal } from "../modals/modal-quotation-info";
+import { PurchaseInfoModal } from "../modals/modal-purchase-info";
+
 
 export const ModalProvider = () => {
   const [isMounted, setIsMounted] = useState(false);
@@ -34,6 +36,7 @@ export const ModalProvider = () => {
       <QuotationListModal />
       <QuotationInfoModal />
       <PurchasePreviewModal />
+      <PurchaseInfoModal />
       <NewProductModal />
       <NewQuotationModal />
       <NewPurchaseModal />

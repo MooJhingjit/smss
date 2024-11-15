@@ -5,7 +5,8 @@ import PurchaseOrderItems from "./_components/order-items";
 import AssociateOrders from "./_components/associate-orders";
 import { db } from "@/lib/db";
 import DocumentItems from "../../../../../components/document-lists";
-import PurchaseOrderTools from "./_components/order-tools";
+import PurchaseOrderTools from "./_components/___order-tools";
+import PurchaseOrderInfo from "./_components/order-info";
 const getData = async (id: string) => {
   const data = await db.purchaseOrder.findUnique({
     where: {
@@ -89,12 +90,13 @@ export default async function PurchaseOrderDetails(props: Readonly<Props>) {
   return (
     <>
       <Breadcrumbs pages={pages} />
-      <div className="grid grid-cols-5 gap-8 mt-6">
+      <div className="grid grid-cols-6 gap-8 mt-6">
         <div className="col-span-3">
           {vendor && <VendorInfo data={vendor} />}
         </div>
-        <div className="col-span-2">
-          <PurchaseOrderTools
+        <div className="col-span-3">
+          <PurchaseOrderInfo data={data} />
+          {/* <PurchaseOrderTools
             orderId={data.id}
             quotationId={data.quotationId}
             quotationCode={data.quotation?.code ?? ""}
@@ -106,12 +108,12 @@ export default async function PurchaseOrderDetails(props: Readonly<Props>) {
                 : ""
             }
             paymentType={data.paymentType}
-          />
+          /> */}
         </div>
-        <div className="col-span-5">
+        <div className="col-span-6">
           <PurchaseOrderItems data={data} />
         </div>
-        <div className="col-span-2">
+        <div className="col-span-3">
           <DocumentItems refType="purchaseOrder" refId={data.id} />
         </div>
         {associateOrders.length > 0 && (
