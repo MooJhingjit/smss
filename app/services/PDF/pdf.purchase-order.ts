@@ -1,18 +1,14 @@
 import { db } from "@/lib/db";
 import {
-  Contact,
   PurchaseOrder,
   PurchaseOrderItem,
-  Quotation,
-  QuotationList,
   User,
 } from "@prisma/client";
 import { PDFDocument, PDFFont, PDFPage, rgb, PDFEmbeddedPage } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
-import { getBoundingBox } from "./pdf.helpers";
-import { getDateFormat } from "@/lib/utils";
 import path from "path";
 import { readFile } from "fs/promises";
+import { getBoundingBox, PDFDateFormat } from "./pdf.helpers";
 
 const PAGE_FONT_SIZE = 8;
 
@@ -21,11 +17,7 @@ const CURRENCY_FORMAT = {
   maximumFractionDigits: 2,
 };
 
-const TODAY = new Date().toLocaleDateString("en-GB", {
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-});
+const TODAY = PDFDateFormat(new Date())
 
 type PurchaseOrderWithRelations = PurchaseOrder & {
   purchaseOrderItems?: PurchaseOrderItem[];
@@ -167,20 +159,59 @@ const drawOrdererInfo = (page: PDFPage, font: PDFFont) => {
   });
 };
 
-const drawRemarkInfo = (page: PDFPage, font: PDFFont, text: string) => {
+const drawRemarkInfo = (page: PDFPage, font: PDFFont, data: PurchaseOrderWithRelations) => {
   const config = {
     font,
     size: PAGE_FONT_SIZE,
     lineHeight: 14,
-    color: rgb(255 / 255, 0 / 255, 0 / 255),
+
   };
 
-  page.drawText(text, {
+  // remark
+  page.drawText(data.remark ?? "", {
     x: 35,
     y: 175,
     maxWidth: 350,
+    color: rgb(255 / 255, 0 / 255, 0 / 255),
     ...config,
   });
+
+  // withholdingTax summary
+  if (data.tax) {
+    const priceAfterTax = (data?.grandTotal ?? 0) - (data?.tax ?? 0)
+    const items = [
+      {
+        label: 'ราคาก่อนภาษี',
+        value: data.price?.toLocaleString("th-TH", CURRENCY_FORMAT) + ' บาท'
+      },
+      {
+        label: 'หัก ณ ที่จ่าย 3%',
+        value: data.tax?.toLocaleString("th-TH", CURRENCY_FORMAT) + ' บาท'
+      },
+      {
+        label: 'ราคาหลังจากหัก ณ ที่จ่าย',
+        value: priceAfterTax.toLocaleString("th-TH", CURRENCY_FORMAT) + ' บาท'
+      }
+    ];
+
+    page.drawText("**", {
+      x: 260,
+      y: 190,
+      maxWidth: 400,
+    color: rgb(255 / 255, 0 / 255, 0 / 255),
+
+      ...config,
+    });
+    items.forEach((item, index) => {
+      page.drawText(`${item.label}: ${item.value}`, {
+        x: 270,
+        y: 190 - (index * 15),
+        maxWidth: 400,
+        ...config,
+      });
+    });
+  }
+
 };
 
 const drawPriceInfo = (
@@ -300,6 +331,21 @@ const generate = async (id: number, data: PurchaseOrderWithRelations) => {
       maxWidth: 20,
       ...config,
     });
+
+    // remark withholdingTax
+    if (
+      data.withholdingTaxEnabled
+    ) {
+      currentPage.drawText("**", {
+        x: columnPosition.description - 8,
+        y: lineStart,
+        maxWidth: 5,
+        color: rgb(255 / 255, 0 / 255, 0 / 255),
+        ...config,
+        // lineHeight: breakLineHeight,
+      });
+    }
+
     currentPage.drawText(data.name, {
       x: columnPosition.description,
       y: lineStart,
@@ -324,8 +370,8 @@ const generate = async (id: number, data: PurchaseOrderWithRelations) => {
     });
 
     const unitPrice = data.unitPrice
-    ? data.unitPrice.toLocaleString("th-TH", CURRENCY_FORMAT)
-    : "";
+      ? data.unitPrice.toLocaleString("th-TH", CURRENCY_FORMAT)
+      : "";
 
     currentPage.drawText(data.unitPrice?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "", {
       x: columnPosition.unitPrice + 44 - getTextWidth(unitPrice, config),
@@ -489,7 +535,7 @@ const drawStaticInfo = (
   }
 
   drawOrdererInfo(page, font);
-  drawRemarkInfo(page, font, data.remark ?? "");
+  drawRemarkInfo(page, font, data);
 
   drawPriceInfo(page, font, {
     price: data.price?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",

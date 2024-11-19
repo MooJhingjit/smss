@@ -48,6 +48,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { FormInput } from "../form/form-input";
 
 
 export const PurchaseInfoModal = () => {
@@ -141,7 +142,7 @@ const MainForm = ({ data }: {
       return res;
     },
     onSuccess: async (n) => {
-      toast.success("อัพเดทสถานะ PO สำเร็จ");
+      toast.success("อัพเดทสำเร็จ");
       customRevalidatePath(`/purchase-orders/${data.id}`);
     },
   });
@@ -172,6 +173,7 @@ const MainForm = ({ data }: {
     status?: PurchaseOrderStatus;
     paymentDue?: string;
     paymentType?: PurchaseOrderPaymentType;
+    vendorQtCode?: string;
   }) => {
     // update what is provided
     let payloadBody: any = {};
@@ -183,6 +185,8 @@ const MainForm = ({ data }: {
         ? new Date(payload.paymentDue).toISOString()
         : null;
     }
+
+    payloadBody["vendorQtCode"] = payload.vendorQtCode
 
     if (payload.paymentType) {
       payloadBody["paymentType"] = payload.paymentType;
@@ -276,11 +280,28 @@ const MainForm = ({ data }: {
             paymentDue={data.paymentDue?.toDateString() ?? ""}
           />
         </ItemList>
+        <ItemList label="เลขใบเสนอราคา">
+          <div className="flex space-x-3 items-center">
+            <FormInput
+              id="deliveryPeriod"
+              className="text-xs w-full"
+              placeholder=""
+              defaultValue={data.vendorQtCode}
+              onBlur={(e) => {
+                const vendorQtCode = e.target.value ?? "";
+                handleChange({ vendorQtCode });
+              }}
+            />
+          </div>
+        </ItemList>
         <ItemList label="">
           <div className="space-x-8 flex items-center">
             <PrintButton orderId={data.id} />
           </div>
         </ItemList>
+
+        
+
 
       </div>
     </div>

@@ -35,6 +35,8 @@ export default function PurchaseOrderInfo(props: Readonly<Props>) {
     />
   })
 
+  lists.push({ label: "เลขใบเสนอราคา", value: data.vendorQtCode ?? "-" })
+
   return (
     <DataInfo
       variant="gray"

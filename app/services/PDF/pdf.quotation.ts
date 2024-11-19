@@ -140,6 +140,21 @@ const generate = async (id: number, data: QuotationWithRelations) => {
       maxWidth: 20,
       ...config,
     });
+
+    // // remark withholdingTax
+    // if (
+    //   data.withholdingTax
+    // ) {
+    //   currentPage.drawText("**", {
+    //     x: columnPosition.description - 8,
+    //     y: lineStart,
+    //     maxWidth: 5,
+    //     color: rgb(255 / 255, 0 / 255, 0 / 255),
+    //     ...config,
+    //     // lineHeight: breakLineHeight,
+    //   });
+    // }
+
     currentPage.drawText(data.name, {
       x: columnPosition.description,
       y: lineStart,
@@ -172,9 +187,9 @@ const generate = async (id: number, data: QuotationWithRelations) => {
     if (data.unitPrice) {
       const quantity = data?.quantity || 1;
       itemAmount = data.unitPrice * quantity
-    } 
+    }
     const amountText = itemAmount.toLocaleString("th-TH", CURRENCY_FORMAT)
-      
+
     currentPage.drawText(amountText, {
       x: columnPosition.amount + 44 - getTextWidth(amountText, config),
       y: lineStart,

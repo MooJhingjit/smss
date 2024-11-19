@@ -13,7 +13,7 @@ export async function PUT(
     }
 
     // body whitelist
-    const bodyWhitelist = ["status", "paymentDue", "paymentType"];
+    const bodyWhitelist = ["status", "paymentDue", "paymentType", "vendorQtCode"];
 
     // check if body has any keys that are not in the whitelist
     const body = await req.json();

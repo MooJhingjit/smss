@@ -221,6 +221,7 @@ model PurchaseOrder {
   quotation          Quotation?               @relation(fields: [quotationId], references: [id])
   vendorId           Int
   vendor             User                     @relation(fields: [vendorId], references: [id], name: "vendor")
+  vendorQtCode       String?
   discount           Float?
   extraCost          Float?
   price              Float?
