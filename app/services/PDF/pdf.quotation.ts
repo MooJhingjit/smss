@@ -21,6 +21,7 @@ const CURRENCY_FORMAT = {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 };
+let _BILL_DATE = ""
 
 type QuotationWithRelations = Quotation & {
   lists: QuotationList[];
@@ -49,11 +50,14 @@ const getQuotation = async (
   return quotation;
 };
 
-export const generateInvoice = async (id: number) => {
+export const generateInvoice = async (id: number, date: string) => {
   try {
     if (!id) {
       throw new Error("Invalid quotation ID");
     }
+
+    _BILL_DATE = PDFDateFormat(new Date(date))
+
 
     const quotation = await getQuotation(id);
 
@@ -595,7 +599,7 @@ const drawStaticInfo = (
 ) => {
   drawHeaderInfo(page, font, currentPageNumber, {
     code: data.code,
-    date: PDFDateFormat(data.createdAt),
+    date: PDFDateFormat(new Date(_BILL_DATE)),
   });
   drawCustomerInfo(page, font, data.contact);
   drawOfferInfo(page, font, {

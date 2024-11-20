@@ -6,8 +6,12 @@ export async function POST(
   context: { params: { id: number } }
 ) {
   const { id } = context.params;
+  const data = await req.json() as {
+    date: string;
+  }
   try {
-    const { pdfBytes } = await generateInvoice(id);
+    const { pdfBytes } = await generateInvoice(id, data.date);
+ 
     const headers = new Headers()
     headers.set('Content-Type', 'application/pdf')
     headers.set('Content-Disposition', 'attachment; filename="download.pdf"')

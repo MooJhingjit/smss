@@ -45,6 +45,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { updateCodeVersion } from "@/lib/utils";
+import { Input } from "../ui/input";
 
 
 export const QuotationInfoModal = () => {
@@ -84,16 +85,16 @@ export const QuotationInfoModal = () => {
             className="w-full space-y-2"
           >
             <CollapsibleTrigger asChild>
-                <div className="flex items-center space-x-1 justify-center cursor-pointer">
-                  <h4 className="text-sm font-semibold">
-                    ดำเนินการเพิ่มเติม
-                  </h4>
-                  <Button variant="ghost" size="sm" className="w-9 p-0">
-                    <ChevronsUpDown className="h-4 w-4" />
-                    <span className="sr-only">Toggle</span>
-                  </Button>
-                </div>
-              </CollapsibleTrigger>
+              <div className="flex items-center space-x-1 justify-center cursor-pointer">
+                <h4 className="text-sm font-semibold">
+                  ดำเนินการเพิ่มเติม
+                </h4>
+                <Button variant="ghost" size="sm" className="w-9 p-0">
+                  <ChevronsUpDown className="h-4 w-4" />
+                  <span className="sr-only">Toggle</span>
+                </Button>
+              </div>
+            </CollapsibleTrigger>
             <CollapsibleContent className="space-y-2">
               <div className="w-full grid grid-cols-2 gap-3">
                 <div className="bg-gray-50 p-2 flex items-center justify-center">
@@ -214,34 +215,29 @@ const QuotationForm = (props: {
   return (
     <div className="space-y-2">
       <div className="grid grid-cols-12   gap-6 ">
-        <ItemList label="ประเภท">
-          <div className="space-x-2 flex items-center w-full ">
-            {
-              hasList && (
-                <HoverInfo message="ไม่สามารถเปลี่ยนประเภทได้ เนื่องจากมีรายการสินค้าแล้ว" />
-              )
-            }
-            <Tabs defaultValue={type} className="w-full" >
-              <TabsList className=" flex">
-                <TabsTrigger
-                  disabled={hasList}
-                  className="flex-1 text-xs"
-                  value="product"
-                  onClick={() => handleItemChange({ type: "product" })}
-                >
-                  สินค้า
-                </TabsTrigger>
-                <TabsTrigger
-                  disabled={hasList}
-                  className="flex-1 text-xs"
-                  value="service"
-                  onClick={() => handleItemChange({ type: "service" })}
-                >
-                  บริการ
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
+        <ItemList label="ประเภท"
+          info={hasList ? "ไม่สามารถเปลี่ยนประเภทได้ เนื่องจากมีรายการสินค้าแล้ว" : ""}
+        >
+          <Tabs defaultValue={type} className="w-full" >
+            <TabsList className=" flex">
+              <TabsTrigger
+                disabled={hasList}
+                className="flex-1 text-xs"
+                value="product"
+                onClick={() => handleItemChange({ type: "product" })}
+              >
+                สินค้า
+              </TabsTrigger>
+              <TabsTrigger
+                disabled={hasList}
+                className="flex-1 text-xs"
+                value="service"
+                onClick={() => handleItemChange({ type: "service" })}
+              >
+                บริการ
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </ItemList>
         <ItemList label="สถานะ">
           <div className=" text-sm leading-6 text-gray-700 flex space-x-2  w-full">
@@ -331,11 +327,16 @@ const QuotationForm = (props: {
               </div>
             </ItemList>
 
-            <ItemList label="">
-              <div className="space-x-8 flex items-center">
-                <PrintButton quotationId={quotationId} hasList={hasList} />
+            <ItemList label="พิมพ์ใบเสนอราคา"
+            >
+              <div className="flex space-x-3 items-center">
+                <PrintQuotation
+                  quotationId={quotationId}
+                  hasList={hasList}
+                />
               </div>
             </ItemList>
+
           </>
 
         )}
@@ -408,16 +409,23 @@ const ApprovalButton = ({
   );
 };
 
-const PrintButton = ({
+
+const PrintQuotation = ({
   quotationId,
   hasList,
 }: {
   quotationId: number;
   hasList: boolean;
 }) => {
-  const onPrintClick = () => {
+  const onPrintClick = (date: Date) => {
     try {
-      fetch(`/api/quotations/invoice/${quotationId}`, { method: "POST" })
+      fetch(`/api/quotations/invoice/${quotationId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ date: date.toISOString() }),
+      })
         .then((res) => res.blob())
         .then((blob) => URL.createObjectURL(blob))
         .then((url) => {
@@ -443,15 +451,30 @@ const PrintButton = ({
     }
   };
   return (
-    <Button
-      onClick={onPrintClick}
-      disabled={!hasList}
-      variant="outline"
-      className="inline-flex items-center px-2 py-2 rounded-md bg-gray-100 text-gray-700 text-xs h-full"
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+        const date = formData.get("date") as string;
+        if (date) {
+          onPrintClick(new Date(date));
+        }
+      }}
+      className="flex w-full max-w-sm items-center space-x-2"
     >
-      <PrinterIcon className="w-4 h-4 mr-1" />
-      <span>พิมพ์ใบเสนอราคา</span>
-    </Button>
+      <Input
+        id="date"
+        name="date"
+        type="date"
+        placeholder="วันที่"
+        defaultValue={new Date().toISOString().split("T")[0]}
+      />
+      <Button size={"sm"} variant={"secondary"} type="submit">
+        <PrinterIcon className="w-4 h-4" />
+      </Button>
+    </form>
+
+
   );
 };
 
@@ -484,15 +507,20 @@ const PurchaseOrderRefInput = ({
 
 const ItemList = ({
   label,
+  info,
   children,
 }: {
   label?: string;
+  info?: string;
   children: React.ReactNode;
 }) => {
   return (
     <div className="col-span-12 pt-2">
       <div className=" flex justify-between items-center px-6 h-full">
-        {label && <p className="text-sm leading-6 text-gray-600">{label}</p>}
+        <div className="flex space-x-2 items-center">
+          {label && <p className="text-sm leading-6 text-gray-600 max-w-[150px] whitespace-pre-wrap">{label}</p>}
+          {info && <HoverInfo message={info} />}
+        </div>
         <div className="w-[200px]">{children}</div>
       </div>
     </div>
