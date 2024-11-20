@@ -41,13 +41,19 @@ export default function BillingInfo({
         <div className="flex items-center justify-between py-1">
           <dt className="text-gray-600">ส่วนลด</dt>
           <dd className="font-medium text-gray-900">
-            <p>{discount}</p>
+            {discount?.toLocaleString("th-TH", {
+                style: "currency",
+                currency: "THB",
+              }) ?? 0}
           </dd>
         </div>
         <div className="flex items-center justify-between py-1">
           <dt className="text-gray-600">ต้นทุนเพิ่ม</dt>
           <dd className="font-medium text-gray-900">
-            <p>{extraCost}</p>
+            {extraCost?.toLocaleString("th-TH", {
+                style: "currency",
+                currency: "THB",
+              }) ?? 0}
           </dd>
         </div>
         <div className="flex items-center justify-between py-1">
@@ -75,7 +81,10 @@ export default function BillingInfo({
         <div className="flex items-center justify-between py-1">
           <dt className="text-gray-600">หัก ณ ที่จ่าย 3%</dt>
           <dd className="font-medium text-yellow-600">
-            <p>{tax}</p>
+            {tax?.toLocaleString("th-TH", {
+                style: "currency",
+                currency: "THB",
+              }) ?? 0}
           </dd>
         </div>
         <div className="flex items-center justify-between pt-4">

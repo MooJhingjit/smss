@@ -447,7 +447,7 @@ const ApprovalButton = ({
         <CheckCircle className="w-4 h-4 mr-1  text-green-700" />
         <div className="">
           <p className="text-sm text-green-700 ">
-            ได้รับการ��นุมัติ: สามารถนำส่งให้ลูกค้าได้
+            ได้รับการอนุมัติ: สามารถนำส่งให้ลูกค้าได้
           </p>
           <ConfirmActionButton
             onConfirm={() => {
@@ -626,7 +626,7 @@ const DeleteComponent = ({
       return res;
     },
     onSuccess: async (n) => {
-      toast.success("ลบสำเร็��");
+      toast.success("ลบสำเร็จ");
       // invalidate query
       // redirect to quotation list
       customRevalidatePath(`/quotations`);
