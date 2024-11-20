@@ -3,29 +3,23 @@
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import React from "react";
-import { ChevronsUpDown, InfoIcon } from "lucide-react"
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible"
+import { InfoIcon } from "lucide-react"
 import { Button } from "@/components/ui/button";
 import { PurchaseOrderWithRelations } from "@/types";
 import { usePurchaseOrderInfoModal } from "@/hooks/use-po-info-modal";
 
-import { LockIcon, PrinterIcon } from "lucide-react";
+import {  PrinterIcon } from "lucide-react";
 import {
   PurchaseOrderPaymentType,
   PurchaseOrderStatus,
   QuotationStatus,
 } from "@prisma/client";
 // import * as Select from '@radix-ui/react-select';
-import { purchaseOrderStatusMapping, quotationStatusMapping } from "@/app/config";
+import { purchaseOrderStatusMapping } from "@/app/config";
 import { MutationResponseType } from "@/components/providers/query-provider";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -36,7 +30,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import Link from "next/link";
 import { customRevalidatePath } from "@/actions/revalidateTag";
 import PO_SERVICES from "@/app/services/api.purchase-order";
 import PaymentOptionControl from "@/components/payment-option-control";
@@ -49,7 +42,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { FormInput } from "../form/form-input";
-
+import { Input } from "../ui/input";
 
 export const PurchaseInfoModal = () => {
   const modal = usePurchaseOrderInfoModal();
@@ -259,20 +252,6 @@ const MainForm = ({ data }: {
           </div>
         </ItemList>
 
-        {/* {
-          data.quotation && (
-            <ItemList label={"สถานะ QT (" + data.quotation.code + ")"}>
-              <div className=" flex items-center space-x-3">
-                <HoverInfo message="สถานะ QT จะเปลี่ยนตาม สถานะ PO ด้านบน" />
-                <span>{
-                  quotationStatusMapping[data.quotation.status].label
-
-                }</span>
-              </div>
-            </ItemList>
-          )
-        } */}
-
         <ItemList label="การชำระเงิน">
           <PaymentOptionControl
             onUpdate={handleChange}
@@ -294,14 +273,14 @@ const MainForm = ({ data }: {
             />
           </div>
         </ItemList>
-        <ItemList label="">
-          <div className="space-x-8 flex items-center">
-            <PrintButton orderId={data.id} />
+        <ItemList label="พิมพ์ใบสั่งซื้อ">
+        <div className="flex space-x-3 items-center">
+
+            <PrintOrderForm
+              orderId={data.id}
+            />
           </div>
         </ItemList>
-
-        
-
 
       </div>
     </div>
@@ -359,10 +338,16 @@ const StatusDropdown = ({
   );
 };
 
-const PrintButton = ({ orderId }: { orderId: number }) => {
-  const onPrintClick = () => {
+const PrintOrderForm = ({ orderId }: { orderId: number }) => {
+  const onPrintClick = (date: Date) => {
     try {
-      fetch(`/api/purchase-orders/invoice/${orderId}`, { method: "POST" })
+      fetch(`/api/purchase-orders/invoice/${orderId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ date: date.toISOString() }),
+      })
         .then((res) => res.blob())
         .then((blob) => URL.createObjectURL(blob))
         .then((url) => {
@@ -389,16 +374,32 @@ const PrintButton = ({ orderId }: { orderId: number }) => {
   };
 
   return (
-    <Button
-      onClick={onPrintClick}
-      variant="outline"
-      className="inline-flex items-center px-2 py-1 rounded-md bg-gray-100 text-gray-700 text-xs h-full"
-    >
-      <PrinterIcon className="w-4 h-4 mr-1" />
-      <span>พิมพ์ใบสั่งซื้อ</span>
-    </Button>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+        const date = formData.get("po-bill") as string;
+        if (date) {
+          onPrintClick(new Date(date));
+        }
+      }}
+      className="flex w-full max-w-sm items-center space-x-2"
+        >
+      <Input
+        id="po-bill"
+        name="po-bill"
+        type="date"
+        placeholder="วันที่"
+        defaultValue={new Date().toISOString().split("T")[0]}
+      />
+      <Button size={"sm"} variant={"secondary"} type="submit">
+        <PrinterIcon className="w-4 h-4" />
+      </Button>
+    </form>
   );
 };
+
+
 
 const HoverInfo = ({ message }: { message: string }) => {
   return (

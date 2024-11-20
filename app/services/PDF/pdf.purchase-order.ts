@@ -10,14 +10,14 @@ import path from "path";
 import { readFile } from "fs/promises";
 import { getBoundingBox, PDFDateFormat } from "./pdf.helpers";
 
+let _BILL_DATE = ""
+
 const PAGE_FONT_SIZE = 8;
 
 const CURRENCY_FORMAT = {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 };
-
-const TODAY = PDFDateFormat(new Date())
 
 type PurchaseOrderWithRelations = PurchaseOrder & {
   purchaseOrderItems?: PurchaseOrderItem[];
@@ -40,11 +40,13 @@ const getData = async (
   return purchaseOrder;
 };
 
-export const generateInvoice = async (id: number) => {
+export const generateInvoice = async (id: number, date: string) => {
   try {
     if (!id) {
       throw new Error("Invalid quotation ID");
     }
+
+    _BILL_DATE = PDFDateFormat(new Date(date))
 
     const purchaseOrder = await getData(id);
 
@@ -151,7 +153,7 @@ const drawOrdererInfo = (page: PDFPage, font: PDFFont) => {
     ...config,
   });
 
-  page.drawText(TODAY, {
+  page.drawText(_BILL_DATE, {
     x: 500,
     y: 640,
     maxWidth: 100,
@@ -528,7 +530,7 @@ const drawStaticInfo = (
 ) => {
   drawHeaderInfo(page, font, currentPageNumber, {
     code: data.code,
-    date: TODAY,
+    date: _BILL_DATE,
   });
   if (data.vendor) {
     drawVendorInfo(page, font, data.vendor);
