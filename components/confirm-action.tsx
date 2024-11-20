@@ -12,7 +12,7 @@ export default function ConfirmActionButton(props: Props) {
   const [isPending, setIsPending] = React.useState(false);
 
   useEffect(() => {
-    setIsPending(disabled);
+    // setIsPending(!!disabled);
     setShowConfirm(false);
   } , [disabled]);
 

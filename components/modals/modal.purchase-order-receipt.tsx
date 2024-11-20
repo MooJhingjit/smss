@@ -21,7 +21,7 @@ export const PurchaseOrderReceiptModal = () => {
   const modal = usePurchaseOrderReceiptModal();
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
 
-  const { data, refs } = modal;
+  const { data } = modal;
   const handleCreate = useAction(createPurchaseOrderReceipt, {
     onSuccess: (data) => {
       toast.success("สำเร็จ");
@@ -53,7 +53,7 @@ export const PurchaseOrderReceiptModal = () => {
               setSelectedItems(selected);
             }}
           >
-            {refs?.purchaseOrderItems?.map((item) => (
+            {data?.purchaseOrderItems?.map((item) => (
               <ToggleGroupItem
                 key={item.id}
                 value={item.id.toString()}

@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { PurchaseOrderWithRelations } from "@/types";
 import { usePurchaseOrderInfoModal } from "@/hooks/use-po-info-modal";
 
-import {  PrinterIcon } from "lucide-react";
+import { PrinterIcon } from "lucide-react";
 import {
   PurchaseOrderPaymentType,
   PurchaseOrderStatus,
@@ -43,6 +43,7 @@ import {
 } from "@/components/ui/tooltip"
 import { FormInput } from "../form/form-input";
 import { Input } from "../ui/input";
+import { usePurchaseOrderReceiptModal } from "@/hooks/use-po-receipt-modal";
 
 export const PurchaseInfoModal = () => {
   const modal = usePurchaseOrderInfoModal();
@@ -273,12 +274,16 @@ const MainForm = ({ data }: {
             />
           </div>
         </ItemList>
-        <ItemList label="พิมพ์ใบสั่งซื้อ">
-        <div className="flex space-x-3 items-center">
-
+        <ItemList label="พิมพ์ใบสั่งซื้อ" >
+          <div className="flex space-x-3 items-center">
             <PrintOrderForm
               orderId={data.id}
             />
+          </div>
+        </ItemList>
+        <ItemList label="การออกบิล" info="หลังจากออกใบเสร็จแล้วจะไม่สามารถแก้ไขสินค้าได้">
+          <div className="flex space-x-3 items-center">
+            <PrintOrderReceipt data={data} />
           </div>
         </ItemList>
 
@@ -289,20 +294,44 @@ const MainForm = ({ data }: {
 
 const ItemList = ({
   label,
+  info,
   children,
 }: {
   label?: string;
+  info?: string
   children: React.ReactNode;
 }) => {
   return (
     <div className="col-span-12 pt-2">
       <div className=" flex justify-between items-center px-6 h-full">
-        {label && <p className="text-sm leading-6 text-gray-600 max-w-[150px] whitespace-pre-wrap">{label}</p>}
+        <div className="flex space-x-2 items-center">
+          {label && <p className="text-sm leading-6 text-gray-600 max-w-[150px] whitespace-pre-wrap">{label}</p>}
+          {info && <HoverInfo message={info} />}
+        </div>
         <div className="w-[200px]">{children}</div>
       </div>
     </div>
   );
 };
+
+const PrintOrderReceipt = ({data}: {
+  data: PurchaseOrderWithRelations
+}) => {
+  const poReceiptModal = usePurchaseOrderReceiptModal();
+  const {purchaseOrderItems, ...rest} = data
+
+  return (
+    <Button
+
+      onClick={() => {
+        poReceiptModal.onOpen(data);
+
+      }}
+      size={"sm"} variant={"secondary"} type="submit">
+      <PrinterIcon className="w-4 h-4" />
+    </Button>
+  )
+}
 
 
 const StatusDropdown = ({
@@ -384,7 +413,7 @@ const PrintOrderForm = ({ orderId }: { orderId: number }) => {
         }
       }}
       className="flex w-full max-w-sm items-center space-x-2"
-        >
+    >
       <Input
         id="po-bill"
         name="po-bill"

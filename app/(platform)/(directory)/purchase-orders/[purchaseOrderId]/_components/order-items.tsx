@@ -7,7 +7,7 @@ import {
 } from "@/types";
 import TableLists from "@/components/table-lists";
 import { usePurchaseOrderListModal } from "@/hooks/use-po-list-modal";
-import { usePurchaseOrderReceiptModal } from "@/hooks/use-po-receipt-modal";
+// import { usePurchaseOrderReceiptModal } from "@/hooks/use-po-receipt-modal";
 import { FormTextarea } from "@/components/form/form-textarea";
 import { FormSubmit } from "@/components/form/form-submit";
 import { useAction } from "@/hooks/use-action";
@@ -35,7 +35,7 @@ export default function PurchaseOrderItems({
 }) {
   const { purchaseOrderItems, vendor } = data;
   const poListModal = usePurchaseOrderListModal();
-  const poReceiptModal = usePurchaseOrderReceiptModal();
+  // const poReceiptModal = usePurchaseOrderReceiptModal();
 
   const { mutate } = useMutation<
     MutationResponseType,
@@ -147,31 +147,31 @@ export default function PurchaseOrderItems({
         );
       },
     },
-    {
-      name: "การออกบิล",
-      key: "receiptId",
-      render: (item: PurchaseOrderItemWithRelations) => {
-        if (item.receiptId) {
-          return (
-            <Button variant="ghost" className="text-xs h-6">
-              ออกใบเสร็จแล้ว
-            </Button>
-          );
-        }
+    // {
+    //   name: "การออกบิล",
+    //   key: "receiptId",
+    //   render: (item: PurchaseOrderItemWithRelations) => {
+    //     if (item.receiptId) {
+    //       return (
+    //         <Button variant="ghost" className="text-xs h-6">
+    //           ออกใบเสร็จแล้ว
+    //         </Button>
+    //       );
+    //     }
 
-        return (
-          <Button
-            variant="default"
-            className="text-xs h-6"
-            onClick={() => {
-              poReceiptModal.onOpen(item, data);
-            }}
-          >
-            ออกใบเสร็จ
-          </Button>
-        );
-      },
-    },
+    //     return (
+    //       <Button
+    //         variant="default"
+    //         className="text-xs h-6"
+    //         onClick={() => {
+    //           poReceiptModal.onOpen(item, data);
+    //         }}
+    //       >
+    //         ออกใบเสร็จ
+    //       </Button>
+    //     );
+    //   },
+    // },
   ];
 
   if (!purchaseOrderItems) {
