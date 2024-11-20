@@ -145,6 +145,7 @@ model Quotation {
   grandTotal            Float?
   tax                   Float?
   paymentType           PurchaseOrderPaymentType @default(cash)
+  paymentCondition      String?
   paymentDue            DateTime?
   withholdingTax        Float?
   withholdingTaxPercent Float?

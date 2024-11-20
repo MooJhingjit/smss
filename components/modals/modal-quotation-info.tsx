@@ -46,6 +46,12 @@ import { useRouter } from "next/navigation";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { updateCodeVersion } from "@/lib/utils";
 import { Input } from "../ui/input";
+import { Bold, Italic, Underline } from "lucide-react"
+
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/components/ui/toggle-group"
 
 
 export const QuotationInfoModal = () => {
@@ -60,7 +66,7 @@ export const QuotationInfoModal = () => {
 
   return (
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
           <DialogTitle>
 
@@ -72,7 +78,7 @@ export const QuotationInfoModal = () => {
           {/* <DialogDescription>เลือกชื่อลูกค้า และประเภทของ QT</DialogDescription> */}
         </DialogHeader>
 
-        <QuotationForm
+        <MainForm
           data={data}
           hasList={data.lists ? data.lists.length > 0 : false}
 
@@ -124,7 +130,7 @@ export const QuotationInfoModal = () => {
 };
 
 
-const QuotationForm = (props: {
+const MainForm = (props: {
   data: QuotationWithRelations;
   hasList: boolean;
 }) => {
@@ -169,11 +175,12 @@ const QuotationForm = (props: {
     paymentType?: PurchaseOrderPaymentType;
     purchaseOrderRef?: string;
     deliveryPeriod?: string;
+    paymentCondition?: string;
     validPricePeriod?: string;
     type?: "product" | "service";
   }) => {
     // update what is provided
-    let payloadBody: any = {};
+    let payloadBody: Record<string, any> = {};
     if (payload.status) {
       payloadBody["status"] = payload.status;
     }
@@ -206,6 +213,9 @@ const QuotationForm = (props: {
     if (payload.type) {
       payloadBody["type"] = payload.type;
     }
+
+    
+    payloadBody['paymentCondition'] = payload.paymentCondition;
 
     // call mutation
     mutate(payloadBody);
@@ -315,12 +325,28 @@ const QuotationForm = (props: {
         {isAdmin && (
           <>
             <ItemList label="การชำระเงิน">
-              <div className="space-x-8 flex items-center w-[200px] ">
+              <div className="space-x-8 flex items-center  ">
 
                 <PaymentOptionControl
                   paymentType={data.paymentType}
                   paymentDue={data.paymentDue ? new Date(data.paymentDue).toISOString().split("T")[0] : ""}
                   onUpdate={handleItemChange}
+                />
+
+
+              </div>
+            </ItemList>
+
+            <ItemList label="เงื่อนไงการชำระเงิน">
+              <div className="space-x-8 flex items-center  ">
+
+                <PaymentCondition
+                  defaultValue={data.paymentCondition || "cash"}
+                  onChange={(value) => {
+                    console.log(value)
+                    handleItemChange({ paymentCondition: value });
+                  }
+                  }
                 />
 
 
@@ -341,6 +367,43 @@ const QuotationForm = (props: {
 
         )}
       </div>
+    </div>
+  );
+}
+
+
+const PaymentCondition = ({ defaultValue, onChange }: { defaultValue: string, onChange: (value: string) => void }) => {
+  const [selectedCondition, setSelectedCondition] = React.useState(defaultValue === "cash" ? "cash" : "other");
+  const [inputValue, setInputValue] = React.useState(defaultValue !== "cash" ? defaultValue : "");
+
+  React.useEffect(() => {
+    if (selectedCondition === "other" ) {
+      return
+    }
+
+    onChange(selectedCondition);
+  }, [selectedCondition]);
+
+  return (
+    <div className="flex items-center space-x-3">
+      <ToggleGroup type="single" value={selectedCondition} onValueChange={(value) => setSelectedCondition(value)}>
+        <ToggleGroupItem value="cash">
+          <p>เงินสด</p>
+        </ToggleGroupItem>
+        <ToggleGroupItem value="other">
+          <p>อื่นๆ</p>
+        </ToggleGroupItem>
+      </ToggleGroup>
+      {selectedCondition === "other" && (
+        <Input
+          id="otherPaymentCondition"
+          placeholder="โปรดระบุ"
+          className="text-xs w-full"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onBlur={() => onChange(inputValue)}
+        />
+      )}
     </div>
   );
 }
@@ -384,7 +447,7 @@ const ApprovalButton = ({
         <CheckCircle className="w-4 h-4 mr-1  text-green-700" />
         <div className="">
           <p className="text-sm text-green-700 ">
-            ได้รับการอนุมัติ: สามารถนำส่งให้ลูกค้าได้
+            ได้รับการ��นุมัติ: สามารถนำส่งให้ลูกค้าได้
           </p>
           <ConfirmActionButton
             onConfirm={() => {
@@ -521,7 +584,7 @@ const ItemList = ({
           {label && <p className="text-sm leading-6 text-gray-600 max-w-[150px] whitespace-pre-wrap">{label}</p>}
           {info && <HoverInfo message={info} />}
         </div>
-        <div className="w-[200px]">{children}</div>
+        <div className="w-[250px]">{children}</div>
       </div>
     </div>
   );
@@ -563,7 +626,7 @@ const DeleteComponent = ({
       return res;
     },
     onSuccess: async (n) => {
-      toast.success("ลบสำเร็จ");
+      toast.success("ลบสำเร็��");
       // invalidate query
       // redirect to quotation list
       customRevalidatePath(`/quotations`);
