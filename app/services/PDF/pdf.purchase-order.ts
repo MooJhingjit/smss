@@ -11,7 +11,7 @@ import { readFile } from "fs/promises";
 import { getBoundingBox, PDFDateFormat } from "./pdf.helpers";
 
 let _BILL_DATE = ""
-
+let _DATA: PurchaseOrderWithRelations | null = null
 const PAGE_FONT_SIZE = 8;
 
 const CURRENCY_FORMAT = {
@@ -54,6 +54,7 @@ export const generateInvoice = async (id: number, date: string) => {
       throw new Error("PurchaseOrder not found");
     }
 
+    _DATA = purchaseOrder
     return generate(id, purchaseOrder);
   } catch (error) {
     console.log(error);
@@ -75,7 +76,6 @@ const drawHeaderInfo = (
 ) => {
   const X_Start = 480;
   const Y_Start = 790;
-
   const config = {
     font,
     size: PAGE_FONT_SIZE,
@@ -101,14 +101,19 @@ const drawHeaderInfo = (
   });
 };
 
-const drawVendorInfo = (page: PDFPage, font: PDFFont, vendor: User) => {
+const drawVendorInfo = (page: PDFPage, font: PDFFont) => {
   const config = {
     font,
     size: PAGE_FONT_SIZE,
-    lineHeight: 15,
+    lineHeight: 16,
   };
 
-  const Y_Start = 717;
+  const vendor = _DATA?.vendor
+  if (!vendor) {
+    return
+  }
+
+  const Y_Start = 720;
   const X_Start = 80;
   page.drawText(vendor.name, {
     x: X_Start,
@@ -131,7 +136,22 @@ const drawVendorInfo = (page: PDFPage, font: PDFFont, vendor: User) => {
     ...config,
   });
 
+  page.drawText(_DATA?.vendorQtCode ?? "", {
+    x: 440,
+    y: Y_Start,
+    maxWidth: 100,
+    ...config,
+  });
+
+
   page.drawText(vendor.phone ?? "", {
+    x: 440,
+    y: Y_Start - config.lineHeight,
+    maxWidth: 100,
+    ...config,
+  });
+
+  page.drawText(vendor.email ?? "", {
     x: 440,
     y: Y_Start - config.lineHeight * 3,
     maxWidth: 100,
@@ -200,7 +220,7 @@ const drawRemarkInfo = (page: PDFPage, font: PDFFont, data: PurchaseOrderWithRel
       x: 260,
       y: 190,
       maxWidth: 400,
-    color: rgb(255 / 255, 0 / 255, 0 / 255),
+      color: rgb(255 / 255, 0 / 255, 0 / 255),
 
       ...config,
     });
@@ -257,21 +277,21 @@ const drawPriceInfo = (
 
   page.drawText(totalPrice, {
     x: columnPosition + 48 - getTextWidth(totalPrice, config),
-    y: 148,
+    y: 144,
     maxWidth: 100,
     ...config,
   });
 
   page.drawText(vat, {
     x: columnPosition + 48 - getTextWidth(vat, config),
-    y: 128,
+    y: 125,
     maxWidth: 100,
     ...config,
   });
 
   page.drawText(grandTotal, {
     x: columnPosition + 48 - getTextWidth(grandTotal, config),
-    y: 111,
+    y: 106,
     maxWidth: 100,
     ...config,
   });
@@ -533,12 +553,11 @@ const drawStaticInfo = (
     date: _BILL_DATE,
   });
   if (data.vendor) {
-    drawVendorInfo(page, font, data.vendor);
+    drawVendorInfo(page, font);
   }
 
   drawOrdererInfo(page, font);
   drawRemarkInfo(page, font, data);
-
   drawPriceInfo(page, font, {
     price: data.price?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
     discount: data.discount?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
