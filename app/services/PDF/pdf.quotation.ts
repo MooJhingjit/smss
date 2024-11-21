@@ -7,7 +7,7 @@ import {
 } from "@prisma/client";
 import { PDFDocument, PDFFont, PDFPage, rgb, PDFEmbeddedPage } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
-import { getBoundingBox, PDFDateFormat } from "./pdf.helpers";
+import { getBoundingBox, loadSignatureImage, PDFDateFormat } from "./pdf.helpers";
 import { getDateFormat } from "@/lib/utils";
 import path from "path";
 import { readFile } from "fs/promises";
@@ -115,8 +115,8 @@ const generate = async (id: number) => {
   ]);
 
   pdfDoc.registerFontkit(fontkit);
-  const myFont = await pdfDoc.embedFont(fontData  as any, { subset: true });
-  const template = await PDFDocument.load(existingPdfBytes  as any);
+  const myFont = await pdfDoc.embedFont(fontData as any, { subset: true });
+  const template = await PDFDocument.load(existingPdfBytes as any);
   const templatePage = await pdfDoc.embedPage(template.getPages()[0]);
 
   const config: ListConfig = {
@@ -481,6 +481,16 @@ const drawRemarkInfo = (page: PDFPage, font: PDFFont, text: string) => {
   });
 };
 
+const drawSignature = async (page: PDFPage) => {
+  const { signatureImage, width, height } = await loadSignatureImage(page, "a");
+  page.drawImage(signatureImage, {
+    x: 270,
+    y: 45,
+    width,
+    height
+  });
+};
+
 const drawPriceInfo = (
   page: PDFPage,
   font: PDFFont,
@@ -610,4 +620,5 @@ const drawStaticInfo = (
     totalPrice: _DATA.totalPrice?.toLocaleString("th-TH", currencyFormat) ?? "",
     grandTotal: _DATA.grandTotal?.toLocaleString("th-TH", currencyFormat) ?? "",
   });
+  drawSignature(page);
 };

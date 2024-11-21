@@ -8,11 +8,11 @@ import { PDFDocument, PDFFont, PDFPage, rgb, PDFEmbeddedPage } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
 import path from "path";
 import { readFile } from "fs/promises";
-import { getBoundingBox, PDFDateFormat } from "./pdf.helpers";
+import { getBoundingBox, loadSignatureImage, PDFDateFormat } from "./pdf.helpers";
 
 const signatureConfigs = {
-  width: 140,
-  height: 60,
+  width: 120,
+  height: 40,
 }
 
 let _BILL_DATE = ""
@@ -290,12 +290,12 @@ const drawPriceInfo = (page: PDFPage, font: PDFFont) => {
 };
 
 const drawSignature = async (page: PDFPage) => {
-  const signatureImageBytes = await readFile(path.join(process.cwd(), "/public/signature/a.png"));
-  const signatureImage = await page.doc.embedPng(signatureImageBytes as any);
+  const { signatureImage, width, height } = await loadSignatureImage(page, "b");
   page.drawImage(signatureImage, {
-    x: 360,
+    x: 380,
     y: 45,
-    ...signatureConfigs
+    width,
+    height
   });
 };
 

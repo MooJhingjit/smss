@@ -393,9 +393,10 @@ const PrintOrderForm = ({ orderId }: { orderId: number }) => {
           // window.URL.revokeObjectURL(url);
 
           // You might want to revoke it later or based on some other conditions
-          setTimeout(() => {
-            window.URL.revokeObjectURL(url); // Clean up the blob URL after it's no longer needed
-          }, 60000); // for example, after 1 minute
+          window.URL.revokeObjectURL(url);
+          // setTimeout(() => {
+          //   window.URL.revokeObjectURL(url); // Clean up the blob URL after it's no longer needed
+          // }, 60000); // for example, after 1 minute
         });
     } catch (error) {
       console.log("error", error);
