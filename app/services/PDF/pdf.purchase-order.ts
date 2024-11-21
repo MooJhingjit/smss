@@ -10,13 +10,10 @@ import path from "path";
 import { readFile } from "fs/promises";
 import { getBoundingBox, loadSignatureImage, PDFDateFormat } from "./pdf.helpers";
 
-const signatureConfigs = {
-  width: 120,
-  height: 40,
-}
 
 let _BILL_DATE = ""
 let _DATA: PurchaseOrderWithRelations | null = null
+let _FONT: PDFFont | null = null;
 const PAGE_FONT_SIZE = 8;
 
 const CURRENCY_FORMAT = {
@@ -69,7 +66,6 @@ export const generateInvoice = async (id: number, date: string) => {
 
 const drawHeaderInfo = (
   page: PDFPage,
-  font: PDFFont,
   currentPageNumber: number,
   {
     code,
@@ -79,10 +75,11 @@ const drawHeaderInfo = (
     date: string;
   }
 ) => {
+  if (!_FONT) return;
   const X_Start = 480;
   const Y_Start = 790;
   const config = {
-    font,
+    font: _FONT,
     size: PAGE_FONT_SIZE,
     lineHeight: 16,
   };
@@ -106,10 +103,10 @@ const drawHeaderInfo = (
   });
 };
 
-const drawVendorInfo = (page: PDFPage, font: PDFFont) => {
-  if (!_DATA) return;
+const drawVendorInfo = (page: PDFPage) => {
+  if (!_DATA || !_FONT) return;
   const config = {
-    font,
+    font: _FONT,
     size: PAGE_FONT_SIZE,
     lineHeight: 16,
   };
@@ -165,9 +162,10 @@ const drawVendorInfo = (page: PDFPage, font: PDFFont) => {
   });
 };
 
-const drawOrdererInfo = (page: PDFPage, font: PDFFont) => {
+const drawOrdererInfo = (page: PDFPage) => {
+  if (!_FONT) return;
   const config = {
-    font,
+    font: _FONT,
     size: PAGE_FONT_SIZE,
     lineHeight: 14,
   };
@@ -187,10 +185,10 @@ const drawOrdererInfo = (page: PDFPage, font: PDFFont) => {
   });
 };
 
-const drawRemarkInfo = (page: PDFPage, font: PDFFont) => {
-  if (!_DATA) return;
+const drawRemarkInfo = (page: PDFPage) => {
+  if (!_DATA || !_FONT) return;
   const config = {
-    font,
+    font: _FONT,
     size: PAGE_FONT_SIZE,
     lineHeight: 14,
 
@@ -243,10 +241,10 @@ const drawRemarkInfo = (page: PDFPage, font: PDFFont) => {
 
 };
 
-const drawPriceInfo = (page: PDFPage, font: PDFFont) => {
-  if (!_DATA) return;
+const drawPriceInfo = (page: PDFPage) => {
+  if (!_DATA || !_FONT) return;
   const config = {
-    font,
+    font: _FONT,
     size: PAGE_FONT_SIZE,
     lineHeight: 14,
   };
@@ -334,14 +332,14 @@ const generate = async (id: number) => {
   ]);
 
   pdfDoc.registerFontkit(fontkit);
-  const myFont = await pdfDoc.embedFont(fontData as any, { subset: true });
+  _FONT = await pdfDoc.embedFont(fontData as any, { subset: true });
   const template = await PDFDocument.load(existingPdfBytes as any);
   const templatePage = await pdfDoc.embedPage(template.getPages()[0]);
 
   const config: ListConfig = {
     size: PAGE_FONT_SIZE,
     lineHeight: 11,
-    font: myFont,
+    font: _FONT,
   };
 
   const writeMainItem = (
@@ -418,7 +416,7 @@ const generate = async (id: number) => {
     const bounding = getBoundingBox(
       data.name,
       pdfDoc,
-      myFont,
+      _FONT,
       PAGE_FONT_SIZE,
       config.lineHeight + 4,
       600
@@ -443,7 +441,7 @@ const generate = async (id: number) => {
     const bounding = getBoundingBox(
       description,
       pdfDoc,
-      myFont,
+      _FONT,
       PAGE_FONT_SIZE,
       config.lineHeight + 4,
       300
@@ -455,7 +453,7 @@ const generate = async (id: number) => {
   let page = pdfDoc.addPage();
   page.drawPage(templatePage);
 
-  drawStaticInfo(page, myFont, 1);
+  drawStaticInfo(page, currentPageNumber);
 
   let lineStart = ITEM_Y_Start;
 
@@ -468,7 +466,6 @@ const generate = async (id: number) => {
       page,
       pdfDoc,
       templatePage,
-      myFont,
       lineStart,
       ITEM_Y_Start,
       (currentPage: PDFPage, currentLineStart: number) =>
@@ -482,7 +479,6 @@ const generate = async (id: number) => {
         page,
         pdfDoc,
         templatePage,
-        myFont,
         lineStart,
         ITEM_Y_Start,
         (currentPage: PDFPage, currentLineStart: number) =>
@@ -510,7 +506,6 @@ const validatePageArea = (
   page: PDFPage,
   pdfDoc: PDFDocument,
   templatePage: PDFEmbeddedPage,
-  myFont: PDFFont,
   lineStart: number,
   ITEM_Y_Start: number,
   exc: any
@@ -520,7 +515,7 @@ const validatePageArea = (
     currentPageNumber++;
     const newPage = pdfDoc.addPage();
     newPage.drawPage(templatePage);
-    drawStaticInfo(newPage, myFont, currentPageNumber);
+    drawStaticInfo(newPage, currentPageNumber);
 
     lineStart = ITEM_Y_Start;
 
@@ -545,20 +540,19 @@ const getTextWidth = (text: string, config: ListConfig) => {
 
 const drawStaticInfo = (
   page: PDFPage,
-  font: PDFFont,
   currentPageNumber: number
 ) => {
   if (!_DATA) return;
-  drawHeaderInfo(page, font, currentPageNumber, {
+  drawHeaderInfo(page, currentPageNumber, {
     code: _DATA.code,
     date: _BILL_DATE,
   });
   if (_DATA.vendor) {
-    drawVendorInfo(page, font);
+    drawVendorInfo(page);
   }
 
-  drawOrdererInfo(page, font);
-  drawRemarkInfo(page, font);
-  drawPriceInfo(page, font);
+  drawOrdererInfo(page);
+  drawRemarkInfo(page);
+  drawPriceInfo(page);
   drawSignature(page);
 };

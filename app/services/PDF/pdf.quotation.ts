@@ -23,6 +23,7 @@ const CURRENCY_FORMAT = {
 };
 let _BILL_DATE = "";
 let _DATA: QuotationWithRelations | null = null;
+let _FONT: PDFFont | null = null;
 
 type QuotationWithRelations = Quotation & {
   lists: QuotationList[];
@@ -115,14 +116,14 @@ const generate = async (id: number) => {
   ]);
 
   pdfDoc.registerFontkit(fontkit);
-  const myFont = await pdfDoc.embedFont(fontData as any, { subset: true });
+  _FONT = await pdfDoc.embedFont(fontData as any, { subset: true });
   const template = await PDFDocument.load(existingPdfBytes as any);
   const templatePage = await pdfDoc.embedPage(template.getPages()[0]);
 
   const config: ListConfig = {
     size: PAGE_FONT_SIZE,
     lineHeight: 11,
-    font: myFont,
+    font: _FONT,
   };
 
   const writeMainItem = (
@@ -199,7 +200,7 @@ const generate = async (id: number) => {
     const bounding = getBoundingBox(
       data.name,
       pdfDoc,
-      myFont,
+      _FONT,
       PAGE_FONT_SIZE,
       config.lineHeight + 4,
       600
@@ -224,7 +225,7 @@ const generate = async (id: number) => {
     const bounding = getBoundingBox(
       description,
       pdfDoc,
-      myFont,
+      _FONT,
       PAGE_FONT_SIZE,
       config.lineHeight + 4,
       300
@@ -257,7 +258,7 @@ const generate = async (id: number) => {
     const bounding = getBoundingBox(
       subItem.label,
       pdfDoc,
-      myFont,
+      _FONT,
       PAGE_FONT_SIZE,
       config.lineHeight + 4,
       300
@@ -269,7 +270,7 @@ const generate = async (id: number) => {
   let page = pdfDoc.addPage();
   page.drawPage(templatePage);
 
-  drawStaticInfo(page, myFont, 1);
+  drawStaticInfo(page, currentPageNumber);
 
   let lineStart = ITEM_Y_Start;
 
@@ -282,7 +283,6 @@ const generate = async (id: number) => {
       page,
       pdfDoc,
       templatePage,
-      myFont,
       lineStart,
       ITEM_Y_Start,
       (currentPage: PDFPage, currentLineStart: number) =>
@@ -296,7 +296,6 @@ const generate = async (id: number) => {
         page,
         pdfDoc,
         templatePage,
-        myFont,
         lineStart,
         ITEM_Y_Start,
         (currentPage: PDFPage, currentLineStart: number) =>
@@ -320,7 +319,6 @@ const generate = async (id: number) => {
             page,
             pdfDoc,
             templatePage,
-            myFont,
             lineStart,
             ITEM_Y_Start,
             (currentPage: PDFPage, currentLineStart: number) =>
@@ -342,7 +340,6 @@ const generate = async (id: number) => {
 
 const drawHeaderInfo = (
   page: PDFPage,
-  font: PDFFont,
   currentPageNumber: number,
   {
     code,
@@ -352,11 +349,12 @@ const drawHeaderInfo = (
     date: string;
   }
 ) => {
+  if (!_FONT) return;
   const X_Start = 480;
   const Y_Start = 750;
 
   const config = {
-    font,
+    font: _FONT,
     size: PAGE_FONT_SIZE,
     lineHeight: 14,
   };
@@ -380,16 +378,19 @@ const drawHeaderInfo = (
   });
 };
 
-const drawCustomerInfo = (page: PDFPage, font: PDFFont, contact: Contact) => {
+const drawCustomerInfo = (page: PDFPage, contact: Contact) => {
+  if (!_FONT) return;
   const config = {
-    font,
+    font: _FONT,
     size: PAGE_FONT_SIZE,
     lineHeight: 13,
   };
 
   const Y_Start = 670;
   const X_Start = 80;
-  page.drawText(contact.name, {
+  // name + branchId
+  const fullContact = contact.name + (contact.branchId ? ` (${contact.branchId})` : "");
+  page.drawText(fullContact, {
     x: X_Start,
     y: Y_Start,
     maxWidth: 600,
@@ -412,7 +413,21 @@ const drawCustomerInfo = (page: PDFPage, font: PDFFont, contact: Contact) => {
 
   page.drawText(contact.phone ?? "", {
     x: 440,
-    y: 657,
+    y:  Y_Start - (config.lineHeight),
+    maxWidth: 100,
+    ...config,
+  });
+
+  page.drawText(contact.fax ?? "", {
+    x: 440,
+    y:  Y_Start - (config.lineHeight*2),
+    maxWidth: 100,
+    ...config,
+  });
+
+  page.drawText(contact.email ?? "", {
+    x: 440,
+    y: Y_Start - (config.lineHeight * 3),
     maxWidth: 100,
     ...config,
   });
@@ -420,7 +435,6 @@ const drawCustomerInfo = (page: PDFPage, font: PDFFont, contact: Contact) => {
 
 const drawOfferInfo = (
   page: PDFPage,
-  font: PDFFont,
   {
     sellerName,
     paymentDue,
@@ -433,8 +447,9 @@ const drawOfferInfo = (
     validPricePeriod: string;
   }
 ) => {
+  if (!_FONT) return;
   const config = {
-    font,
+    font: _FONT,
     size: PAGE_FONT_SIZE,
     lineHeight: 14,
   };
@@ -465,9 +480,10 @@ const drawOfferInfo = (
   });
 };
 
-const drawRemarkInfo = (page: PDFPage, font: PDFFont, text: string) => {
+const drawRemarkInfo = (page: PDFPage, text: string) => {
+  if (!_FONT) return;
   const config = {
-    font,
+    font: _FONT,
     size: PAGE_FONT_SIZE,
     lineHeight: 14,
     color: rgb(255 / 255, 0 / 255, 0 / 255),
@@ -493,7 +509,6 @@ const drawSignature = async (page: PDFPage) => {
 
 const drawPriceInfo = (
   page: PDFPage,
-  font: PDFFont,
   {
     totalPrice,
     discount,
@@ -506,8 +521,9 @@ const drawPriceInfo = (
     grandTotal: string;
   }
 ) => {
+  if (!_FONT) return;
   const config = {
-    font,
+    font: _FONT,
     size: PAGE_FONT_SIZE,
     lineHeight: 14,
   };
@@ -550,14 +566,12 @@ type ListConfig = {
 };
 
 
-
 const END_POSITION = 210;
 let currentPageNumber = 1;
 const validatePageArea = (
   page: PDFPage,
   pdfDoc: PDFDocument,
   templatePage: PDFEmbeddedPage,
-  myFont: PDFFont,
   lineStart: number,
   ITEM_Y_Start: number,
   exc: any
@@ -567,7 +581,7 @@ const validatePageArea = (
     currentPageNumber++;
     const newPage = pdfDoc.addPage();
     newPage.drawPage(templatePage);
-    drawStaticInfo(newPage, myFont, currentPageNumber);
+    drawStaticInfo(newPage, currentPageNumber);
 
     lineStart = ITEM_Y_Start;
 
@@ -591,16 +605,15 @@ const getTextWidth = (text: string, config: ListConfig) => {
 
 const drawStaticInfo = (
   page: PDFPage,
-  font: PDFFont,
   currentPageNumber: number
 ) => {
   if (!_DATA) return;
-  drawHeaderInfo(page, font, currentPageNumber, {
+  drawHeaderInfo(page, currentPageNumber, {
     code: _DATA.code,
     date: PDFDateFormat(new Date(_BILL_DATE)),
   });
-  drawCustomerInfo(page, font, _DATA.contact);
-  drawOfferInfo(page, font, {
+  drawCustomerInfo(page, _DATA.contact);
+  drawOfferInfo(page, {
     sellerName: _DATA.seller?.name ?? "",
     paymentDue: _DATA.paymentDue
       ? "ไม่เกิน " + getDateFormat(_DATA.paymentDue)
@@ -608,13 +621,13 @@ const drawStaticInfo = (
     deliveryPeriod: _DATA.deliveryPeriod?.toString() ?? "",
     validPricePeriod: _DATA.validPricePeriod?.toString() ?? "",
   });
-  drawRemarkInfo(page, font, _DATA.remark ?? "");
+  drawRemarkInfo(page, _DATA.remark ?? "");
 
   const currencyFormat = {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   };
-  drawPriceInfo(page, font, {
+  drawPriceInfo(page, {
     discount: _DATA.discount?.toLocaleString("th-TH", currencyFormat) ?? "",
     tax: _DATA.tax?.toLocaleString("th-TH", currencyFormat) ?? "",
     totalPrice: _DATA.totalPrice?.toLocaleString("th-TH", currencyFormat) ?? "",

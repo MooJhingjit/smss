@@ -20,14 +20,15 @@ export function PDFDateFormat(date: Date): string {
 export function getBoundingBox(
   text: string,
   doc: PDFDocument,
-  font: PDFFont,
+  font: PDFFont | null,
   fontSize: number,
   lineHeight: number,
   maxWidth: number
 ) {
+
   // Function to measure the width of a length of text. Lifted from the 'drawText' source.
   // font refers to an instance of PDFFont
-  const measureWidth = (s: any) => font.widthOfTextAtSize(s, fontSize);
+  const measureWidth = (s: any) => font?.widthOfTextAtSize(s, fontSize) || 0;
 
   // We split the text into an array of lines
   // doc refers to an instance of PDFDocument
