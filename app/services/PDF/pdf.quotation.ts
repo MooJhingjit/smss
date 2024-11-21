@@ -21,7 +21,8 @@ const CURRENCY_FORMAT = {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 };
-let _BILL_DATE = ""
+let _BILL_DATE = "";
+let _DATA: QuotationWithRelations | null = null;
 
 type QuotationWithRelations = Quotation & {
   lists: QuotationList[];
@@ -56,8 +57,7 @@ export const generateInvoice = async (id: number, date: string) => {
       throw new Error("Invalid quotation ID");
     }
 
-    _BILL_DATE = PDFDateFormat(new Date(date))
-
+    _BILL_DATE = PDFDateFormat(new Date(date));
 
     const quotation = await getQuotation(id);
 
@@ -68,13 +68,6 @@ export const generateInvoice = async (id: number, date: string) => {
     let temporaryQuotationTotalPrice = {};
     // check if total price is not yet calculated
     if (!quotation.grandTotal) {
-      // const quotationListsByVendor = groupQuotationByVendor(
-      //   quotation.lists as QuotationListWithRelations[]
-      // );
-
-      // const { sumTotalPrice, sumDiscount, sumTotalTax, grandTotal } =
-      //   summarizeQuotationTotalPrice(quotationListsByVendor);
-
       const { totalPrice, discount, tax, grandTotal } =
         calculateQuotationItemPrice(quotation.lists);
 
@@ -86,14 +79,16 @@ export const generateInvoice = async (id: number, date: string) => {
       };
     }
 
-    return generate(id, { ...quotation, ...temporaryQuotationTotalPrice });
+    _DATA = { ...quotation, ...temporaryQuotationTotalPrice };
+    return generate(id);
   } catch (error) {
     console.log(error);
     throw new Error("Error writing PDF file");
   }
 };
 
-const generate = async (id: number, data: QuotationWithRelations) => {
+const generate = async (id: number) => {
+  if (!_DATA) return;
   // list start position
   const ITEM_Y_Start = 545;
   const ITEM_X_Start = 60;
@@ -274,11 +269,11 @@ const generate = async (id: number, data: QuotationWithRelations) => {
   let page = pdfDoc.addPage();
   page.drawPage(templatePage);
 
-  drawStaticInfo(page, myFont, 1, data);
+  drawStaticInfo(page, myFont, 1);
 
   let lineStart = ITEM_Y_Start;
 
-  data.lists?.forEach((list, index) => {
+  _DATA.lists?.forEach((list, index) => {
     if (index > 0) {
       lineStart -= config.lineHeight; // space between main items
     }
@@ -290,7 +285,6 @@ const generate = async (id: number, data: QuotationWithRelations) => {
       myFont,
       lineStart,
       ITEM_Y_Start,
-      data,
       (currentPage: PDFPage, currentLineStart: number) =>
         writeMainItem(currentPage, index, list, currentLineStart)
     );
@@ -305,7 +299,6 @@ const generate = async (id: number, data: QuotationWithRelations) => {
         myFont,
         lineStart,
         ITEM_Y_Start,
-        data,
         (currentPage: PDFPage, currentLineStart: number) =>
           writeMainDescription(
             currentPage,
@@ -330,7 +323,6 @@ const generate = async (id: number, data: QuotationWithRelations) => {
             myFont,
             lineStart,
             ITEM_Y_Start,
-            data,
             (currentPage: PDFPage, currentLineStart: number) =>
               writeSubItem(currentPage, subItem, currentLineStart)
           );
@@ -343,10 +335,7 @@ const generate = async (id: number, data: QuotationWithRelations) => {
   });
 
   const modifiedPdfBytes = await pdfDoc.save();
-  // const modifiedPdfPath = `public/quotation.pdf`; // Path to save modified PDF
-  // await fs.writeFile(modifiedPdfPath, modifiedPdfBytes);
   return {
-    // pdfPath: modifiedPdfPath,
     pdfBytes: modifiedPdfBytes,
   };
 };
@@ -561,14 +550,14 @@ const validatePageArea = (
   myFont: PDFFont,
   lineStart: number,
   ITEM_Y_Start: number,
-  data: QuotationWithRelations,
   exc: any
 ) => {
+  if (!_DATA) return { page, lineStart };
   if (lineStart < END_POSITION) {
     currentPageNumber++;
     const newPage = pdfDoc.addPage();
     newPage.drawPage(templatePage);
-    drawStaticInfo(newPage, myFont, currentPageNumber, data);
+    drawStaticInfo(newPage, myFont, currentPageNumber);
 
     lineStart = ITEM_Y_Start;
 
@@ -577,7 +566,6 @@ const validatePageArea = (
       page: newPage,
       lineStart: lineStart - heightUsed,
     };
-    // return lineStart
   }
 
   let heightUsed = exc(page, lineStart);
@@ -594,32 +582,32 @@ const getTextWidth = (text: string, config: ListConfig) => {
 const drawStaticInfo = (
   page: PDFPage,
   font: PDFFont,
-  currentPageNumber: number,
-  data: QuotationWithRelations
+  currentPageNumber: number
 ) => {
+  if (!_DATA) return;
   drawHeaderInfo(page, font, currentPageNumber, {
-    code: data.code,
+    code: _DATA.code,
     date: PDFDateFormat(new Date(_BILL_DATE)),
   });
-  drawCustomerInfo(page, font, data.contact);
+  drawCustomerInfo(page, font, _DATA.contact);
   drawOfferInfo(page, font, {
-    sellerName: data.seller?.name ?? "",
-    paymentDue: data.paymentDue
-      ? "ไม่เกิน " + getDateFormat(data.paymentDue)
+    sellerName: _DATA.seller?.name ?? "",
+    paymentDue: _DATA.paymentDue
+      ? "ไม่เกิน " + getDateFormat(_DATA.paymentDue)
       : "",
-    deliveryPeriod: data.deliveryPeriod?.toString() ?? "",
-    validPricePeriod: data.validPricePeriod?.toString() ?? "",
+    deliveryPeriod: _DATA.deliveryPeriod?.toString() ?? "",
+    validPricePeriod: _DATA.validPricePeriod?.toString() ?? "",
   });
-  drawRemarkInfo(page, font, data.remark ?? "");
+  drawRemarkInfo(page, font, _DATA.remark ?? "");
 
   const currencyFormat = {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   };
   drawPriceInfo(page, font, {
-    discount: data.discount?.toLocaleString("th-TH", currencyFormat) ?? "",
-    tax: data.tax?.toLocaleString("th-TH", currencyFormat) ?? "",
-    totalPrice: data.totalPrice?.toLocaleString("th-TH", currencyFormat) ?? "",
-    grandTotal: data.grandTotal?.toLocaleString("th-TH", currencyFormat) ?? "",
+    discount: _DATA.discount?.toLocaleString("th-TH", currencyFormat) ?? "",
+    tax: _DATA.tax?.toLocaleString("th-TH", currencyFormat) ?? "",
+    totalPrice: _DATA.totalPrice?.toLocaleString("th-TH", currencyFormat) ?? "",
+    grandTotal: _DATA.grandTotal?.toLocaleString("th-TH", currencyFormat) ?? "",
   });
 };

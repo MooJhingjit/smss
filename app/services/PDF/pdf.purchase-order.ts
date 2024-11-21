@@ -55,7 +55,7 @@ export const generateInvoice = async (id: number, date: string) => {
     }
 
     _DATA = purchaseOrder
-    return generate(id, purchaseOrder);
+    return generate(id);
   } catch (error) {
     console.log(error);
     throw new Error("Error writing PDF file");
@@ -102,6 +102,7 @@ const drawHeaderInfo = (
 };
 
 const drawVendorInfo = (page: PDFPage, font: PDFFont) => {
+  if (!_DATA) return;
   const config = {
     font,
     size: PAGE_FONT_SIZE,
@@ -181,7 +182,8 @@ const drawOrdererInfo = (page: PDFPage, font: PDFFont) => {
   });
 };
 
-const drawRemarkInfo = (page: PDFPage, font: PDFFont, data: PurchaseOrderWithRelations) => {
+const drawRemarkInfo = (page: PDFPage, font: PDFFont) => {
+  if (!_DATA) return;
   const config = {
     font,
     size: PAGE_FONT_SIZE,
@@ -190,7 +192,7 @@ const drawRemarkInfo = (page: PDFPage, font: PDFFont, data: PurchaseOrderWithRel
   };
 
   // remark
-  page.drawText(data.remark ?? "", {
+  page.drawText(_DATA.remark ?? "", {
     x: 35,
     y: 175,
     maxWidth: 350,
@@ -199,16 +201,16 @@ const drawRemarkInfo = (page: PDFPage, font: PDFFont, data: PurchaseOrderWithRel
   });
 
   // withholdingTax summary
-  if (data.tax) {
-    const priceAfterTax = (data?.grandTotal ?? 0) - (data?.tax ?? 0)
+  if (_DATA.tax) {
+    const priceAfterTax = (_DATA?.grandTotal ?? 0) - (_DATA?.tax ?? 0)
     const items = [
       {
         label: 'ราคาก่อนภาษี',
-        value: data.price?.toLocaleString("th-TH", CURRENCY_FORMAT) + ' บาท'
+        value: _DATA.price?.toLocaleString("th-TH", CURRENCY_FORMAT) + ' บาท'
       },
       {
         label: 'หัก ณ ที่จ่าย 3%',
-        value: data.tax?.toLocaleString("th-TH", CURRENCY_FORMAT) + ' บาท'
+        value: _DATA.tax?.toLocaleString("th-TH", CURRENCY_FORMAT) + ' บาท'
       },
       {
         label: 'ราคาหลังจากหัก ณ ที่จ่าย',
@@ -236,23 +238,8 @@ const drawRemarkInfo = (page: PDFPage, font: PDFFont, data: PurchaseOrderWithRel
 
 };
 
-const drawPriceInfo = (
-  page: PDFPage,
-  font: PDFFont,
-  {
-    price,
-    discount,
-    totalPrice,
-    vat,
-    grandTotal,
-  }: {
-    price: string;
-    discount: string;
-    totalPrice: string;
-    vat: string;
-    grandTotal: string;
-  }
-) => {
+const drawPriceInfo = (page: PDFPage, font: PDFFont) => {
+  if (!_DATA) return;
   const config = {
     font,
     size: PAGE_FONT_SIZE,
@@ -261,36 +248,36 @@ const drawPriceInfo = (
 
   const columnPosition = 520;
 
-  page.drawText(price, {
-    x: columnPosition + 48 - getTextWidth(price, config),
+  page.drawText(_DATA.price?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "", {
+    x: columnPosition + 48 - getTextWidth(_DATA.price?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "", config),
     y: 187,
     maxWidth: 100,
     ...config,
   });
 
-  page.drawText(discount, {
-    x: columnPosition + 48 - getTextWidth(discount, config),
+  page.drawText(_DATA.discount?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "", {
+    x: columnPosition + 48 - getTextWidth(_DATA.discount?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "", config),
     y: 167,
     maxWidth: 100,
     ...config,
   });
 
-  page.drawText(totalPrice, {
-    x: columnPosition + 48 - getTextWidth(totalPrice, config),
+  page.drawText(_DATA.totalPrice?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "", {
+    x: columnPosition + 48 - getTextWidth(_DATA.totalPrice?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "", config),
     y: 144,
     maxWidth: 100,
     ...config,
   });
 
-  page.drawText(vat, {
-    x: columnPosition + 48 - getTextWidth(vat, config),
+  page.drawText(_DATA.vat?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "", {
+    x: columnPosition + 48 - getTextWidth(_DATA.vat?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "", config),
     y: 125,
     maxWidth: 100,
     ...config,
   });
 
-  page.drawText(grandTotal, {
-    x: columnPosition + 48 - getTextWidth(grandTotal, config),
+  page.drawText(_DATA.grandTotal?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "", {
+    x: columnPosition + 48 - getTextWidth(_DATA.grandTotal?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "", config),
     y: 106,
     maxWidth: 100,
     ...config,
@@ -303,7 +290,8 @@ type ListConfig = {
   font: PDFFont;
 };
 
-const generate = async (id: number, data: PurchaseOrderWithRelations) => {
+const generate = async (id: number) => {
+  if (!_DATA) return;
   // list start position
   const ITEM_Y_Start = 585;
   const ITEM_X_Start = 44;
@@ -452,11 +440,11 @@ const generate = async (id: number, data: PurchaseOrderWithRelations) => {
   let page = pdfDoc.addPage();
   page.drawPage(templatePage);
 
-  drawStaticInfo(page, myFont, 1, data);
+  drawStaticInfo(page, myFont, 1);
 
   let lineStart = ITEM_Y_Start;
 
-  data.purchaseOrderItems?.forEach((list, index) => {
+  _DATA.purchaseOrderItems?.forEach((list, index) => {
     if (index > 0) {
       lineStart -= config.lineHeight; // space between main items
     }
@@ -468,7 +456,6 @@ const generate = async (id: number, data: PurchaseOrderWithRelations) => {
       myFont,
       lineStart,
       ITEM_Y_Start,
-      data,
       (currentPage: PDFPage, currentLineStart: number) =>
         writeMainItem(currentPage, index, list, currentLineStart)
     );
@@ -483,7 +470,6 @@ const generate = async (id: number, data: PurchaseOrderWithRelations) => {
         myFont,
         lineStart,
         ITEM_Y_Start,
-        data,
         (currentPage: PDFPage, currentLineStart: number) =>
           writeMainDescription(
             currentPage,
@@ -512,14 +498,14 @@ const validatePageArea = (
   myFont: PDFFont,
   lineStart: number,
   ITEM_Y_Start: number,
-  data: PurchaseOrderWithRelations,
   exc: any
 ) => {
+  if (!_DATA) return { page, lineStart };
   if (lineStart < END_POSITION) {
     currentPageNumber++;
     const newPage = pdfDoc.addPage();
     newPage.drawPage(templatePage);
-    drawStaticInfo(newPage, myFont, currentPageNumber, data);
+    drawStaticInfo(newPage, myFont, currentPageNumber);
 
     lineStart = ITEM_Y_Start;
 
@@ -545,24 +531,18 @@ const getTextWidth = (text: string, config: ListConfig) => {
 const drawStaticInfo = (
   page: PDFPage,
   font: PDFFont,
-  currentPageNumber: number,
-  data: PurchaseOrderWithRelations
+  currentPageNumber: number
 ) => {
+  if (!_DATA) return;
   drawHeaderInfo(page, font, currentPageNumber, {
-    code: data.code,
+    code: _DATA.code,
     date: _BILL_DATE,
   });
-  if (data.vendor) {
+  if (_DATA.vendor) {
     drawVendorInfo(page, font);
   }
 
   drawOrdererInfo(page, font);
-  drawRemarkInfo(page, font, data);
-  drawPriceInfo(page, font, {
-    price: data.price?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
-    discount: data.discount?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
-    totalPrice: data.totalPrice?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
-    vat: data.vat?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
-    grandTotal: data.grandTotal?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
-  });
+  drawRemarkInfo(page, font);
+  drawPriceInfo(page, font);
 };
