@@ -10,6 +10,11 @@ import path from "path";
 import { readFile } from "fs/promises";
 import { getBoundingBox, PDFDateFormat } from "./pdf.helpers";
 
+const signatureConfigs = {
+  width: 140,
+  height: 60,
+}
+
 let _BILL_DATE = ""
 let _DATA: PurchaseOrderWithRelations | null = null
 const PAGE_FONT_SIZE = 8;
@@ -284,6 +289,16 @@ const drawPriceInfo = (page: PDFPage, font: PDFFont) => {
   });
 };
 
+const drawSignature = async (page: PDFPage) => {
+  const signatureImageBytes = await readFile(path.join(process.cwd(), "/public/signature/a.png"));
+  const signatureImage = await page.doc.embedPng(signatureImageBytes as any);
+  page.drawImage(signatureImage, {
+    x: 360,
+    y: 45,
+    ...signatureConfigs
+  });
+};
+
 type ListConfig = {
   size: number;
   lineHeight: number;
@@ -319,8 +334,8 @@ const generate = async (id: number) => {
   ]);
 
   pdfDoc.registerFontkit(fontkit);
-  const myFont = await pdfDoc.embedFont(fontData, { subset: true });
-  const template = await PDFDocument.load(existingPdfBytes);
+  const myFont = await pdfDoc.embedFont(fontData as any, { subset: true });
+  const template = await PDFDocument.load(existingPdfBytes as any);
   const templatePage = await pdfDoc.embedPage(template.getPages()[0]);
 
   const config: ListConfig = {
@@ -545,4 +560,5 @@ const drawStaticInfo = (
   drawOrdererInfo(page, font);
   drawRemarkInfo(page, font);
   drawPriceInfo(page, font);
+  drawSignature(page);
 };

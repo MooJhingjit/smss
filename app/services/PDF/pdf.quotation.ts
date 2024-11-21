@@ -115,8 +115,8 @@ const generate = async (id: number) => {
   ]);
 
   pdfDoc.registerFontkit(fontkit);
-  const myFont = await pdfDoc.embedFont(fontData, { subset: true });
-  const template = await PDFDocument.load(existingPdfBytes);
+  const myFont = await pdfDoc.embedFont(fontData  as any, { subset: true });
+  const template = await PDFDocument.load(existingPdfBytes  as any);
   const templatePage = await pdfDoc.embedPage(template.getPages()[0]);
 
   const config: ListConfig = {
