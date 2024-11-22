@@ -23,6 +23,7 @@ import { useMutation } from "@tanstack/react-query";
 import { MutationResponseType } from "@/components/providers/query-provider";
 import { customRevalidatePath } from "@/actions/revalidateTag";
 import PO_ITEM_SERVICES from "@/app/services/api.purchase-order-items";
+import Remarks from "./remarks";
 
 type Payload = {
   withholdingTaxEnabled: boolean;
@@ -214,9 +215,6 @@ export default function PurchaseOrderItems({
         <div className="grid grid-cols-5 gap-4 mt-4">
           <div className="col-span-5 md:col-span-3 ">
             <Remarks id={data.id} remark={data.remark} />
-            {/* <div className="mt-2 bg-gray-50 p-3 rounded">
-              <TaxInfo />
-            </div> */}
           </div>
           <div className="col-span-5 md:col-span-2">
             <BillingInfo isManual={!data.quotationId} data={data} />
@@ -226,63 +224,6 @@ export default function PurchaseOrderItems({
     </PageComponentWrapper>
   );
 }
-
-type FormRemark = {
-  id: number;
-  remark: string | null;
-};
-const Remarks = ({ id, remark }: { id: number; remark: string | null }) => {
-  // useForm
-  const {
-    register,
-    watch,
-    reset,
-    getValues,
-    formState: { errors, isValid, isDirty },
-  } = useForm<FormRemark>({
-    mode: "onChange",
-    defaultValues: {
-      remark: remark ?? "",
-    },
-  });
-
-  useEffect(() => {
-    reset({ remark: remark ?? "" });
-  }, [remark, reset]);
-
-  const handleUpdate = useAction(updatePurchaseOrder, {
-    onSuccess: (data) => {
-      toast.success("สำเร็จ");
-    },
-    onError: (error) => {
-      toast.error(error);
-    },
-  });
-
-  const onSubmit = async () => {
-    const remark = getValues("remark") ?? "";
-    handleUpdate.execute({ id, remark, formType: "remark" });
-  };
-
-  return (
-    <form action={onSubmit} className="relative">
-      <FormTextarea
-        id="remark"
-        placeholder="หมายเหตุ"
-        className="w-full h-full border p-2 rounded-lg"
-        register={register}
-        rows={12}
-      />
-      <div className="absolute top-2 right-2">
-        {isDirty && (
-          <FormSubmit variant="default" className="text-xs">
-            Update
-          </FormSubmit>
-        )}
-      </div>
-    </form>
-  );
-};
 
 // const TaxInfo = () => {
 //   return (

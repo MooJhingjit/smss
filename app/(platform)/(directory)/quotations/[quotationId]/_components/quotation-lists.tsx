@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { QuotationType } from "@prisma/client";
 import ProductBadge from "@/components/badges/product-badge";
 import { calculateQuotationItemPrice } from "@/app/services/service.quotation";
+import Remarks from "./remarks";
 
 type Props = {
   quotationId: number;
@@ -143,7 +144,7 @@ export default function QuotationLists(props: Props) {
       {data.length > 0 && (
         <div className="grid grid-cols-5 gap-4 mt-4">
           <div className="col-span-5 md:col-span-3 ">
-            <Remark id={quotationId} remark={remark} />
+            <Remarks id={quotationId} remark={remark} />
           </div>
           <div className="col-span-5 md:col-span-2">
             <BillingInfo data={data} />
@@ -222,59 +223,59 @@ const BillingInfo = (props: BillingProps) => {
   );
 };
 
-type FormRemark = {
-  id: number;
-  remark: string | null;
-};
+// type FormRemark = {
+//   id: number;
+//   remark: string | null;
+// };
 
-const Remark = ({ id, remark }: { id: number; remark: string | null }) => {
-  // useForm
-  const {
-    register,
-    reset,
-    getValues,
-    formState: { isDirty },
-  } = useForm<FormRemark>({
-    mode: "onChange",
-    defaultValues: {
-      remark: remark ?? "",
-    },
-  });
+// const Remark = ({ id, remark }: { id: number; remark: string | null }) => {
+//   // useForm
+//   const {
+//     register,
+//     reset,
+//     getValues,
+//     formState: { isDirty },
+//   } = useForm<FormRemark>({
+//     mode: "onChange",
+//     defaultValues: {
+//       remark: remark ?? "",
+//     },
+//   });
 
-  useEffect(() => {
-    reset({ remark: remark ?? "" });
-  }, [remark, reset]);
+//   useEffect(() => {
+//     reset({ remark: remark ?? "" });
+//   }, [remark, reset]);
 
-  const handleUpdate = useAction(updateQuotation, {
-    onSuccess: (data) => {
-      toast.success("สำเร็จ");
-    },
-    onError: (error) => {
-      toast.error(error);
-    },
-  });
+//   const handleUpdate = useAction(updateQuotation, {
+//     onSuccess: (data) => {
+//       toast.success("สำเร็จ");
+//     },
+//     onError: (error) => {
+//       toast.error(error);
+//     },
+//   });
 
-  const onSubmit = async () => {
-    const remark = getValues("remark") ?? "";
-    handleUpdate.execute({ id, remark });
-  };
+//   const onSubmit = async () => {
+//     const remark = getValues("remark") ?? "";
+//     handleUpdate.execute({ id, remark });
+//   };
 
-  return (
-    <form action={onSubmit} className="h-full relative">
-      <FormTextarea
-        id="remark"
-        placeholder="หมายเหตุ"
-        className="w-full h-full border p-2 rounded-lg"
-        register={register}
-        rows={12}
-      />
-      <div className="absolute bottom-6 right-2">
-        {isDirty && (
-          <FormSubmit variant="default" className="text-xs">
-            บันทึก
-          </FormSubmit>
-        )}
-      </div>
-    </form>
-  );
-};
+//   return (
+//     <form action={onSubmit} className="h-full relative">
+//       <FormTextarea
+//         id="remark"
+//         placeholder="หมายเหตุ"
+//         className="w-full h-full border p-2 rounded-lg"
+//         register={register}
+//         rows={12}
+//       />
+//       <div className="absolute bottom-6 right-2">
+//         {isDirty && (
+//           <FormSubmit variant="default" className="text-xs">
+//             บันทึก
+//           </FormSubmit>
+//         )}
+//       </div>
+//     </form>
+//   );
+// };

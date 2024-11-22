@@ -37,14 +37,16 @@ export const columns: ColumnDef<
       return vendor?.name;
     },
   },
-
   {
     accessorKey: "discount",
     header: "ส่วนลด",
-  },
-  {
-    accessorKey: "tax",
-    header: "ภาษี",
+    cell: ({ row }) => {
+      const { discount } = row.original;
+      return discount?.toLocaleString("th-TH", {
+        style: "currency",
+        currency: "THB",
+      }) ?? 0;
+    },
   },
   {
     accessorKey: "createdAt",
