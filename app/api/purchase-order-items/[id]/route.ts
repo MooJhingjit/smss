@@ -36,6 +36,7 @@ export async function PUT(
       };
     }
 
+    console.log(payload)
     const purchaseOrderItem = await db.purchaseOrderItem.update({
       where: {
         id: Number(id),

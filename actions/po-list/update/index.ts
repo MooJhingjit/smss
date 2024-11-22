@@ -15,8 +15,8 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         id,
       },
       data: { // do not allow to update quantity and type for now
-        // price,
-        // unitPrice,
+        price,
+        unitPrice,
         unit,
         // quantity,
         description,

@@ -75,7 +75,7 @@ function MainForm({
     grandTotal,
     onReset,
     onSubmit,
-    priceBeforeTax,
+    priceBeforeVat,
     isManual
   } = useBillingInfo({ data });
 
@@ -124,7 +124,7 @@ function MainForm({
         </ItemList>
         <ItemList label="ราคาก่อนหักภาษี">
           <div className="font-medium text-gray-900">
-            {priceBeforeTax?.toLocaleString("th-TH", {
+            {priceBeforeVat?.toLocaleString("th-TH", {
               style: "currency",
               currency: "THB",
             }) ?? 0}
@@ -138,7 +138,7 @@ function MainForm({
             }) ?? 0}
           </div>
         </ItemList>
-        <ItemList label="หัก ณ ที่จ่าย 3%">
+        {/* <ItemList label="หัก ณ ที่จ่าย 3%">
           <Input
             id="tax"
             {...register("tax")}
@@ -147,8 +147,8 @@ function MainForm({
             className=" border border-gray-300 text-right px-2 text-xs focus:ring-0"
             defaultValue={0}
           />
-        </ItemList>
-        <ItemList label="ราคาทั้งหมด">
+        </ItemList> */}
+        <ItemList label="ราคาทั้งหมด (ไม่รวม หัก ณ ที่จ่าย)">
           <div className="font-medium text-primary-600 flex items-center space-x-2">
             <span>
               {" "}
@@ -198,10 +198,10 @@ const ItemList = ({
     <div className="col-span-12 pt-2">
       <div className=" flex justify-between items-center px-6 h-full">
         <div className="flex space-x-2 items-center">
-          {label && <p className="text-sm leading-6 text-gray-600 max-w-[150px] whitespace-pre-wrap">{label}</p>}
+          {label && <p className="text-sm leading-6 text-gray-600 max-w-[150px] whitespace-nowrap">{label}</p>}
           {info && <HoverInfo message={info} />}
         </div>
-        <div className="w-[250px] flex justify-end items-center">{children}</div>
+        <div className="w-[220px] flex justify-end items-center">{children}</div>
       </div>
     </div>
   );

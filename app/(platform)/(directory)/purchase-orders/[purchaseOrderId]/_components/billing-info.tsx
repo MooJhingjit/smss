@@ -15,10 +15,9 @@ export default function BillingInfo({
     discount,
     extraCost,
     price,
-    tax,
     vat,
     grandTotal,
-    priceBeforeTax,
+    priceBeforeVat,
   } = useBillingInfo({ data });
   const {onOpen } = usePurchaseOrderSummaryModal();
 
@@ -60,7 +59,7 @@ export default function BillingInfo({
           <dt className="text-gray-600">ราคาก่อนหักภาษี</dt>
           <dd className="font-medium text-gray-900">
             <p>
-              {priceBeforeTax?.toLocaleString("th-TH", {
+              {priceBeforeVat?.toLocaleString("th-TH", {
                 style: "currency",
                 currency: "THB",
               }) ?? 0}
@@ -78,7 +77,7 @@ export default function BillingInfo({
             </p>
           </dd>
         </div>
-        <div className="flex items-center justify-between py-1">
+        {/* <div className="flex items-center justify-between py-1">
           <dt className="text-gray-600">หัก ณ ที่จ่าย 3%</dt>
           <dd className="font-medium text-yellow-600">
             {tax?.toLocaleString("th-TH", {
@@ -86,9 +85,9 @@ export default function BillingInfo({
                 currency: "THB",
               }) ?? 0}
           </dd>
-        </div>
+        </div> */}
         <div className="flex items-center justify-between pt-4">
-          <dt className="font-medium text-gray-900">ราคาทั้งหมด</dt>
+          <dt className="font-medium text-gray-900">ราคาทั้งหมด (ไม่รวม หัก ณ ที่จ่าย)</dt>
 
           <dd className="font-medium text-primary-600 flex items-center space-x-2">
             <Button

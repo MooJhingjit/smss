@@ -68,18 +68,17 @@ export default function useBillingInfo({ data }: UseBillingInfoProps) {
 
         const totalPrice = tPrice - discountNum + extraCostNum;
         const vat = totalPrice * 0.07;
-        // const tax = totalPrice * 0.03;
+        const tax = totalPrice * 0.03;
 
         setValue('totalPrice', totalPrice);
-        setValue('grandTotal', totalPrice + vat);
         setValue('vat', vat);
-        // setValue('tax', tax);
+        setValue('tax', tax);
     }, [getValues, setValue, data.price, isManual]);
 
     const discount = useWatch({ name: 'discount', control });
     const extraCost = useWatch({ name: 'extraCost', control });
     const price = useWatch({ name: 'price', control });
-    // const tax = useWatch({ name: 'tax', control });
+    const tax = useWatch({ name: 'tax', control });
     const vat = useWatch({ name: 'vat', control });
     const grandTotal = useWatch({ name: 'grandTotal', control });
 
@@ -99,7 +98,7 @@ export default function useBillingInfo({ data }: UseBillingInfoProps) {
             price: Number(formData.price),
             discount: Number(formData.discount),
             extraCost: Number(formData.extraCost),
-            // tax: Number(formData.tax),
+            tax: Number(formData.tax),
             id: data.id,
             formType: 'billing',
         });
@@ -115,17 +114,18 @@ export default function useBillingInfo({ data }: UseBillingInfoProps) {
         }
     }, [price, discount, extraCost, isDirty, onChange]);
 
-    // useEffect(() => {
-    //     if (!isDirty) return;
+    useEffect(() => {
+        if (!isDirty) return;
 
-    //     const { totalPrice } = getValues();
-    //     const vat = Number(totalPrice) * 0.07;
-    //     const grandTotal = Number(totalPrice) + vat
+        const { tax, totalPrice } = getValues();
+        const vat = Number(totalPrice) * 0.07;
+        const grandTotal = Number(totalPrice) + vat - Number(tax);
 
-    //     setValue('grandTotal', grandTotal);
-    // }, [isDirty, getValues, setValue]);
+        setValue('grandTotal', grandTotal);
+        setValue('tax', tax);
+    }, [isDirty, tax, getValues, setValue]);
 
-    const priceBeforeVat = getValues('totalPrice');
+    const priceBeforeTax = getValues('totalPrice');
 
     return {
         register,
@@ -136,11 +136,12 @@ export default function useBillingInfo({ data }: UseBillingInfoProps) {
         discount,
         extraCost,
         price,
+        tax,
         vat,
         grandTotal,
         onReset,
         onSubmit,
-        priceBeforeVat,
+        priceBeforeTax,
         isManual
     };
 }

@@ -134,6 +134,7 @@ export const PurchaseOrderListModal = () => {
 
   const isNewItem = !defaultData;
 
+  const itemId = defaultData?.id;
 
   return (
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
@@ -201,10 +202,9 @@ export const PurchaseOrderListModal = () => {
             <div className="col-span-1">
               <FormInput
                 id="unitPrice"
-                key={`cost_${new Date().getTime().toString()}`}
+                key={`cost_${itemId}`}
                 label="ราคาต่อหน่วย"
                 type="number"
-                readOnly={!isNewItem}
                 register={register}
                 errors={handleCreate.fieldErrors}
               />

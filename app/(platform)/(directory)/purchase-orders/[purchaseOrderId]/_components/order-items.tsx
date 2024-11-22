@@ -89,7 +89,7 @@ export default function PurchaseOrderItems({
       },
     },
     {
-      name: "ราคา",
+      name: "ราคารวม",
       key: "price",
       render: (item: PurchaseOrderItemWithRelations) => {
         return (

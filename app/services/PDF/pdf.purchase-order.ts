@@ -204,22 +204,35 @@ const drawRemarkInfo = (page: PDFPage) => {
   });
 
   // withholdingTax summary
-  if (_DATA.tax) {
-    const priceAfterTax = (_DATA?.grandTotal ?? 0) - (_DATA?.tax ?? 0)
+  const withholdingTaxSummary = _DATA.purchaseOrderItems?.filter(item => item.withholdingTaxEnabled)
+  .reduce((acc, item) => {
+    return acc + (item.withholdingTax ?? 0)
+  } , 0) ?? 0
+
+  if (withholdingTaxSummary) {
+    const priceAfterTax = (_DATA?.grandTotal ?? 0) - withholdingTaxSummary
+ 
     const items = [
       {
         label: 'ราคาก่อนภาษี',
-        value: _DATA.price?.toLocaleString("th-TH", CURRENCY_FORMAT) + ' บาท'
+        value: _DATA.totalPrice?.toLocaleString("th-TH", CURRENCY_FORMAT) + ' บาท'
       },
       {
         label: 'หัก ณ ที่จ่าย 3%',
-        value: _DATA.tax?.toLocaleString("th-TH", CURRENCY_FORMAT) + ' บาท'
+        value: withholdingTaxSummary?.toLocaleString("th-TH", CURRENCY_FORMAT) + ' บาท'
       },
       {
         label: 'ราคาหลังจากหัก ณ ที่จ่าย',
         value: priceAfterTax.toLocaleString("th-TH", CURRENCY_FORMAT) + ' บาท'
-      }
+      },
     ];
+
+    if (_DATA.extraCost) {
+      items.push({
+        label: '*ต้นทุนเพิ่ม',
+        value: _DATA.extraCost?.toLocaleString("th-TH", CURRENCY_FORMAT) + ' บาท'
+      })
+    }
 
     page.drawText("**", {
       x: 260,
