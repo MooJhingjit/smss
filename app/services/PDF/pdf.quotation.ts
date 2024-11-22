@@ -69,13 +69,13 @@ export const generateInvoice = async (id: number, date: string) => {
     let temporaryQuotationTotalPrice = {};
     // check if total price is not yet calculated
     if (!quotation.grandTotal) {
-      const { totalPrice, discount, tax, grandTotal } =
+      const { totalPrice, discount, vat, grandTotal } =
         calculateQuotationItemPrice(quotation.lists);
 
       temporaryQuotationTotalPrice = {
         totalPrice,
         discount,
-        tax,
+        tax: vat,
         grandTotal,
       };
     }

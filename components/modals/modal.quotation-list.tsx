@@ -322,7 +322,7 @@ export const QuotationListModal = () => {
 
         <div className="">
           <FormInput
-            key={`withholdingTaxPercent_${refs?.timestamps}`}
+            key={`withholdingTaxPercent_${refs?.timestamps}`} // need to change to vat
             id="withholdingTaxPercent"
             label="ภาษี (%)"
             type="number"
@@ -335,7 +335,7 @@ export const QuotationListModal = () => {
 
         <div className="">
           <FormInput
-            key={`withholdingTax_${refs?.timestamps}`}
+            key={`withholdingTax_${refs?.timestamps}`}  // need to change to vat
             id="withholdingTax"
             label="ภาษีทั้งหมด"
             type="number"

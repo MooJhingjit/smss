@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
       data: {
         totalPrice: quotationSummary.totalPrice,
         discount: quotationSummary.discount,
-        tax: quotationSummary.tax,
+        tax: quotationSummary.vat,
         grandTotal: quotationSummary.grandTotal,
       },
     });

@@ -64,13 +64,13 @@ const columns = [
   },
   { name: "จำนวน", key: "quantity" },
 
-  {
-    name: "ภาษี",
-    key: "withholdingTaxPercent",
-    render: (item: QuotationListWithRelations) => {
-      return `(+${item.withholdingTaxPercent}%) ${item.withholdingTax?.toLocaleString()}`;
-    },
-  },
+  // {
+  //   name: "ภาษี",
+  //   key: "withholdingTaxPercent",
+  //   render: (item: QuotationListWithRelations) => {
+  //     return `(+${item.withholdingTaxPercent}%) ${item.withholdingTax?.toLocaleString()}`;
+  //   },
+  // },
   {
     name: "ส่วนลด",
     key: "discount",
@@ -147,7 +147,7 @@ export default function QuotationLists(props: Props) {
             <Remarks id={quotationId} remark={remark} />
           </div>
           <div className="col-span-5 md:col-span-2">
-            <BillingInfo data={data} />
+            <BillingSummary data={data} />
           </div>
         </div>
       )}
@@ -155,10 +155,9 @@ export default function QuotationLists(props: Props) {
   );
 }
 
-type BillingProps = {
+const BillingSummary = (props: {
   data: QuotationListWithRelations[];
-};
-const BillingInfo = (props: BillingProps) => {
+}) => {
   const { data } = props;
 
   // const summary = data.reduce(
@@ -203,7 +202,7 @@ const BillingInfo = (props: BillingProps) => {
         <div className="flex items-center justify-between py-4">
           <dt className="text-gray-600">7% Vat</dt>
           <dd className="font-medium text-gray-900">
-            {summary.tax.toLocaleString("th-TH", {
+            {summary.vat.toLocaleString("th-TH", {
               style: "currency",
               currency: "THB",
             })}

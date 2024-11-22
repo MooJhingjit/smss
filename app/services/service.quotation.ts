@@ -19,6 +19,8 @@ export const groupQuotationByVendor = (
 export const calculateQuotationItemPrice = (
   items: QuotationList[]
 ) => {
+  console.log(items)
+
   // get total price and discount for each vendor
   const summary = items.reduce(
     (acc, curr) => {
@@ -28,7 +30,7 @@ export const calculateQuotationItemPrice = (
         totalPrice: acc.totalPrice + (curr.unitPrice ?? 0) * quantity, // included interest (%)
         discount: acc.discount + (curr.discount ?? 0),
         quantity: acc.quantity + quantity,
-        tax: acc.tax + (curr.withholdingTax ?? 0),
+        // tax: acc.tax + (curr.withholdingTax ?? 0),
       };
     },
     {
@@ -36,12 +38,14 @@ export const calculateQuotationItemPrice = (
       totalPrice: 0,
       discount: 0,
       quantity: 0,
-      tax: 0,
+      // tax: 0,
     }
   );
 
-  const grandTotal = summary.totalPrice - summary.discount + summary.tax;
-  return { ...summary, grandTotal}
+  const total = summary.totalPrice - summary.discount
+  const vat = total * 0.07
+  const grandTotal = total + vat
+  return { ...summary, vat, grandTotal}
 };
 
 // export const summarizeQuotationTotalPrice = (quotationListsByVendor: {
