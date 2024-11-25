@@ -100,9 +100,8 @@ export async function loadPdfAssets(publicPath: string) {
   pdfDoc.registerFontkit(fontkit);
   const font = await pdfDoc.embedFont(fontData as any, { subset: true });
   const template = await PDFDocument.load(existingPdfBytes as any);
-  const templatePage = await pdfDoc.embedPage(template.getPages()[0]);
 
-  return { pdfDoc, font, templatePage };
+  return { pdfDoc, font, template };
 }
 
 export const validatePageArea = (
