@@ -276,14 +276,18 @@ const MainForm = ({ data }: {
         </ItemList>
         <ItemList label="พิมพ์ใบสั่งซื้อ" >
           <div className="flex space-x-3 items-center">
-            <PrintOrderForm
+            <ReceiptPrint
+              type="po-to-vendor"
               orderId={data.id}
             />
           </div>
         </ItemList>
-        <ItemList label="การออกบิล" info="หลังจากออกใบเสร็จแล้วจะไม่สามารถแก้ไขสินค้าได้">
+        <ItemList label="ออกบิลสินค้า" info="หลังจากออกใบเสร็จแล้วจะไม่สามารถแก้ไขสินค้าได้">
           <div className="flex space-x-3 items-center">
-            <PrintOrderReceipt data={data} />
+            <ReceiptPrint
+              type="product-to-customer"
+              orderId={data.id}
+            />
           </div>
         </ItemList>
 
@@ -314,25 +318,24 @@ const ItemList = ({
   );
 };
 
-const PrintOrderReceipt = ({data}: {
-  data: PurchaseOrderWithRelations
-}) => {
-  const poReceiptModal = usePurchaseOrderReceiptModal();
-  const {purchaseOrderItems, ...rest} = data
+// const PrintOrderReceipt = ({ data }: {
+//   data: PurchaseOrderWithRelations
+// }) => {
+//   const poReceiptModal = usePurchaseOrderReceiptModal();
+//   const { purchaseOrderItems, ...rest } = data
 
-  return (
-    <Button
+//   return (
+//     <Button
 
-      onClick={() => {
-        poReceiptModal.onOpen(data);
+//       onClick={() => {
+//         poReceiptModal.onOpen(data);
 
-      }}
-      size={"sm"} variant={"secondary"} type="submit">
-      <PrinterIcon className="w-4 h-4" />
-    </Button>
-  )
-}
-
+//       }}
+//       size={"sm"} variant={"secondary"} type="submit">
+//       <PrinterIcon className="w-4 h-4" />
+//     </Button>
+//   )
+// }
 
 const StatusDropdown = ({
   curStatus,
@@ -367,36 +370,30 @@ const StatusDropdown = ({
   );
 };
 
-const PrintOrderForm = ({ orderId }: { orderId: number }) => {
+const ReceiptPrint = ({ orderId, type }: {
+  orderId: number, type: "po-to-vendor" | "product-to-customer"
+
+}) => {
   const onPrintClick = (date: Date) => {
+
     try {
-      fetch(`/api/purchase-orders/invoice/${orderId}`, {
+      fetch(`/api/purchase-orders/bills/${orderId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ date: date.toISOString() }),
+        body: JSON.stringify({ date: date.toISOString(), type }),
       })
         .then((res) => res.blob())
         .then((blob) => URL.createObjectURL(blob))
         .then((url) => {
-          // Create an anchor element and use it to navigate to the URL
           const a = document.createElement("a");
           a.href = url;
           a.target = "_blank"; // Ensure it opens in a new tab
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
-
-          // Optionally, you might not want to revoke the URL immediately
-          // since the file might still be loading in the new tab
-          // window.URL.revokeObjectURL(url);
-
-          // You might want to revoke it later or based on some other conditions
           window.URL.revokeObjectURL(url);
-          // setTimeout(() => {
-          //   window.URL.revokeObjectURL(url); // Clean up the blob URL after it's no longer needed
-          // }, 60000); // for example, after 1 minute
         });
     } catch (error) {
       console.log("error", error);
@@ -428,8 +425,6 @@ const PrintOrderForm = ({ orderId }: { orderId: number }) => {
     </form>
   );
 };
-
-
 
 const HoverInfo = ({ message }: { message: string }) => {
   return (
