@@ -389,6 +389,17 @@ const drawCustomerInfo = (page: PDFPage) => {
     ...config,
   });
 
+
+  // right side
+  const rightXStart = 500;
+  // date
+  page.drawText(_BILL_DATE, {
+    x: rightXStart,
+    y: Y_Start - config.lineHeight,
+    maxWidth: 100,
+    ...config,
+  });
+
 };
 
 
