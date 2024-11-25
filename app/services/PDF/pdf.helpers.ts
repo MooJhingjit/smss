@@ -3,11 +3,18 @@ import {
   PDFFont,
   PDFPage,
   breakTextIntoLines,
+  PDFEmbeddedPage
 } from "pdf-lib";
+import fontkit from "@pdf-lib/fontkit";
 
 import path from "path";
 import { readFile } from "fs/promises";
 
+export type ListConfig = {
+  size: number;
+  lineHeight: number;
+  font: PDFFont;
+};
 
 export function PDFDateFormat(date: Date): string {
   const day = String(date.getDate()).padStart(2, '0');
@@ -78,3 +85,54 @@ export async function loadSignatureImage(page: PDFPage, userKey: string) {
     height: userConfig[userKey as keyof typeof userConfig].height,
   };
 }
+
+export async function loadPdfAssets(publicPath: string) {
+  const basePath = process.cwd(); // Gets the base path of your project
+  const fontPath = path.join(basePath, "public/fonts/Sarabun-Regular.ttf");
+  const pdfTemplatePath = path.join(basePath, publicPath);
+
+  const [pdfDoc, fontData, existingPdfBytes] = await Promise.all([
+    PDFDocument.create(),
+    readFile(fontPath),
+    readFile(pdfTemplatePath),
+  ]);
+
+  pdfDoc.registerFontkit(fontkit);
+  const font = await pdfDoc.embedFont(fontData as any, { subset: true });
+  const template = await PDFDocument.load(existingPdfBytes as any);
+  const templatePage = await pdfDoc.embedPage(template.getPages()[0]);
+
+  return { pdfDoc, font, templatePage };
+}
+
+export const validatePageArea = (
+  page: PDFPage,
+  pdfDoc: PDFDocument,
+  templatePage: PDFEmbeddedPage,
+  lineStart: number,
+  LIST_END_AT: number,
+  ITEM_Y_Start: number,
+  exc: any
+) => {
+  if (lineStart < LIST_END_AT) {
+    const newPage = pdfDoc.addPage();
+    newPage.drawPage(templatePage);
+    lineStart = ITEM_Y_Start;
+
+    let heightUsed = exc(newPage, lineStart);
+    return {
+      page: newPage,
+      lineStart: lineStart - heightUsed,
+    };
+  }
+
+  let heightUsed = exc(page, lineStart);
+  return {
+    page: page,
+    lineStart: lineStart - heightUsed,
+  };
+};
+
+export const getTextWidth = (text: string, config: ListConfig) => {
+  return config.font.widthOfTextAtSize(text, config.size);
+};
