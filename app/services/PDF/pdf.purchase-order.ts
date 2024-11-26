@@ -95,6 +95,21 @@ const generate = async () => {
   let page = pdfDoc.addPage();
   page.drawPage(templatePage);
 
+  // draw approver signature
+  const approverSignature = await loadSignatureImage("2");
+  const approverSignatureImage = await page.doc.embedPng(approverSignature.imageBytes as any);
+  page.drawImage(approverSignatureImage, {
+    x: 380,
+    y: 45,
+    ...approverSignatureImage.scale(approverSignature.scale)
+  })
+  page.drawText(_BILL_DATE, {
+    x: 380,
+    y: 35,
+    ...config
+  })
+
+
   drawStaticInfo(page, 1);
 
   let lineStart = ITEM_Y_Start;
@@ -504,16 +519,6 @@ const drawPriceInfo = (page: PDFPage) => {
   });
 };
 
-const drawSignature = async (page: PDFPage) => {
-  const { signatureImage, width, height } = await loadSignatureImage(page, "b");
-  page.drawImage(signatureImage, {
-    x: 380,
-    y: 45,
-    width,
-    height
-  });
-};
-
 const drawStaticInfo = (
   page: PDFPage,
   currentPageNumber: number
@@ -530,5 +535,4 @@ const drawStaticInfo = (
   drawOrdererInfo(page);
   drawRemarkInfo(page);
   drawPriceInfo(page);
-  drawSignature(page);
 };

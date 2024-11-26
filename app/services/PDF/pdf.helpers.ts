@@ -63,28 +63,50 @@ export function getBoundingBox(
   return { width: textWidth, height: textHeight };
 }
 
-export async function loadSignatureImage(page: PDFPage, userKey: string) {
+// export async function loadSignatureImage(page: PDFPage, userKey: string) {
+//   const userConfig = {
+//     "1": {
+//       path: "/public/signature/1.png",
+//       width: 120,
+//       height: 40,
+//     },
+//     "2": {
+//       path: "/public/signature/2.png",
+//       width: 60,
+//       height: 40,
+//     }
+//   }
+//   const signatureImageBytes = await readFile(path.join(process.cwd(), userConfig[userKey as keyof typeof userConfig].path));
+//   const signatureImage = await page.doc.embedPng(signatureImageBytes as any);
+
+//   return {
+//     signatureImage,
+//     width: userConfig[userKey as keyof typeof userConfig].width,
+//     height: userConfig[userKey as keyof typeof userConfig].height,
+//   };
+// }
+
+export async function loadSignatureImage(userKey: string) {
   const userConfig = {
-    "a": {
-      path: "/public/signature/a.png",
-      width: 120,
-      height: 40,
+    "1": {
+      path: "/public/signature/1.png",
+      scale: 0.2
     },
-    "b": {
-      path: "/public/signature/b.png",
-      width: 60,
-      height: 40,
+    "2": {
+      path: "/public/signature/2.png",
+      scale: 0.7
     }
   }
-  const signatureImageBytes = await readFile(path.join(process.cwd(), userConfig[userKey as keyof typeof userConfig].path));
-  const signatureImage = await page.doc.embedPng(signatureImageBytes as any);
+  const imageBytes = await readFile(path.join(process.cwd(), userConfig[userKey as keyof typeof userConfig].path));
 
   return {
-    signatureImage,
-    width: userConfig[userKey as keyof typeof userConfig].width,
-    height: userConfig[userKey as keyof typeof userConfig].height,
+    imageBytes,
+    scale: userConfig[userKey as keyof typeof userConfig].scale
   };
 }
+
+
+
 
 export async function loadPdfAssets(publicPath: string) {
   const basePath = process.cwd(); // Gets the base path of your project

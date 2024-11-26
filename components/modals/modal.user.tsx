@@ -90,6 +90,7 @@ export const NewUserModal = () => {
             <FormSelect
               id="role"
               label="ประเภท"
+              disabled={true}
               defaultValue={user?.role ?? undefined}
               options={[
                 { id: "buyer", title: "Buyer" },

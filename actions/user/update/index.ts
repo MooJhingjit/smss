@@ -39,6 +39,9 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       payload.password = hashPassword;
     }
 
+    console.log("payload id", id);
+    console.log("payload", payload);
+
     user = await db.user.update({
       where: {
         id,

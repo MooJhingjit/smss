@@ -5,7 +5,7 @@ import {
   QuotationList,
   User,
 } from "@prisma/client";
-import { PDFDocument, PDFFont, PDFPage, rgb, PDFEmbeddedPage } from "pdf-lib";
+import { PDFDocument, PDFFont, PDFPage, rgb, PDFEmbeddedPage, degrees } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
 import { getBoundingBox, getPaymentCondition, loadSignatureImage, PDFDateFormat } from "./pdf.helpers";
 import { getDateFormat } from "@/lib/utils";
@@ -114,6 +114,7 @@ const generate = async (id: number) => {
     readFile(fontPath),
     readFile(pdfTemplatePath),
   ]);
+
 
   pdfDoc.registerFontkit(fontkit);
   _FONT = await pdfDoc.embedFont(fontData as any, { subset: true });
@@ -240,7 +241,6 @@ const generate = async (id: number) => {
     lineStart: number
   ) => {
     // get current page number
-    console.log();
     currentPage.drawText(subItem.label, {
       x: columnPosition.description + 12, // indent
       y: lineStart,
@@ -269,6 +269,35 @@ const generate = async (id: number) => {
 
   let page = pdfDoc.addPage();
   page.drawPage(templatePage);
+
+  // drawSignature
+  // approver
+  // const approverSignatureImageBytes = await readFile(path.join(process.cwd(), "/public/signature/1.png"));
+  const approverSignature = await loadSignatureImage("1");
+  const approverSignatureImage = await page.doc.embedPng(approverSignature.imageBytes as any);
+  page.drawImage(approverSignatureImage, {
+    x: 440,
+    y: 60,
+    ...approverSignatureImage.scale(approverSignature.scale)
+
+  })
+  page.drawText(_BILL_DATE, {
+    x: 440,
+    y: 45,
+    ...config
+  })
+
+  // seller
+  const sellerId = _DATA.seller?.id;
+  if (sellerId) {
+    const sellerSignature = await loadSignatureImage(sellerId.toString());
+    const sellerSignatureImage = await page.doc.embedPng(sellerSignature.imageBytes as any);
+    page.drawImage(sellerSignatureImage, {
+      x: 280,
+      y: 60,
+      ...approverSignatureImage.scale(sellerSignature.scale)
+    })
+  }
 
   drawStaticInfo(page, currentPageNumber);
 
@@ -413,14 +442,14 @@ const drawCustomerInfo = (page: PDFPage, contact: Contact) => {
 
   page.drawText(contact.phone ?? "", {
     x: 440,
-    y:  Y_Start - (config.lineHeight),
+    y: Y_Start - (config.lineHeight),
     maxWidth: 100,
     ...config,
   });
 
   page.drawText(contact.fax ?? "", {
     x: 440,
-    y:  Y_Start - (config.lineHeight*2),
+    y: Y_Start - (config.lineHeight * 2),
     maxWidth: 100,
     ...config,
   });
@@ -508,15 +537,6 @@ const drawRemarkInfo = (page: PDFPage, text: string) => {
   });
 };
 
-const drawSignature = async (page: PDFPage) => {
-  const { signatureImage, width, height } = await loadSignatureImage(page, "a");
-  page.drawImage(signatureImage, {
-    x: 270,
-    y: 45,
-    width,
-    height
-  });
-};
 
 const drawPriceInfo = (
   page: PDFPage,
@@ -645,5 +665,5 @@ const drawStaticInfo = (
     totalPrice: _DATA.totalPrice?.toLocaleString("th-TH", currencyFormat) ?? "",
     grandTotal: _DATA.grandTotal?.toLocaleString("th-TH", currencyFormat) ?? "",
   });
-  drawSignature(page);
+  // drawSignature(page);
 };
