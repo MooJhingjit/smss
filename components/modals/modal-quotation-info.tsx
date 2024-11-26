@@ -390,8 +390,8 @@ const PaymentCondition = ({ defaultValue, onChange }: { defaultValue: string, on
         <ToggleGroupItem value="cash">
           <p>เงินสด</p>
         </ToggleGroupItem>
-        <ToggleGroupItem value="other">
-          <p>อื่นๆ</p>
+        <ToggleGroupItem value="other" className="whitespace-nowrap">
+        ระบุวัน
         </ToggleGroupItem>
       </ToggleGroup>
       {selectedCondition === "other" && (
@@ -399,6 +399,7 @@ const PaymentCondition = ({ defaultValue, onChange }: { defaultValue: string, on
           id="otherPaymentCondition"
           placeholder="โปรดระบุ"
           className="text-xs w-full"
+          type="number"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onBlur={() => onChange(inputValue)}

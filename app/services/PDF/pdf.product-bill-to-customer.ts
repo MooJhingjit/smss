@@ -4,13 +4,15 @@ import {
   PurchaseOrder,
   Quotation,
   QuotationList,
+  User,
 } from "@prisma/client";
 import { PDFDocument, PDFEmbeddedPage, PDFFont, PDFPage } from "pdf-lib";
-import { getBoundingBox, loadSignatureImage, PDFDateFormat, loadPdfAssets, validatePageArea, getTextWidth } from "./pdf.helpers";
+import { getBoundingBox, loadSignatureImage, PDFDateFormat, loadPdfAssets, validatePageArea, getTextWidth, getPaymentCondition, getBillDueDate } from "./pdf.helpers";
 
 type QuotationWithRelations = Quotation & {
   lists?: QuotationList[];
   contact?: Contact | null;
+  seller?: User | null;
 };
 type PurchaseOrderWithRelations = PurchaseOrder & {
   quotation?: QuotationWithRelations | null;
@@ -52,8 +54,9 @@ const getData = async (
         include: {
           lists: true,
           contact: true,
+          seller: true,
         }
-        
+
       }
     },
     where: {
@@ -73,6 +76,7 @@ export const generateInvoice = async (id: number, date: string) => {
     _BILL_DATE = PDFDateFormat(new Date(date))
 
     const purchaseOrder = await getData(id);
+    console.log(purchaseOrder)
 
     if (!purchaseOrder) {
       throw new Error("PurchaseOrder not found");
@@ -89,7 +93,7 @@ export const generateInvoice = async (id: number, date: string) => {
 const main = async () => {
   if (!_DATA) return;
   // list start position
- 
+
   const totalPages = 4
   const { pdfDoc, font, template } = await loadPdfAssets("public/pdf/product-bill-to-customer-template.pdf");
   _FONT = font;
@@ -135,7 +139,7 @@ const drawItemLists = (
   if (!_DATA || !_FONT) return;
 
   let lineStart = ITEM_Y_Start;
-  
+
   // write item list
   _DATA.quotation?.lists?.forEach((list, index) => {
     if (index > 0) {
@@ -380,7 +384,7 @@ const drawCustomerInfo = (page: PDFPage) => {
     customer.email,
   ]
     .filter((item) => item)
-    .join(", ");  
+    .join(", ");
 
   page.drawText(contactInfo, {
     x: X_Start,
@@ -400,9 +404,41 @@ const drawCustomerInfo = (page: PDFPage) => {
     ...config,
   });
 
+  const quotation = _DATA.quotation
+
+  const seller = quotation?.seller;
+  page.drawText(seller?.name ?? "", {
+    x: rightXStart,
+    y: Y_Start - config.lineHeight * 2,
+    maxWidth: 100,
+    ...config,
+  });
+
+  page.drawText(quotation?.purchaseOrderRef ?? "", {
+    x: rightXStart,
+    y: Y_Start - config.lineHeight * 5,
+    maxWidth: 100,
+    ...config,
+  });
+
+  const paymentCondition = getPaymentCondition(quotation?.paymentCondition ?? "");
+  page.drawText(paymentCondition, {
+    x: rightXStart,
+    y: Y_Start - config.lineHeight * 3,
+    maxWidth: 100,
+    ...config,
+  });
+
+  const dueDate = getBillDueDate(new Date(_BILL_DATE), quotation?.paymentCondition ?? "");
+  page.drawText(PDFDateFormat(dueDate), {
+    x: rightXStart,
+    y: Y_Start - config.lineHeight * 4,
+    maxWidth: 100,
+    ...config,
+  });
+
+
 };
-
-
 
 const drawPriceInfo = (
   page: PDFPage,
@@ -469,5 +505,5 @@ const drawStaticInfo = (
     totalPrice: _DATA.quotation?.totalPrice?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
     grandTotal: _DATA.quotation?.grandTotal?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
   });
-  
+
 };

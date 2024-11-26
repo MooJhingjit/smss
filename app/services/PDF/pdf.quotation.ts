@@ -7,7 +7,7 @@ import {
 } from "@prisma/client";
 import { PDFDocument, PDFFont, PDFPage, rgb, PDFEmbeddedPage } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
-import { getBoundingBox, loadSignatureImage, PDFDateFormat } from "./pdf.helpers";
+import { getBoundingBox, getPaymentCondition, loadSignatureImage, PDFDateFormat } from "./pdf.helpers";
 import { getDateFormat } from "@/lib/utils";
 import path from "path";
 import { readFile } from "fs/promises";
@@ -440,11 +440,13 @@ const drawOfferInfo = (
     paymentDue,
     deliveryPeriod,
     validPricePeriod,
+    paymentCondition,
   }: {
     sellerName: string;
     paymentDue: string;
     deliveryPeriod: string;
     validPricePeriod: string;
+    paymentCondition: string;
   }
 ) => {
   if (!_FONT) return;
@@ -454,27 +456,36 @@ const drawOfferInfo = (
     lineHeight: 14,
   };
 
+  const Y_Start = 594;
   page.drawText(sellerName, {
     x: 65,
-    y: 594,
+    y: Y_Start,
     maxWidth: 150,
     ...config,
   });
+
+  page.drawText(getPaymentCondition(paymentCondition), {
+    x: 265,
+    y: Y_Start,
+    maxWidth: 150,
+    ...config,
+  });
+
   page.drawText(paymentDue, {
     x: 260,
-    y: 594,
+    y: Y_Start,
     maxWidth: 500,
     ...config,
   });
   page.drawText(deliveryPeriod, {
     x: 430,
-    y: 594,
+    y: Y_Start,
     maxWidth: 100,
     ...config,
   });
   page.drawText(validPricePeriod, {
     x: 500,
-    y: 594,
+    y: Y_Start,
     maxWidth: 100,
     ...config,
   });
@@ -620,6 +631,7 @@ const drawStaticInfo = (
       : "",
     deliveryPeriod: _DATA.deliveryPeriod?.toString() ?? "",
     validPricePeriod: _DATA.validPricePeriod?.toString() ?? "",
+    paymentCondition: _DATA.paymentCondition ?? "",
   });
   drawRemarkInfo(page, _DATA.remark ?? "");
 

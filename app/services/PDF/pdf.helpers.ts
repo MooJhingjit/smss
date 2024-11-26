@@ -135,3 +135,25 @@ export const validatePageArea = (
 export const getTextWidth = (text: string, config: ListConfig) => {
   return config.font.widthOfTextAtSize(text, config.size);
 };
+
+export const getPaymentCondition = (condition: string | undefined): string => {
+  if (!condition) return "";
+  if (!isNaN(parseInt(condition))) {
+    return condition + " วัน";
+  } else if (condition === "cash") {
+    return "เงินสด";
+  }
+  return "";
+};
+
+
+export const getBillDueDate = (date: Date, condition: string | undefined): Date => {
+  // If condition is not set, return the original date
+  if (!condition) return date;
+
+  // If condition is a number, add the number of days to the original date
+  if (!isNaN(parseInt(condition))) {
+    return new Date(date.getTime() + parseInt(condition) * 24 * 60 * 60 * 1000);
+  }
+  return date;
+}

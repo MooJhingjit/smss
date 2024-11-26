@@ -253,6 +253,17 @@ const MainForm = ({ data }: {
           </div>
         </ItemList>
 
+        {
+          data.quotation?.code && (
+            <ItemList label="QT Code">
+              {
+                data.quotation?.code
+              }
+            </ItemList>
+          )
+        }
+
+
         <ItemList label="การชำระเงิน">
           <PaymentOptionControl
             onUpdate={handleChange}

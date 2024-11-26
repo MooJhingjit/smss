@@ -24,6 +24,8 @@ export default function PurchaseOrderInfo(props: Readonly<Props>) {
   let lists = []
 
   lists.push({ label: "สถานะ (PO)", value: purchaseOrderStatusMapping[data.status] })
+  lists.push({ label: "QT", value: data.quotation?.code ?? "-" })
+
 
   if (quotationStatus) {
     lists.push({ label: "สถานะ (QT)", value: quotationStatusMapping[quotationStatus].label })
