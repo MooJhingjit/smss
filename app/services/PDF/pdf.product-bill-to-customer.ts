@@ -7,7 +7,7 @@ import {
   User,
 } from "@prisma/client";
 import { PDFDocument, PDFEmbeddedPage, PDFFont, PDFPage } from "pdf-lib";
-import { getBoundingBox, loadSignatureImage, PDFDateFormat, loadPdfAssets, validatePageArea, getTextWidth, getPaymentCondition, getBillDueDate } from "./pdf.helpers";
+import { getBoundingBox, PDFDateFormat, loadPdfAssets, validatePageArea, getTextWidth, getPaymentCondition, getBillDueDate } from "./pdf.helpers";
 
 type QuotationWithRelations = Quotation & {
   lists?: QuotationList[];
@@ -25,7 +25,7 @@ let _FONT: PDFFont | null = null;
 // item list config
 const PAGE_FONT_SIZE = 8;
 const LIST_END_AT = 210;
-const ITEM_Y_Start = 585;
+const ITEM_Y_Start = 595;
 const ITEM_X_Start = 65;
 
 // horizontal position
@@ -363,7 +363,7 @@ const drawCustomerInfo = (page: PDFPage) => {
   // combine taxId, branchId
   const taxInfo = [
     customer.taxId,
-    customer.branchId,
+    customer.branchId ? `สาขาที่ ${customer.branchId}` : "",
   ]
     .filter((item) => item)
     .join(", ");

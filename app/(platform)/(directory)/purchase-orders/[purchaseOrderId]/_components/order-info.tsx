@@ -8,6 +8,8 @@ import {
 import { purchaseOrderStatusMapping } from "@/app/config";
 import { PurchaseOrderWithRelations } from "@/types";
 import { usePurchaseOrderInfoModal } from "@/hooks/use-po-info-modal";
+import Link from "next/link";
+import { ExternalLinkIcon } from "lucide-react";
 
 
 type Props = {
@@ -24,12 +26,23 @@ export default function PurchaseOrderInfo(props: Readonly<Props>) {
   let lists = []
 
   lists.push({ label: "สถานะ (PO)", value: purchaseOrderStatusMapping[data.status] })
-  lists.push({ label: "QT", value: data.quotation?.code ?? "-" })
 
-
+  let QT_label = "QT"
   if (quotationStatus) {
-    lists.push({ label: "สถานะ (QT)", value: quotationStatusMapping[quotationStatus].label })
+    QT_label = `${QT_label} (${quotationStatusMapping[quotationStatus].label})`
   }
+  
+  lists.push({
+    label: QT_label , value:
+      data.quotation ? (
+        <Link href={`/quotations/${data.quotation.id}`} target="_blank" className="flex items-center space-x-2">
+          <span>{data.quotation.code}</span>
+          <ExternalLinkIcon className="w-4 h-4 text-blue-500" />
+        </Link>
+      ) : "-"
+
+  })
+
   lists.push({
     label: "การชำระเงิน", value: <PaymentLabel
       paymentType={data.paymentType}

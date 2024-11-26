@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import React from "react";
-import { InfoIcon } from "lucide-react"
+import { ExternalLinkIcon, InfoIcon } from "lucide-react"
 import { Button } from "@/components/ui/button";
 import { PurchaseOrderWithRelations } from "@/types";
 import { usePurchaseOrderInfoModal } from "@/hooks/use-po-info-modal";
@@ -44,6 +44,7 @@ import {
 import { FormInput } from "../form/form-input";
 import { Input } from "../ui/input";
 import { usePurchaseOrderReceiptModal } from "@/hooks/use-po-receipt-modal";
+import Link from "next/link";
 
 export const PurchaseInfoModal = () => {
   const modal = usePurchaseOrderInfoModal();
@@ -256,9 +257,10 @@ const MainForm = ({ data }: {
         {
           data.quotation?.code && (
             <ItemList label="QT Code">
-              {
-                data.quotation?.code
-              }
+              <Link target="_blank" href={`/quotations/${data.quotationId}`} className="flex items-center space-x-2">
+                <span>{data.quotation?.code}</span>
+                <ExternalLinkIcon className="w-4 h-4 text-blue-500" />
+              </Link>
             </ItemList>
           )
         }
