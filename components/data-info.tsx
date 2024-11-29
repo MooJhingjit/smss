@@ -23,11 +23,12 @@ const variants = cva(
 
 
 type DataInfoProps = VariantProps<typeof variants> & {
-    header: string;
+    header?: string;
     lists: { label: string; value: string | ReactNode }[];
     onEdit: () => void;
     className?: string; // optional prop for additional custom styles
     columnClassName?: string; // optional prop for additional custom styles
+    CustomComponent?: ReactNode;
 };
 
 export default function DataInfo({
@@ -37,11 +38,21 @@ export default function DataInfo({
     className = "",
     columnClassName = "grid-cols-1  sm:grid-cols-3 md:grid-cols-4",
     variant,
+    CustomComponent,
 }: Readonly<DataInfoProps>) {
     return (
         <div className={cn(variants({ variant }), className)}>
             <div className="flex items-center justify-between">
-                <h3 className="font-medium ">{header}</h3>
+                <div className="items-center space-x-3 flex">
+                    {
+                        header && (
+                            <h3 className="font-medium ">{header}</h3>
+                        )
+                    }
+                    {
+                        CustomComponent && CustomComponent
+                    }
+                </div>
                 <Button
                     onClick={onEdit}
                     variant={"link"}

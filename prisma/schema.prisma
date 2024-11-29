@@ -159,6 +159,7 @@ model Quotation {
   lists                 QuotationList[]
   purchaseOrders        PurchaseOrder[]
   medias                Media[]
+  invoices              Invoice[]
 
   @@index([contactId])
   @@index([sellerId])
@@ -277,7 +278,7 @@ model PurchaseOrderItemReceipt {
   id                 Int                 @id @default(autoincrement())
   purchaseOrderItems PurchaseOrderItem[]
   createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
+  updatedAt          DateTime            @default(now())
 }
 
 model Media {
@@ -290,10 +291,34 @@ model Media {
   purchaseOrderId Int?
   purchaseOrder   PurchaseOrder? @relation(fields: [purchaseOrderId], references: [id])
   createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  updatedAt       DateTime       @default(now())
 
   @@index([quotationId])
   @@index([purchaseOrderId])
+}
+
+model BillGroup {
+  id    Int      @id @default(autoincrement())
+  code  String?
+  date  DateTime?
+  invoices Invoice[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @default(now())
+}
+
+model Invoice {
+  id          Int       @id @default(autoincrement())
+  code        String?
+  date  DateTime?
+  billGroupId Int
+  billGroup   BillGroup @relation(fields: [billGroupId], references: [id])
+  quotationId Int
+  quotation   Quotation @relation(fields: [quotationId], references: [id])
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @default(now())
+
+  @@index([billGroupId])
+  @@index([quotationId])
 }
 
 // npx prisma db push
