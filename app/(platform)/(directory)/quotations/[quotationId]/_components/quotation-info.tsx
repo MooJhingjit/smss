@@ -17,6 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { FormSearchAsync } from "@/components/form/form-search-async";
 import { ProductWithRelations } from "@/types";
 import { Input } from "@/components/ui/input";
+import { createQuotation } from "@/actions/invoice/create";
 type Props = {
   data: Quotation;
 };
@@ -54,6 +55,10 @@ type BillControllerProps = {
 }
 
 const BillController = ({ currentQuotation }: BillControllerProps) => {
+  const handleCreateBillGroup = async () => {
+    await createQuotation({ quotationId: currentQuotation.id });
+  };
+
   return (
     <div className="border p-3 relative">
       <span className="absolute bg-gray-50 px-2 -top-2 text-xs ">กลุ่มใบเสนอราคา</span>
@@ -82,22 +87,24 @@ const BillController = ({ currentQuotation }: BillControllerProps) => {
                   </div>
                   <div className="mt-2">
                     <FormSearchAsync
-                      id="productId"
+                      id="quotationId"
                       required
                       config={{
-                        endpoint: "products",
-                        params: {},
-                        customRender: (data: ProductWithRelations) => {
+                        endpoint: "quotations/group",
+                        params: {
+                          'currentQuotationId': currentQuotation.id
+                        },
+                        customRender: (data: Quotation) => {
                           return {
                             value: data.id,
-                            label: `${data.name} (${data.vendor?.name})`,
+                            label: `${data.code}`,
                             data: data,
                           };
                         },
                       }}
                       defaultValue={null}
-                      onSelected={(item) => {
-                        // console.log(item);
+                      onSelected={(item: Quotation) => {
+                        console.log(item);
                         // setValue("name", item.data.name);
                         // setValue("percentage", item.data.percentage);
                         // setValue("cost", item.data.cost);
@@ -133,6 +140,7 @@ const BillController = ({ currentQuotation }: BillControllerProps) => {
             </div>
           </PopoverContent>
         </Popover>
+        <Button onClick={handleCreateBillGroup}>Create Bill Group</Button>
       </div>
     </div>
   )

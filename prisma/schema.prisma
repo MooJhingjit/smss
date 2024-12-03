@@ -159,7 +159,7 @@ model Quotation {
   lists                 QuotationList[]
   purchaseOrders        PurchaseOrder[]
   medias                Media[]
-  invoices              Invoice[]
+  invoice             Invoice[]
 
   @@index([contactId])
   @@index([sellerId])
