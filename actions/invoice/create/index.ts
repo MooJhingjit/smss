@@ -5,6 +5,7 @@ import { InputType, ReturnType } from "./types";
 import { schema } from "./schema";
 import { generateCode } from "@/lib/utils";
 import { currentUser } from "@/lib/auth";
+import { revalidatePath } from "next/cache";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
   try {
@@ -13,22 +14,56 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       throw new Error("Unauthorized");
     }
 
-    const billGroup = await db.billGroup.create({
-      data: {
-        // code: generateCode(),
-        date: new Date(),
-      },
-    });
+    const { billGroupId, newQuotationId, currentQuotationId } = data;
 
-    const invoice = await db.invoice.create({
-      data: {
-        // code: generateCode(),
-        // date: new Date(),
-        billGroupId: billGroup.id,
-        quotationId: data.quotationId,
-      },
-    });
+    let billGroupIdToUse = billGroupId;
+    let invoice;
+    if (!billGroupIdToUse) {
+      const billGroup = await db.billGroup.create({
+        data: {
+          code: "", //generateCode(),
+          date: new Date(),
+        },
+      });
+      billGroupIdToUse = billGroup.id;
 
+      // first time create bill group, attach current quotation to it and create invoice
+      await db.quotation.update({
+        where: { id: currentQuotationId },
+        data: { billGroupId: billGroupIdToUse },
+      });
+
+      invoice = await db.invoice.create({
+        data: {
+          code: "", // generateCode(),
+          date: new Date(),
+          billGroupId: billGroupIdToUse,
+          quotationId: currentQuotationId,
+        },
+      });
+    }
+
+    // attach new quotation to the same bill group
+    if (newQuotationId && newQuotationId !== currentQuotationId) {
+      await db.quotation.update({
+        where: { id: newQuotationId },
+        data: { billGroupId: billGroupIdToUse },
+      });
+
+      invoice = await db.invoice.create({
+        data: {
+          code: "", // generateCode(),
+          date: new Date(),
+          billGroupId: billGroupIdToUse,
+          quotationId: newQuotationId,
+        },
+      });
+
+    }
+
+    revalidatePath("/quotations/[id]");
+
+    // return latest invoice
     return { data: invoice };
   } catch (error) {
     console.log("error", error);
@@ -38,4 +73,4 @@ const handler = async (data: InputType): Promise<ReturnType> => {
   }
 };
 
-export const createQuotation = createSafeAction(schema, handler);
+export const attachQuotationToBillGroup = createSafeAction(schema, handler);

@@ -1,4 +1,7 @@
 import { z } from "zod";
 export const schema = z.object({
-  quotationId: z.number(),
+  billGroupId: z.number().nullable(),
+  currentQuotationId: z.number(),
+  newQuotationId: z.number()
+
 });

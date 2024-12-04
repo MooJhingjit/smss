@@ -14,8 +14,8 @@ export async function GET(req: NextRequest) {
         code: {
           contains: search,
         },
-        invoices: {
-          none: {}, // This checks that there are no related invoices
+        billGroupId: {
+          equals: null,
         },
       },
     });

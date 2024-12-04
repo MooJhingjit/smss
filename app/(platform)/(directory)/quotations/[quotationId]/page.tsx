@@ -6,7 +6,7 @@ import DocumentItems from "@/components/document-lists";
 import PurchaseOrders from "./_components/purchase-orders";
 import { db } from "@/lib/db";
 import { QuotationListWithRelations } from "@/types";
-import {  QuotationType } from "@prisma/client";
+import { QuotationType } from "@prisma/client";
 import { InfoIcon } from "lucide-react";
 import { classNames } from "@/lib/utils";
 import { quotationTypeMapping } from "@/app/config";
@@ -54,9 +54,27 @@ const getData = async (
       },
     },
   });
-  return data;
-};
 
+  // get all quotations that are in the same bill group
+  const quotationsGroup = (data?.billGroupId) ? await db.quotation.findMany({
+    select: {
+      id: true,
+      code: true,
+    },
+    where: {
+      billGroupId: data.billGroupId,
+      id: {
+        not: parseInt(quotationId),
+      }
+    },
+  }) : [];
+
+
+  return {
+    data,
+    quotationsGroup
+  }
+}
 interface QuotationIdPageProps {
   params: {
     quotationId: string;
@@ -68,8 +86,16 @@ export default async function QuotationDetails(
 ) {
   const { params } = props;
   const { isAdmin, info } = await useUser();
-  const data = await getData(params.quotationId, isAdmin, info?.id);
+  const res = await getData(params.quotationId, isAdmin, info?.id);
 
+
+  if (!res || !res.data) {
+    return <DataNotfound link="/quotations" />;
+  }
+
+  const { data, quotationsGroup } = res;
+
+  
   const pages = [
     {
       name: "ใบเสนอราคาทั้งหมด (QT)",
@@ -100,10 +126,6 @@ export default async function QuotationDetails(
     },
   ];
 
-  if (!data) {
-    return <DataNotfound link="/quotations" />;
-  }
-
   const { contact, lists, status } = data;
 
   const isQT_Approved = !["open", "pending_approval", "offer"].includes(status);
@@ -117,8 +139,9 @@ export default async function QuotationDetails(
         </div>
         <div className="col-span-5 md:col-span-3">
           <QuotationInfo
+            quotationsGroup={quotationsGroup}
             data={data}
-          /> 
+          />
         </div>
         <div className="col-span-5">
           <QuotationLists

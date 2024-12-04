@@ -4,7 +4,7 @@ import DataInfo from "@/components/data-info";
 import { Badge } from "@/components/ui/badge";
 import { useQuotationInfoModal } from "@/hooks/use-quotation-info-modal";
 import { Quotation } from "@prisma/client";
-import { CircleEllipsisIcon, Minus, MinusCircleIcon, PlusIcon, PrinterIcon } from "lucide-react";
+import { CircleEllipsisIcon, Minus, MinusCircleIcon, PlusIcon, PrinterIcon, ReceiptIcon } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import {
@@ -17,22 +17,31 @@ import { Separator } from "@/components/ui/separator";
 import { FormSearchAsync } from "@/components/form/form-search-async";
 import { ProductWithRelations } from "@/types";
 import { Input } from "@/components/ui/input";
-import { createQuotation } from "@/actions/invoice/create";
+import { attachQuotationToBillGroup } from "@/actions/invoice/create";
+import ConfirmActionButton from "@/components/confirm-action";
+import { useAction } from "@/hooks/use-action";
+import { toast } from "sonner";
+
 type Props = {
   data: Quotation;
+  quotationsGroup: {
+    code: string;
+    id: number;
+  }[]
 };
 
 
 export default function QuotationInfo(props: Readonly<Props>) {
   const modal = useQuotationInfoModal();
-  const { data } = props;
+  const { data, quotationsGroup } = props;
+  console.log("🚀 ~ QuotationInfo ~ data:", data)
 
   const paymentConditionLabel = data.paymentCondition === "cash" ? paymentTypeMapping[data.paymentCondition] : data.paymentCondition;
 
   return (
     <DataInfo
       variant="gray"
-      CustomComponent={<BillController currentQuotation={data} />}
+      CustomComponent={<BillController currentQuotation={data} quotationsGroup={quotationsGroup} />}
       lists={[
         { label: "ประเภท", value: quotationTypeMapping[data.type] },
         { label: "สถานะ", value: quotationStatusMapping[data.status].label },
@@ -52,25 +61,80 @@ export default function QuotationInfo(props: Readonly<Props>) {
 
 type BillControllerProps = {
   currentQuotation: Quotation;
+  quotationsGroup: {
+    code: string;
+    id: number;
+  }[]
 }
 
-const BillController = ({ currentQuotation }: BillControllerProps) => {
-  const handleCreateBillGroup = async () => {
-    await createQuotation({ quotationId: currentQuotation.id });
+const BillController = ({ currentQuotation, quotationsGroup }: BillControllerProps) => {
+
+  const [showFormSearch, setShowFormSearch] = React.useState(false);
+
+  const handleBillGroup = useAction(attachQuotationToBillGroup, {
+    onSuccess: () => {
+      toast.success('สำเร็จ');
+    },
+    onError: (error) => {
+      toast.error(error);
+    },
+  });
+
+  const attachBillGroup = async (quotationId: number) => {
+    // bill group id can be null, then create a new bill group
+    await handleBillGroup.execute({
+      billGroupId: currentQuotation.billGroupId,
+      currentQuotationId: currentQuotation.id,
+      newQuotationId: quotationId
+    });
   };
+
+  if (!currentQuotation.billGroupId) {
+    return (
+      <div className="flex items-center space-x-4">
+        <Badge variant="default">{currentQuotation.code} </Badge>
+
+        <Popover>
+          <PopoverTrigger asChild>
+            <CircleEllipsisIcon size={16} className="cursor-pointer" />
+          </PopoverTrigger>
+          <PopoverContent className="w-52">
+            <ConfirmActionButton
+              onConfirm={() => {
+                attachBillGroup(currentQuotation.id)
+              }}
+            >
+              <div className="flex space-x-1 items-center">
+                <ReceiptIcon size={16} />
+                <div
+                  className="w-full text-sm"
+                >
+                  <p>สร้างกลุ่มบิลใหม่</p>
+                </div>
+              </div>
+            </ConfirmActionButton>
+          </PopoverContent>
+        </Popover>
+
+      </div>
+    )
+  }
+
 
   return (
     <div className="border p-3 relative">
-      <span className="absolute bg-gray-50 px-2 -top-2 text-xs ">กลุ่มใบเสนอราคา</span>
+      <span className="absolute bg-gray-50 px-2 -top-2 text-xs ">กลุ่มใบเสนอราคา ({quotationsGroup.length + 1}) </span>
       <div className="flex items-center space-x-4">
         <Badge variant="default">{currentQuotation.code}</Badge>
 
-        <Link href={"/quotations/" + currentQuotation.id}>
-          <Badge variant="secondary" className="relative pr-6">
-            <span>QT20241100011</span>
-            <span className="absolute top-1 right-0 text-red-600"><MinusCircleIcon size={12} /></span>
-          </Badge>
-        </Link>
+        {quotationsGroup.map((qt) => (
+          <Link key={qt.id} href={"/quotations/" + qt.id}>
+            <Badge variant="secondary" className="relative">
+              <span>{qt.code}</span>
+              {/* <span className="absolute top-1 right-0 text-red-600"><MinusCircleIcon size={12} /></span> */}
+            </Badge>
+          </Link>
+        ))}
 
         <Popover>
           <PopoverTrigger asChild>
@@ -81,46 +145,46 @@ const BillController = ({ currentQuotation }: BillControllerProps) => {
               <div className="">
 
                 <div className="">
-                  <div className="text-sm text-muted-foreground flex items-center">
-                    <PlusIcon size={16} className="mr-2" />
-                    <span>เพิ่มใบ QT</span>
-                  </div>
-                  <div className="mt-2">
-                    <FormSearchAsync
-                      id="quotationId"
-                      required
-                      config={{
-                        endpoint: "quotations/group",
-                        params: {
-                          'currentQuotationId': currentQuotation.id
-                        },
-                        customRender: (data: Quotation) => {
-                          return {
-                            value: data.id,
-                            label: `${data.code}`,
-                            data: data,
-                          };
-                        },
-                      }}
-                      defaultValue={null}
-                      onSelected={(item: Quotation) => {
-                        console.log(item);
-                        // setValue("name", item.data.name);
-                        // setValue("percentage", item.data.percentage);
-                        // setValue("cost", item.data.cost);
-                        // setValue("description", item.data.description);
-                      }}
-                    />
-                  </div>
+                  <Button variant={"outline"}
+                    className="w-full"
+                    onClick={() => setShowFormSearch(!showFormSearch)}
+                  >
+                    <PlusIcon size={12} className="mr-1" />
+                    <span className="text-xs">QT</span>
+                  </Button>
 
-
+                  {showFormSearch && (
+                    <div className="mt-2">
+                      <FormSearchAsync
+                        id="quotationId"
+                        required
+                        config={{
+                          endpoint: "quotations/group",
+                          params: {
+                            'currentQuotationId': currentQuotation.id
+                          },
+                          customRender: (data: Quotation) => {
+                            return {
+                              value: data.id,
+                              label: `${data.code}`,
+                              data: data,
+                            };
+                          },
+                        }}
+                        defaultValue={null}
+                        onSelected={(v) => {
+                          attachBillGroup(v.value);
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
                 <Separator className="my-4" />
 
                 <div className="">
                   <div className="text-sm text-muted-foreground flex items-center">
                     <PrinterIcon size={16} className="mr-2" />
-                    <span>ออกบิล 24 Nov 2024</span>
+                    <span>ออกบิล</span>
                   </div>
                   <div className="flex items-center gap-2 mt-2">
                     <Input
@@ -140,7 +204,7 @@ const BillController = ({ currentQuotation }: BillControllerProps) => {
             </div>
           </PopoverContent>
         </Popover>
-        <Button onClick={handleCreateBillGroup}>Create Bill Group</Button>
+        {/* <Button onClick={handleCreateBillGroup}>Create Bill Group</Button> */}
       </div>
     </div>
   )
