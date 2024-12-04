@@ -295,14 +295,14 @@ const MainForm = ({ data }: {
             />
           </div>
         </ItemList>
-        <ItemList label="ออกบิลสินค้า" info="หลังจากออกใบเสร็จแล้วจะไม่สามารถแก้ไขสินค้าได้">
+        {/* <ItemList label="ออกบิลสินค้า" info="หลังจากออกใบเสร็จแล้วจะไม่สามารถแก้ไขสินค้าได้">
           <div className="flex space-x-3 items-center">
             <ReceiptPrint
               type="product-to-customer"
               orderId={data.id}
             />
           </div>
-        </ItemList>
+        </ItemList> */}
 
       </div>
     </div>

@@ -14,12 +14,12 @@ type QuotationWithRelations = Quotation & {
   contact?: Contact | null;
   seller?: User | null;
 };
-type PurchaseOrderWithRelations = PurchaseOrder & {
-  quotation?: QuotationWithRelations | null;
-};
+// type PurchaseOrderWithRelations = PurchaseOrder & {
+//   quotation?: QuotationWithRelations | null;
+// };
 
 let _BILL_DATE = ""
-let _DATA: PurchaseOrderWithRelations | null = null
+let _DATA: QuotationWithRelations | null = null
 let _FONT: PDFFont | null = null;
 
 // item list config
@@ -47,17 +47,12 @@ const CURRENCY_FORMAT = {
 
 const getData = async (
   id: number
-): Promise<PurchaseOrderWithRelations | null> => {
-  const purchaseOrder = await db.purchaseOrder.findUnique({
+): Promise<QuotationWithRelations | null> => {
+  const purchaseOrder = await db.quotation.findUnique({
     include: {
-      quotation: {
-        include: {
-          lists: true,
-          contact: true,
-          seller: true,
-        }
-
-      }
+      lists: true,
+      contact: true,
+      seller: true,
     },
     where: {
       id: parseInt(id.toString()),
@@ -141,7 +136,7 @@ const drawItemLists = (
   let lineStart = ITEM_Y_Start;
 
   // write item list
-  _DATA.quotation?.lists?.forEach((list, index) => {
+  _DATA?.lists?.forEach((list, index) => {
     if (index > 0) {
       lineStart -= config.lineHeight; // space between main items
     }
@@ -500,10 +495,10 @@ const drawStaticInfo = (
   drawCustomerInfo(page);
 
   drawPriceInfo(page, {
-    discount: _DATA.quotation?.discount?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
-    tax: _DATA.quotation?.tax?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
-    totalPrice: _DATA.quotation?.totalPrice?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
-    grandTotal: _DATA.quotation?.grandTotal?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
+    discount: _DATA?.discount?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
+    tax: _DATA?.tax?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
+    totalPrice: _DATA?.totalPrice?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
+    grandTotal: _DATA?.grandTotal?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
   });
 
 };

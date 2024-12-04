@@ -1,5 +1,8 @@
+import { purchaseOrderStatusMapping } from "@/app/config";
+import StatusBadge from "@/components/badges/status-badge";
 import { getDateFormat } from "@/lib/utils";
 import { PurchaseOrderWithRelations } from "@/types";
+import { PurchaseOrderStatus } from "@prisma/client";
 import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 
@@ -32,6 +35,19 @@ export const purchaseOrderColumns = [
       });
     }
 
+  },
+  {
+    name: "สถานะ",
+    key: "status",
+    render: (item: PurchaseOrderWithRelations) => {
+      return (
+        <StatusBadge status={purchaseOrderStatusMapping[item.status]}
+
+          isWarning={item.status === PurchaseOrderStatus.product_received}
+          isSuccess={item.status === PurchaseOrderStatus.paid} />
+
+      );
+    },
   },
   {
     name: "สร้างเมื่อ",

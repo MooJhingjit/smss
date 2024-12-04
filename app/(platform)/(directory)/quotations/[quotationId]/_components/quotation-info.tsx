@@ -140,7 +140,7 @@ const BillController = ({ currentQuotation, quotationsGroup }: BillControllerPro
           <PopoverTrigger asChild>
             <CircleEllipsisIcon size={16} className="cursor-pointer" />
           </PopoverTrigger>
-          <PopoverContent className="w-60">
+          <PopoverContent className="w-56">
             <div className="grid gap-4">
               <div className="">
 
@@ -187,16 +187,7 @@ const BillController = ({ currentQuotation, quotationsGroup }: BillControllerPro
                     <span>ออกบิล</span>
                   </div>
                   <div className="flex items-center gap-2 mt-2">
-                    <Input
-                      id="date"
-                      name="date"
-                      type="date"
-                      placeholder="วันที่"
-                      defaultValue={new Date().toISOString().split("T")[0]}
-                    />
-                    <Button size={"sm"} variant={"secondary"} type="submit">
-                      <PrinterIcon className="w-4 h-4" />
-                    </Button>
+                    <ReceiptPrint quotationId={currentQuotation.id} />
                   </div>
                 </div>
               </div>
@@ -209,3 +200,59 @@ const BillController = ({ currentQuotation, quotationsGroup }: BillControllerPro
     </div>
   )
 }
+
+const ReceiptPrint = ({ quotationId, }: {
+  quotationId: number
+
+}) => {
+  const onPrintClick = (date: Date) => {
+
+    try {
+      fetch(`/api/quotations/bills/${quotationId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ date: date.toISOString() }),
+      })
+        .then((res) => res.blob())
+        .then((blob) => URL.createObjectURL(blob))
+        .then((url) => {
+          const a = document.createElement("a");
+          a.href = url;
+          a.target = "_blank"; // Ensure it opens in a new tab
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(url);
+        });
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+        const date = formData.get("bill-date") as string;
+        if (date) {
+          onPrintClick(new Date(date));
+        }
+      }}
+      className="flex w-full max-w-sm items-center space-x-2 "
+    >
+      <Input
+        id="bill-date"
+        name="bill-date"
+        type="date"
+        placeholder="วันที่"
+        defaultValue={new Date().toISOString().split("T")[0]}
+      />
+      <Button size={"sm"} variant={"outline"} type="submit">
+        <PrinterIcon className="w-4 h-4" />
+      </Button>
+    </form>
+  );
+};

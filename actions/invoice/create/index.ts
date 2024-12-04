@@ -36,7 +36,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       invoice = await db.invoice.create({
         data: {
           code: "", // generateCode(),
-          date: new Date(),
+          // date: new Date(),
           billGroupId: billGroupIdToUse,
           quotationId: currentQuotationId,
         },
@@ -53,7 +53,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       invoice = await db.invoice.create({
         data: {
           code: "", // generateCode(),
-          date: new Date(),
+          // date: new Date(),
           billGroupId: billGroupIdToUse,
           quotationId: newQuotationId,
         },
