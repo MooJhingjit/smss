@@ -140,7 +140,7 @@ const BillController = ({ currentQuotation, quotationsGroup }: BillControllerPro
           <PopoverTrigger asChild>
             <CircleEllipsisIcon size={16} className="cursor-pointer" />
           </PopoverTrigger>
-          <PopoverContent className="w-56">
+          <PopoverContent className="w-auto">
             <div className="grid gap-4">
               <div className="">
 
