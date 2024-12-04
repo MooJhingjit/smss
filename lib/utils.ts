@@ -19,6 +19,15 @@ export function generateCode(id: number, prefix: "QT" | "PO", date: Date = new D
   return `${prefix}${year}${month}${formattedId}`;
 }
 
+
+export function generateInvoiceCode(id: number, date: Date = new Date()) {
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const formattedId = id.toString().padStart(4, "0");
+
+  return `${year}-${month}${formattedId}`;
+}
+
 export function updateCodeVersion(code: string): string {
   // Split the ID by the dash
   const parts = code.split("-");

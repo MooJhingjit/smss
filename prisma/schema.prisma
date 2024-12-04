@@ -161,8 +161,7 @@ model Quotation {
   lists                 QuotationList[]
   purchaseOrders        PurchaseOrder[]
   medias                Media[]
-  invoice             Invoice[]
-
+  invoice               Invoice?
   @@index([contactId])
   @@index([sellerId])
 }
@@ -312,12 +311,12 @@ model BillGroup {
 model Invoice {
   id          Int       @id @default(autoincrement())
   code        String?
-  date  DateTime?
+  date  DateTime
   billGroupId Int
   billGroup   BillGroup @relation(fields: [billGroupId], references: [id])
-  quotationId Int
+  quotationId Int @unique
   quotation   Quotation @relation(fields: [quotationId], references: [id])
-  grandTotal Float?
+  grandTotal Float
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @default(now())
 

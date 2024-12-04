@@ -17,7 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { FormSearchAsync } from "@/components/form/form-search-async";
 import { ProductWithRelations } from "@/types";
 import { Input } from "@/components/ui/input";
-import { attachQuotationToBillGroup } from "@/actions/invoice/create";
+import { attachQuotationToBillGroup } from "@/actions/bill-group/create";
 import ConfirmActionButton from "@/components/confirm-action";
 import { useAction } from "@/hooks/use-action";
 import { toast } from "sonner";
@@ -187,7 +187,7 @@ const BillController = ({ currentQuotation, quotationsGroup }: BillControllerPro
                     <span>ออกบิล</span>
                   </div>
                   <div className="flex items-center gap-2 mt-2">
-                    <ReceiptPrint quotationId={currentQuotation.id} />
+                    <ReceiptPrint quotationGroupId={currentQuotation.billGroupId} />
                   </div>
                 </div>
               </div>
@@ -201,14 +201,14 @@ const BillController = ({ currentQuotation, quotationsGroup }: BillControllerPro
   )
 }
 
-const ReceiptPrint = ({ quotationId, }: {
-  quotationId: number
+const ReceiptPrint = ({ quotationGroupId, }: {
+  quotationGroupId: number
 
 }) => {
   const onPrintClick = (date: Date) => {
 
     try {
-      fetch(`/api/quotations/bills/${quotationId}`, {
+      fetch(`/api/quotations/bills/${quotationGroupId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

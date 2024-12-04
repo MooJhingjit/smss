@@ -3,7 +3,6 @@ import { db } from "@/lib/db";
 import { createSafeAction } from "@/lib/create-safe-action";
 import { InputType, ReturnType } from "./types";
 import { schema } from "./schema";
-import { generateCode } from "@/lib/utils";
 import { currentUser } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
@@ -33,14 +32,14 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         data: { billGroupId: billGroupIdToUse },
       });
 
-      invoice = await db.invoice.create({
-        data: {
-          code: "", // generateCode(),
-          // date: new Date(),
-          billGroupId: billGroupIdToUse,
-          quotationId: currentQuotationId,
-        },
-      });
+      // invoice = await db.invoice.create({
+      //   data: {
+      //     code: "", // generateCode(),
+      //     // date: new Date(),
+      //     billGroupId: billGroupIdToUse,
+      //     quotationId: currentQuotationId,
+      //   },
+      // });
     }
 
     // attach new quotation to the same bill group
@@ -50,14 +49,14 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         data: { billGroupId: billGroupIdToUse },
       });
 
-      invoice = await db.invoice.create({
-        data: {
-          code: "", // generateCode(),
-          // date: new Date(),
-          billGroupId: billGroupIdToUse,
-          quotationId: newQuotationId,
-        },
-      });
+      // invoice = await db.invoice.create({
+      //   data: {
+      //     code: "", // generateCode(),
+      //     // date: new Date(),
+      //     billGroupId: billGroupIdToUse,
+      //     quotationId: newQuotationId,
+      //   },
+      // });
 
     }
 

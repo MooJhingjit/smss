@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import {
   Contact,
+  Invoice,
   PurchaseOrder,
   Quotation,
   QuotationList,
@@ -13,6 +14,7 @@ type QuotationWithRelations = Quotation & {
   lists?: QuotationList[];
   contact?: Contact | null;
   seller?: User | null;
+  invoice ?: Invoice | null;
 };
 // type PurchaseOrderWithRelations = PurchaseOrder & {
 //   quotation?: QuotationWithRelations | null;
@@ -48,36 +50,38 @@ const CURRENCY_FORMAT = {
 const getData = async (
   id: number
 ): Promise<QuotationWithRelations | null> => {
-  const purchaseOrder = await db.quotation.findUnique({
+  const quotation = await db.quotation.findUnique({
     include: {
       lists: true,
       contact: true,
       seller: true,
+      invoice: true,
     },
     where: {
       id: parseInt(id.toString()),
     },
   });
 
-  return purchaseOrder;
+  return quotation;
 };
 
-export const generateInvoice = async (id: number, date: string) => {
+export const generateInvoice = async (id: number, defaultDate: string) => {
   try {
     if (!id) {
       throw new Error("Invalid quotation ID");
     }
 
-    _BILL_DATE = PDFDateFormat(new Date(date))
 
-    const purchaseOrder = await getData(id);
-    console.log(purchaseOrder)
+    const quotation = await getData(id);
 
-    if (!purchaseOrder) {
+    const invoiceDate = quotation?.invoice?.date ?? defaultDate
+    _BILL_DATE = PDFDateFormat(new Date(invoiceDate))
+
+    if (!quotation) {
       throw new Error("PurchaseOrder not found");
     }
 
-    _DATA = purchaseOrder
+    _DATA = quotation
     return main();
   } catch (error) {
     console.log(error);
@@ -282,14 +286,6 @@ const writeMainDescription = (
 
 const drawHeaderInfo = (
   page: PDFPage,
-  currentPageNumber: number,
-  {
-    code,
-    date,
-  }: {
-    code: string;
-    date: string;
-  }
 ) => {
   if (!_FONT) return;
   const X_Start = 480;
@@ -299,18 +295,8 @@ const drawHeaderInfo = (
     size: PAGE_FONT_SIZE,
     lineHeight: 16,
   };
-  // page.drawText(date, {
-  //   x: X_Start,
-  //   y: Y_Start,
-  //   maxWidth: 100,
-  //   ...config,
-  // });
-  // page.drawText(code, {
-  //   x: X_Start,
-  //   y: Y_Start - config.lineHeight,
-  //   maxWidth: 100,
-  //   ...config,
-  // });
+
+
   page.drawText("1", {
     x: 530,
     y: 790,
@@ -327,7 +313,7 @@ const drawCustomerInfo = (page: PDFPage) => {
     lineHeight: 14,
   };
 
-  const customer = _DATA?.quotation?.contact;
+  const customer = _DATA?.contact;
   if (!customer) {
     return
   }
@@ -390,7 +376,17 @@ const drawCustomerInfo = (page: PDFPage) => {
 
 
   // right side
+  const quotation = _DATA
+
   const rightXStart = 500;
+  // code
+  page.drawText(quotation?.invoice?.code ?? "", {
+    x: rightXStart,
+    y: Y_Start,
+    maxWidth: 100,
+    ...config,
+  });
+
   // date
   page.drawText(_BILL_DATE, {
     x: rightXStart,
@@ -398,8 +394,7 @@ const drawCustomerInfo = (page: PDFPage) => {
     maxWidth: 100,
     ...config,
   });
-
-  const quotation = _DATA.quotation
+  
 
   const seller = quotation?.seller;
   page.drawText(seller?.name ?? "", {
@@ -487,10 +482,7 @@ const drawStaticInfo = (
 ) => {
   if (!_DATA) return;
 
-  drawHeaderInfo(page, currentPageNumber, {
-    code: "test",
-    date: _BILL_DATE,
-  });
+  drawHeaderInfo(page);
 
   drawCustomerInfo(page);
 
