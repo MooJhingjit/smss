@@ -55,6 +55,7 @@ export const FormSearchAsync = forwardRef<any, FormInputProps>(
             disabled={disabled}
             id={id}
             ref={ref}
+            placeholder={placeholder ?? ""}
             config={config}
             defaultValue={defaultValue}
             onSelected={onSelected}

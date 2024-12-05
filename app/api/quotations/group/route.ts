@@ -5,6 +5,8 @@ export async function GET(req: NextRequest) {
   try {
     const currentQuotationId = req.nextUrl.searchParams.get("currentQuotationId") as string;
     const search = req.nextUrl.searchParams.get("search") as string;
+    const currentContactId = req.nextUrl.searchParams.get("currentContactId") as string;
+    console.log("🚀 ~ GET ~ contactId:", req.nextUrl.searchParams)
 
     const quotations = await db.quotation.findMany({
       where: {
@@ -13,6 +15,9 @@ export async function GET(req: NextRequest) {
         },
         code: {
           contains: search,
+        },
+        contactId: {
+          equals: parseInt(currentContactId),
         },
         billGroupId: {
           equals: null,

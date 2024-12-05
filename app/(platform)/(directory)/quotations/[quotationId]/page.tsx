@@ -5,7 +5,7 @@ import QuotationLists from "./_components/quotation-lists";
 import DocumentItems from "@/components/document-lists";
 import PurchaseOrders from "./_components/purchase-orders";
 import { db } from "@/lib/db";
-import { QuotationListWithRelations } from "@/types";
+import { QuotationListWithRelations, QuotationWithRelations } from "@/types";
 import { QuotationType } from "@prisma/client";
 import { InfoIcon } from "lucide-react";
 import { classNames } from "@/lib/utils";
@@ -38,6 +38,7 @@ const getData = async (
     include: {
       contact: true,
       seller: true,
+      invoice: true,
       purchaseOrders: {
         include: {
           vendor: true,
@@ -53,13 +54,14 @@ const getData = async (
         },
       },
     },
-  });
+  }) as QuotationWithRelations
 
   // get all quotations that are in the same bill group
   const quotationsGroup = (data?.billGroupId) ? await db.quotation.findMany({
     select: {
       id: true,
       code: true,
+      grandTotal: true,
     },
     where: {
       billGroupId: data.billGroupId,
@@ -160,7 +162,7 @@ export default async function QuotationDetails(
             {isQT_Approved ? (
               <PurchaseOrders
                 quotationLists={lists as QuotationListWithRelations[]}
-                hasQuotationItems={lists.length > 0}
+                hasQuotationItems={!!(lists && lists.length > 0)}
                 quotationId={data.id}
               />
             ) : (

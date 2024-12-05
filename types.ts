@@ -8,6 +8,7 @@ import {
   PurchaseOrderItemStatus,
   PurchaseOrderItem,
   Contact,
+  Invoice,
 } from "@prisma/client";
 import { JWT } from "next-auth/jwt";
 
@@ -29,6 +30,7 @@ export type QuotationWithRelations = Quotation & {
   seller?: User;
   purchaseOrders?: PurchaseOrder[];
   lists?: QuotationList[];
+  invoice?: Invoice;
 };
 
 

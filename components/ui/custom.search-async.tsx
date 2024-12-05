@@ -49,11 +49,12 @@ type Props = {
   onSelected: (selected: any) => void;
   config: AsyncSelectConfigType;
   disabled: boolean;
+  placeholder?: string;
 };
 
 const SearchAsync = React.forwardRef<any, Props>(
   (
-    { className, id, defaultValue, onSelected, config, disabled, ...props },
+    { className, id, defaultValue, onSelected, config, disabled, placeholder, ...props },
     ref,
   ) => {
     const { search } = useSearchAsync(config);
@@ -67,6 +68,7 @@ const SearchAsync = React.forwardRef<any, Props>(
         styles={customStyles}
         defaultValue={defaultValue}
         isDisabled={disabled}
+        placeholder={placeholder ?? "ค้นหา"}
         className="text-xs w-full h-[36px]"
         {...props}
       />

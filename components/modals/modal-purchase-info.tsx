@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import React from "react";
-import { ExternalLinkIcon, InfoIcon } from "lucide-react"
+import { ExternalLinkIcon, InfoIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PurchaseOrderWithRelations } from "@/types";
 import { usePurchaseOrderInfoModal } from "@/hooks/use-po-info-modal";
@@ -40,11 +40,12 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
+} from "@/components/ui/tooltip";
 import { FormInput } from "../form/form-input";
 import { Input } from "../ui/input";
 import { usePurchaseOrderReceiptModal } from "@/hooks/use-po-receipt-modal";
 import Link from "next/link";
+import { ReceiptPrint } from "@/components/print-receipt";
 
 export const PurchaseInfoModal = () => {
   const modal = usePurchaseOrderInfoModal();
@@ -60,7 +61,6 @@ export const PurchaseInfoModal = () => {
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>
-
             <div className="flex space-x-1 items-center">
               {/* <PenBoxIcon className="w-5 h-5 " /> */}
               <span> {data?.code}</span>
@@ -116,11 +116,7 @@ export const PurchaseInfoModal = () => {
   );
 };
 
-
-const MainForm = ({ data }: {
-  data: PurchaseOrderWithRelations;
-}) => {
-
+const MainForm = ({ data }: { data: PurchaseOrderWithRelations }) => {
   const { mutate } = useMutation<
     MutationResponseType,
     Error,
@@ -181,7 +177,7 @@ const MainForm = ({ data }: {
         : null;
     }
 
-    payloadBody["vendorQtCode"] = payload.vendorQtCode
+    payloadBody["vendorQtCode"] = payload.vendorQtCode;
 
     if (payload.paymentType) {
       payloadBody["paymentType"] = payload.paymentType;
@@ -190,7 +186,6 @@ const MainForm = ({ data }: {
     // call mutation
     mutate(payloadBody);
   };
-
 
   // quotation mutation
   const { mutate: qtMutate } = useMutation<
@@ -220,7 +215,6 @@ const MainForm = ({ data }: {
   return (
     <div className="space-y-2">
       <div className="grid grid-cols-12   gap-6 ">
-
         <ItemList label="สถานะ PO">
           <div className=" text-sm leading-6 text-gray-700 flex space-x-2">
             {/* {isLocked && (
@@ -254,17 +248,18 @@ const MainForm = ({ data }: {
           </div>
         </ItemList>
 
-        {
-          data.quotation?.code && (
-            <ItemList label="QT Code">
-              <Link target="_blank" href={`/quotations/${data.quotationId}`} className="flex items-center space-x-2">
-                <span>{data.quotation?.code}</span>
-                <ExternalLinkIcon className="w-4 h-4 text-blue-500" />
-              </Link>
-            </ItemList>
-          )
-        }
-
+        {data.quotation?.code && (
+          <ItemList label="QT Code">
+            <Link
+              target="_blank"
+              href={`/quotations/${data.quotationId}`}
+              className="flex items-center space-x-2"
+            >
+              <span>{data.quotation?.code}</span>
+              <ExternalLinkIcon className="w-4 h-4 text-blue-500" />
+            </Link>
+          </ItemList>
+        )}
 
         <ItemList label="การชำระเงิน">
           <PaymentOptionControl
@@ -287,27 +282,15 @@ const MainForm = ({ data }: {
             />
           </div>
         </ItemList>
-        <ItemList label="พิมพ์ใบสั่งซื้อ" >
+        <ItemList label="พิมพ์ใบสั่งซื้อ">
           <div className="flex space-x-3 items-center">
-            <ReceiptPrint
-              type="po-to-vendor"
-              orderId={data.id}
-            />
+            <ReceiptPrint endpoint={`/api/purchase-orders/bills/${data.id}`} />
           </div>
         </ItemList>
-        {/* <ItemList label="ออกบิลสินค้า" info="หลังจากออกใบเสร็จแล้วจะไม่สามารถแก้ไขสินค้าได้">
-          <div className="flex space-x-3 items-center">
-            <ReceiptPrint
-              type="product-to-customer"
-              orderId={data.id}
-            />
-          </div>
-        </ItemList> */}
-
       </div>
     </div>
-  )
-}
+  );
+};
 
 const ItemList = ({
   label,
@@ -315,14 +298,18 @@ const ItemList = ({
   children,
 }: {
   label?: string;
-  info?: string
+  info?: string;
   children: React.ReactNode;
 }) => {
   return (
     <div className="col-span-12 pt-2">
       <div className=" flex justify-between items-center px-6 h-full">
         <div className="flex space-x-2 items-center">
-          {label && <p className="text-sm leading-6 text-gray-600 max-w-[150px] whitespace-pre-wrap">{label}</p>}
+          {label && (
+            <p className="text-sm leading-6 text-gray-600 max-w-[150px] whitespace-pre-wrap">
+              {label}
+            </p>
+          )}
           {info && <HoverInfo message={info} />}
         </div>
         <div className="w-[200px]">{children}</div>
@@ -383,62 +370,6 @@ const StatusDropdown = ({
   );
 };
 
-const ReceiptPrint = ({ orderId, type }: {
-  orderId: number, type: "po-to-vendor" | "product-to-customer"
-
-}) => {
-  const onPrintClick = (date: Date) => {
-
-    try {
-      fetch(`/api/purchase-orders/bills/${orderId}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ date: date.toISOString(), type }),
-      })
-        .then((res) => res.blob())
-        .then((blob) => URL.createObjectURL(blob))
-        .then((url) => {
-          const a = document.createElement("a");
-          a.href = url;
-          a.target = "_blank"; // Ensure it opens in a new tab
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          window.URL.revokeObjectURL(url);
-        });
-    } catch (error) {
-      console.log("error", error);
-    }
-  };
-
-  return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        const formData = new FormData(e.currentTarget);
-        const date = formData.get("po-bill") as string;
-        if (date) {
-          onPrintClick(new Date(date));
-        }
-      }}
-      className="flex w-full max-w-sm items-center space-x-2"
-    >
-      <Input
-        id="po-bill"
-        name="po-bill"
-        type="date"
-        placeholder="วันที่"
-        defaultValue={new Date().toISOString().split("T")[0]}
-      />
-      <Button size={"sm"} variant={"secondary"} type="submit">
-        <PrinterIcon className="w-4 h-4" />
-      </Button>
-    </form>
-  );
-};
-
 const HoverInfo = ({ message }: { message: string }) => {
   return (
     <TooltipProvider>
@@ -451,5 +382,5 @@ const HoverInfo = ({ message }: { message: string }) => {
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
-  )
-}
+  );
+};
