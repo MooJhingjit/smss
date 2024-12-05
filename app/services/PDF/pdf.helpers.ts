@@ -179,3 +179,71 @@ export const getBillDueDate = (date: Date, condition: string | undefined): Date 
   }
   return date;
 }
+
+// numeric prices into Thai characters 
+const thaiNumberWords = {
+  0: "ศูนย์",
+  1: "หนึ่ง",
+  2: "สอง",
+  3: "สาม",
+  4: "สี่",
+  5: "ห้า",
+  6: "หก",
+  7: "เจ็ด",
+  8: "แปด",
+  9: "เก้า",
+};
+
+const thaiPlaceValues = ["", "สิบ", "ร้อย", "พัน", "หมื่น", "แสน", "ล้าน"];
+
+export const convertToThaiBahtText = (price: number): string => {
+  const [baht, satang] = price.toFixed(2).split(".");
+
+  const convertIntegerToThai = (num: string): string => {
+    let result = "";
+    const length = num.length;
+
+    const processSegment = (segment: string): string => {
+      let segmentResult = "";
+      const segmentLength = segment.length;
+      for (let i = 0; i < segmentLength; i++) {
+        const digit = parseInt(segment[i]);
+        const placeValueIndex = segmentLength - i - 1;
+
+        if (digit === 0) continue;
+
+        if (digit === 1 && placeValueIndex === 1) {
+          segmentResult += "สิบ";
+        } else if (digit === 2 && placeValueIndex === 1) {
+          segmentResult += "ยี่สิบ";
+        } else if (digit === 1 && placeValueIndex === 0 && segmentLength > 1) {
+          segmentResult += "เอ็ด";
+        } else {
+          segmentResult += thaiNumberWords[digit as keyof typeof thaiNumberWords] + thaiPlaceValues[placeValueIndex];
+        }
+      }
+      return segmentResult;
+    };
+
+    const groups = Math.ceil(length / 6); // Each group is at most 6 digits long (e.g., "ล้าน")
+    for (let groupIndex = 0; groupIndex < groups; groupIndex++) {
+      const start = length - (groupIndex + 1) * 6;
+      const end = length - groupIndex * 6;
+      const segment = num.slice(Math.max(0, start), end);
+
+      if (parseInt(segment) > 0) {
+        const groupText = processSegment(segment);
+        if (groupIndex > 0) result = groupText + thaiPlaceValues[6] + result;
+        else result = groupText + result;
+      }
+    }
+
+    return result;
+  };
+
+  const bahtText = convertIntegerToThai(baht) + "บาท";
+  const satangText =
+    parseInt(satang) > 0 ? convertIntegerToThai(satang) + "สตางค์" : "ถ้วน";
+
+  return bahtText + satangText;
+};

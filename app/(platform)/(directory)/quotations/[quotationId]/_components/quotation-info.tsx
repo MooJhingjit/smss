@@ -123,7 +123,7 @@ const BillController = ({ currentQuotation, quotationsGroup }: BillControllerPro
 
   return (
     <div className="border p-3 relative">
-      <span className="absolute bg-gray-50 px-2 -top-2 text-xs ">กลุ่มใบเสนอราคา ({quotationsGroup.length + 1}) </span>
+      <span className="absolute bg-gray-50 px-2 -top-2 text-xs ">กลุ่มบิล ({quotationsGroup.length + 1}) </span>
       <div className="flex items-center space-x-4">
         <Badge variant="default">{currentQuotation.code}</Badge>
 

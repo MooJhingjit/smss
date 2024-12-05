@@ -1,491 +1,244 @@
 import { db } from "@/lib/db";
 import {
-    Contact,
-    Invoice,
-    PurchaseOrder,
-    Quotation,
-    QuotationList,
-    User,
+  Contact,
+  Invoice,
+  Quotation,
+  QuotationList,
+  User,
 } from "@prisma/client";
-import { PDFDocument, PDFEmbeddedPage, PDFFont, PDFPage } from "pdf-lib";
-import { getBoundingBox, PDFDateFormat, loadPdfAssets, validatePageArea, getTextWidth, getPaymentCondition, getBillDueDate } from "./pdf.helpers";
+import { PDFFont, PDFPage } from "pdf-lib";
+import {
+  PDFDateFormat,
+  loadPdfAssets,
+  getTextWidth,
+  loadSignatureImage,
+  convertToThaiBahtText,
+} from "./pdf.helpers";
 
 type QuotationWithRelations = Quotation & {
-    lists?: QuotationList[];
-    contact?: Contact | null;
-    seller?: User | null;
-    invoice?: Invoice | null;
+  lists?: QuotationList[];
+  contact?: Contact | null;
+  seller?: User | null;
+  invoice?: Invoice | null;
 };
-// type PurchaseOrderWithRelations = PurchaseOrder & {
-//   quotation?: QuotationWithRelations | null;
-// };
 
-let _BILL_DATE = ""
-let _DATA: QuotationWithRelations | null = null
+let _BILL_DATE = "";
+let _DATA: QuotationWithRelations[];
 let _FONT: PDFFont | null = null;
 
-// item list config
-const PAGE_FONT_SIZE = 8;
-const LIST_END_AT = 210;
-const ITEM_Y_Start = 595;
-const ITEM_X_Start = 65;
-
-// horizontal position
-const columnPosition = {
-    index: ITEM_X_Start - 10,
-    description: ITEM_X_Start + 30,
-    quantity: ITEM_X_Start + 349,
-    unit: ITEM_X_Start + 390,
-    unitPrice: ITEM_X_Start + 385,
-    amount: ITEM_X_Start + 465,
-};
-
-
 const CURRENCY_FORMAT = {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
 };
 
+const getData = async (id: number): Promise<QuotationWithRelations[]> => {
+  const quotations = await db.quotation.findMany({
+    include: {
+      contact: true,
+      invoice: true,
+    },
+    where: {
+      billGroupId: id,
+    },
+  });
 
-const getData = async (
-    id: number
-): Promise<QuotationWithRelations | null> => {
-    const quotation = await db.quotation.findUnique({
-        include: {
-            lists: true,
-            contact: true,
-            seller: true,
-            invoice: true,
-        },
-        where: {
-            id: parseInt(id.toString()),
-        },
-    });
-
-    return quotation;
+  return quotations;
 };
 
-export const generateBillCover = async (id: number, defaultDate: string) => {
-    try {
-        if (!id) {
-            throw new Error("Invalid quotation ID");
-        }
+export const generateBillCover = async (billGroupId: number) => {
+  try {
+    const quotationWithInvoices = await getData(billGroupId);
 
+    const billDate = quotationWithInvoices?.[0]?.invoice?.date ?? Date.now();
+    _BILL_DATE = PDFDateFormat(new Date(billDate));
 
-        const quotation = await getData(id);
-
-        const invoiceDate = quotation?.invoice?.date ?? defaultDate
-        _BILL_DATE = PDFDateFormat(new Date(invoiceDate))
-
-        if (!quotation) {
-            throw new Error("PurchaseOrder not found");
-        }
-
-        _DATA = quotation
-        return main();
-    } catch (error) {
-        console.log(error);
-        throw new Error("Error writing PDF file");
+    if (!quotationWithInvoices.length) {
+      return null;
     }
+
+    _DATA = quotationWithInvoices;
+    return main();
+  } catch (error) {
+    console.log(error);
+    throw new Error("Error writing PDF file");
+  }
 };
 
 const main = async () => {
-    if (!_DATA) return;
-    // list start position
+  const { pdfDoc, font, template } = await loadPdfAssets(
+    "public/pdf/product-bill-cover.pdf"
+  );
+  _FONT = font;
 
-    const { pdfDoc, font, template } = await loadPdfAssets("public/pdf/product-bill-cover.pdf");
-    _FONT = font;
-
-    const config = {
-        size: PAGE_FONT_SIZE,
-        lineHeight: 11,
-        font: _FONT,
-    };
-
-    // loop through all pages
-    const templatePage = await pdfDoc.embedPage(template.getPages()[0]); let page = pdfDoc.addPage();
+  const totalPages = 2;
+  // loop through all pages
+  for (let i = 0; i < totalPages; i++) {
+    const templatePage = await pdfDoc.embedPage(template.getPages()[i]);
+    let page = pdfDoc.addPage();
     page.drawPage(templatePage);
 
-    // drawStaticInfo(page);
-
-    // drawItemLists(
-    //     page,
-    //     pdfDoc,
-    //     templatePage,
-    //     config
-    // )
-
-    const modifiedPdfBytes = await pdfDoc.save();
-    return {
-        pdfBytes: modifiedPdfBytes,
-    };
-};
-
-const drawItemLists = (
-    page: PDFPage,
-    pdfDoc: PDFDocument,
-    templatePage: PDFEmbeddedPage,
-    config: {
-        font: PDFFont;
-        size: number;
-        lineHeight: number;
-    }
-) => {
-    if (!_DATA || !_FONT) return;
-
-    let lineStart = ITEM_Y_Start;
-
-    // write item list
-    _DATA?.lists?.forEach((list, index) => {
-        if (index > 0) {
-            lineStart -= config.lineHeight; // space between main items
-        }
-
-        const mainItemRes = validatePageArea(
-            page,
-            pdfDoc,
-            templatePage,
-            lineStart,
-            LIST_END_AT,
-            ITEM_Y_Start,
-            (currentPage: PDFPage, currentLineStart: number) =>
-                writeMainItem(currentPage, index, list, currentLineStart, config, pdfDoc)
-        );
-        lineStart = mainItemRes.lineStart;
-        page = mainItemRes.page;
-
-        if (list.description) {
-            const mainDescriptionRes = validatePageArea(
-                page,
-                pdfDoc,
-                templatePage,
-                lineStart,
-                LIST_END_AT,
-                ITEM_Y_Start,
-                (currentPage: PDFPage, currentLineStart: number) =>
-                    writeMainDescription(
-                        currentPage,
-                        list.description ?? "",
-                        currentLineStart,
-                        config,
-                        pdfDoc
-                    )
-            );
-
-            lineStart = mainDescriptionRes.lineStart;
-            page = mainDescriptionRes.page;
-        }
+    // draw biller signature
+    const signature = await loadSignatureImage("1");
+    const signatureImage = await page.doc.embedPng(signature.imageBytes as any);
+    page.drawImage(signatureImage, {
+      x: 100,
+      y: 500,
+      ...signatureImage.scale(signature.scale),
     });
-
-}
-
-const writeMainItem = (
-    currentPage: PDFPage,
-    index: number,
-    data: QuotationList,
-    lineStart: number,
-    config: {
-        font: PDFFont;
-        size: number;
-        lineHeight: number;
-    },
-    pdfDoc: PDFDocument
-) => {
-    currentPage.drawText((index + 1).toString(), {
-        x: columnPosition.index,
-        y: lineStart,
-        maxWidth: 20,
-        ...config,
-    });
-
-
-    currentPage.drawText(data.name, {
-        x: columnPosition.description,
-        y: lineStart,
-        maxWidth: 600,
-        ...config,
-        // lineHeight: breakLineHeight,
-    });
-
-    // Quantity
-    currentPage.drawText(data.quantity ? data.quantity.toString() : "", {
-        x: columnPosition.quantity,
-        y: lineStart,
-        maxWidth: 20,
-        ...config,
-    });
-
-
-    const unitPrice = data.unitPrice
-        ? data.unitPrice.toLocaleString("th-TH", CURRENCY_FORMAT)
-        : "";
-
-    currentPage.drawText(data.unitPrice?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "", {
-        x: columnPosition.unitPrice + 44 - getTextWidth(unitPrice, config),
-        y: lineStart,
-        maxWidth: 20,
-        ...config,
-    });
-
-    const amountText = data.price
-        ? data.price.toLocaleString("th-TH", CURRENCY_FORMAT)
-        : "";
-    currentPage.drawText(amountText, {
-        x: columnPosition.amount + 44 - getTextWidth(amountText, config),
-        y: lineStart,
-        maxWidth: 50,
-        ...config,
-    });
-
-    const bounding = getBoundingBox(
-        data.name,
-        pdfDoc,
-        _FONT,
-        PAGE_FONT_SIZE,
-        config.lineHeight + 4,
-        600
-    );
-
-    return bounding.height / 10;
-};
-
-const writeMainDescription = (
-    currentPage: PDFPage,
-    description: string,
-    lineStart: number,
-    config: {
-        font: PDFFont;
-        size: number;
-        lineHeight: number;
-    },
-    pdfDoc: PDFDocument
-) => {
-    currentPage.drawText(description, {
-        x: columnPosition.description + 12, // indent
-        y: lineStart,
-        maxWidth: 300,
-        ...config,
-        opacity: 0.5,
-    });
-
-    const bounding = getBoundingBox(
-        description,
-        pdfDoc,
-        _FONT,
-        PAGE_FONT_SIZE,
-        config.lineHeight + 4,
-        300
-    );
-
-    return bounding.height / 10;
-};
-
-const drawHeaderInfo = (
-    page: PDFPage,
-) => {
-    if (!_FONT) return;
-    const X_Start = 480;
-    const Y_Start = 790;
-    const config = {
-        font: _FONT,
-        size: PAGE_FONT_SIZE,
-        lineHeight: 16,
-    };
-
-
-    page.drawText("1", {
-        x: 530,
-        y: 790,
-        maxWidth: 100,
-        ...config,
-    });
-};
-
-const drawCustomerInfo = (page: PDFPage) => {
-    if (!_DATA || !_FONT) return;
-    const config = {
-        font: _FONT,
-        size: PAGE_FONT_SIZE,
-        lineHeight: 14,
-    };
-
-    const customer = _DATA?.contact;
-    if (!customer) {
-        return
-    }
-
-    const Y_Start = 702;
-    const X_Start = 85;
-    page.drawText("", {
-        x: X_Start,
-        y: Y_Start,
-        maxWidth: 600,
-        ...config,
-    });
-
-    page.drawText(customer.name ?? "", {
-        x: X_Start,
-        y: Y_Start - config.lineHeight,
-        maxWidth: 500,
-        ...config,
-    });
-
-    page.drawText(customer.address ?? "", {
-        x: X_Start,
-        y: Y_Start - config.lineHeight * 2,
-        maxWidth: 500,
-        ...config,
-    });
-
-    // combine taxId, branchId
-    const taxInfo = [
-        customer.taxId,
-        customer.branchId ? `สาขาที่ ${customer.branchId}` : "",
-    ]
-        .filter((item) => item)
-        .join(", ");
-
-
-    page.drawText(taxInfo ?? "", {
-        x: X_Start,
-        y: Y_Start - config.lineHeight * 4,
-        maxWidth: 500,
-        ...config,
-    });
-
-    // combine contact, phone, fax, email
-    const contactInfo = [
-        customer.contact,
-        customer.phone,
-        customer.fax,
-        customer.email,
-    ]
-        .filter((item) => item)
-        .join(", ");
-
-    page.drawText(contactInfo, {
-        x: X_Start,
-        y: Y_Start - config.lineHeight * 5,
-        maxWidth: 500,
-        ...config,
-    });
-
-
-    // right side
-    const quotation = _DATA
-
-    const rightXStart = 500;
-    // code
-    page.drawText(quotation?.invoice?.code ?? "", {
-        x: rightXStart,
-        y: Y_Start,
-        maxWidth: 100,
-        ...config,
-    });
-
-    // date
     page.drawText(_BILL_DATE, {
-        x: rightXStart,
-        y: Y_Start - config.lineHeight,
-        maxWidth: 100,
-        ...config,
+      x: 70,
+      y: 488,
+      maxWidth: 50,
+      size: 8,
+      font: _FONT as PDFFont,
     });
-
-
-    const seller = quotation?.seller;
-    page.drawText(seller?.name ?? "", {
-        x: rightXStart,
-        y: Y_Start - config.lineHeight * 2,
-        maxWidth: 100,
-        ...config,
-    });
-
-    page.drawText(quotation?.purchaseOrderRef ?? "", {
-        x: rightXStart,
-        y: Y_Start - config.lineHeight * 5,
-        maxWidth: 100,
-        ...config,
-    });
-
-    const paymentCondition = getPaymentCondition(quotation?.paymentCondition ?? "");
-    page.drawText(paymentCondition, {
-        x: rightXStart,
-        y: Y_Start - config.lineHeight * 3,
-        maxWidth: 100,
-        ...config,
-    });
-
-    const dueDate = getBillDueDate(new Date(_BILL_DATE), quotation?.paymentCondition ?? "");
-    page.drawText(PDFDateFormat(dueDate), {
-        x: rightXStart,
-        y: Y_Start - config.lineHeight * 4,
-        maxWidth: 100,
-        ...config,
-    });
-
-
-};
-
-const drawPriceInfo = (
-    page: PDFPage,
-    {
-        totalPrice,
-        discount,
-        tax,
-        grandTotal,
-    }: {
-        totalPrice: string;
-        discount: string;
-        tax: string;
-        grandTotal: string;
-    }
-) => {
-    if (!_FONT) return;
-    const config = {
-        font: _FONT,
-        size: PAGE_FONT_SIZE,
-        lineHeight: 15,
-    };
-
-    const columnPosition = 574;
-    const Start_Y = 182;
-
-    page.drawText(totalPrice, {
-        x: columnPosition - getTextWidth(totalPrice, config),
-        y: Start_Y,
-        maxWidth: 100,
-        ...config,
-    });
-
-    page.drawText(tax, {
-        x: columnPosition - getTextWidth(tax, config),
-        y: Start_Y - config.lineHeight,
-        maxWidth: 100,
-        ...config,
-    });
-
-    page.drawText(grandTotal, {
-        x: columnPosition - getTextWidth(grandTotal, config),
-        y: Start_Y - config.lineHeight * 2,
-        maxWidth: 100,
-        ...config,
-    });
-};
-
-const drawStaticInfo = (
-    page: PDFPage,
-) => {
-    if (!_DATA) return;
+    // end draw biller signature
 
     drawHeaderInfo(page);
 
-    drawCustomerInfo(page);
+    drawItemLists(page);
+  }
 
-    drawPriceInfo(page, {
-        discount: _DATA?.discount?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
-        tax: _DATA?.tax?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
-        totalPrice: _DATA?.totalPrice?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
-        grandTotal: _DATA?.grandTotal?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
+  const modifiedPdfBytes = await pdfDoc.save();
+  return {
+    pdfBytes: modifiedPdfBytes,
+  };
+};
+
+const drawItemLists = (page: PDFPage) => {
+  const FONT_SIZE = 8;
+  const ITEM_Y_Start = 660;
+  const ITEM_X_Start = 65;
+
+  const columnPosition = {
+    index: ITEM_X_Start - 10,
+    invoiceCode: ITEM_X_Start + 60,
+    invoiceDate: ITEM_X_Start + 180,
+    poRef: ITEM_X_Start + 290,
+    total: ITEM_X_Start + 500,
+  };
+
+  const config = {
+    size: FONT_SIZE,
+    font: _FONT as PDFFont,
+    lineHeight: 17,
+  };
+
+  //   draw invoice items
+  let currentY = ITEM_Y_Start;
+
+  let grandTotal = 0;
+  _DATA.forEach((quotation, index) => {
+    const invoice = quotation.invoice;
+    grandTotal += invoice?.grandTotal ?? 0;
+
+    if (!invoice) return;
+
+    page.drawText((index + 1).toString(), {
+      x: columnPosition.index,
+      y: currentY,
+      ...config,
     });
 
+    page.drawText(invoice.code ?? "", {
+      x: columnPosition.invoiceCode,
+      y: currentY,
+      maxWidth: 250,
+      ...config,
+    });
+
+    const invoiceDate = invoice.date
+      ? PDFDateFormat(new Date(invoice.date))
+      : "";
+    page.drawText(invoiceDate, {
+      x: columnPosition.invoiceDate,
+      y: currentY,
+      ...config,
+    });
+
+    const poRef = quotation.purchaseOrderRef ?? "";
+    page.drawText(poRef, {
+      x: columnPosition.poRef,
+      y: currentY,
+      ...config,
+    });
+
+    const total = invoice.grandTotal?.toLocaleString("en-US", CURRENCY_FORMAT);
+    page.drawText(total, {
+      x: columnPosition.total - getTextWidth(total, config),
+      y: currentY,
+      maxWidth: 100,
+      ...config,
+    });
+
+    currentY -= config.lineHeight;
+  });
+
+  // draw grandTotal
+  const grandTotalText = grandTotal.toLocaleString("en-US", CURRENCY_FORMAT);
+  page.drawText(grandTotalText, {
+    x: columnPosition.total - getTextWidth(grandTotalText, config),
+    y: 551,
+    maxWidth: 100,
+    ...config,
+  });
+
+  const thaiBahtText = convertToThaiBahtText(grandTotal);
+  page.drawText(thaiBahtText, {
+    x: ITEM_X_Start,
+    y: 551,
+    maxWidth: 100,
+    ...config,
+  });
+};
+
+const drawHeaderInfo = (page: PDFPage) => {
+  if (!_FONT) return;
+  const X_Start = 75;
+  const Y_Start = 732;
+  const config = {
+    font: _FONT,
+    size: 8,
+    lineHeight: 17,
+  };
+
+  const contactRef = _DATA[0].contact ?? "";
+  if (!contactRef) return;
+
+  const name = [
+    contactRef.name ?? "",
+    contactRef.branchId ? `สาขา ${contactRef.branchId}` : "",
+  ]
+  page.drawText(name.join(" "), {
+    x: X_Start,
+    y: Y_Start,
+    maxWidth: 500,
+    ...config,
+  });
+
+  const contactDetails = [
+    contactRef.address ?? "",
+    "เลขประจำตัวผู้เสียภาษี " + contactRef.taxId,
+  ];
+
+  page.drawText(contactDetails.join(" "), {
+    x: X_Start,
+    y: Y_Start - config.lineHeight,
+    maxWidth: 500,
+    ...config,
+  });
+
+  page.drawText("Group Bill Id", {
+    x: X_Start + 400,
+    y: Y_Start,
+    maxWidth: 50,
+    ...config,
+  });
+
+  page.drawText(_BILL_DATE, {
+    x: X_Start + 370,
+    y: Y_Start - config.lineHeight * 2,
+    maxWidth: 50,
+    ...config,
+  });
 };
