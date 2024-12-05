@@ -7,12 +7,13 @@ import PurchaseOrders from "./_components/purchase-orders";
 import { db } from "@/lib/db";
 import { QuotationListWithRelations, QuotationWithRelations } from "@/types";
 import { QuotationType } from "@prisma/client";
-import { InfoIcon } from "lucide-react";
+import { CheckCircle, CheckIcon, InfoIcon, LockKeyhole } from "lucide-react";
 import { classNames } from "@/lib/utils";
 import { quotationTypeMapping } from "@/app/config";
 import { useUser } from "@/hooks/use-user";
 import DataNotfound from "@/components/data-notfound";
 import QuotationInfo from "./_components/quotation-info";
+import { Badge } from "@/components/ui/badge";
 
 const getData = async (
   quotationId: string,
@@ -33,7 +34,7 @@ const getData = async (
     where.sellerId = parseInt(userId);
   }
 
-  const data = await db.quotation.findUnique({
+  const data = (await db.quotation.findUnique({
     where,
     include: {
       contact: true,
@@ -54,29 +55,30 @@ const getData = async (
         },
       },
     },
-  }) as QuotationWithRelations
+  })) as QuotationWithRelations;
 
   // get all quotations that are in the same bill group
-  const quotationsGroup = (data?.billGroupId) ? await db.quotation.findMany({
-    select: {
-      id: true,
-      code: true,
-      grandTotal: true,
-    },
-    where: {
-      billGroupId: data.billGroupId,
-      id: {
-        not: parseInt(quotationId),
-      }
-    },
-  }) : [];
-
+  const quotationsGroup = data?.billGroupId
+    ? await db.quotation.findMany({
+        select: {
+          id: true,
+          code: true,
+          grandTotal: true,
+        },
+        where: {
+          billGroupId: data.billGroupId,
+          id: {
+            not: parseInt(quotationId),
+          },
+        },
+      })
+    : [];
 
   return {
     data,
-    quotationsGroup
-  }
-}
+    quotationsGroup,
+  };
+};
 interface QuotationIdPageProps {
   params: {
     quotationId: string;
@@ -90,14 +92,12 @@ export default async function QuotationDetails(
   const { isAdmin, info } = await useUser();
   const res = await getData(params.quotationId, isAdmin, info?.id);
 
-
   if (!res || !res.data) {
     return <DataNotfound link="/quotations" />;
   }
 
   const { data, quotationsGroup } = res;
 
-  
   const pages = [
     {
       name: "ใบเสนอราคาทั้งหมด (QT)",
@@ -108,10 +108,10 @@ export default async function QuotationDetails(
       name: data?.code ?? "",
       render: () => {
         return (
-          <div>
+          <div className="flex space-x-1 items-center">
             <p
               className={classNames(
-                "rounded bg-gray-100 px-2 py-0.5 text-xs tracking-wide text-gray-600 space-x-2",
+                "rounded px-2 py-0.5 text-xs tracking-wide text-gray-600 space-x-2",
                 data?.type === QuotationType.service ? "text-green-600" : ""
               )}
             >
@@ -120,6 +120,16 @@ export default async function QuotationDetails(
                 ({data && quotationTypeMapping[data?.type]})
               </span>
             </p>
+
+            {data && data.grandTotal && data.grandTotal > 0 && (
+              <Badge
+                variant={"outline"}
+                className="flex items-center border-green-700 text-green-700 border-none"
+              >
+                <CheckCircle className="w-4 h-4 mr-1" />
+                <span>ไม่สามารถแก้ไขได้ เนื่องจากได้รับการอนุมัติแล้ว</span>
+              </Badge>
+            )}
           </div>
         );
       },
@@ -140,10 +150,7 @@ export default async function QuotationDetails(
           {contact && <CustomerInfo data={contact} />}
         </div>
         <div className="col-span-5 md:col-span-3">
-          <QuotationInfo
-            quotationsGroup={quotationsGroup}
-            data={data}
-          />
+          <QuotationInfo quotationsGroup={quotationsGroup} data={data} />
         </div>
         <div className="col-span-5">
           <QuotationLists
