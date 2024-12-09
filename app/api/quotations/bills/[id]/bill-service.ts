@@ -1,7 +1,10 @@
 import { generateBillCover } from "@/app/services/PDF/pdf.product-bill-cover";
 import { generateInvoice as generateBillToCustomer } from "@/app/services/PDF/pdf.product-bill-to-customer";
+import { generateInvoice as generateServiceBillToCustomer } from "@/app/services/PDF/pdf.service-bills-to-customer";
+
 import { db } from "@/lib/db";
 import { generateInvoiceCode } from "@/lib/utils";
+import { QT_TYPE } from "@/types";
 import { Invoice } from "@prisma/client";
 import { PDFDocument } from "pdf-lib";
 
@@ -12,7 +15,7 @@ export async function generateGroupInvoices(id: string, customDate: string) {
   const mergedPdf = await PDFDocument.create();
   for (const quotation of quotations) {
     await validateQuotationInvoice(quotation, billGroupId, customDate);
-    await addQuotationToMergedPdf(quotation.id, customDate, mergedPdf);
+    await createBills(quotation.id, quotation.type, customDate, mergedPdf);
   }
 
   await addBillCoverToMergedPdf(billGroupId, mergedPdf);
@@ -26,6 +29,7 @@ async function getQuotations(billGroupId: number) {
       id: true,
       grandTotal: true,
       purchaseOrderRef: true,
+      type: true,
     },
     where: {
       billGroupId,
@@ -33,12 +37,37 @@ async function getQuotations(billGroupId: number) {
   });
 }
 
-async function addQuotationToMergedPdf(quotationId: number, customDate: string, mergedPdf: PDFDocument) {
-  const result = await generateBillToCustomer(quotationId, customDate);
-  if (!result) {
+async function createBills(quotationId: number, quotationType: QT_TYPE, customDate: string, mergedPdf: PDFDocument) {
+  if (quotationType === "product") {
+    const result = await generateBillToCustomer(quotationId, customDate);
+    await addQuotationToMergedPdf(result, quotationId, mergedPdf)
+
+  } else {
+    const results = await generateServiceBillToCustomer(quotationId, customDate);
+
+    if (!results) {
+      throw new Error(`Failed to generate PDF for quotation id: ${quotationId}`);
+    }
+
+    for (const result of results) {
+      await addQuotationToMergedPdf(result, quotationId, mergedPdf)
+    }
+
+  }
+}
+
+async function addQuotationToMergedPdf(pdfResult:
+  {
+    pdfBytes: Uint8Array<ArrayBufferLike>;
+  } | undefined
+  , quotationId: number
+  , mergedPdf: PDFDocument) {
+
+  if (!pdfResult) {
     throw new Error(`Failed to generate PDF for quotation id: ${quotationId}`);
   }
-  const { pdfBytes } = result;
+
+  const { pdfBytes } = pdfResult;
   const pdfDoc = await PDFDocument.load(pdfBytes);
   const copiedPages = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
   copiedPages.forEach((page) => mergedPdf.addPage(page));
@@ -57,6 +86,7 @@ async function validateQuotationInvoice(
   quotation: {
     grandTotal: number | null;
     id: number;
+    type: QT_TYPE;
   },
   billGroupId: number,
   customDate: string
@@ -74,7 +104,7 @@ async function validateQuotationInvoice(
   }
 }
 
-async function createNewInvoice(quotation: { grandTotal: number | null; id: number }, billGroupId: number, customDate: string) {
+async function createNewInvoice(quotation: { grandTotal: number | null; id: number; type: QT_TYPE }, billGroupId: number, customDate: string) {
   const newInvoice = await db.invoice.create({
     data: {
       code: "",
@@ -85,7 +115,7 @@ async function createNewInvoice(quotation: { grandTotal: number | null; id: numb
     },
   });
 
-  const code = generateInvoiceCode(newInvoice.id);
+  const code = generateInvoiceCode(newInvoice.id, quotation.type);
   await db.invoice.update({
     where: {
       id: newInvoice.id,

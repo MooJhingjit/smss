@@ -21,6 +21,8 @@ declare module "next-auth" {
     accessToken?: string;
   }
 }
+
+export type QT_TYPE = "product" | "service";
 export type ProductWithRelations = Product & { items?: Item[]; vendor?: User };
 
 export type QuotationWithBuyer = Quotation & { contact: Contact };

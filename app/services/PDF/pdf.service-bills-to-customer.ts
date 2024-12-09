@@ -14,7 +14,7 @@ type QuotationWithRelations = Quotation & {
   lists?: QuotationList[];
   contact?: Contact | null;
   seller?: User | null;
-  invoice ?: Invoice | null;
+  invoice?: Invoice | null;
 };
 // type PurchaseOrderWithRelations = PurchaseOrder & {
 //   quotation?: QuotationWithRelations | null;
@@ -33,7 +33,7 @@ const ITEM_X_Start = 65;
 // horizontal position
 const columnPosition = {
   index: ITEM_X_Start - 10,
-  description: ITEM_X_Start + 30,
+  description: ITEM_X_Start + 20,
   quantity: ITEM_X_Start + 349,
   unit: ITEM_X_Start + 390,
   unitPrice: ITEM_X_Start + 385,
@@ -93,36 +93,50 @@ const main = async () => {
   if (!_DATA) return;
   // list start position
 
-  const totalPages = 4
-  const { pdfDoc, font, template } = await loadPdfAssets("public/pdf/product-bill-to-customer-template.pdf");
-  _FONT = font;
+  const templates = [
+    "public/pdf/service-invoice-to-customer-template.pdf",
+    "public/pdf/service-bill-to-customer-template.pdf"
+  ];
 
-  const config = {
-    size: PAGE_FONT_SIZE,
-    lineHeight: 11,
-    font: _FONT,
-  };
+  let results = []
 
-  // loop through all pages
-  for (let i = 0; i < totalPages; i++) {
-    const templatePage = await pdfDoc.embedPage(template.getPages()[i]);
-    let page = pdfDoc.addPage();
-    page.drawPage(templatePage);
+  for (const templatePath of templates) {
+    const { pdfDoc, font, template } = await loadPdfAssets(templatePath);
+    _FONT = font;
 
-    drawStaticInfo(page, i + 1);
+    const config = {
+      size: PAGE_FONT_SIZE,
+      lineHeight: 11,
+      font: _FONT,
+    };
 
-    drawItemLists(
-      page,
-      pdfDoc,
-      templatePage,
-      config
-    )
+    const totalPages = templatePath.includes("service-invoice-to-customer-template.pdf") ? 2 : 3;
+
+    // loop through all pages
+    for (let i = 0; i < totalPages; i++) {
+      const templatePage = await pdfDoc.embedPage(template.getPages()[i]);
+      let page = pdfDoc.addPage();
+      page.drawPage(templatePage);
+
+      drawStaticInfo(page, i + 1);
+
+      drawItemLists(
+        page,
+        pdfDoc,
+        templatePage,
+        config
+      )
+    }
+
+    const modifiedPdfBytes = await pdfDoc.save();
+
+    results.push({
+      pdfBytes: modifiedPdfBytes,
+    });
+    // Save or return the modified PDF bytes as needed
   }
 
-  const modifiedPdfBytes = await pdfDoc.save();
-  return {
-    pdfBytes: modifiedPdfBytes,
-  };
+  return results;
 };
 
 const drawItemLists = (
@@ -394,7 +408,7 @@ const drawCustomerInfo = (page: PDFPage) => {
     maxWidth: 100,
     ...config,
   });
-  
+
 
   const seller = quotation?.seller;
   page.drawText(seller?.name ?? "", {
@@ -476,7 +490,7 @@ const drawPriceInfo = (
   });
 
   // Price text
- 
+
   const thaiBahtText = convertToThaiBahtText(parseFloat(grandTotal.replace(/,/g, "")));
   page.drawText(thaiBahtText, {
     x: ITEM_X_Start + 30,

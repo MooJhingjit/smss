@@ -162,7 +162,7 @@ const BillController = ({
       <div className="flex items-center gap-2 flex-wrap">
         <Badge variant="default">
           {!currentQuotation.grandTotal && (
-            <InfoIcon size={12} className="mr-1 " />
+            <InfoIcon size={12} className="mr-1 text-red-300" />
           )}
           <span> {currentQuotation.code}</span>
         </Badge>

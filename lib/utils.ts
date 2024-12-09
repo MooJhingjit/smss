@@ -20,12 +20,14 @@ export function generateCode(id: number, prefix: "QT" | "PO", date: Date = new D
 }
 
 
-export function generateInvoiceCode(id: number, date: Date = new Date()) {
+export function generateInvoiceCode(id: number, type: 'product' | 'service', date: Date = new Date()) {
   const year = date.getFullYear();
   const month = (date.getMonth() + 1).toString().padStart(2, "0");
   const formattedId = id.toString().padStart(4, "0");
 
-  return `${year}-${month}${formattedId}`;
+  const prefix = type === 'product' ? '' : 'S';
+
+  return `${prefix}${year}-${month}${formattedId}`;
 }
 
 export function updateCodeVersion(code: string): string {
