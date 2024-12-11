@@ -58,7 +58,7 @@ async function createBills(quotationId: number, quotationType: QT_TYPE, customDa
 
 async function addQuotationToMergedPdf(pdfResult:
   {
-    pdfBytes: Uint8Array<ArrayBufferLike>;
+    pdfBytes: Uint8Array
   } | undefined
   , quotationId: number
   , mergedPdf: PDFDocument) {

@@ -11,7 +11,12 @@ export async function POST(
     }
 
     // default to purchase order
-    const { pdfBytes } = await generateInvoice(id, data.date);
+    const res = await generateInvoice(id, data.date);
+
+    if (!res) {
+      return NextResponse.json({ error: "Data not found" }, { status: 404 })
+    }
+    const pdfBytes = res.pdfBytes
     const headers = new Headers()
     headers.set('Content-Type', 'application/pdf')
     headers.set('Content-Disposition', 'attachment; filename="purchase-order.pdf"')

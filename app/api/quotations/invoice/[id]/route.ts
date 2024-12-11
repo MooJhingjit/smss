@@ -10,7 +10,11 @@ export async function POST(
     date: string;
   }
   try {
-    const { pdfBytes } = await generateInvoice(id, data.date);
+    const result = await generateInvoice(id, data.date);
+    if (!result) {
+      throw new Error("Failed to generate invoice");
+    }
+    const { pdfBytes } = result;
  
     const headers = new Headers()
     headers.set('Content-Type', 'application/pdf')

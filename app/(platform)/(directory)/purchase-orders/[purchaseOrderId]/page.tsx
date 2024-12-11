@@ -5,7 +5,6 @@ import PurchaseOrderItems from "./_components/order-items";
 import AssociateOrders from "./_components/associate-orders";
 import { db } from "@/lib/db";
 import DocumentItems from "../../../../../components/document-lists";
-import PurchaseOrderTools from "./_components/___order-tools";
 import PurchaseOrderInfo from "./_components/order-info";
 const getData = async (id: string) => {
   const data = await db.purchaseOrder.findUnique({
