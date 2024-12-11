@@ -1,7 +1,7 @@
 "use client";
 import React, { SyntheticEvent, useEffect, useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { QuotationWithBuyer } from "@/types";
+import { QuotationWithBuyer, QuotationWithRelations } from "@/types";
 import { QuotationStatus, QuotationType } from "@prisma/client";
 import { useQueries, useMutation } from "@tanstack/react-query";
 import {
@@ -13,8 +13,9 @@ import QT_SERVICES from "@/app/services/api.quotation";
 import Link from "next/link";
 import { FormInput } from "@/components/form/form-input";
 import { useSearchParams } from "next/navigation";
-import { quotationStatusMapping } from "@/app/config";
+import { productTypeMapping, quotationStatusMapping } from "@/app/config";
 import {
+  FileIcon,
   Files,
   ListFilter,
   ListFilterIcon,
@@ -22,6 +23,7 @@ import {
   Paperclip,
   PlusIcon,
   Receipt,
+  UserIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuotationModal } from "@/hooks/use-quotation-modal";
@@ -29,9 +31,9 @@ import { classNames, cn } from "@/lib/utils";
 import { Select } from "@/components/ui/select";
 import { FormSelect } from "@/components/form/form-select";
 
-interface Props {}
+interface Props { }
 
-type QuotationWithCounts = QuotationWithBuyer & {
+type QuotationWithCounts = QuotationWithRelations & {
   _count: {
     purchaseOrders: number;
     medias: number;
@@ -417,55 +419,58 @@ const BoardCard = ({
           className="w-full rounded-md bg-white shadow mb-3 cursor-move"
         >
           <div className="p-2 text-xs">
-            <div className="flex justify-between items-center">
-              <div className="flex space-x-1">
-                <Link
-                  href={`/quotations/${item.id}`}
-                  className={classNames(
-                    "inline-flex items-center capitalize rounded bg-gray-100  py-0.5 text-xs font-medium text-gray-700 underline",
-                    item.type === QuotationType.product
-                      ? "bg-white"
-                      : "bg-green-100"
-                  )}
-                >
-                  {item.isLocked && (
+            <div className="flex space-x-1 justify-between  ">
+              <Link
+                href={`/quotations/${item.id}`}
+                className={classNames(
+                  "inline-flex items-center capitalize rounded bg-gray-100  py-0.5 text-xs font-medium text-gray-700 underline",
+                  // item.type === QuotationType.product
+                  //   ? "bg-white"
+                  //   : "bg-green-100"
+                )}
+              >
+                {/* {item.isLocked && (
                     <LockIcon className="w-3 h-3 mr-1 text-gray-500" />
-                  )}
-                  <span>{item.code}</span>
-                </Link>
-                {/* <span className="inline-flex items-center capitalize rounded bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-600">
-                  {item.type}
-                </span> */}
-              </div>
-              {/* <p className=" text-slate-700 capitalize">{item.paymentType}</p> */}
+                  )} */}
+                <span>{item.code}</span>
+              </Link>
+              <span className="inline-flex items-center capitalize rounded bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-600">
+                {productTypeMapping[item.type]}
+              </span>
             </div>
+            {/* <p className=" text-slate-700 capitalize">{item.paymentType}</p> */}
 
-            <div className="flex justify-between mt-2">
-              <div className="font-medium text-slate-900">
-                {item.contact.name}
-              </div>
+            <div className="font-medium text-slate-900 mt-2">
+              {item.contact?.name || ""}
             </div>
-            {/* <div className="">
-              
-            </div> */}
-          </div>
-          <div className="bg-gray-50 flex justify-between items-center px-2">
-            <div className="">
-              <p className=" text-slate-700 capitalize text-xs my-1">
-                {/* display date in DD/MM/YYYY */}
+            {/* <div className="font-medium text-slate-900 mt-2 flex items-center space-x-2">
+              <p>สร้างโดย</p>
+              <p className="font-medium text-slate-900 ">
+                {item.seller?.name || ""}
+              </p>
+              <p>
                 {new Date(item.createdAt).toLocaleDateString("th-TH", {
                   year: "numeric",
                   month: "2-digit",
                   day: "2-digit",
                 })}
               </p>
+            </div> */}
+            {/* <div className="">
+              
+            </div> */}
+          </div>
+          <div className="bg-gray-50 flex justify-between items-center px-2">
+            <div className=" text-slate-900 text-xs flex items-center space-x-1 ">
+              <UserIcon className="w-3 h-3  text-gray-500" />
+              <span>{item.seller?.name || ""}</span>
             </div>
 
             <div className="flex  space-x-2">
               {/* PO */}
               {item?._count?.purchaseOrders > 0 && (
                 <div className="flex items-center my-1" title="PO">
-                  <Receipt className="w-3 h-3  text-orange-400" />
+                  <FileIcon className="w-3 h-3  text-orange-400" />
                   <span className="text-xs text-orange-400">
                     {item?._count?.purchaseOrders}
                   </span>

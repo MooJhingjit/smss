@@ -236,7 +236,7 @@ const BillController = ({
                 {areQuotationsReady ? (
                   <div className="">
                     <div className="text-sm text-muted-foreground flex items-center">
-                      <PrinterIcon size={16} className="mr-2" />
+                      <ReceiptIcon size={16} className="mr-2" />
                       <div className="flex items-center space-x-2">
                         <span>ออกบิล</span>
                         {billDateText && (

@@ -49,6 +49,9 @@ export async function GET(req: NextRequest) {
     const quotations = await db.quotation.findMany({
       include: {
         contact: true,
+        seller: {
+          select: { name: true },
+        },
         _count: {
           select: { purchaseOrders: true, lists: true, medias: true },
         },
