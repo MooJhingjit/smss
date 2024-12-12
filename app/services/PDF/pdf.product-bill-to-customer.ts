@@ -9,6 +9,7 @@ import {
 } from "@prisma/client";
 import { PDFDocument, PDFEmbeddedPage, PDFFont, PDFPage } from "pdf-lib";
 import { getBoundingBox, PDFDateFormat, loadPdfAssets, validatePageArea, getTextWidth, getPaymentCondition, getBillDueDate, convertToThaiBahtText } from "./pdf.helpers";
+import path from "path";
 
 type QuotationWithRelations = Quotation & {
   lists?: QuotationList[];
@@ -94,7 +95,8 @@ const main = async () => {
   // list start position
 
   const totalPages = 4
-  const { pdfDoc, font, template } = await loadPdfAssets("public/pdf/product-bill-to-customer-template.pdf");
+  const folderPath =  path.resolve('./public', '/pdf/product-bill-to-customer-template.pdf')
+  const { pdfDoc, font, template } = await loadPdfAssets(folderPath);
   _FONT = font;
 
   const config = {

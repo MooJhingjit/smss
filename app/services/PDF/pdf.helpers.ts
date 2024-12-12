@@ -111,7 +111,7 @@ export async function loadSignatureImage(userKey: string) {
 export async function loadPdfAssets(publicPath: string) {
   const basePath = process.cwd(); // Gets the base path of your project
   const fontPath = path.join(basePath, "public/fonts/Sarabun-Regular.ttf");
-  const pdfTemplatePath = path.join("/"+publicPath);
+  const pdfTemplatePath = path.join(publicPath);
 
   const [pdfDoc, fontData, existingPdfBytes] = await Promise.all([
     PDFDocument.create(),
