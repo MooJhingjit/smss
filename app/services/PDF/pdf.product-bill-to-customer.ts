@@ -95,7 +95,7 @@ const main = async () => {
   // list start position
 
   const totalPages = 4
-  const folderPath =  path.resolve('./public', '/pdf/product-bill-to-customer-template.pdf')
+  const folderPath =  path.resolve('./public', 'pdf/product-bill-to-customer-template.pdf')
   const { pdfDoc, font, template } = await loadPdfAssets(folderPath);
   _FONT = font;
 
