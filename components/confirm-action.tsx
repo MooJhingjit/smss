@@ -41,7 +41,7 @@ export default function ConfirmActionButton(props: Props) {
           <button
             onClick={() => setShowConfirm(false)}
             type="button"
-            className="relative -ml-px inline-flex items-center rounded-r-md bg-white px-10 py-1 text-xs  text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10"
+            className="relative -ml-px inline-flex items-center rounded-r-md bg-white px-3 py-1 text-xs  text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10"
           >
             ยกเลิก
           </button>

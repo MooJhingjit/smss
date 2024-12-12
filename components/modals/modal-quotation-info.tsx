@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useQuotationInfoModal } from "@/hooks/use-quotation-info-modal";
-import React from "react";
+import React, { useRef } from "react";
 import { ChevronsUpDown } from "lucide-react"
 
 import {
@@ -46,7 +46,6 @@ import { useRouter } from "next/navigation";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { updateCodeVersion } from "@/lib/utils";
 import { Input } from "../ui/input";
-import { Bold, Italic, Underline } from "lucide-react"
 
 import {
   ToggleGroup,
@@ -57,7 +56,6 @@ import {
 export const QuotationInfoModal = () => {
   const modal = useQuotationInfoModal();
   const data = modal.data;
-  console.log(data)
   const [isActionAreaOpen, setIsOpenActionArea] = React.useState(false)
 
   if (!data) {
@@ -79,6 +77,7 @@ export const QuotationInfoModal = () => {
         </DialogHeader>
 
         <MainForm
+          closeModal={modal.onClose}
           data={data}
           hasList={data.lists ? data.lists.length > 0 : false}
 
@@ -133,8 +132,9 @@ export const QuotationInfoModal = () => {
 const MainForm = (props: {
   data: QuotationWithRelations;
   hasList: boolean;
+  closeModal: () => void;
 }) => {
-  const { hasList, data } = props;
+  const { hasList, data, closeModal } = props;
   const isAdmin = useIsAdmin();
   const {
     id: quotationId,
@@ -145,6 +145,9 @@ const MainForm = (props: {
     validPricePeriod,
     type
   } = data;
+
+  const shouldCloseModal = React.useRef(false);
+
 
   const { mutate } = useMutation<
     MutationResponseType,
@@ -165,6 +168,12 @@ const MainForm = (props: {
     onSuccess: async (n) => {
       toast.success("สำเร็จ");
       // invalidate query
+
+      if (shouldCloseModal.current) {
+        closeModal()
+      }
+
+
       customRevalidatePath(`/quotations/${quotationId}`);
     },
   });
@@ -182,6 +191,7 @@ const MainForm = (props: {
     // update what is provided
     let payloadBody: Record<string, any> = {};
     if (payload.status) {
+
       payloadBody["status"] = payload.status;
     }
     if (payload.paymentDue || payload.paymentDue === "") {
@@ -214,7 +224,7 @@ const MainForm = (props: {
       payloadBody["type"] = payload.type;
     }
 
-    
+
     payloadBody['paymentCondition'] = payload.paymentCondition;
 
     // call mutation
@@ -260,6 +270,7 @@ const MainForm = (props: {
               <div className="w-full">
                 <QuotationStatusDropdown
                   onStatusChange={(s) => {
+                    shouldCloseModal.current = true
                     handleItemChange({ status: s });
                   }}
                   curStatus={status}
@@ -343,7 +354,6 @@ const MainForm = (props: {
                 <PaymentCondition
                   defaultValue={data.paymentCondition || "cash"}
                   onChange={(value) => {
-                    console.log(value)
                     handleItemChange({ paymentCondition: value });
                   }
                   }
@@ -375,9 +385,16 @@ const MainForm = (props: {
 const PaymentCondition = ({ defaultValue, onChange }: { defaultValue: string, onChange: (value: string) => void }) => {
   const [selectedCondition, setSelectedCondition] = React.useState(defaultValue === "cash" ? "cash" : "other");
   const [inputValue, setInputValue] = React.useState(defaultValue !== "cash" ? defaultValue : "");
+  const firstUpdate = useRef(true);
 
   React.useEffect(() => {
-    if (selectedCondition === "other" ) {
+    
+    if (firstUpdate.current) {
+      firstUpdate.current = false;
+      return;
+    }
+
+    if (selectedCondition === "other") {
       return
     }
 
@@ -391,7 +408,7 @@ const PaymentCondition = ({ defaultValue, onChange }: { defaultValue: string, on
           <p>เงินสด</p>
         </ToggleGroupItem>
         <ToggleGroupItem value="other" className="whitespace-nowrap">
-        ระบุวัน
+          ระบุวัน
         </ToggleGroupItem>
       </ToggleGroup>
       {selectedCondition === "other" && (
