@@ -14,6 +14,7 @@ import {
   loadSignatureImage,
   convertToThaiBahtText,
 } from "./pdf.helpers";
+import path from "path";
 
 type QuotationWithRelations = Quotation & {
   lists?: QuotationList[];
@@ -65,9 +66,8 @@ export const generateBillCover = async (billGroupId: number) => {
 };
 
 const main = async () => {
-  const { pdfDoc, font, template } = await loadPdfAssets(
-    "public/pdf/product-bill-cover.pdf"
-  );
+   const folderPath =  path.resolve('./public', 'pdf/product-bill-cover.pdf')
+  const { pdfDoc, font, template } = await loadPdfAssets(folderPath);
   _FONT = font;
 
   const totalPages = 2;
