@@ -103,12 +103,12 @@ const generate = async (id: number) => {
     amount: ITEM_X_Start + 462,
   };
 
-  const basePath = process.cwd(); // Gets the base path of your project
-  const fontPath = path.join(basePath, "public/fonts/Sarabun-Regular.ttf");
-  const pdfTemplatePath = path.join(
-    basePath,
-    "public/pdf/quotation-template.pdf"
-  );
+  const fontResolvePath =  path.resolve('./public', 'fonts/Sarabun-Regular.ttf')
+  const fontPath = path.join(fontResolvePath);
+
+  const templateResolvePath =  path.resolve('./public', 'pdf/quotation-template.pdf')
+
+  const pdfTemplatePath = path.join(templateResolvePath);
   const [pdfDoc, fontData, existingPdfBytes] = await Promise.all([
     PDFDocument.create(),
     readFile(fontPath),
