@@ -13,10 +13,10 @@ export async function generateGroupInvoices(id: string, customDate: string) {
   const quotations = await getQuotations(billGroupId);
 
   const mergedPdf = await PDFDocument.create();
-  for (const quotation of quotations) {
-    await validateQuotationInvoice(quotation, billGroupId, customDate);
-    await createBills(quotation.id, quotation.type, customDate, mergedPdf);
-  }
+  // for (const quotation of quotations) {
+  //   await validateQuotationInvoice(quotation, billGroupId, customDate);
+  //   await createBills(quotation.id, quotation.type, customDate, mergedPdf);
+  // }
 
   await addBillCoverToMergedPdf(billGroupId, mergedPdf);
 
