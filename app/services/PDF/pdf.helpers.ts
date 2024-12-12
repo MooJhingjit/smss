@@ -89,15 +89,18 @@ export function getBoundingBox(
 export async function loadSignatureImage(userKey: string) {
   const userConfig = {
     "1": {
-      path: "/public/signature/1.png",
+      path: "signature/1.png",
       scale: 0.2
     },
     "2": {
-      path: "/public/signature/2.png",
+      path: "signature/2.png",
       scale: 0.7
     }
   }
-  const imageBytes = await readFile(path.join(process.cwd(), userConfig[userKey as keyof typeof userConfig].path));
+
+  const folderPath = path.resolve('./public', userConfig[userKey as keyof typeof userConfig].path)
+
+  const imageBytes = await readFile(path.join(folderPath));
 
   return {
     imageBytes,
@@ -106,12 +109,13 @@ export async function loadSignatureImage(userKey: string) {
 }
 
 
-
-
 export async function loadPdfAssets(publicPath: string) {
-  const basePath = process.cwd(); // Gets the base path of your project
-  const fontPath = path.join(basePath, "public/fonts/Sarabun-Regular.ttf");
-  const pdfTemplatePath = path.join(publicPath);
+  // const basePath = process.cwd(); // Gets the base path of your project
+  const fontResolvePath = path.resolve('./public', "fonts/Sarabun-Regular.ttf")
+  const fontPath = path.join(fontResolvePath);
+
+  const templateResolvePath = path.resolve('./public', publicPath)
+  const pdfTemplatePath = path.join(templateResolvePath);
 
   const [pdfDoc, fontData, existingPdfBytes] = await Promise.all([
     PDFDocument.create(),

@@ -81,7 +81,7 @@ const generate = async () => {
   const ITEM_Y_Start = 585;
  
 
-  const { pdfDoc, font, template } = await loadPdfAssets("public/pdf/purchase-order-template.pdf");
+  const { pdfDoc, font, template } = await loadPdfAssets("pdf/purchase-order-template.pdf");
   const templatePage = await pdfDoc.embedPage(template.getPages()[0]);
 
   _FONT = font;
