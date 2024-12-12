@@ -96,7 +96,7 @@ const main = async () => {
 
   const templates = [
     
-    path.resolve('./public', 'service-invoice-to-customer-template.pdf'),
+    path.resolve('./public', 'service-invoice-to-customer-template2.pdf'),
     path.resolve('./public', 'service-bill-to-customer-template.pdf'),
   ];
 
