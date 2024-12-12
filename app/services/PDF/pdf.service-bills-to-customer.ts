@@ -95,8 +95,9 @@ const main = async () => {
   // list start position
 
   const templates = [
-    path.resolve('/public/pdf/service-invoice-to-customer-template.pdf'),
-    path.resolve('/public/pdf/service-bill-to-customer-template.pdf'),
+    
+    path.resolve('./public', '/pdf/service-invoice-to-customer-template.pdf'),
+    path.resolve('./public', '/pdf/service-bill-to-customer-template.pdf'),
   ];
 
   let results = []
