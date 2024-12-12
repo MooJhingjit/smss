@@ -9,6 +9,7 @@ import {
 } from "@prisma/client";
 import { PDFDocument, PDFEmbeddedPage, PDFFont, PDFPage } from "pdf-lib";
 import { getBoundingBox, PDFDateFormat, loadPdfAssets, validatePageArea, getTextWidth, getPaymentCondition, getBillDueDate, convertToThaiBahtText } from "./pdf.helpers";
+import path from "path";
 
 type QuotationWithRelations = Quotation & {
   lists?: QuotationList[];
@@ -94,8 +95,8 @@ const main = async () => {
   // list start position
 
   const templates = [
-    "public/pdf/service-invoice-to-customer-template.pdf",
-    "public/pdf/service-bill-to-customer-template.pdf"
+    path.resolve('/public/pdf/service-invoice-to-customer-template.pdf'),
+    path.resolve('/public/pdf/service-bill-to-customer-template.pdf'),
   ];
 
   let results = []
