@@ -3,7 +3,11 @@ import { Quotation } from "@prisma/client";
 
 import { ActionState } from "@/lib/create-safe-action";
 
-import { schema } from "./schema";
+import { schema, serviceQuotationSummarySchema } from "./schema";
 
 export type InputType = z.infer<typeof schema>;
 export type ReturnType = ActionState<InputType, Quotation>;
+
+
+export type ServiceQuotationInputType = z.infer<typeof serviceQuotationSummarySchema>;
+export type ReturnServiceQuotationType = ActionState<InputType, Quotation>;

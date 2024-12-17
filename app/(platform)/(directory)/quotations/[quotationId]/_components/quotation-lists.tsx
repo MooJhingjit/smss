@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect } from "react";
-import { Plus } from "lucide-react";
+import { InfoIcon, Plus, ShieldCheckIcon } from "lucide-react";
 import PageComponentWrapper from "@/components/page-component-wrapper";
 import TableLists from "@/components/table-lists";
 import { useQuotationListModal } from "@/hooks/use-quotation-list";
@@ -8,7 +8,7 @@ import { QuotationListWithRelations } from "@/types";
 import { FormTextarea } from "@/components/form/form-textarea";
 import { useForm } from "react-hook-form";
 import { useAction } from "@/hooks/use-action";
-import { updateQuotation } from "@/actions/quotation/update";
+import { updateQuotation, updateServiceQuotationSummary } from "@/actions/quotation/update";
 import { toast } from "sonner";
 import { FormSubmit } from "@/components/form/form-submit";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,8 @@ import { QuotationType } from "@prisma/client";
 import ProductBadge from "@/components/badges/product-badge";
 import { calculateQuotationItemPrice } from "@/app/services/service.quotation";
 import Remarks from "./remarks";
+import ConfirmActionButton from "@/components/confirm-action";
+import { cn } from "@/lib/utils";
 
 type Props = {
   quotationId: number;
@@ -23,6 +25,7 @@ type Props = {
   data: QuotationListWithRelations[];
   remark: string;
   isLocked: boolean;
+  grandTotal: number | null;
 };
 const columns = [
   { name: "#", key: "index" },
@@ -95,7 +98,7 @@ const columns = [
 ];
 
 export default function QuotationLists(props: Props) {
-  const { data, quotationId, quotationType, remark, isLocked } = props;
+  const { data, quotationId, quotationType, remark, isLocked, grandTotal } = props;
   const modal = useQuotationListModal();
 
   const listLabel = isLocked ? "" : "เพิ่มรายการสินค้า/บริการ";
@@ -129,15 +132,15 @@ export default function QuotationLists(props: Props) {
             isLocked
               ? undefined
               : (item) => {
-                  return modal.onOpen(item, {
-                    quotationRef: { id: item.quotationId, type: quotationType },
-                    productRef: {
-                      id: item.productId ?? 0,
-                      name: item.product?.name ?? "",
-                    },
-                    timestamps: Date.now(),
-                  });
-                }
+                return modal.onOpen(item, {
+                  quotationRef: { id: item.quotationId, type: quotationType },
+                  productRef: {
+                    id: item.productId ?? 0,
+                    name: item.product?.name ?? "",
+                  },
+                  timestamps: Date.now(),
+                });
+              }
           }
         />
       </div>
@@ -147,7 +150,10 @@ export default function QuotationLists(props: Props) {
             <Remarks id={quotationId} remark={remark} />
           </div>
           <div className="col-span-5 md:col-span-2">
-            <BillingSummary data={data} />
+            <BillingSummary
+              quotationType={quotationType}
+              grandTotal={grandTotal}
+              data={data} />
           </div>
         </div>
       )}
@@ -156,31 +162,42 @@ export default function QuotationLists(props: Props) {
 }
 
 const BillingSummary = (props: {
+  quotationType: QuotationType;
+  grandTotal: number | null;
   data: QuotationListWithRelations[];
 }) => {
-  const { data } = props;
-
-  // const summary = data.reduce(
-  //   (acc, item: QuotationListWithRelations) => {
-  //     const discount = item.discount ?? 0;
-  //     let price = item.price ?? 0;
-  //     const quantity = item.quantity ?? 1;
-  //     price = price * quantity;
-  //     const totalPrice = item.totalPrice ?? 0;
-
-  //     acc.subtotal += price;
-  //     acc.discount += discount;
-  //     acc.vat += item.withholdingTax ?? 0;
-  //     acc.grandTotal += totalPrice;
-  //     return acc;
-  //   },
-  //   { subtotal: 0, discount: 0, total: 0, vat: 0, grandTotal: 0 },
-  // );
+  const { data, quotationType, grandTotal } = props;
   const summary = calculateQuotationItemPrice(data);
-  // TODO save to db
+
+  const { execute, isLoading } = useAction(updateServiceQuotationSummary, {
+    onSuccess: (data) => {
+
+    },
+    onError: (error) => {
+      toast.error(error);
+    },
+  });
+
   return (
-    <div className="bg-gray-100 p-4 w-full sm:rounded-lg sm:px-6">
+    <div className={cn(" p-4 w-full sm:rounded-lg sm:px-6",
+      {
+        "bg-gray-50 border": !!grandTotal,
+        " border-green-700 bg-white": grandTotal, // confirmed
+      }
+
+    )}>
+      {
+        grandTotal && (
+          <div className="flex items-center space-x-2">
+            <ShieldCheckIcon className="w-4 h-4 text-green-800" />
+            <p className="text-green-800" >ใบเสนอราคานี้ได้รับการยืนยันแล้ว ไม่สามารถแก้ไขได้</p>
+
+          </div>
+        )
+      }
       <dl className="divide-y divide-gray-200 text-sm">
+
+
         <div className="flex items-center justify-between py-4">
           <dt className="text-gray-600">Subtotal</dt>
           <dd className="font-medium text-gray-900">
@@ -218,63 +235,35 @@ const BillingSummary = (props: {
           </dd>
         </div>
       </dl>
+
+      {
+        // this qt haven't been confirmed yet (this is only for service quotation)
+        quotationType === "service" && data.length && !grandTotal && (
+          <div className="w-full  flex items-center justify-center">
+            <ConfirmActionButton
+              onConfirm={() => {
+                execute({
+                  id: data[0].quotationId,
+                  totalPrice: summary.totalPrice,
+                  discount: summary.discount,
+                  tax: summary.vat,
+                  grandTotal: summary.grandTotal,
+                });
+
+              }}
+            >
+              <Button className="mt-4 w-full space-x-1 flex flex-col  p-3 h-auto" >
+                <div className=" flex items-center justify-center space-x-2">
+                  <InfoIcon className="w-4 h-4 text-orange-500" />
+                  <p>รายการนี้ยังไม่ได้รับการยืนยัน  กดเพื่อยืนยันยอดรวม</p>
+                </div>
+                <p className="text-xs">เมื่อยืนยันแล้วจะไม่สามารถแก้ไขยอดรวมได้</p>
+              </Button>
+            </ConfirmActionButton>
+
+          </div>
+        )
+      }
     </div>
   );
 };
-
-// type FormRemark = {
-//   id: number;
-//   remark: string | null;
-// };
-
-// const Remark = ({ id, remark }: { id: number; remark: string | null }) => {
-//   // useForm
-//   const {
-//     register,
-//     reset,
-//     getValues,
-//     formState: { isDirty },
-//   } = useForm<FormRemark>({
-//     mode: "onChange",
-//     defaultValues: {
-//       remark: remark ?? "",
-//     },
-//   });
-
-//   useEffect(() => {
-//     reset({ remark: remark ?? "" });
-//   }, [remark, reset]);
-
-//   const handleUpdate = useAction(updateQuotation, {
-//     onSuccess: (data) => {
-//       toast.success("สำเร็จ");
-//     },
-//     onError: (error) => {
-//       toast.error(error);
-//     },
-//   });
-
-//   const onSubmit = async () => {
-//     const remark = getValues("remark") ?? "";
-//     handleUpdate.execute({ id, remark });
-//   };
-
-//   return (
-//     <form action={onSubmit} className="h-full relative">
-//       <FormTextarea
-//         id="remark"
-//         placeholder="หมายเหตุ"
-//         className="w-full h-full border p-2 rounded-lg"
-//         register={register}
-//         rows={12}
-//       />
-//       <div className="absolute bottom-6 right-2">
-//         {isDirty && (
-//           <FormSubmit variant="default" className="text-xs">
-//             บันทึก
-//           </FormSubmit>
-//         )}
-//       </div>
-//     </form>
-//   );
-// };

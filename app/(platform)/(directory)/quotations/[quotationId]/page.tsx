@@ -60,18 +60,18 @@ const getData = async (
   // get all quotations that are in the same bill group
   const quotationsGroup = data?.billGroupId
     ? await db.quotation.findMany({
-        select: {
-          id: true,
-          code: true,
-          grandTotal: true,
+      select: {
+        id: true,
+        code: true,
+        grandTotal: true,
+      },
+      where: {
+        billGroupId: data.billGroupId,
+        id: {
+          not: parseInt(quotationId),
         },
-        where: {
-          billGroupId: data.billGroupId,
-          id: {
-            not: parseInt(quotationId),
-          },
-        },
-      })
+      },
+    })
     : [];
 
   return {
@@ -116,9 +116,7 @@ export default async function QuotationDetails(
               )}
             >
               <span>{data?.code}</span>
-              <span className="capitalize">
-                ({data && quotationTypeMapping[data?.type]})
-              </span>
+
             </p>
 
             {data && data.grandTotal && data.grandTotal > 0 && (
@@ -144,7 +142,13 @@ export default async function QuotationDetails(
   const isReadonly = ["pending_approval", "offer", "approved"].includes(status);
   return (
     <>
-      <Breadcrumbs pages={pages} />
+      <div className="flex justify-between items-center">
+        <Breadcrumbs pages={pages} />
+        <Badge className="capitalize" variant="secondary">
+         ประเภท: {data && quotationTypeMapping[data?.type]}
+        </Badge>
+
+      </div>
       <div className="grid  grid-cols-5 gap-8 mt-6">
         <div className="col-span-5 md:col-span-2">
           {contact && <CustomerInfo data={contact} />}
@@ -156,6 +160,7 @@ export default async function QuotationDetails(
           <QuotationLists
             isLocked={data.isLocked || (!isAdmin && isReadonly)}
             quotationId={data.id}
+            grandTotal={data.grandTotal}
             quotationType={data.type}
             remark={data.remark ?? ""}
             data={lists as QuotationListWithRelations[]}

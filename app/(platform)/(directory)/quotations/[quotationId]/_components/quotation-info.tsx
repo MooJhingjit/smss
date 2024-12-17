@@ -127,16 +127,18 @@ const BillController = ({
           <PopoverTrigger asChild>
             <CircleEllipsisIcon size={16} className="cursor-pointer" />
           </PopoverTrigger>
-          <PopoverContent className="w-52">
+          <PopoverContent className="w-52 p-2">
             <ConfirmActionButton
               onConfirm={() => {
                 attachBillGroup(currentQuotation.id);
               }}
             >
-              <div className="flex space-x-1 items-center">
-                <ReceiptIcon size={16} />
-                <div className="w-full text-sm">
+              <div className="flex space-x-1 items-start">
+                <ReceiptIcon size={16} className="mt-1" />
+                <div className="w-full text-sm text-left">
+                  
                   <p>สร้างกลุ่มบิลใหม่</p>
+                  <p className="text-xs text-destructive">เมื่อสร้างแล้วไม่สามรถลบออกได้</p>
                 </div>
               </div>
             </ConfirmActionButton>
@@ -149,10 +151,10 @@ const BillController = ({
   const contactName = currentQuotation.contact?.name ?? "ลูกค้า";
   const billDateText = currentQuotation?.invoice?.date
     ? new Intl.DateTimeFormat("th-TH", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      }).format(currentQuotation?.invoice?.date)
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }).format(currentQuotation?.invoice?.date)
     : null;
   return (
     <div className="border p-3 relative">
