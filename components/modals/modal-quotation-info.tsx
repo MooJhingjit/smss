@@ -372,9 +372,21 @@ const MainForm = (props: {
                 />
               </div>
             </ItemList>
+            {data.type === "service" && (
+              <ItemList
+                label="ออกใบกำกับภาษี"
+              // info="ออกเมื่อ 20/12/2023"
+              >
+                <div className="flex space-x-3 items-center">
+                  <PrintTaxInvoice
+                    hasList={hasList}
+                    quotation={data}
+                  />
+                </div>
+              </ItemList>
 
+            )}
           </>
-
         )}
       </div>
     </div>
@@ -388,7 +400,7 @@ const PaymentCondition = ({ defaultValue, onChange }: { defaultValue: string, on
   const firstUpdate = useRef(true);
 
   React.useEffect(() => {
-    
+
     if (firstUpdate.current) {
       firstUpdate.current = false;
       return;
@@ -489,7 +501,105 @@ const ApprovalButton = ({
     />
   );
 };
+const PrintTaxInvoice = ({
+  hasList,
+  quotation,
+}: {
+  hasList: boolean;
+  quotation: QuotationWithRelations;
 
+}) => {
+  const { invoice } = quotation;
+
+  const lastInvoiceDate = invoice?.date ? new Date(invoice.date) : new Date();
+
+  const [isDone, setIsDone] = React.useState(false);
+
+  const onPrintClick = (date: Date) => {
+    setIsDone(false);
+    try {
+      fetch(`/api/quotations/tax-invoice/${quotation.id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ date: date.toISOString() }),
+      })
+        .then((res) => res.blob())
+        .then((blob) => URL.createObjectURL(blob))
+        .then((url) => {
+          setIsDone(true);
+
+          // Create an anchor element and use it to navigate to the URL
+          const a = document.createElement("a");
+          a.href = url;
+          a.target = "_blank"; // Ensure it opens in a new tab
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+
+          // Optionally, you might not want to revoke the URL immediately
+          // since the file might still be loading in the new tab
+          // window.URL.revokeObjectURL(url);
+
+          // You might want to revoke it later or based on some other conditions
+          window.URL.revokeObjectURL(url);
+          // setTimeout(() => {
+          //   window.URL.revokeObjectURL(url); // Clean up the blob URL after it's no longer needed
+          // }, 60000); // for example, after 1 minute
+        });
+    } catch (error) {
+      console.log("error", error);
+      setIsDone(true);
+    } 
+  };
+
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const triggerSubmit = () => {
+    if (formRef.current) {
+      formRef.current.dispatchEvent(
+        new Event("submit", { bubbles: true, cancelable: true })
+      );
+    }
+  };
+
+
+  return (
+    <form
+      ref={formRef}
+      onSubmit={(e) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+        const date = formData.get("date") as string;
+        if (date) {
+          onPrintClick(new Date(date));
+        }
+      }}
+      className="flex w-full max-w-sm items-center space-x-2"
+    >
+      <Input
+        id="date"
+        name="date"
+        type="date"
+        placeholder="วันที่"
+        defaultValue={lastInvoiceDate.toISOString().split("T")[0]}
+      />
+      <ConfirmActionButton
+        isDone={isDone}
+        onConfirm={triggerSubmit}
+      >
+        <Button size={"sm"} variant={"secondary"} type="button">
+          <PrinterIcon className="w-4 h-4" />
+        </Button>
+
+      </ConfirmActionButton>
+
+    </form>
+
+
+  );
+};
 
 const PrintQuotation = ({
   quotationId,

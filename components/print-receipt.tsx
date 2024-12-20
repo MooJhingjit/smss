@@ -1,10 +1,22 @@
 import { PrinterIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import ConfirmActionButton from "@/components/confirm-action";
 
-export const ReceiptPrint = ({ endpoint, defaultBillDate}: { endpoint: string, defaultBillDate?:  Date }) => {
+export const ReceiptPrint = ({ endpoint, defaultBillDate }: { endpoint: string, defaultBillDate?: Date }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const triggerSubmit = () => {
+    if (formRef.current) {
+      formRef.current.dispatchEvent(
+        new Event("submit", { bubbles: true, cancelable: true })
+      );
+    }
+  };
+
 
   const onPrintClick = async (date: Date) => {
     setIsSubmitting(true);
@@ -36,6 +48,7 @@ export const ReceiptPrint = ({ endpoint, defaultBillDate}: { endpoint: string, d
 
   return (
     <form
+      ref={formRef}
       onSubmit={(e) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
@@ -53,9 +66,18 @@ export const ReceiptPrint = ({ endpoint, defaultBillDate}: { endpoint: string, d
         placeholder="วันที่"
         defaultValue={defaultBillDate?.toISOString().split("T")[0] ?? new Date().toISOString().split("T")[0]}
       />
-      <Button size={"sm"} variant={"secondary"} type="submit" disabled={isSubmitting}>
-        <PrinterIcon className="w-4 h-4" />
-      </Button>
+
+      <ConfirmActionButton
+        onConfirm={() => {
+          triggerSubmit(); // Call this to programmatically trigger the form submission
+        }}
+      >
+        <Button size={"sm"} variant={"secondary"} type="button" disabled={isSubmitting}>
+          <PrinterIcon className="w-4 h-4" />
+        </Button>
+      </ConfirmActionButton>
+
+
     </form>
   );
 };

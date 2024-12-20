@@ -57,7 +57,7 @@ export default function DataInfo({
                     onClick={onEdit}
                     variant={"link"}
                 >
-                    แก้ไข
+                    จัดการ
                 </Button>
             </div>
             <div className={

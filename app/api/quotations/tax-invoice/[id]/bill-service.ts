@@ -10,27 +10,6 @@ import { PDFDocument } from "pdf-lib";
 
 
 
-export async function generateGroupInvoices(id: string, customDate: string) {
-  const billGroupId = parseInt(id);
-  const quotations = await getQuotationsByGroup(billGroupId);
-
-  const mergedPdf = await PDFDocument.create();
-  for (const quotation of quotations) {
-    await validateQuotationInvoice(quotation, billGroupId, customDate);
-
-    if (quotation.type === "product") {
-      // for service will be created separately later
-      await createBills(quotation.id, quotation.type, customDate, mergedPdf);
-    }
-  }
-
-  await addBillCoverToMergedPdf(billGroupId, mergedPdf);
-
-  return await mergedPdf.save();
-}
-
-
-
 export async function generateTaxInvoice(quotationId: number, customDate: string) {
   try {
     const quotation = await getQuotationById(quotationId);
@@ -52,20 +31,6 @@ export async function generateTaxInvoice(quotationId: number, customDate: string
       throw new Error("Failed to generate tax invoice");
     }
   }
-}
-
-async function getQuotationsByGroup(billGroupId: number) {
-  return await db.quotation.findMany({
-    select: {
-      id: true,
-      grandTotal: true,
-      purchaseOrderRef: true,
-      type: true,
-    },
-    where: {
-      billGroupId,
-    },
-  });
 }
 
 async function validateQuotationInvoice(
@@ -143,17 +108,6 @@ async function addQuotationToMergedPdf(pdfResult:
   const copiedPages = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
   copiedPages.forEach((page) => mergedPdf.addPage(page));
 }
-
-async function addBillCoverToMergedPdf(billGroupId: number, mergedPdf: PDFDocument) {
-  const billCover = await generateBillCover(billGroupId);
-  if (billCover) {
-    const billCoverDoc = await PDFDocument.load(billCover.pdfBytes);
-    const billCoverPages = await mergedPdf.copyPages(billCoverDoc, billCoverDoc.getPageIndices());
-    billCoverPages.forEach((page) => mergedPdf.addPage(page));
-  }
-}
-
-
 
 async function createNewInvoice(quotation: { grandTotal: number | null; id: number; type: QT_TYPE }, billGroupId: number, customDate: string) {
   const newInvoice = await db.invoice.create({

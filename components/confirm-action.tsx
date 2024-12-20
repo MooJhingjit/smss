@@ -5,16 +5,24 @@ type Props = {
   disabled?: boolean;
   onConfirm: () => void;
   children: React.ReactNode;
+  isDone?: boolean;
 };
 export default function ConfirmActionButton(props: Props) {
-  const { onConfirm, children, disabled } = props;
+  const { onConfirm, children, disabled, isDone } = props;
   const [showConfirm, setShowConfirm] = React.useState(false);
   const [isPending, setIsPending] = React.useState(false);
 
   useEffect(() => {
-    // setIsPending(!!disabled);
     setShowConfirm(false);
   } , [disabled]);
+
+  // reset isPending when isDone is true
+  useEffect(() => {
+    if (isDone && isPending) {
+      setIsPending(false);
+      setShowConfirm(false);
+    }
+  }, [isDone , isPending]);
 
   if (isPending) {
     return (

@@ -240,7 +240,7 @@ const BillController = ({
                     <div className="text-sm text-muted-foreground flex items-center">
                       <ReceiptIcon size={16} className="mr-2" />
                       <div className="flex items-center space-x-2">
-                        <span>ออกบิล</span>
+                        <span>ออกบิลชุด</span>
                         {billDateText && (
                           <span className="text-xs text-orange-500">
                             (ออกบิลแล้ว ณ วันที่ {billDateText})
