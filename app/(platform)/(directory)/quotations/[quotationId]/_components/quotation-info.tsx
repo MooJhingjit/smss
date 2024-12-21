@@ -122,7 +122,6 @@ const BillController = ({
     return (
       <div className="flex items-center space-x-4">
         <Badge variant="default">{currentQuotation.code} </Badge>
-
         <Popover>
           <PopoverTrigger asChild>
             <CircleEllipsisIcon size={16} className="cursor-pointer" />
