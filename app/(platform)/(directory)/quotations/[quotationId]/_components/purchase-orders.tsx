@@ -56,13 +56,13 @@ export default function PurchaseOrders(props: {
           quantity: quantity,
           totalCost,
         };
-      },
+      }
     );
 
     modal.onOpen(
       purchaseOrderPreview as PurchaseOrderPreview[],
       queryKey,
-      quotationId,
+      quotationId
     );
   };
 
@@ -82,15 +82,27 @@ export default function PurchaseOrders(props: {
 
   if (!data?.length) {
     return (
-      <div className="mt-6 bg-yellow-50 border border-yellow-400 w-full h-40 rounded flex items-center justify-center">
-        <Button
-          onClick={previewPurchaseOrders}
-          variant="outline"
-          className="text-gray-500 text-sm space-x-2"
-        >
-          <PenLineIcon className="w-5 h-5 text-yellow-500" />
-          <span>สร้างใบสั่งซื้อ(PO) จากใบเสนอราคา(QT) แบบอัตโนมัติ</span>
-        </Button>
+      <div className="mt-6 bg-green-100 border border-green-600 w-full h-40 rounded flex items-center justify-center">
+        <div className="space-y-3">
+          <div className="">
+            <p className="text-green-700 text-sm">
+              - สร้าง <b>ใบสั่งซื้อ(PO)</b> จากใบเสนอราคา(QT) แบบอัตโนมัติ
+            </p>
+            <p className="text-green-700 text-sm">
+              - ตรวจสอบรายการสินค้าและยอดรวม ก่อนสร้างใบสั่งซื้อ
+            </p>
+          </div>
+          <div className="text-center">
+            <Button
+              onClick={previewPurchaseOrders}
+              variant="outline"
+              className="text-gray-500 text-sm space-x-2"
+            >
+              <PenLineIcon className="w-5 h-5 text-green-500" />
+              <span>สร้าง</span>
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }

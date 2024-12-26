@@ -5,6 +5,7 @@ import { InputType, ReturnType } from "./types";
 import { schema } from "./schema";
 import { generateCode } from "@/lib/utils";
 import { currentUser } from "@/lib/auth";
+import { QuotationType } from "@prisma/client";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
   const userSession = await currentUser();
@@ -28,7 +29,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     });
 
     // update code based on quotation ID
-    const code = generateCode(quotation.id, "QT");
+    const code = generateCode(quotation.id, quotation.type === QuotationType.product ? "QT" : "S_QT");
     quotation = await db.quotation.update({
       where: { id: quotation.id },
       data: { code },

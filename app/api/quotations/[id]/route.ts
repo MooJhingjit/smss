@@ -66,7 +66,7 @@ export async function DELETE(
         id: Number(id),
       },
     });
-    return new NextResponse("Deleted", { status: 204 });
+    return NextResponse.json({});
   } catch (error) {
     console.log("error", error);
     return new NextResponse("Internal Error", { status: 500 });

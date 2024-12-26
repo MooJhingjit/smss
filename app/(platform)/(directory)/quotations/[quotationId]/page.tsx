@@ -170,7 +170,7 @@ export default async function QuotationDetails(
           <DocumentItems refType="quotation" refId={data.id} />
         </div>
         {isAdmin && (
-          <div className="col-span-5 md:col-span-3">
+          <div className="col-span-5 md:col-span-3 mb-6">
             {isQT_Approved ? (
               <PurchaseOrders
                 quotationLists={lists as QuotationListWithRelations[]}

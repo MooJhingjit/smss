@@ -380,7 +380,7 @@ const BoardColumn = ({
             ({items.length})
           </div>
         </div>
-        <div className=" h-[calc(100%-70px)] p-3">
+        <div className=" h-[calc(100%-70px)] p-3 overflow-auto">
           <Droppable droppableId={columnKey} type="card">
             {(provided) => (
               <ul

@@ -20,7 +20,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     if (!billGroupIdToUse) {
       const billGroup = await db.billGroup.create({
         data: {
-          code: "", //generateCode(),
+          code: "", 
           date: new Date(),
         },
       });
@@ -32,14 +32,6 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         data: { billGroupId: billGroupIdToUse },
       });
 
-      // invoice = await db.invoice.create({
-      //   data: {
-      //     code: "", // generateCode(),
-      //     // date: new Date(),
-      //     billGroupId: billGroupIdToUse,
-      //     quotationId: currentQuotationId,
-      //   },
-      // });
     }
 
     // attach new quotation to the same bill group
@@ -48,16 +40,6 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         where: { id: newQuotationId },
         data: { billGroupId: billGroupIdToUse },
       });
-
-      // invoice = await db.invoice.create({
-      //   data: {
-      //     code: "", // generateCode(),
-      //     // date: new Date(),
-      //     billGroupId: billGroupIdToUse,
-      //     quotationId: newQuotationId,
-      //   },
-      // });
-
     }
 
     revalidatePath("/quotations/[id]");

@@ -751,6 +751,7 @@ const DeleteComponent = ({
     { quotationId: number }
   >({
     mutationFn: async (fields) => {
+      console.log("🚀 ~ mutationFn: ~ fields:", fields)
       const res = await QT_SERVICES.delete(fields.quotationId);
       return res;
     },
@@ -764,6 +765,9 @@ const DeleteComponent = ({
       onDeleted();
 
     },
+    onError: (error) => {
+      console.error(error);
+    }
   });
 
   const handleDelete = () => {

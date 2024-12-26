@@ -11,6 +11,7 @@ import { Quotation } from "@prisma/client";
 import {
   CircleEllipsisIcon,
   InfoIcon,
+  LayersIcon,
   PlusIcon,
   PrinterIcon,
   ReceiptIcon,
@@ -126,18 +127,19 @@ const BillController = ({
           <PopoverTrigger asChild>
             <CircleEllipsisIcon size={16} className="cursor-pointer" />
           </PopoverTrigger>
-          <PopoverContent className="w-52 p-2">
+          <PopoverContent className="w-auto p-2">
             <ConfirmActionButton
               onConfirm={() => {
                 attachBillGroup(currentQuotation.id);
               }}
             >
-              <div className="flex space-x-1 items-start">
-                <ReceiptIcon size={16} className="mt-1" />
+              <div className="flex space-x-1 items-start gap-2 px-2">
+                <LayersIcon size={20} className="mt-1" />
                 <div className="w-full text-sm text-left">
-                  
-                  <p>สร้างกลุ่มบิลใหม่</p>
-                  <p className="text-xs text-destructive">เมื่อสร้างแล้วไม่สามรถลบออกได้</p>
+                  <p>สร้างกลุ่มบิลใหม่ (Click)</p>
+                  <p className="text-xs text-orange-500 whitespace-nowrap">
+                    - เมื่อสร้างแล้วไม่สามรถลบออกได้
+                  </p>
                 </div>
               </div>
             </ConfirmActionButton>
@@ -146,32 +148,37 @@ const BillController = ({
       </div>
     );
   }
-  const areQuotationsReady = quotationsGroup.every((qt) => qt.grandTotal) && currentQuotation.grandTotal;
+  const areQuotationsReady =
+    quotationsGroup.every((qt) => qt.grandTotal) && currentQuotation.grandTotal;
   const contactName = currentQuotation.contact?.name ?? "ลูกค้า";
-  const billDateText = currentQuotation?.invoice?.date
+  const invDate = currentQuotation?.invoice?.date
     ? new Intl.DateTimeFormat("th-TH", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    }).format(currentQuotation?.invoice?.date)
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      }).format(currentQuotation?.invoice?.date)
     : null;
+
+  const allQuotations = [currentQuotation, ...quotationsGroup].sort(
+    (a, b) => a.id - b.id
+  );
   return (
     <div className="border p-3 relative">
       <span className="absolute bg-gray-50 px-2 -top-2 text-xs ">
         กลุ่มบิล ({quotationsGroup.length + 1}){" "}
       </span>
       <div className="flex items-center gap-2 flex-wrap">
-        <Badge variant="default">
+        {/* <Badge variant="default">
           {!currentQuotation.grandTotal && (
             <InfoIcon size={12} className="mr-1 text-red-300" />
           )}
           <span> {currentQuotation.code}</span>
-        </Badge>
+        </Badge> */}
 
-        {quotationsGroup.map((qt) => (
+        {allQuotations.map((qt) => (
           <Link key={qt.id} href={"/quotations/" + qt.id}>
             <Badge
-              variant="secondary"
+              variant={qt.id === currentQuotation.id ? "default" : "secondary"}
               className={cn("relative flex items-center", {
                 // "text-destructive": !qt.grandTotal,
               })}
@@ -193,16 +200,25 @@ const BillController = ({
             <div className="grid gap-4">
               <div className="">
                 <div className="">
-                  <Button
-                    variant={"outline"}
-                    className="w-full"
-                    onClick={() => setShowFormSearch(!showFormSearch)}
-                  >
-                    <PlusIcon size={12} className="mr-1" />
-                    <span className="text-xs">
-                      เพิ่มใบเสนอราคาอื่นๆ ของ {contactName}
-                    </span>
-                  </Button>
+                  {invDate ? (
+                    <p className="text-xs text-orange-500 flex items-center">
+                      <InfoIcon size={12} className="mr-1" />
+                      <span className="text-xs">
+                        ไม่สามารถเพิ่มใบเสนอราคาอื่นๆ ได้ เนื่องจากออกบิลแล้ว
+                      </span>
+                    </p>
+                  ) : (
+                    <Button
+                      variant={"outline"}
+                      className="w-full"
+                      onClick={() => setShowFormSearch(!showFormSearch)}
+                    >
+                      <PlusIcon size={12} className="mr-1" />
+                      <span className="text-xs">
+                        เพิ่มใบเสนอราคาอื่นๆ ของ {contactName}
+                      </span>
+                    </Button>
+                  )}
 
                   {showFormSearch && (
                     <div className="mt-2">
@@ -236,14 +252,19 @@ const BillController = ({
 
                 {areQuotationsReady ? (
                   <div className="">
-                    <div className="text-sm text-muted-foreground flex items-center">
+                    <div className="text-sm text-muted-foreground flex ">
                       <ReceiptIcon size={16} className="mr-2" />
-                      <div className="flex items-center space-x-2">
-                        <span>ออกบิลชุด</span>
-                        {billDateText && (
-                          <span className="text-xs text-orange-500">
-                            (ออกบิลแล้ว ณ วันที่ {billDateText})
-                          </span>
+                      <div className="">
+                        <p>ออกใบวางบิล</p>
+                        {invDate && (
+                          <>
+                            <p className="text-xs text-orange-500">
+                              - ออกบิลแล้ว ณ วันที่ {invDate}
+                            </p>
+                            <p className="text-xs text-orange-500">
+                              - สามารถแก้ไขวันที่ได้ แต่เลข INV จะไม่เปลี่ยน
+                            </p>
+                          </>
                         )}
                       </div>
                     </div>
@@ -258,13 +279,21 @@ const BillController = ({
                   </div>
                 ) : (
                   <div className="text-xs ">
-                    <div className="flex items-center space-x-2 ">
+                    <div className="flex space-x-2 ">
                       <InfoIcon size={16} className="text-destructive" />
-                      <span>ไม่สามารถออกบิลได้</span>
+                      <div className="pl-2">
+                        <p>ไม่สามารถออกบิลได้</p>
+                        <p className="">
+                          กรุณาตรวจสอบใบเสนอราคา ที่มีเครื่องหมายกำกับ
+                        </p>
+                        <p className="text-xs text-orange-500 mt-1">
+                          - กรณี สินค้า ต้องสร้างใบ PO ก่อน (เพื่อยืนยันยอดรวม)
+                        </p>
+                        <p className="text-xs text-orange-500">
+                          - กรณี บริการ ต้องยืนยันยอดรวมก่อน
+                        </p>
+                      </div>
                     </div>
-                    <span className="pl-6">
-                      กรุณาตรวจสอบใบเสนอราคา ที่มีเครื่องหมายกำกับ
-                    </span>
                   </div>
                 )}
               </div>

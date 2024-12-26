@@ -11,7 +11,7 @@ export function classNames(...classes: ClassValue[]) {
 
 export const codeLength = 6;
 
-export function generateCode(id: number, prefix: "QT" | "PO", date: Date = new Date()) {
+export function generateCode(id: number, prefix: "S_QT" | "QT" | "PO", date: Date = new Date()) {
   const year = date.getFullYear();
   const month = (date.getMonth() + 1).toString().padStart(2, "0");
   const formattedId = id.toString().padStart(4, "0");
