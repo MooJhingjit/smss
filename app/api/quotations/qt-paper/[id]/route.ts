@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
-import { generateInvoice } from "@/app/services/PDF/pdf.quotation";
+import { generateQuotationPaper } from "@/app/services/PDF/pdf.quotation";
 
 export async function POST(
   req: NextRequest,
@@ -10,7 +10,7 @@ export async function POST(
     date: string;
   }
   try {
-    const result = await generateInvoice(id, data.date);
+    const result = await generateQuotationPaper(id, data.date);
     if (!result) {
       throw new Error("Failed to generate invoice");
     }

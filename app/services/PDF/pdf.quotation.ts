@@ -52,7 +52,7 @@ const getQuotation = async (
   return quotation;
 };
 
-export const generateInvoice = async (id: number, date: string) => {
+export const generateQuotationPaper = async (id: number, date: string) => {
   try {
     if (!id) {
       throw new Error("Invalid quotation ID");

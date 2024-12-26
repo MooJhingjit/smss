@@ -93,50 +93,40 @@ const main = async () => {
   if (!_DATA) return;
   // list start position
 
-  const templates = [
-    "pdf/service-invoice-to-customer-template.pdf",
-    "pdf/service-bill-to-customer-template.pdf"
-  ];
+  const totalPages = 2;
+  const templatePath = "pdf/service-invoice-to-customer-template.pdf";
 
-  let results = []
+  const { pdfDoc, font, template } = await loadPdfAssets(templatePath);
+  _FONT = font;
 
-  for (const templatePath of templates) {
-    const { pdfDoc, font, template } = await loadPdfAssets(templatePath);
-    _FONT = font;
+  const config = {
+    size: PAGE_FONT_SIZE,
+    lineHeight: 11,
+    font: _FONT,
+  };
 
-    const config = {
-      size: PAGE_FONT_SIZE,
-      lineHeight: 11,
-      font: _FONT,
-    };
 
-    const totalPages = templatePath.includes("service-invoice-to-customer-template.pdf") ? 2 : 3;
+  // loop through all pages
+  for (let i = 0; i < totalPages; i++) {
+    const templatePage = await pdfDoc.embedPage(template.getPages()[i]);
+    let page = pdfDoc.addPage();
+    page.drawPage(templatePage);
 
-    // loop through all pages
-    for (let i = 0; i < totalPages; i++) {
-      const templatePage = await pdfDoc.embedPage(template.getPages()[i]);
-      let page = pdfDoc.addPage();
-      page.drawPage(templatePage);
+    drawStaticInfo(page, i + 1);
 
-      drawStaticInfo(page, i + 1);
-
-      drawItemLists(
-        page,
-        pdfDoc,
-        templatePage,
-        config
-      )
-    }
-
-    const modifiedPdfBytes = await pdfDoc.save();
-
-    results.push({
-      pdfBytes: modifiedPdfBytes,
-    });
-    // Save or return the modified PDF bytes as needed
+    drawItemLists(
+      page,
+      pdfDoc,
+      templatePage,
+      config
+    );
   }
 
-  return results;
+  const modifiedPdfBytes = await pdfDoc.save();
+
+  return {
+    pdfBytes: modifiedPdfBytes,
+  };
 };
 
 const drawItemLists = (

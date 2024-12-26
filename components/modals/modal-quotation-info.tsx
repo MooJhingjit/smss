@@ -10,18 +10,24 @@ import {
 import { toast } from "sonner";
 import { useQuotationInfoModal } from "@/hooks/use-quotation-info-modal";
 import React, { useRef } from "react";
-import { ChevronsUpDown } from "lucide-react"
+import { ChevronsUpDown } from "lucide-react";
 
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible"
-import { LockIcon, PrinterIcon, Send, Clock, CheckCircle, PenBoxIcon, InfoIcon, Delete } from "lucide-react";
+} from "@/components/ui/collapsible";
 import {
-  PurchaseOrderPaymentType,
-  QuotationStatus,
-} from "@prisma/client";
+  LockIcon,
+  PrinterIcon,
+  Send,
+  Clock,
+  CheckCircle,
+  PenBoxIcon,
+  InfoIcon,
+  Delete,
+} from "lucide-react";
+import { PurchaseOrderPaymentType, QuotationStatus } from "@prisma/client";
 import { quotationStatusMapping } from "@/app/config";
 import { MutationResponseType } from "@/components/providers/query-provider";
 import { useMutation } from "@tanstack/react-query";
@@ -41,22 +47,18 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
+} from "@/components/ui/tooltip";
 import { useRouter } from "next/navigation";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { updateCodeVersion } from "@/lib/utils";
 import { Input } from "../ui/input";
 
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@/components/ui/toggle-group"
-
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 export const QuotationInfoModal = () => {
   const modal = useQuotationInfoModal();
   const data = modal.data;
-  const [isActionAreaOpen, setIsOpenActionArea] = React.useState(false)
+  const [isActionAreaOpen, setIsOpenActionArea] = React.useState(false);
 
   if (!data) {
     return null;
@@ -67,7 +69,6 @@ export const QuotationInfoModal = () => {
       <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
           <DialogTitle>
-
             <div className="flex space-x-1 items-center">
               {/* <PenBoxIcon className="w-5 h-5 " /> */}
               <span> {data?.code}</span>
@@ -80,10 +81,8 @@ export const QuotationInfoModal = () => {
           closeModal={modal.onClose}
           data={data}
           hasList={data.lists ? data.lists.length > 0 : false}
-
         />
         <DialogFooter className="border-t pt-6">
-
           <Collapsible
             open={isActionAreaOpen}
             onOpenChange={setIsOpenActionArea}
@@ -91,9 +90,7 @@ export const QuotationInfoModal = () => {
           >
             <CollapsibleTrigger asChild>
               <div className="flex items-center space-x-1 justify-center cursor-pointer">
-                <h4 className="text-sm font-semibold">
-                  ดำเนินการเพิ่มเติม
-                </h4>
+                <h4 className="text-sm font-semibold">ดำเนินการเพิ่มเติม</h4>
                 <Button variant="ghost" size="sm" className="w-9 p-0">
                   <ChevronsUpDown className="h-4 w-4" />
                   <span className="sr-only">Toggle</span>
@@ -119,15 +116,11 @@ export const QuotationInfoModal = () => {
               </div>
             </CollapsibleContent>
           </Collapsible>
-
-
-
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 };
-
 
 const MainForm = (props: {
   data: QuotationWithRelations;
@@ -143,11 +136,10 @@ const MainForm = (props: {
     purchaseOrderRef,
     deliveryPeriod,
     validPricePeriod,
-    type
+    type,
   } = data;
 
   const shouldCloseModal = React.useRef(false);
-
 
   const { mutate } = useMutation<
     MutationResponseType,
@@ -170,9 +162,8 @@ const MainForm = (props: {
       // invalidate query
 
       if (shouldCloseModal.current) {
-        closeModal()
+        closeModal();
       }
-
 
       customRevalidatePath(`/quotations/${quotationId}`);
     },
@@ -191,7 +182,6 @@ const MainForm = (props: {
     // update what is provided
     let payloadBody: Record<string, any> = {};
     if (payload.status) {
-
       payloadBody["status"] = payload.status;
     }
     if (payload.paymentDue || payload.paymentDue === "") {
@@ -224,21 +214,24 @@ const MainForm = (props: {
       payloadBody["type"] = payload.type;
     }
 
-
-    payloadBody['paymentCondition'] = payload.paymentCondition;
+    payloadBody["paymentCondition"] = payload.paymentCondition;
 
     // call mutation
     mutate(payloadBody);
   };
 
-
   return (
     <div className="space-y-2">
       <div className="grid grid-cols-12   gap-6 ">
-        <ItemList label="ประเภท"
-          info={hasList ? "ไม่สามารถเปลี่ยนประเภทได้ เนื่องจากมีรายการสินค้าแล้ว" : ""}
+        <ItemList
+          label="ประเภท"
+          info={
+            hasList
+              ? "ไม่สามารถเปลี่ยนประเภทได้ เนื่องจากมีรายการสินค้าแล้ว"
+              : ""
+          }
         >
-          <Tabs defaultValue={type} className="w-full" >
+          <Tabs defaultValue={type} className="w-full">
             <TabsList className=" flex">
               <TabsTrigger
                 disabled={hasList}
@@ -270,7 +263,7 @@ const MainForm = (props: {
               <div className="w-full">
                 <QuotationStatusDropdown
                   onStatusChange={(s) => {
-                    shouldCloseModal.current = true
+                    shouldCloseModal.current = true;
                     handleItemChange({ status: s });
                   }}
                   curStatus={status}
@@ -329,7 +322,14 @@ const MainForm = (props: {
         {!isAdmin && (
           <ItemList label="การชำระเงิน">
             <div className="flex space-x-3 items-center">
-              <PaymentBadge paymentType={data.paymentType} paymentDue={data.paymentDue ? new Date(data.paymentDue).toISOString().split("T")[0] : ""} />
+              <PaymentBadge
+                paymentType={data.paymentType}
+                paymentDue={
+                  data.paymentDue
+                    ? new Date(data.paymentDue).toISOString().split("T")[0]
+                    : ""
+                }
+              />
             </div>
           </ItemList>
         )}
@@ -337,77 +337,81 @@ const MainForm = (props: {
           <>
             <ItemList label="การชำระเงิน">
               <div className="space-x-8 flex items-center  ">
-
                 <PaymentOptionControl
                   paymentType={data.paymentType}
-                  paymentDue={data.paymentDue ? new Date(data.paymentDue).toISOString().split("T")[0] : ""}
+                  paymentDue={
+                    data.paymentDue
+                      ? new Date(data.paymentDue).toISOString().split("T")[0]
+                      : ""
+                  }
                   onUpdate={handleItemChange}
                 />
-
-
               </div>
             </ItemList>
 
             <ItemList label="เงื่อนไงการชำระเงิน">
               <div className="space-x-8 flex items-center  ">
-
                 <PaymentCondition
                   defaultValue={data.paymentCondition || "cash"}
                   onChange={(value) => {
                     handleItemChange({ paymentCondition: value });
-                  }
-                  }
+                  }}
                 />
-
-
               </div>
             </ItemList>
 
-            <ItemList label="พิมพ์ใบเสนอราคา"
-            >
+            <ItemList label="พิมพ์ใบเสนอราคา">
               <div className="flex space-x-3 items-center">
-                <PrintQuotation
-                  quotationId={quotationId}
-                  hasList={hasList}
-                />
+                <PrintQuotation quotationId={quotationId} hasList={hasList} />
               </div>
             </ItemList>
             {data.type === "service" && (
               <ItemList
                 label="ออกใบกำกับภาษี"
-              // info="ออกเมื่อ 20/12/2023"
+                // info="ออกเมื่อ 20/12/2023"
               >
-                <div className="flex space-x-3 items-center">
-                  <PrintTaxInvoice
-                    hasList={hasList}
-                    quotation={data}
-                  />
-                </div>
+                {data.invoice ? (
+                  <div className="flex space-x-3 items-center">
+                    <PrintTaxInvoice hasList={hasList} quotation={data} />
+                  </div>
+                ) : (
+                  <div className="flex space-x-2 items-center">
+                    <InfoIcon className="w-4 h-4 text-orange-500" />
+                    <p className="text-orange-500 text-sm">ต้องมีใบวางบิล และใบแจ้งหนี้ก่อน</p>
+                  </div>
+                )}
               </ItemList>
-
             )}
           </>
         )}
       </div>
     </div>
   );
-}
+};
 
-
-const PaymentCondition = ({ defaultValue, onChange }: { defaultValue: string, onChange: (value: string) => void }) => {
-  const [selectedCondition, setSelectedCondition] = React.useState(defaultValue === "cash" ? "cash" : "other");
-  const [inputValue, setInputValue] = React.useState(defaultValue !== "cash" ? defaultValue : "");
+const PaymentCondition = ({
+  defaultValue,
+  onChange,
+}: {
+  defaultValue: string;
+  onChange: (value: string) => void;
+}) => {
+  const [selectedCondition, setSelectedCondition] = React.useState(
+    defaultValue === "cash" ? "cash" : "other"
+  );
+  const [inputValue, setInputValue] = React.useState(
+    defaultValue !== "cash" ? defaultValue : ""
+  );
   const firstUpdate = useRef(true);
 
   React.useEffect(() => {
-
     if (firstUpdate.current) {
       firstUpdate.current = false;
       return;
     }
 
     if (selectedCondition === "other") {
-      return
+      return;
     }
 
     onChange(selectedCondition);
@@ -415,7 +419,11 @@ const PaymentCondition = ({ defaultValue, onChange }: { defaultValue: string, on
 
   return (
     <div className="flex items-center space-x-3">
-      <ToggleGroup type="single" value={selectedCondition} onValueChange={(value) => setSelectedCondition(value)}>
+      <ToggleGroup
+        type="single"
+        value={selectedCondition}
+        onValueChange={(value) => setSelectedCondition(value)}
+      >
         <ToggleGroupItem value="cash">
           <p>เงินสด</p>
         </ToggleGroupItem>
@@ -436,7 +444,7 @@ const PaymentCondition = ({ defaultValue, onChange }: { defaultValue: string, on
       )}
     </div>
   );
-}
+};
 
 const ApprovalButton = ({
   hasList,
@@ -507,7 +515,6 @@ const PrintTaxInvoice = ({
 }: {
   hasList: boolean;
   quotation: QuotationWithRelations;
-
 }) => {
   const { invoice } = quotation;
 
@@ -551,7 +558,7 @@ const PrintTaxInvoice = ({
     } catch (error) {
       console.log("error", error);
       setIsDone(true);
-    } 
+    }
   };
 
   const formRef = useRef<HTMLFormElement>(null);
@@ -563,7 +570,6 @@ const PrintTaxInvoice = ({
       );
     }
   };
-
 
   return (
     <form
@@ -585,19 +591,12 @@ const PrintTaxInvoice = ({
         placeholder="วันที่"
         defaultValue={lastInvoiceDate.toISOString().split("T")[0]}
       />
-      <ConfirmActionButton
-        isDone={isDone}
-        onConfirm={triggerSubmit}
-      >
+      <ConfirmActionButton isDone={isDone} onConfirm={triggerSubmit}>
         <Button size={"sm"} variant={"secondary"} type="button">
           <PrinterIcon className="w-4 h-4" />
         </Button>
-
       </ConfirmActionButton>
-
     </form>
-
-
   );
 };
 
@@ -610,7 +609,7 @@ const PrintQuotation = ({
 }) => {
   const onPrintClick = (date: Date) => {
     try {
-      fetch(`/api/quotations/invoice/${quotationId}`, {
+      fetch(`/api/quotations/qt-paper/${quotationId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -665,8 +664,6 @@ const PrintQuotation = ({
         <PrinterIcon className="w-4 h-4" />
       </Button>
     </form>
-
-
   );
 };
 
@@ -710,7 +707,11 @@ const ItemList = ({
     <div className="col-span-12 pt-2">
       <div className=" flex justify-between items-center px-6 h-full">
         <div className="flex space-x-2 items-center">
-          {label && <p className="text-sm leading-6 text-gray-600 max-w-[150px] whitespace-pre-wrap">{label}</p>}
+          {label && (
+            <p className="text-sm leading-6 text-gray-600 max-w-[150px] whitespace-pre-wrap">
+              {label}
+            </p>
+          )}
           {info && <HoverInfo message={info} />}
         </div>
         <div className="w-[250px]">{children}</div>
@@ -731,8 +732,8 @@ const HoverInfo = ({ message }: { message: string }) => {
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
-  )
-}
+  );
+};
 
 const DeleteComponent = ({
   quotationId,
@@ -751,7 +752,7 @@ const DeleteComponent = ({
     { quotationId: number }
   >({
     mutationFn: async (fields) => {
-      console.log("🚀 ~ mutationFn: ~ fields:", fields)
+      console.log("🚀 ~ mutationFn: ~ fields:", fields);
       const res = await QT_SERVICES.delete(fields.quotationId);
       return res;
     },
@@ -763,28 +764,27 @@ const DeleteComponent = ({
       router.push("/quotations");
 
       onDeleted();
-
     },
     onError: (error) => {
       console.error(error);
-    }
+    },
   });
 
   const handleDelete = () => {
-    // router.push("/quotations");  
+    // router.push("/quotations");
     mutate({ quotationId });
   };
 
   if (hasList) {
     return (
-      <span className="text-orange-500 text-xs">ไม่สามารถลบได้ เนื่องจากมีรายการสินค้าแล้ว</span>
-    )
+      <span className="text-orange-500 text-xs">
+        ไม่สามารถลบได้ เนื่องจากมีรายการสินค้าแล้ว
+      </span>
+    );
   }
 
   return (
-    <ConfirmActionButton
-      onConfirm={handleDelete}
-    >
+    <ConfirmActionButton onConfirm={handleDelete}>
       <Button
         variant="link"
         disabled={hasList}
@@ -796,7 +796,7 @@ const DeleteComponent = ({
       </Button>
     </ConfirmActionButton>
   );
-}
+};
 
 const VersionUpdate = ({
   quotationId,
@@ -812,15 +812,12 @@ const VersionUpdate = ({
   const { mutate, isPending } = useMutation<
     MutationResponseType,
     Error,
-    { quotationId: number, code: string }
+    { quotationId: number; code: string }
   >({
     mutationFn: async (fields) => {
-      const res = await QT_SERVICES.put(
-        fields.quotationId,
-        {
-          code: fields.code,
-        }
-      );
+      const res = await QT_SERVICES.put(fields.quotationId, {
+        code: fields.code,
+      });
       return res;
     },
     onSuccess: async (n) => {
@@ -838,15 +835,14 @@ const VersionUpdate = ({
 
   if (hasPo) {
     return (
-      <span className="text-orange-500 text-xs">ไม่สามารถอัพเดทเวอร์ชั่นได้ เนื่องจากมีใบสั่งซื้อแล้ว</span>
-    )
+      <span className="text-orange-500 text-xs">
+        ไม่สามารถอัพเดทเวอร์ชั่นได้ เนื่องจากมีใบสั่งซื้อแล้ว
+      </span>
+    );
   }
 
   return (
-    <ConfirmActionButton
-      disabled={isPending}
-      onConfirm={handleUpdate}
-    >
+    <ConfirmActionButton disabled={isPending} onConfirm={handleUpdate}>
       <Button
         variant="link"
         className="inline-flex items-center px-2 py-1 rounded-md  text-xs h-full"
@@ -854,7 +850,5 @@ const VersionUpdate = ({
         <span>อัพเดทเวอร์ชั่น (R+1)</span>
       </Button>
     </ConfirmActionButton>
-
-
   );
-}
+};
