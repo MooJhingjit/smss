@@ -110,11 +110,11 @@ export async function loadSignatureImage(userKey: string) {
     },
     "3": {
       path: "signature/3.png",
-      scale: 0.1,
+      scale: 0.7,
     },
     "4": {
       path: "signature/4.png",
-      scale: 0.1,
+      scale: 0.7,
     },
   };
 
