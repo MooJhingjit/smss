@@ -66,6 +66,7 @@ export const NewUserModal = () => {
       address,
       password,
     };
+    console.log("🚀 ~ onSubmit ~ payload.role:", payload)
     if (user?.id) {
       // update user
       handleUpdate.execute({
@@ -90,7 +91,7 @@ export const NewUserModal = () => {
             <FormSelect
               id="role"
               label="ประเภท"
-              disabled={true}
+              // disabled={true}
               defaultValue={user?.role ?? undefined}
               options={[
                 { id: "buyer", title: "Buyer" },
