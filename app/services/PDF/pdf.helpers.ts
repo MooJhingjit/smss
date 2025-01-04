@@ -3,7 +3,7 @@ import {
   PDFFont,
   PDFPage,
   breakTextIntoLines,
-  PDFEmbeddedPage
+  PDFEmbeddedPage,
 } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
 
@@ -17,8 +17,21 @@ export type ListConfig = {
 };
 
 export function PDFDateFormat(date: Date): string {
-  const day = String(date.getDate()).padStart(2, '0');
-  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const day = String(date.getDate()).padStart(2, "0");
+  const monthNames = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
   const month = monthNames[date.getMonth()];
   const year = date.getFullYear();
   return `${day}/${month}/${year}`;
@@ -32,7 +45,6 @@ export function getBoundingBox(
   lineHeight: number,
   maxWidth: number
 ) {
-
   // Function to measure the width of a length of text. Lifted from the 'drawText' source.
   // font refers to an instance of PDFFont
   const measureWidth = (s: any) => font?.widthOfTextAtSize(s, fontSize) || 0;
@@ -90,31 +102,41 @@ export async function loadSignatureImage(userKey: string) {
   const userConfig = {
     "1": {
       path: "signature/1.png",
-      scale: 0.2
+      scale: 0.7,
     },
     "2": {
       path: "signature/2.png",
-      scale: 0.7
-    }
-  }
+      scale:0.2,
+    },
+    "3": {
+      path: "signature/3.png",
+      scale: 0.1,
+    },
+    "4": {
+      path: "signature/4.png",
+      scale: 0.1,
+    },
+  };
 
-  const folderPath = path.resolve('./public', userConfig[userKey as keyof typeof userConfig].path)
+  const user = userConfig[userKey as keyof typeof userConfig];
+  const userPath = user ? user.path : "signature/blank.png";
+
+  const folderPath = path.resolve("./public", userPath);
 
   const imageBytes = await readFile(path.join(folderPath));
 
   return {
     imageBytes,
-    scale: userConfig[userKey as keyof typeof userConfig].scale
+    scale: userConfig[userKey as keyof typeof userConfig].scale,
   };
 }
 
-
 export async function loadPdfAssets(publicPath: string) {
   // const basePath = process.cwd(); // Gets the base path of your project
-  const fontResolvePath = path.resolve('./public', "fonts/Sarabun-Regular.ttf")
+  const fontResolvePath = path.resolve("./public", "fonts/Sarabun-Regular.ttf");
   const fontPath = path.join(fontResolvePath);
 
-  const templateResolvePath = path.resolve('./public', publicPath)
+  const templateResolvePath = path.resolve("./public", publicPath);
   const pdfTemplatePath = path.join(templateResolvePath);
 
   const [pdfDoc, fontData, existingPdfBytes] = await Promise.all([
@@ -172,8 +194,10 @@ export const getPaymentCondition = (condition: string | undefined): string => {
   return "";
 };
 
-
-export const getBillDueDate = (date: Date, condition: string | undefined): Date => {
+export const getBillDueDate = (
+  date: Date,
+  condition: string | undefined
+): Date => {
   // If condition is not set, return the original date
   if (!condition) return date;
 
@@ -182,9 +206,9 @@ export const getBillDueDate = (date: Date, condition: string | undefined): Date 
     return new Date(date.getTime() + parseInt(condition) * 24 * 60 * 60 * 1000);
   }
   return date;
-}
+};
 
-// numeric prices into Thai characters 
+// numeric prices into Thai characters
 const thaiNumberWords = {
   0: "ศูนย์",
   1: "หนึ่ง",
@@ -223,7 +247,9 @@ export const convertToThaiBahtText = (price: number): string => {
         } else if (digit === 1 && placeValueIndex === 0 && segmentLength > 1) {
           segmentResult += "เอ็ด";
         } else {
-          segmentResult += thaiNumberWords[digit as keyof typeof thaiNumberWords] + thaiPlaceValues[placeValueIndex];
+          segmentResult +=
+            thaiNumberWords[digit as keyof typeof thaiNumberWords] +
+            thaiPlaceValues[placeValueIndex];
         }
       }
       return segmentResult;
