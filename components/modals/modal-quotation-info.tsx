@@ -320,18 +320,33 @@ const MainForm = (props: {
           </div>
         </ItemList>
         {!isAdmin && (
-          <ItemList label="การชำระเงิน">
-            <div className="flex space-x-3 items-center">
-              <PaymentBadge
-                paymentType={data.paymentType}
-                paymentDue={
-                  data.paymentDue
-                    ? new Date(data.paymentDue).toISOString().split("T")[0]
-                    : ""
-                }
-              />
-            </div>
-          </ItemList>
+          <>
+            <ItemList label="การชำระเงิน">
+              <div className="flex space-x-3 items-center">
+                <PaymentBadge
+                  paymentType={data.paymentType}
+                  paymentDue={
+                    data.paymentDue
+                      ? new Date(data.paymentDue).toISOString().split("T")[0]
+                      : ""
+                  }
+                />
+              </div>
+            </ItemList>
+            {
+              data.status !== QuotationStatus.open &&
+                data.status !== QuotationStatus.pending_approval && (
+                  <ItemList label="พิมพ์ใบเสนอราคา">
+                    <div className="flex space-x-3 items-center">
+                      <PrintQuotation
+                        quotationId={quotationId}
+                        hasList={hasList}
+                      />
+                    </div>
+                  </ItemList>
+                )
+            }
+          </>
         )}
         {isAdmin && (
           <>
@@ -377,7 +392,9 @@ const MainForm = (props: {
                 ) : (
                   <div className="flex space-x-2 items-center">
                     <InfoIcon className="w-4 h-4 text-orange-500" />
-                    <p className="text-orange-500 text-sm">ต้องมีใบวางบิล และใบแจ้งหนี้ก่อน</p>
+                    <p className="text-orange-500 text-sm">
+                      ต้องมีใบวางบิล และใบแจ้งหนี้ก่อน
+                    </p>
                   </div>
                 )}
               </ItemList>
