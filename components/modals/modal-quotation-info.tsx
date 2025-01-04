@@ -274,6 +274,7 @@ const MainForm = (props: {
                 hasList={hasList}
                 currentStatus={status}
                 onApprove={(s) => {
+                  shouldCloseModal.current = true;
                   handleItemChange({
                     status: s,
                   });
