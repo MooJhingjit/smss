@@ -11,7 +11,7 @@ export async function generateTaxInvoice(
     const quotation = await getQuotationById(quotationId);
 
     if (!quotation || !quotation.billGroupId) {
-      throw new Error(`Quotation with id ${quotationId} not found`);
+      throw new Error(`Quotation with id ${quotationId} not found, or it does not have a bill group id`);
     }
 
     const invoice = await db.invoice.findFirst({
