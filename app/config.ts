@@ -73,3 +73,4 @@ export const productTypeMapping = {
   product: "สินค้า",
   service: "บริการ",
 };
+
