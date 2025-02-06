@@ -14,6 +14,7 @@ export async function POST(
     // Generate the merged PDF
     const mergedPdfBytes = await generateTaxInvoice(parseInt(id), data.date);
 
+    
     // Set response headers and return the merged PDF
     const headers = new Headers();
     headers.set('Content-Type', 'application/pdf');
