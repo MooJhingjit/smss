@@ -29,7 +29,6 @@ export const columns: ColumnDef<User & { user?: Contact }>[] = [
       const { name, isProtected } = row.original;
       return (
         <div className="flex items-center space-x-2">
-          <p>{name}</p>
           {isProtected && (
             <div
               className="flex items-center space-x-2"
@@ -38,6 +37,8 @@ export const columns: ColumnDef<User & { user?: Contact }>[] = [
               <ShieldCheck className="w-5 h-5 text-green-700" />
             </div>
           )}
+          <p>{name}</p>
+
         </div>
       );
     },

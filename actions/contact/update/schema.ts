@@ -10,13 +10,7 @@ export const ContactSchema = z.object({
     .min(3, {
       message: "Name is too short.",
     }),
-  email: z
-    .string({
-      required_error: "Email is required",
-    })
-    .email({
-      message: "Email is invalid.",
-    }),
+  email: z.string().email().optional().or(z.literal("")),
     branchId: z.string().optional(),
   phone: z.string().optional(),
   contact: z.string().optional(),
