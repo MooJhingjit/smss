@@ -47,7 +47,7 @@ model Contact {
   sellerId    Int?
   user        User?       @relation(fields: [sellerId], references: [id], name: "seller")
   name        String
-  email       String      @unique
+  email       String?     
   taxId       String?     @unique
   branchId    String?     
   phone       String?
