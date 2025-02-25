@@ -28,6 +28,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       },
     });
   } catch (error) {
+    console.log("🚀 ~ handler ~ error:", error)
     return {
       error: "Failed to create.",
     };
