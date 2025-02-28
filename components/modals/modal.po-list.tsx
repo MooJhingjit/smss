@@ -396,12 +396,6 @@ const NewItemForm = ({ data }: { data: Item }) => {
           label="ระยะเวลาการรับประกัน"
           type="date"
           register={register}
-          // defaultValue={
-          //   item?.warrantyDate
-          //     ? new Date(item.warrantyDate).toISOString().slice(0, 10)
-          //     : undefined
-          // }
-          // errors={fieldErrors}
         />
       </div>
       <div className="col-span-2">
