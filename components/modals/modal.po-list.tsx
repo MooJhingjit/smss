@@ -410,8 +410,6 @@ const NewItemForm = ({ data }: { data: Item }) => {
           label="หมายเหตุ"
           type="text"
           register={register}
-          // defaultValue={item?.name}
-          // errors={fieldErrors}
         />
       </div>
       <div className="col-span-4 flex justify-end">
