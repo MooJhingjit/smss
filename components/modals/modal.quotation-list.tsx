@@ -491,7 +491,6 @@ const SubItems = ({
               className="w-20"
             />
 
-            {/* <input type="text" value={item.label} placeholder="Sub Item" className="input input-bordered" /> */}
             <MinusCircle
               onClick={() => handleRemove(index)}
               className="text-red-300 w-5  hover:text-red-400 cursor-pointer"
