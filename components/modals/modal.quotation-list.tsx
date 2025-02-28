@@ -205,20 +205,6 @@ export const QuotationListModal = () => {
     watch("unitPrice"),
   ]);
 
-  // useEffect(() => {
-  //   // summary for service
-  //   const unitPrice = watch("unitPrice");
-  //   const quantity = watch("quantity");
-  //   const discount = watch("discount");
-  //   let totalPrice = parseFloat(unitPrice);
-  //   if (quantity) {
-  //     totalPrice = parseFloat(unitPrice) * parseFloat(quantity);
-  //   }
-  //   if (discount) {
-  //     totalPrice = totalPrice - parseFloat(discount);
-  //   }
-  //   setValue("totalPrice", totalPrice.toString());
-  // }, [watch("unitPrice"), watch("quantity"), watch("discount")]);
 
   const subItems = getValues("subItems");
 
