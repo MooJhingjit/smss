@@ -170,10 +170,14 @@ export const QuotationListModal = () => {
 
   useEffect(() => {
     const cost = watch("cost");
-    const percentage = watch("percentage");
-    if (cost && percentage) {
-      const unitPrice =
-        parseFloat(cost) + (parseFloat(cost) * parseFloat(percentage)) / 100;
+    const unitPrice = parseFloat(watch("unitPrice") || "0");
+    if (cost && unitPrice) {
+      const percentage = (
+        ((unitPrice - parseFloat(cost)) / parseFloat(cost)) *
+        100
+      ).toFixed(3);
+      setValue("percentage", percentage.toString());
+
       // multiply by quantity
       const quantity = watch("quantity");
       // console.log("quantity", quantity)
@@ -181,7 +185,6 @@ export const QuotationListModal = () => {
       if (quantity) {
         totalPrice = unitPrice * parseFloat(quantity);
       }
-      setValue("unitPrice", unitPrice.toString());
 
       // calculate tax 7%
       const tax = (totalPrice * 7) / 100;
@@ -200,6 +203,7 @@ export const QuotationListModal = () => {
     watch("percentage"),
     watch("quantity"),
     watch("discount"),
+    watch("unitPrice"),
   ]);
 
   // useEffect(() => {
@@ -251,7 +255,6 @@ export const QuotationListModal = () => {
               label: defaultData?.product.name,
             }}
             onSelected={(item) => {
-              console.log(item);
               setValue("name", item.data.name);
               setValue("percentage", item.data.percentage);
               setValue("cost", item.data.cost);
@@ -288,8 +291,9 @@ export const QuotationListModal = () => {
           <FormInput
             key={`percentage_${refs?.timestamps}`}
             id="percentage"
-            label="กำไร (%)"
+            label="กำไรโดยประมาณ (%)"
             required
+            readOnly
             type="number"
             register={register}
             errors={fieldErrors}
@@ -302,7 +306,6 @@ export const QuotationListModal = () => {
             label="ราคาขายต่อหน่วย"
             required
             type="number"
-            readOnly
             register={register}
             errors={fieldErrors}
           />
@@ -335,7 +338,7 @@ export const QuotationListModal = () => {
 
         <div className="">
           <FormInput
-            key={`withholdingTax_${refs?.timestamps}`}  // need to change to vat
+            key={`withholdingTax_${refs?.timestamps}`} // need to change to vat
             id="withholdingTax"
             label="ภาษีทั้งหมด"
             type="number"
