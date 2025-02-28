@@ -9,7 +9,7 @@ import {
 import { usePurchaseOrderListModal } from "@/hooks/use-po-list-modal";
 import { FormInput } from "../form/form-input";
 import { useForm } from "react-hook-form";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { FormSubmit } from "../form/form-submit";
 import { useAction } from "@/hooks/use-action";
 import { toast } from "sonner";
@@ -41,7 +41,6 @@ export const PurchaseOrderListModal = () => {
   const modal = usePurchaseOrderListModal();
   const defaultData = modal.data;
   const purchaseOrderRelations = modal.refs;
-  // const timestamps = useRef<string | undefined>();
   const { register, reset, setValue, getValues, watch } = useForm<FormInput>({
     mode: "onChange",
   });
