@@ -206,9 +206,7 @@ export const QuotationListModal = () => {
   ]);
 
   // useEffect(() => {
-
   //   // summary for service
-
   //   const unitPrice = watch("unitPrice");
   //   const quantity = watch("quantity");
   //   const discount = watch("discount");
