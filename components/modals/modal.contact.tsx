@@ -67,7 +67,6 @@ export const ContactModal = () => {
       isProtected: isProtected === "on",
     };
     if (contact?.id) {
-      // update user
       handleUpdate.execute({
         id: contact.id,
         ...payload,
