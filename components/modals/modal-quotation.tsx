@@ -90,7 +90,6 @@ export const NewQuotationModal = () => {
               onSelected={(item) => {
                 setCustomerDetails(item.data);
               }}
-              // errors={fieldErrors}
             />
           </div>
           {customerDetails && (
