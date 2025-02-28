@@ -185,7 +185,6 @@ export const QuotationListModal = () => {
       if (quantity) {
         totalPrice = unitPrice * parseFloat(quantity);
       }
-
       // calculate tax 7%
       const tax = (totalPrice * 7) / 100;
       setValue("withholdingTax", tax.toString());
