@@ -401,7 +401,7 @@ const MainForm = (props: {
               </div>
             </ItemList>
 
-            <ItemList label="เงื่อนไงการชำระเงิน">
+            <ItemList label="เงื่อนไขการชำระเงิน">
               <div className="space-x-8 flex items-center  ">
                 <PaymentCondition
                   defaultValue={data.paymentCondition || "cash"}
