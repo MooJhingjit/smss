@@ -21,7 +21,8 @@ async function getData(): Promise<
     QuotationWithBuyer[],
     PurchaseOrderWithVendor[],
     { _sum: { totalPrice: number | null } },
-    { _sum: { totalPrice: number | null } }
+    { _sum: { totalPrice: number | null } },
+    { _sum: { grandTotal: number | null } }
   ]
 > {
   const quotations = db.quotation.findMany({
@@ -106,12 +107,23 @@ async function getData(): Promise<
     },
   });
 
+  const saleTotalWithVat = db.quotation.aggregate({
+    _sum: {
+      grandTotal: true,
+    },
+    where: {
+      createdAt: {
+        gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1), 
+      },
+    },
+  });
+
   const orderAmount = db.purchaseOrder.aggregate({
     _sum: {
       totalPrice: true,
     },
     where: {
-      updatedAt: {
+      createdAt: {
         gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
       },
     },
@@ -124,7 +136,8 @@ async function getData(): Promise<
     quotationsDueDate,
     purchaseOrdersDueDate,
     saleTotal,
-    orderAmount
+    orderAmount,
+    saleTotalWithVat
   ]);
   return data;
 }
@@ -137,7 +150,8 @@ export default async function AdminHomePage() {
     quotationsDueDate,
     purchaseOrdersDueDate,
     saleTotal,
-    orderAmount
+    orderAmount,
+    saleTotalWithVat
   ] = await getData();
 
   return (
@@ -147,6 +161,7 @@ export default async function AdminHomePage() {
           <div className="h-full w-full">
             <ShortcutMenus
               saleTotal={saleTotal._sum.totalPrice ?? 0}
+              saleTotalWithVat={saleTotalWithVat._sum.grandTotal ?? 0}
               orderAmount={orderAmount._sum.totalPrice ?? 0}
             />
           </div>

@@ -10,10 +10,15 @@ import { Badge } from "@/components/ui/badge";
 type StatProps = {
   saleTotal: number;
   orderAmount: number;
+  saleTotalWithVat: number;
 };
 type Props = StatProps;
 
-export default function ShortcutMenus({ saleTotal, orderAmount }: Props) {
+export default function ShortcutMenus({
+  saleTotal,
+  orderAmount,
+  saleTotalWithVat,
+}: Props) {
   return (
     <div className="grid  grid-cols-4 lg:grid-cols-5 gap-4">
       <MenuItem
@@ -59,7 +64,11 @@ export default function ShortcutMenus({ saleTotal, orderAmount }: Props) {
         link="/contacts"
       />
 
-      <Stats saleTotal={saleTotal} orderAmount={orderAmount} />
+      <Stats
+        saleTotal={saleTotal}
+        saleTotalWithVat={saleTotalWithVat}
+        orderAmount={orderAmount}
+      />
     </div>
   );
 }
@@ -87,7 +96,7 @@ const MenuItem = (props: {
   );
 };
 
-const Stats = ({ saleTotal, orderAmount }: StatProps) => {
+const Stats = ({ saleTotal, orderAmount, saleTotalWithVat }: StatProps) => {
   const firstDay = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
   const lastDay = new Date(
     new Date().getFullYear(),
@@ -96,19 +105,27 @@ const Stats = ({ saleTotal, orderAmount }: StatProps) => {
   );
 
   return (
-    <div className="col-span-4 lg:p-4  relative flex items-center justify-center space-x-6 border rounded-lg shadow-lg overflow-hidden">
+    <div className="col-span-4 lg:p-2  relative  border rounded-lg shadow-lg overflow-hidden">
       {/* <div className="absolute inset-0 bg-gray-100  rounded-lg opacity-10 z-10 h-full"></div> */}
-      <div className="">
+      {/* <div className="">
         <p className=" text-sm">สรุปข้อมูลในช่วง</p>
         <div className="flex items-center justify-center space-x-2 mt-2">
           <Badge variant="secondary">{getDateFormat(firstDay)}</Badge>
           {" - "}
           <Badge variant="secondary">{getDateFormat(lastDay)}</Badge>
         </div>
+      </div> */}
+
+      <div className="flex items-center  space-x-2">
+        <p className=" text-sm">สรุปข้อมูลในช่วง</p>
+
+        <Badge variant="secondary">{getDateFormat(firstDay)}</Badge>
+        {" - "}
+        <Badge variant="secondary">{getDateFormat(lastDay)}</Badge>
       </div>
 
-      <div className="flex items-center justify-center space-x-6  flex-1">
-        <div className=" lg:border-gray-900/5 lg:border-t-0 lg:mb-0 z-20">
+      <div className="flex  w-full  justify-between    flex-1 ">
+        <div className=" lg:border-gray-900/5 lg:border-t-0 lg:mb-0 z-20 flex-1">
           <dt className="text font-medium leading-6 flex space-x-1 text-slate-700 ">
             {/* <CircleDollarSign className='w-5 h-5' strokeWidth={1.5} /> */}
             <p>ยอดขาย</p>
@@ -116,11 +133,12 @@ const Stats = ({ saleTotal, orderAmount }: StatProps) => {
           <dd className="mt-1 w-full flex-none font-medium  text-slate-700 ">
             {getPriceFormat(saleTotal)}
           </dd>
+          <dd className="mt-1 w-full flex-none font-medium  text-slate-700 ">
+            {getPriceFormat(saleTotalWithVat) + " (+VAT)"}
+          </dd>
         </div>
 
-        <Separator orientation="vertical" />
-
-        <div className="justify-center border-gray-900/5 lg:border-t-0 ">
+        <div className="justify-center border-gray-900/5 lg:border-t-0 flex-1 ">
           <dt className="text font-medium leading-6  flex space-x-1 text-slate-700">
             {/* <CircleDollarSign className='w-5 h-5 ' strokeWidth={1.5} /> */}
             <p>ยอดสั่งซื้อ</p>
