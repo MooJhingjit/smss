@@ -1,13 +1,20 @@
 import { db } from "@/lib/db";
+import { Contact, Quotation, QuotationList, User } from "@prisma/client";
 import {
-  Contact,
-  Quotation,
-  QuotationList,
-  User,
-} from "@prisma/client";
-import { PDFDocument, PDFFont, PDFPage, rgb, PDFEmbeddedPage, degrees } from "pdf-lib";
+  PDFDocument,
+  PDFFont,
+  PDFPage,
+  rgb,
+  PDFEmbeddedPage,
+  degrees,
+} from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
-import { getBoundingBox, getPaymentCondition, loadSignatureImage, PDFDateFormat } from "./pdf.helpers";
+import {
+  getBoundingBox,
+  getPaymentCondition,
+  loadSignatureImage,
+  PDFDateFormat,
+} from "./pdf.helpers";
 import { getDateFormat } from "@/lib/utils";
 import path from "path";
 import { readFile } from "fs/promises";
@@ -103,10 +110,13 @@ const generate = async (id: number) => {
     amount: ITEM_X_Start + 462,
   };
 
-  const fontResolvePath =  path.resolve('./public', 'fonts/Sarabun-Regular.ttf')
+  const fontResolvePath = path.resolve("./public", "fonts/Sarabun-Regular.ttf");
   const fontPath = path.join(fontResolvePath);
 
-  const templateResolvePath =  path.resolve('./public', 'pdf/quotation-template.pdf')
+  const templateResolvePath = path.resolve(
+    "./public",
+    "pdf/quotation-template.pdf"
+  );
 
   const pdfTemplatePath = path.join(templateResolvePath);
   const [pdfDoc, fontData, existingPdfBytes] = await Promise.all([
@@ -114,7 +124,6 @@ const generate = async (id: number) => {
     readFile(fontPath),
     readFile(pdfTemplatePath),
   ]);
-
 
   pdfDoc.registerFontkit(fontkit);
   _FONT = await pdfDoc.embedFont(fontData as any, { subset: true });
@@ -133,7 +142,6 @@ const generate = async (id: number) => {
     data: QuotationList,
     lineStart: number
   ) => {
-
     // Description
     currentPage.drawText((index + 1).toString(), {
       x: columnPosition.index,
@@ -187,9 +195,9 @@ const generate = async (id: number) => {
     let itemAmount = 0;
     if (data.unitPrice) {
       const quantity = data?.quantity || 1;
-      itemAmount = data.unitPrice * quantity
+      itemAmount = data.unitPrice * quantity;
     }
-    const amountText = itemAmount.toLocaleString("th-TH", CURRENCY_FORMAT)
+    const amountText = itemAmount.toLocaleString("th-TH", CURRENCY_FORMAT);
 
     currentPage.drawText(amountText, {
       x: columnPosition.amount + 44 - getTextWidth(amountText, config),
@@ -273,30 +281,33 @@ const generate = async (id: number) => {
   // drawSignature
   // approver
   // const approverSignatureImageBytes = await readFile(path.join(process.cwd(), "/public/signature/1.png"));
-  const approverSignature = await loadSignatureImage("1");
-  const approverSignatureImage = await page.doc.embedPng(approverSignature.imageBytes as any);
+  const approverSignature = await loadSignatureImage("2");
+  const approverSignatureImage = await page.doc.embedPng(
+    approverSignature.imageBytes as any
+  );
   page.drawImage(approverSignatureImage, {
     x: 440,
     y: 60,
-    ...approverSignatureImage.scale(approverSignature.scale)
-
-  })
+    ...approverSignatureImage.scale(approverSignature.scale),
+  });
   page.drawText(_BILL_DATE, {
     x: 440,
     y: 45,
-    ...config
-  })
+    ...config,
+  });
 
   // seller
   const sellerId = _DATA.seller?.id;
   if (sellerId) {
     const sellerSignature = await loadSignatureImage(sellerId.toString());
-    const sellerSignatureImage = await page.doc.embedPng(sellerSignature.imageBytes as any);
+    const sellerSignatureImage = await page.doc.embedPng(
+      sellerSignature.imageBytes as any
+    );
     page.drawImage(sellerSignatureImage, {
       x: 280,
       y: 60,
-      ...approverSignatureImage.scale(sellerSignature.scale)
-    })
+      ...approverSignatureImage.scale(sellerSignature.scale),
+    });
   }
 
   drawStaticInfo(page, currentPageNumber);
@@ -418,7 +429,8 @@ const drawCustomerInfo = (page: PDFPage, contact: Contact) => {
   const Y_Start = 670;
   const X_Start = 80;
   // name + branchId
-  const fullContact = contact.name + (contact.branchId ? ` (${contact.branchId})` : "");
+  const fullContact =
+    contact.name + (contact.branchId ? ` (${contact.branchId})` : "");
   page.drawText(fullContact, {
     x: X_Start,
     y: Y_Start,
@@ -442,21 +454,21 @@ const drawCustomerInfo = (page: PDFPage, contact: Contact) => {
 
   page.drawText(contact.phone ?? "", {
     x: 440,
-    y: Y_Start - (config.lineHeight),
+    y: Y_Start - config.lineHeight,
     maxWidth: 100,
     ...config,
   });
 
   page.drawText(contact.fax ?? "", {
     x: 440,
-    y: Y_Start - (config.lineHeight * 2),
+    y: Y_Start - config.lineHeight * 2,
     maxWidth: 100,
     ...config,
   });
 
   page.drawText(contact.email ?? "", {
     x: 440,
-    y: Y_Start - (config.lineHeight * 3),
+    y: Y_Start - config.lineHeight * 3,
     maxWidth: 100,
     ...config,
   });
@@ -469,13 +481,11 @@ const drawOfferInfo = (
     paymentDue,
     deliveryPeriod,
     validPricePeriod,
-    paymentCondition,
   }: {
     sellerName: string;
     paymentDue: string;
     deliveryPeriod: string;
     validPricePeriod: string;
-    paymentCondition: string;
   }
 ) => {
   if (!_FONT) return;
@@ -493,12 +503,12 @@ const drawOfferInfo = (
     ...config,
   });
 
-  page.drawText(getPaymentCondition(paymentCondition), {
-    x: 265,
-    y: Y_Start,
-    maxWidth: 150,
-    ...config,
-  });
+  // page.drawText(getPaymentCondition(paymentCondition), {
+  //   x: 265,
+  //   y: Y_Start,
+  //   maxWidth: 150,
+  //   ...config,
+  // });
 
   page.drawText(paymentDue, {
     x: 260,
@@ -536,7 +546,6 @@ const drawRemarkInfo = (page: PDFPage, text: string) => {
     ...config,
   });
 };
-
 
 const drawPriceInfo = (
   page: PDFPage,
@@ -596,7 +605,6 @@ type ListConfig = {
   font: PDFFont;
 };
 
-
 const END_POSITION = 210;
 let currentPageNumber = 1;
 const validatePageArea = (
@@ -634,10 +642,7 @@ const getTextWidth = (text: string, config: ListConfig) => {
   return config.font.widthOfTextAtSize(text, config.size);
 };
 
-const drawStaticInfo = (
-  page: PDFPage,
-  currentPageNumber: number
-) => {
+const drawStaticInfo = (page: PDFPage, currentPageNumber: number) => {
   if (!_DATA) return;
   drawHeaderInfo(page, currentPageNumber, {
     code: _DATA.code,
@@ -646,12 +651,17 @@ const drawStaticInfo = (
   drawCustomerInfo(page, _DATA.contact);
   drawOfferInfo(page, {
     sellerName: _DATA.seller?.name ?? "",
-    paymentDue: _DATA.paymentDue
-      ? "ไม่เกิน " + getDateFormat(_DATA.paymentDue)
+    paymentDue:
+      _DATA.paymentType === "credit"
+        ? "ไม่เกิน " + _DATA.paymentCondition + "วัน"
+        : "เงินสด",
+    deliveryPeriod: _DATA.deliveryPeriod
+      ? _DATA.deliveryPeriod?.toString() + " วัน"
       : "",
-    deliveryPeriod: _DATA.deliveryPeriod?.toString() ?? "",
-    validPricePeriod: _DATA.validPricePeriod?.toString() ?? "",
-    paymentCondition: _DATA.paymentCondition ?? "",
+    validPricePeriod: _DATA.validPricePeriod 
+      ? _DATA.validPricePeriod?.toString() + " วัน"
+      : "",
+    // paymentCondition: _DATA.paymentCondition ?? "",
   });
   drawRemarkInfo(page, _DATA.remark ?? "");
 

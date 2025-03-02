@@ -116,7 +116,13 @@ export const PurchaseInfoModal = () => {
   );
 };
 
-const MainForm = ({ data }: { data: PurchaseOrderWithRelations }) => {
+const MainForm = ({
+  data: originalData,
+}: {
+  data: PurchaseOrderWithRelations;
+}) => {
+  const [data, setData] = React.useState(originalData);
+
   const { mutate } = useMutation<
     MutationResponseType,
     Error,
@@ -124,6 +130,7 @@ const MainForm = ({ data }: { data: PurchaseOrderWithRelations }) => {
       status?: PurchaseOrderStatus;
       paymentDue?: string;
       paymentType?: PurchaseOrderPaymentType;
+      vendorQtCode?: string;
     }
   >({
     mutationFn: async (fields) => {
@@ -138,52 +145,51 @@ const MainForm = ({ data }: { data: PurchaseOrderWithRelations }) => {
     },
   });
 
-  // // quotation mutation
-  // const { mutate: qtMutate } = useMutation<
-  //   MutationResponseType,
-  //   Error,
-  //   {
-  //     status?: QuotationStatus;
-  //   }
-  // >({
-  //   mutationFn: async (fields) => {
-  //     if (!quotationId) {
-  //       return;
-  //     }
-  //     return await QT_SERVICES.put(quotationId, {
-  //       ...fields,
-  //     });
-  //   },
-  //   onSuccess: async (n) => {
-  //     toast.success("อัพเดทสถานะ QT สำเร็จ");
-  //     customRevalidatePath(`/purchase-orders/${data.id}`);
-  //   },
-  // });
-
-  const handleChange = (payload: {
+  const handleItemChange = (payload: {
     status?: PurchaseOrderStatus;
     paymentDue?: string;
     paymentType?: PurchaseOrderPaymentType;
     vendorQtCode?: string;
   }) => {
-    // update what is provided
-    let payloadBody: any = {};
-    if (payload.status) {
-      payloadBody["status"] = payload.status;
-    }
-    if (payload.paymentDue || payload.paymentDue === "") {
-      payloadBody["paymentDue"] = payload.paymentDue
-        ? new Date(payload.paymentDue).toISOString()
-        : null;
+    let payloadBody: Record<string, any> = {};
+
+    const updateField = <T,>(
+      key: string,
+      newValue: T | undefined,
+      oldValue: T,
+      allowEmpty: boolean = false,
+      transform: (v: T) => any = (v) => v
+    ) => {
+      console.log("🚀 ~ newValue:", newValue)
+      if (
+        newValue !== undefined &&
+        (allowEmpty ? newValue !== oldValue : newValue && newValue !== oldValue)
+      ) {
+        payloadBody[key] = transform(newValue);
+ 
+        // Update local state
+        setData((prev) => ({
+          ...prev,
+          [key]: payloadBody[key],
+        }));
+      }
+    };
+
+    updateField("status", payload.status, data.status);
+    updateField(
+      "paymentDue",
+      payload.paymentDue,
+      data.paymentDue?.toISOString()?.split("T")[0],
+      true,
+      (v) => (v ? new Date(v) : null)
+    );
+    updateField("paymentType", payload.paymentType, data.paymentType);
+    updateField("vendorQtCode", payload.vendorQtCode, data.vendorQtCode, true);
+
+    if (Object.keys(payloadBody).length === 0) {
+      return;
     }
 
-    payloadBody["vendorQtCode"] = payload.vendorQtCode;
-
-    if (payload.paymentType) {
-      payloadBody["paymentType"] = payload.paymentType;
-    }
-
-    // call mutation
     mutate(payloadBody);
   };
 
@@ -209,28 +215,20 @@ const MainForm = ({ data }: { data: PurchaseOrderWithRelations }) => {
     },
   });
 
-  // const quotationCode = data.quotation
-  // const quotationStatus = data.quotation?
-
   return (
     <div className="space-y-2">
       <div className="grid grid-cols-12   gap-6 ">
         <ItemList label="สถานะ PO">
           <div className=" text-sm leading-6 text-gray-700 flex space-x-2">
-            {/* {isLocked && (
-              <div className="col-span-1 flex items-center">
-                <LockIcon className="w-4 h-4 text-yellow-500" />
-              </div>
-            )} */}
             <div className="">
               <StatusDropdown
                 onStatusChange={(s) => {
-                  handleChange({ status: s });
+                  handleItemChange({ status: s });
 
                   // sync status to quotation
                   let qtStatus: QuotationStatus | undefined;
                   if (s === "draft") {
-                    qtStatus = "draft" as QuotationStatus;
+                    qtStatus = "po_preparing" as QuotationStatus;
                   } else if (s === "po_sent") {
                     qtStatus = "po_sent" as QuotationStatus;
                   } else if (s === "product_received") {
@@ -263,7 +261,7 @@ const MainForm = ({ data }: { data: PurchaseOrderWithRelations }) => {
 
         <ItemList label="การชำระเงิน">
           <PaymentOptionControl
-            onUpdate={handleChange}
+            onUpdate={handleItemChange}
             paymentType={data.paymentType}
             paymentDue={data.paymentDue?.toDateString() ?? ""}
           />
@@ -277,7 +275,7 @@ const MainForm = ({ data }: { data: PurchaseOrderWithRelations }) => {
               defaultValue={data.vendorQtCode}
               onBlur={(e) => {
                 const vendorQtCode = e.target.value ?? "";
-                handleChange({ vendorQtCode });
+                handleItemChange({ vendorQtCode });
               }}
             />
           </div>

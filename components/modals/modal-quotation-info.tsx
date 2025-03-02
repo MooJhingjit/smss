@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useQuotationInfoModal } from "@/hooks/use-quotation-info-modal";
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { ChevronsUpDown } from "lucide-react";
 
 import {
@@ -66,7 +66,7 @@ export const QuotationInfoModal = () => {
 
   return (
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
-      <DialogContent className="sm:max-w-[550px]">
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>
             <div className="flex space-x-1 items-center">
@@ -79,7 +79,7 @@ export const QuotationInfoModal = () => {
 
         <MainForm
           closeModal={modal.onClose}
-          data={data}
+          originalData={data}
           hasList={data.lists ? data.lists.length > 0 : false}
         />
         <DialogFooter className="border-t pt-6">
@@ -123,12 +123,15 @@ export const QuotationInfoModal = () => {
 };
 
 const MainForm = (props: {
-  data: QuotationWithRelations;
+  originalData: QuotationWithRelations;
   hasList: boolean;
   closeModal: () => void;
 }) => {
-  const { hasList, data, closeModal } = props;
+  const { hasList, originalData, closeModal } = props;
   const isAdmin = useIsAdmin();
+
+  const [data, setData] = useState(originalData);
+
   const {
     id: quotationId,
     status,
@@ -179,44 +182,77 @@ const MainForm = (props: {
     validPricePeriod?: string;
     type?: "product" | "service";
   }) => {
-    // update what is provided
+    console.log("🚀 ~ data:", data)
+    console.log("🚀 ~ payload:", payload)
     let payloadBody: Record<string, any> = {};
-    if (payload.status) {
-      payloadBody["status"] = payload.status;
-    }
-    if (payload.paymentDue || payload.paymentDue === "") {
-      payloadBody["paymentDue"] = payload.paymentDue
-        ? new Date(payload.paymentDue).toISOString()
-        : null;
+
+    const updateField = <T,>(
+      key: string,
+      newValue: T | undefined,
+      oldValue: T,
+      transform: (v: T) => any = (v) => v,
+      allowEmpty: boolean = false
+    ) => {
+      // console.log("🚀 ~ newValue:", newValue)
+      // console.log("🚀 ~ oldValue:", oldValue)
+      // For fields that allow empty strings, we only check for undefined.
+      // Otherwise, we require a truthy value.
+      console.log("🚀 ~ newValue:", newValue)
+      console.log("🚀 ~ oldValue:", oldValue)
+
+      if (
+        newValue !== undefined &&
+        (allowEmpty ? newValue !== oldValue : newValue && newValue !== oldValue)
+      ) {
+        payloadBody[key] = transform(newValue);
+
+        // Update local state
+        setData((prev) => ({
+          ...prev,
+          [key]: payloadBody[key],
+        }));
+      }
+    };
+
+    updateField("status", payload.status, status);
+    updateField(
+      "paymentDue",
+      payload.paymentDue,
+      data.paymentDue?.toISOString()?.split("T")[0],
+      (v) => (v ? new Date(v) : null),
+      true
+    );
+    updateField("paymentType", payload.paymentType, data.paymentType);
+    updateField(
+      "purchaseOrderRef",
+      payload.purchaseOrderRef,
+      data.purchaseOrderRef
+    );
+    updateField(
+      "deliveryPeriod",
+      payload.deliveryPeriod,
+      data.deliveryPeriod?.toString(),
+      (v) => (v ? parseInt(v) : null),
+      true
+    );
+    updateField(
+      "validPricePeriod",
+      payload.validPricePeriod,
+      data.validPricePeriod?.toString(),
+      (v) => (v ? parseInt(v) : null),
+      true
+    );
+    updateField("type", payload.type, data.type);
+    updateField(
+      "paymentCondition",
+      payload.paymentCondition,
+      data.paymentCondition
+    );
+
+    if (Object.keys(payloadBody).length === 0) {
+      return;
     }
 
-    if (payload.paymentType) {
-      payloadBody["paymentType"] = payload.paymentType;
-    }
-
-    if (payload.purchaseOrderRef) {
-      payloadBody["purchaseOrderRef"] = payload.purchaseOrderRef;
-    }
-
-    if (payload.deliveryPeriod || payload.deliveryPeriod === "") {
-      payloadBody["deliveryPeriod"] = payload.deliveryPeriod
-        ? parseInt(payload.deliveryPeriod)
-        : null;
-    }
-
-    if (payload.validPricePeriod || payload.validPricePeriod === "") {
-      payloadBody["validPricePeriod"] = payload.validPricePeriod
-        ? parseInt(payload.validPricePeriod)
-        : null;
-    }
-
-    if (payload.type) {
-      payloadBody["type"] = payload.type;
-    }
-
-    payloadBody["paymentCondition"] = payload.paymentCondition;
-
-    // call mutation
     mutate(payloadBody);
   };
 
@@ -284,12 +320,13 @@ const MainForm = (props: {
           </div>
         </ItemList>
 
-        <ItemList label="ระยะเวลาการส่งมอบ">
+        <ItemList label="ระยะเวลาการส่งมอบ (วัน)">
           <div className="flex space-x-3 items-center">
             <FormInput
               id="deliveryPeriod"
               className="text-xs w-full"
               placeholder="จำนวนวัน"
+              type="number"
               defaultValue={deliveryPeriod}
               onBlur={(e) => {
                 const deliveryPeriod = e.target.value ?? "";
@@ -298,11 +335,12 @@ const MainForm = (props: {
             />
           </div>
         </ItemList>
-        <ItemList label="ระยะเวลาการยืนราคา">
+        <ItemList label="ระยะเวลาการยืนราคา (วัน)">
           <div className="flex space-x-3 items-center">
             <FormInput
               id="validPricePeriod"
               className="text-xs w-full"
+              type="number"
               placeholder="จำนวนวัน"
               defaultValue={validPricePeriod}
               onBlur={(e) => {
@@ -334,19 +372,17 @@ const MainForm = (props: {
                 />
               </div>
             </ItemList>
-            {
-              data.status !== QuotationStatus.open &&
-                data.status !== QuotationStatus.pending_approval && (
-                  <ItemList label="พิมพ์ใบเสนอราคา">
-                    <div className="flex space-x-3 items-center">
-                      <PrintQuotation
-                        quotationId={quotationId}
-                        hasList={hasList}
-                      />
-                    </div>
-                  </ItemList>
-                )
-            }
+            {data.status !== QuotationStatus.open &&
+              data.status !== QuotationStatus.pending_approval && (
+                <ItemList label="พิมพ์ใบเสนอราคา">
+                  <div className="flex space-x-3 items-center">
+                    <PrintQuotation
+                      quotationId={quotationId}
+                      hasList={hasList}
+                    />
+                  </div>
+                </ItemList>
+              )}
           </>
         )}
         {isAdmin && (
@@ -726,7 +762,7 @@ const ItemList = ({
       <div className=" flex justify-between items-center px-6 h-full">
         <div className="flex space-x-2 items-center">
           {label && (
-            <p className="text-sm leading-6 text-gray-600 max-w-[150px] whitespace-pre-wrap">
+            <p className="text-sm leading-6 text-gray-600 max-w-[150px] whitespace-nowrap">
               {label}
             </p>
           )}

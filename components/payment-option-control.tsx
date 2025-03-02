@@ -59,7 +59,7 @@ export default function PaymentOptionControl(props: Props) {
             defaultValue={paymentDue}
             onChange={(e) => {
               const value = e.target.value;
-              if (!value || paymentDue === value) return;
+              // if (!value || paymentDue === value) return;
               onUpdate({
                 paymentDue: value,
                 paymentType: PurchaseOrderPaymentType.credit,

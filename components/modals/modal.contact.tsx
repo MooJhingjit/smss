@@ -20,7 +20,6 @@ import { useIsAdmin } from "@/hooks/use-is-admin";
 export const ContactModal = () => {
   const modal = useContactModal();
   const contact = modal.data;
-  console.log("🚀 ~ ContactModal ~ contact:", contact)
   const isAdmin = useIsAdmin();
 
 

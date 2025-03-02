@@ -228,7 +228,7 @@ const drawHeaderInfo = (page: PDFPage) => {
     ...config,
   });
 
-  page.drawText("Group Bill Id", {
+  page.drawText("Group Bill Id", { // 2025-03027
     x: X_Start + 400,
     y: Y_Start,
     maxWidth: 50,

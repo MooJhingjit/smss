@@ -70,7 +70,7 @@ export default function QuotationInfo(props: Readonly<Props>) {
           label: "วิธีการชำระเงิน",
           value: paymentTypeMapping[data.paymentType],
         },
-        { label: "เงือนไขการชำระเงิน", value: paymentConditionLabel ?? "-" },
+        { label: "เงื่อนไขการชำระเงิน", value: `${paymentConditionLabel ?? "-"} ${data.paymentType === "credit"? "วัน" : ""}` },
         {
           label: "ระยะเวลาการส่งมอบ",
           value: `${data.deliveryPeriod ?? "-"} วัน`,
