@@ -87,7 +87,7 @@ export default function TableLists<T>(props: Readonly<Props<T>>) {
           ))}
         </TableRow>
       </TableHeader>
-      <TableBody className="divide-y divide-gray-200 bg-white">
+      <TableBody className="divide-y divide-gray-200 bg-white" >
         {data.map((item: any, rowIdx) => (
           <TableRow key={item.id} className="hover:bg-gray-50">
             {link && (

@@ -100,8 +100,8 @@ async function getData(): Promise<
       totalPrice: true,
     },
     where: {
-      updatedAt: {
-        gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+      createdAt: {
+        gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1), 
       },
     },
   });

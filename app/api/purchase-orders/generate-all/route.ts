@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import { db } from "@/lib/db";
-import { generateCode } from "@/lib/utils";
+import { generateCode, parseSequenceNumber } from "@/lib/utils";
 import {
   groupQuotationByVendor,
   calculateQuotationItemPrice,
@@ -26,11 +26,9 @@ export async function POST(req: NextRequest) {
     const quotationListsByVendor = groupQuotationByVendor(
       quotationLists as QuotationListWithRelations[]
     );
-
-    // const { sumTotalPrice, sumDiscount, sumTotalTax, grandTotal } =
-    //   summarizeQuotationTotalPrice(quotationListsByVendor);
-
-    // const { totalPrice, tax, discount } = calculateQuotationItemPrice(quotationLists)
+    
+    // const today = new Date(Date.UTC(2025, 1, 1));
+    const today = new Date();
 
     // create purchase orders for each vendor
     const purchaseOrders = await Promise.all(
@@ -52,11 +50,37 @@ export async function POST(req: NextRequest) {
             tax: PO_tax,
             vat: PO_vat,
             status: "draft",
+            createdAt: today,
+            updatedAt: today,
           },
         });
 
+
+        // 1) Find the most recently created quotation (descending by code)
+        // that starts with prefix + year + month.
+        const year = today.getFullYear();
+        const month = (today.getMonth() + 1).toString().padStart(2, "0");
+        const lastPO = await db.purchaseOrder.findFirst({
+          where: {
+            code: {
+              startsWith: `PO${year}${month}`,
+            },
+          },
+          orderBy: {
+            code: "desc",
+          },
+        });
+
+        // 2) Parse the last 4 digits to figure out the sequence number
+        let nextSequence = parseSequenceNumber(lastPO?.code ?? "");
+
         // update code based on purchaseOrder ID
-        const code = generateCode(purchaseOrder.id, "PO");
+        const code = generateCode(
+          purchaseOrder.id,
+          "PO",
+          purchaseOrder.createdAt,
+          nextSequence
+        );
         await db.purchaseOrder.update({
           where: { id: purchaseOrder.id },
           data: { code },
@@ -66,7 +90,7 @@ export async function POST(req: NextRequest) {
       })
     );
 
-    const quotationSummary = calculateQuotationItemPrice(quotationLists)
+    const quotationSummary = calculateQuotationItemPrice(quotationLists);
 
     // update total price, tax and total discount for quotation
     await db.quotation.update({

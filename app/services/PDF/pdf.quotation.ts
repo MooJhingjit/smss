@@ -646,7 +646,7 @@ const drawStaticInfo = (page: PDFPage, currentPageNumber: number) => {
   if (!_DATA) return;
   drawHeaderInfo(page, currentPageNumber, {
     code: _DATA.code,
-    date: PDFDateFormat(new Date(_BILL_DATE)),
+    date: PDFDateFormat(new Date(_DATA.createdAt)),
   });
   drawCustomerInfo(page, _DATA.contact);
   drawOfferInfo(page, {
