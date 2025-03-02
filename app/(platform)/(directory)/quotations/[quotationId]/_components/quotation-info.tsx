@@ -47,12 +47,13 @@ type Props = {
 export default function QuotationInfo(props: Readonly<Props>) {
   const modal = useQuotationInfoModal();
   const { data, quotationsGroup } = props;
-  console.log("🚀 ~ QuotationInfo ~ data:", data);
 
   const paymentConditionLabel =
     data.paymentCondition === "cash"
       ? paymentTypeMapping[data.paymentCondition]
-      : data.paymentCondition;
+      : data.paymentCondition
+      ? `${data.paymentCondition} วัน`
+      : "-";
 
   return (
     <DataInfo
@@ -70,7 +71,7 @@ export default function QuotationInfo(props: Readonly<Props>) {
           label: "วิธีการชำระเงิน",
           value: paymentTypeMapping[data.paymentType],
         },
-        { label: "เงื่อนไขการชำระเงิน", value: `${paymentConditionLabel ?? "-"} ${data.paymentType === "credit"? "วัน" : ""}` },
+        { label: "เงื่อนไขการชำระเงิน", value: `${paymentConditionLabel}` },
         {
           label: "ระยะเวลาการส่งมอบ",
           value: `${data.deliveryPeriod ?? "-"} วัน`,
