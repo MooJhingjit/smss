@@ -36,10 +36,10 @@ export default function ItemTable<TData, TValue>(
           return (
             <Link
               target="_blank"
-              href={`/purchase-orders/${row.original.purchaseOrderItem.purchaseOrder.id}`}
+              href={`/purchase-orders/${row.original.purchaseOrderItem?.purchaseOrder.id}`}
               className="text-blue-500 hover:underline flex space-x-2 items-center"
             >
-              <span>{row.original.purchaseOrderItem.purchaseOrder.code}</span>
+              <span>{row.original.purchaseOrderItem?.purchaseOrder.code}</span>
               <ExternalLinkIcon className="w-4 h-4" />
             </Link>
           );
