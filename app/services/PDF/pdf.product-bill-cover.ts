@@ -78,13 +78,13 @@ const main = async () => {
     page.drawPage(templatePage);
 
     // draw biller signature
-    const signature = await loadSignatureImage("1");
-    const signatureImage = await page.doc.embedPng(signature.imageBytes as any);
-    page.drawImage(signatureImage, {
-      x: 100,
-      y: 500,
-      ...signatureImage.scale(signature.scale),
-    });
+    // const signature = await loadSignatureImage("1");
+    // const signatureImage = await page.doc.embedPng(signature.imageBytes as any);
+    // page.drawImage(signatureImage, {
+    //   x: 100,
+    //   y: 500,
+    //   ...signatureImage.scale(signature.scale),
+    // });
     page.drawText(_BILL_DATE, {
       x: 70,
       y: 488,

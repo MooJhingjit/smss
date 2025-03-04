@@ -96,7 +96,7 @@ const generate = async () => {
   page.drawPage(templatePage);
 
   // draw approver signature
-  const approverSignature = await loadSignatureImage("2");
+  const approverSignature = await loadSignatureImage("1");
   const approverSignatureImage = await page.doc.embedPng(approverSignature.imageBytes as any);
   page.drawImage(approverSignatureImage, {
     x: 380,

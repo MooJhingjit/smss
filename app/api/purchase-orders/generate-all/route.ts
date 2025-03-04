@@ -46,6 +46,7 @@ export async function POST(req: NextRequest) {
             vendorId: Number(vendorId),
             quotationId: body.quotationId,
             price: totalCost,
+            totalPrice: totalCost,
             grandTotal: totalCost - PO_tax + PO_vat,
             tax: PO_tax,
             vat: PO_vat,
