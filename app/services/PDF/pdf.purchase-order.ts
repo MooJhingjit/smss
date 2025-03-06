@@ -79,7 +79,7 @@ const generate = async () => {
   if (!_DATA) return;
   // list start position
   const ITEM_Y_Start = 585;
- 
+
 
   const { pdfDoc, font, template } = await loadPdfAssets("pdf/purchase-order-template.pdf");
   const templatePage = await pdfDoc.embedPage(template.getPages()[0]);
@@ -108,6 +108,15 @@ const generate = async () => {
     y: 35,
     ...config
   })
+
+  // orderer signature
+  const ordererSignature = await loadSignatureImage("2");
+  const ordererSignatureImage = await page.doc.embedPng(ordererSignature.imageBytes as any);
+  page.drawImage(ordererSignatureImage, {
+    x: 355,
+    y: 640,
+    ...ordererSignatureImage.scale(ordererSignature.scale)
+  });
 
 
   drawStaticInfo(page, 1);
@@ -481,7 +490,7 @@ const drawPriceInfo = (page: PDFPage) => {
   };
 
   const columnPosition = 520;
-  
+
 
   page.drawText(_DATA.price?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "", {
     x: columnPosition + 48 - getTextWidth(_DATA.price?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "", config),

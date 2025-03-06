@@ -24,6 +24,17 @@ export default function ConfirmActionButton(props: Props) {
     }
   }, [isDone , isPending]);
 
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (isPending) {
+      timer = setTimeout(() => {
+        setIsPending(false);
+        setShowConfirm(false);
+      }, 2000);
+    }
+    return () => clearTimeout(timer);
+  }, [isPending]);
+
   if (isPending) {
     return (
       <div className="h-full flex items-center">
