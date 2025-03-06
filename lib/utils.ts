@@ -73,19 +73,19 @@ export function parseSequenceNumber(code: string): number {
   return parseInt(seqStr, 10) + 1;
 }
 
-export function generateInvoiceCode(
-  id: number,
-  type: "product" | "service",
-  date: Date = new Date()
-) {
-  const year = date.getFullYear();
-  const month = (date.getMonth() + 1).toString().padStart(2, "0");
-  const formattedId = id.toString().padStart(4, "0");
+// export function generateInvoiceCode(
+//   id: number,
+//   type: "product" | "service",
+//   date: Date = new Date()
+// ) {
+//   const year = date.getFullYear();
+//   const month = (date.getMonth() + 1).toString().padStart(2, "0");
+//   const formattedId = id.toString().padStart(4, "0");
 
-  const prefix = type === "product" ? "" : "S";
+//   const prefix = type === "product" ? "" : "S";
 
-  return `${prefix}${year}-${month}${formattedId}`;
-}
+//   return `${prefix}${year}-${month}${formattedId}`;
+// }
 
 export function updateCodeVersion(code: string): string {
   // Split the ID by the dash

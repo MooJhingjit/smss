@@ -1,11 +1,9 @@
 import { generateBillCover } from "@/app/services/PDF/pdf.product-bill-cover";
 import { generateInvoice as generateBillToCustomer } from "@/app/services/PDF/pdf.product-bill-to-customer";
 import { generateInvoice as generateServiceInvoiceToCustomer } from "@/app/services/PDF/pdf.service-invoice-to-customer";
-
 import { db } from "@/lib/db";
-import { generateInvoiceCode } from "@/lib/utils";
 import { QT_TYPE } from "@/types";
-import { Invoice } from "@prisma/client";
+import { Invoice, QuotationType } from "@prisma/client";
 import { PDFDocument } from "pdf-lib";
 
 
@@ -72,8 +70,8 @@ async function validateQuotationInvoice(
 async function addQuotationToMergedPdf(
   pdfResult:
     | {
-        pdfBytes: Uint8Array;
-      }
+      pdfBytes: Uint8Array;
+    }
     | undefined,
   quotationId: number,
   mergedPdf: PDFDocument
@@ -111,17 +109,49 @@ async function createNewInvoice(
   billGroupId: number,
   customDate: string
 ) {
+
+  const invoiceDate = new Date(customDate);
   const newInvoice = await db.invoice.create({
     data: {
       code: "",
-      date: new Date(customDate),
+      date: invoiceDate,
       grandTotal: quotation.grandTotal ?? 0,
       billGroupId: billGroupId,
       quotationId: quotation.id,
     },
   });
 
-  const code = generateInvoiceCode(newInvoice.id, quotation.type);
+  // Generate the invoice code
+  const prefix = quotation.type === QuotationType.product ? "" : "S";
+
+  // 1) Find the most recently created quotation (descending by code)
+  // that starts with prefix + year + month.
+  const year = invoiceDate.getFullYear();
+  const month = (invoiceDate.getMonth() + 1).toString().padStart(2, "0");
+  const datePrefix = `${year}-${month}`;
+
+  const lastInvoice = await db.invoice.findFirst({
+    where: {
+      code: {
+        startsWith: `${prefix}${year}-${month}`,
+      },
+    },
+    orderBy: {
+      id: "desc",
+    },
+  });
+
+  // 2) Parse the last 3 digits to figure out the sequence number
+  let nextSequence = 1;
+  if (lastInvoice?.code) {
+    nextSequence = parseInt(lastInvoice.code.slice(-3), 10) + 1;
+  }
+
+  // format:  [S]YYYY-MMDDD
+  const code = `${prefix}${datePrefix}${nextSequence.toString().padStart(3, "0")}`;
+
+
+
   await db.invoice.update({
     where: {
       id: newInvoice.id,

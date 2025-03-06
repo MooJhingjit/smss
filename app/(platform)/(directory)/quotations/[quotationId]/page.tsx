@@ -45,6 +45,7 @@ const getData = async (
           vendor: true,
         },
       },
+      billGroup: true,
       lists: {
         include: {
           product: {

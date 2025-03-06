@@ -34,6 +34,7 @@ import { toast } from "sonner";
 import { ReceiptPrint } from "@/components/print-receipt";
 import { cn } from "@/lib/utils";
 import { PDFDateFormat } from "@/app/services/PDF/pdf.helpers";
+import { Input } from "@/components/ui/input";
 
 type Props = {
   data: QuotationWithRelations;
@@ -52,8 +53,8 @@ export default function QuotationInfo(props: Readonly<Props>) {
     data.paymentCondition === "cash"
       ? paymentTypeMapping[data.paymentCondition]
       : data.paymentCondition
-      ? `${data.paymentCondition} วัน`
-      : "-";
+        ? `${data.paymentCondition} วัน`
+        : "-";
 
   return (
     <DataInfo
@@ -101,6 +102,9 @@ const BillController = ({
   quotationsGroup,
 }: BillControllerProps) => {
   const [showFormSearch, setShowFormSearch] = React.useState(false);
+  const [billGroupDate, setBillGroupDate] = React.useState(
+    new Date().toISOString().split("T")[0]
+  );
 
   const handleBillGroup = useAction(attachQuotationToBillGroup, {
     onSuccess: () => {
@@ -112,12 +116,21 @@ const BillController = ({
   });
 
   const attachBillGroup = async (quotationId: number) => {
+
+    if (billGroupDate === "") {
+      toast.error("กรุณาเลือกวันที่ออกกลุ่มบิล");
+      return;
+    }
+
     // bill group id can be null, then create a new bill group
-    await handleBillGroup.execute({
+    const payload = {
       billGroupId: currentQuotation.billGroupId,
       currentQuotationId: currentQuotation.id,
       newQuotationId: quotationId,
-    });
+      billGroupDate: billGroupDate,
+    }
+
+    await handleBillGroup.execute(payload);
   };
 
   if (!currentQuotation.billGroupId) {
@@ -129,21 +142,40 @@ const BillController = ({
             <CircleEllipsisIcon size={16} className="cursor-pointer" />
           </PopoverTrigger>
           <PopoverContent className="w-auto p-2">
-            <ConfirmActionButton
-              onConfirm={() => {
-                attachBillGroup(currentQuotation.id);
-              }}
-            >
-              <div className="flex space-x-1 items-start gap-2 px-2">
-                <LayersIcon size={20} className="mt-1" />
-                <div className="w-full text-sm text-left">
-                  <p>สร้างกลุ่มบิลใหม่ (Click)</p>
-                  <p className="text-xs text-orange-500 whitespace-nowrap">
-                    - เมื่อสร้างแล้วไม่สามรถลบออกได้
-                  </p>
+            <div className="flex space-x-2 items-center justify-end">
+              <div className="">
+                <div className="flex space-x-1 items-start gap-2 px-2">
+                  <LayersIcon size={20} className="mt-1" />
+                  <div className="w-full text-sm text-left">
+                    <p>สร้างกลุ่มบิลใหม่</p>
+                    <p className="text-xs text-orange-500 whitespace-nowrap">
+                      - เมื่อสร้างแล้วไม่สามรถลบออกได้
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex justify-center space-x-2 mt-2">
+                  <Input
+                    id="bill_group_date"
+                    name="bill_group_date"
+                    type="date"
+                    placeholder="วันที่ออกบิล"
+                    onChange={(e) => setBillGroupDate(e.target.value)}
+                    defaultValue={billGroupDate}
+                  />
+                  <ConfirmActionButton
+                    onConfirm={() => {
+                      attachBillGroup(currentQuotation.id);
+                    }}
+                  >
+                    <Button className="flex justify-center items-center space-x-1 h-9">
+                      <PlusIcon size={12} className="mr-1" />
+                      <p>สร้าง</p>
+                    </Button>
+                  </ConfirmActionButton>
                 </div>
               </div>
-            </ConfirmActionButton>
+            </div>
           </PopoverContent>
         </Popover>
       </div>
@@ -151,23 +183,30 @@ const BillController = ({
   }
   const areQuotationsReady =
     quotationsGroup.every((qt) => qt.grandTotal) && currentQuotation.grandTotal;
+
   const contactName = currentQuotation.contact?.name ?? "ลูกค้า";
   const invDate = currentQuotation?.invoice?.date
     ? new Intl.DateTimeFormat("th-TH", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      }).format(currentQuotation?.invoice?.date)
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }).format(currentQuotation?.invoice?.date)
     : null;
 
   const allQuotations = [currentQuotation, ...quotationsGroup].sort(
     (a, b) => a.id - b.id
   );
+  const billGroupCode = currentQuotation?.billGroup?.code ?? "";
+  const defaultInvoiceDate = currentQuotation?.billGroup?.date
   return (
     <div className="border p-3 relative">
-      <span className="absolute bg-gray-50 px-2 -top-2 text-xs ">
-        กลุ่มบิล ({quotationsGroup.length + 1}){" "}
-      </span>
+      <div className="absolute bg-gray-50 px-2 -top-2 text-xs ">
+        <div className="flex space-x-2 items-center justify-center">
+          <p> กลุ่มบิล</p>
+          {billGroupCode && <p className="font-semibold">{billGroupCode}</p>}
+          {/* <p> ({quotationsGroup.length + 1})</p> */}
+        </div>
+      </div>
       <div className="flex items-center gap-2 flex-wrap">
         {/* <Badge variant="default">
           {!currentQuotation.grandTotal && (
@@ -256,8 +295,8 @@ const BillController = ({
                     <div className="text-sm text-muted-foreground flex ">
                       <ReceiptIcon size={16} className="mr-2" />
                       <div className="">
-                        <p>ออกใบวางบิล</p>
-                        {invDate && (
+                        <p>ออกใบแจ้งหนี้/ใบวางบิล</p>
+                        {invDate ? (
                           <>
                             <p className="text-xs text-orange-500">
                               - ออกบิลแล้ว ณ วันที่ {invDate}
@@ -266,13 +305,23 @@ const BillController = ({
                               - สามารถแก้ไขวันที่ได้ แต่เลข INV จะไม่เปลี่ยน
                             </p>
                           </>
+                        ) : (
+                          <>
+                            <p className="text-xs text-orange-500">
+                              - ออกใบแจ้งหนี้/ใบวางบิล ทั้งหมดในกลุ่ม *ครั้งแรก
+
+                            </p>
+                            <p className="text-xs text-orange-500">
+                              - เลข INV จะไม่เปลี่ยน หากมีการแก้ไขวันที่ในการออกครั้งถัดไป
+                            </p>
+                          </>
                         )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2 mt-2">
                       <ReceiptPrint
                         defaultBillDate={
-                          currentQuotation?.invoice?.date ?? undefined
+                          currentQuotation?.invoice?.date ?? defaultInvoiceDate ?? undefined
                         }
                         endpoint={`/api/quotations/bills/${currentQuotation.billGroupId}`}
                       />

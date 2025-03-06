@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import {
+  BillGroup,
   Contact,
   Invoice,
   Quotation,
@@ -21,6 +22,7 @@ type QuotationWithRelations = Quotation & {
   contact?: Contact | null;
   seller?: User | null;
   invoice?: Invoice | null;
+  billGroup?: BillGroup | null;
 };
 
 let _BILL_DATE = "";
@@ -37,6 +39,7 @@ const getData = async (id: number): Promise<QuotationWithRelations[]> => {
     include: {
       contact: true,
       invoice: true,
+      billGroup: true,
     },
     where: {
       billGroupId: id,
@@ -226,7 +229,8 @@ const drawHeaderInfo = (page: PDFPage) => {
     ...config,
   });
 
-  page.drawText("Group Bill Id", { // 2025-03027
+  const groupBillCode = _DATA[0].billGroup?.code ?? "";
+  page.drawText(groupBillCode, { // 2025-03027
     x: X_Start + 400,
     y: Y_Start,
     maxWidth: 50,

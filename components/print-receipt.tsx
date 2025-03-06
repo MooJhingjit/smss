@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRef, useState } from "react";
 import ConfirmActionButton from "@/components/confirm-action";
+import { revalidatePath } from "next/cache";
 
 export const ReceiptPrint = ({ endpoint, defaultBillDate }: { endpoint: string, defaultBillDate?: Date }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,6 +39,10 @@ export const ReceiptPrint = ({ endpoint, defaultBillDate }: { endpoint: string, 
           a.click();
           document.body.removeChild(a);
           window.URL.revokeObjectURL(url);
+
+         // reload page
+         window.location.reload();
+
         });
     } catch (error) {
       console.log("error", error);
