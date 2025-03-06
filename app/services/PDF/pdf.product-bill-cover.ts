@@ -86,13 +86,13 @@ const main = async () => {
     //   y: 500,
     //   ...signatureImage.scale(signature.scale),
     // });
-    page.drawText(_BILL_DATE, {
-      x: 70,
-      y: 488,
-      maxWidth: 50,
-      size: 8,
-      font: _FONT as PDFFont,
-    });
+    // page.drawText(_BILL_DATE, {
+    //   x: 70,
+    //   y: 488,
+    //   maxWidth: 50,
+    //   size: 8,
+    //   font: _FONT as PDFFont,
+    // });
     // end draw biller signature
 
     drawHeaderInfo(page);

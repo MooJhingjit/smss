@@ -321,7 +321,7 @@ const drawCustomerInfo = (page: PDFPage) => {
 
   const Y_Start = 702;
   const X_Start = 85;
-  page.drawText("", {
+  page.drawText(customer.branchId ?? "", {
     x: X_Start,
     y: Y_Start,
     maxWidth: 600,
@@ -343,15 +343,15 @@ const drawCustomerInfo = (page: PDFPage) => {
   });
 
   // combine taxId, branchId
-  const taxInfo = [
-    customer.taxId,
-    customer.branchId ? `สาขาที่ ${customer.branchId}` : "",
-  ]
-    .filter((item) => item)
-    .join(", ");
+  // const taxInfo = [
+  //   customer.taxId,
+  //   customer.branchId ? `สาขาที่ ${customer.branchId}` : "",
+  // ]
+  //   .filter((item) => item)
+  //   .join(", ");
 
 
-  page.drawText(taxInfo ?? "", {
+  page.drawText(customer.taxId ?? "", {
     x: X_Start,
     y: Y_Start - config.lineHeight * 4,
     maxWidth: 500,
@@ -363,7 +363,7 @@ const drawCustomerInfo = (page: PDFPage) => {
     customer.contact,
     customer.phone,
     customer.fax,
-    customer.email,
+    // customer.email,
   ]
     .filter((item) => item)
     .join(", ");
