@@ -36,7 +36,6 @@ export async function PUT(
       };
     }
 
-    console.log(payload)
     const purchaseOrderItem = await db.purchaseOrderItem.update({
       where: {
         id: Number(id),
@@ -54,9 +53,6 @@ export async function PUT(
           tax: purchaseOrderItem.withholdingTaxEnabled
             ? { increment: purchaseOrderItem.withholdingTax ?? 0 }
             : { decrement: purchaseOrderItem.withholdingTax ?? 0 },
-          grandTotal: purchaseOrderItem.withholdingTaxEnabled
-            ? { decrement: purchaseOrderItem.withholdingTax ?? 0 }
-            : { increment: purchaseOrderItem.withholdingTax ?? 0 },
         },
       });
     }
