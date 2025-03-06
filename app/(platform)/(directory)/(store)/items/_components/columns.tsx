@@ -15,6 +15,18 @@ export const columns: ColumnDef<Item>[] = [
   {
     accessorKey: "cost",
     header: "ราคาซื้อ",
+    cell: ({ row }) => {
+      const { cost } = row.original;
+
+      if (cost === null) {
+        return 0;
+      }
+
+      return cost?.toLocaleString("th-TH", {
+        style: "currency",
+        currency: "THB",
+      }) ?? 0
+    }
   },
 
   {

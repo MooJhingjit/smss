@@ -6,6 +6,8 @@ import AssociateOrders from "./_components/associate-orders";
 import { db } from "@/lib/db";
 import DocumentItems from "../../../../../components/document-lists";
 import PurchaseOrderInfo from "./_components/order-info";
+import { redirect } from 'next/navigation'
+
 const getData = async (id: string) => {
   const data = await db.purchaseOrder.findUnique({
     where: {
@@ -51,6 +53,11 @@ const getAssociateOrders = async (
 
 export default async function PurchaseOrderDetails(props: Readonly<Props>) {
   const { params } = props;
+
+  if (params.purchaseOrderId === 'undefined') {
+    redirect('/purchase-orders')
+  }
+
   const data = await getData(params.purchaseOrderId);
 
   if (!data) {

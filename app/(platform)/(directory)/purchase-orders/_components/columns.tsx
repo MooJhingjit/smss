@@ -21,42 +21,67 @@ export const columns: ColumnDef<
     };
   }
 >[] = [
-  {
-    accessorKey: "code",
-    header: "ใบสั่งซื้อ",
-  },
-  {
-    accessorKey: "quotation.code",
-    header: "ใบเสนอราคา",
-  },
-  {
-    accessorKey: "vendor.name",
-    header: "ผู้ขาย/ร้านค้า",
-    cell: ({ row }) => {
-      const { vendor } = row.original;
-      return vendor?.name;
+    {
+      accessorKey: "code",
+      header: "ใบสั่งซื้อ",
     },
-  },
-  {
-    accessorKey: "discount",
-    header: "ส่วนลด",
-    cell: ({ row }) => {
-      const { discount } = row.original;
-      return discount?.toLocaleString("th-TH", {
-        style: "currency",
-        currency: "THB",
-      }) ?? 0;
+    {
+      accessorKey: "quotation.code",
+      header: "ใบเสนอราคา",
     },
-  },
-  {
-    accessorKey: "createdAt",
-    header: "สร้างเมื่อ",
-    cell: ({ row }) => {
-      const { createdAt } = row.original;
-      return getDateFormat(createdAt);
+    {
+      accessorKey: "vendor.name",
+      header: "ผู้ขาย/ร้านค้า",
+      cell: ({ row }) => {
+        const { vendor } = row.original;
+        return vendor?.name;
+      },
     },
-  },
-  {
-    id: "actions",
-  },
-];
+    {
+      accessorKey: "discount",
+      header: "ส่วนลด",
+      cell: ({ row }) => {
+        const { discount } = row.original;
+        return discount?.toLocaleString("th-TH", {
+          style: "currency",
+          currency: "THB",
+        }) ?? 0;
+      },
+    },
+    {
+      accessorKey: "cost",
+      header: "ราคารวม",
+      cell: ({ row }) => {
+        const { totalPrice } = row.original;
+        return totalPrice?.toLocaleString("th-TH", {
+          style: "currency",
+          currency: "THB",
+        }) ?? 0
+      }
+    },
+    {
+      accessorKey: "cost",
+      header: "ยอดสุทธิ (รวม VAT)",
+      cell: ({ row }) => {
+        const grandTotal = row.original.grandTotal?.toLocaleString("th-TH", {
+          style: "currency",
+          currency: "THB",
+        }) ?? 0
+
+        const vat = row.original?.vat?.toLocaleString("th-TH") ?? 0
+
+        return grandTotal + "( +vat " + vat + " )"
+      }
+    },
+    {
+      accessorKey: "createdAt",
+      header: "สร้างเมื่อ",
+      cell: ({ row }) => {
+        const { createdAt } = row.original;
+        return getDateFormat(createdAt);
+      },
+    },
+    {
+      id: "actions",
+    },
+  ];

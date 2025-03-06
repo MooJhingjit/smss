@@ -10,7 +10,6 @@ const handler = async (data: InputType): Promise<ReturnType> => {
   const { taxId, branchId, name, email, phone, fax, address, isProtected } = data;
 
   const userSession = await currentUser();
-  console.log("🚀 ~ userSession:", userSession);
   let contact;
   try {
     contact = await db.contact.create({
@@ -18,7 +17,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         name,
         taxId,
         branchId,
-        email,
+        email: email ?? "",
         phone,
         contact: data.contact,
         fax,
