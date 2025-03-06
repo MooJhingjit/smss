@@ -8,7 +8,7 @@ import {
   User,
 } from "@prisma/client";
 import { PDFDocument, PDFEmbeddedPage, PDFFont, PDFPage } from "pdf-lib";
-import { getBoundingBox, PDFDateFormat, loadPdfAssets, validatePageArea, getTextWidth, getPaymentCondition, getBillDueDate, convertToThaiBahtText } from "./pdf.helpers";
+import { getBoundingBox, PDFDateFormat, loadPdfAssets, validatePageArea, getTextWidth, getPaymentCondition, getBillDueDate, convertToThaiBahtText, getCustomerNameWithBranch } from "./pdf.helpers";
 
 type QuotationWithRelations = Quotation & {
   lists?: QuotationList[];
@@ -340,7 +340,7 @@ const drawCustomerInfo = (page: PDFPage) => {
     ...config,
   });
 
-  page.drawText(customer.name ?? "", {
+  page.drawText(getCustomerNameWithBranch(customer.name, customer.branchId), {
     x: X_Start,
     y: Y_Start - config.lineHeight,
     maxWidth: 500,

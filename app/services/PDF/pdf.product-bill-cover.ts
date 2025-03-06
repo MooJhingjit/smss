@@ -13,6 +13,7 @@ import {
   getTextWidth,
   loadSignatureImage,
   convertToThaiBahtText,
+  getCustomerNameWithBranch,
 } from "./pdf.helpers";
 
 type QuotationWithRelations = Quotation & {
@@ -205,11 +206,8 @@ const drawHeaderInfo = (page: PDFPage) => {
   const contactRef = _DATA[0].contact ?? "";
   if (!contactRef) return;
 
-  const name = [
-    contactRef.name ?? "",
-    contactRef.branchId ? `สาขา ${contactRef.branchId}` : "",
-  ]
-  page.drawText(name.join(" "), {
+
+  page.drawText(getCustomerNameWithBranch(contactRef.name, contactRef.branchId), {
     x: X_Start,
     y: Y_Start,
     maxWidth: 500,

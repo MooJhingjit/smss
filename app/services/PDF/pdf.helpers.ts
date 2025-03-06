@@ -106,7 +106,7 @@ export async function loadSignatureImage(userKey: string) {
     },
     "2": {
       path: "signature/2.png",
-      scale:0.15,
+      scale: 0.15,
     },
     "3": {
       path: "signature/3.png",
@@ -277,3 +277,17 @@ export const convertToThaiBahtText = (price: number): string => {
 
   return bahtText + satangText;
 };
+
+
+export const getCustomerNameWithBranch = (companyName: string, branchId: string | null) => {
+  const mainBranchLabel = "สำนักงานใหญ่"
+
+  if (!branchId) return companyName;
+
+  // if company is included mainBranchLabel, return it
+  if (companyName.includes(mainBranchLabel)) return companyName;
+
+  if (branchId === "00000") return `${companyName} "${mainBranchLabel}"`;
+
+  return `${companyName}`;
+}

@@ -11,6 +11,7 @@ import {
 import fontkit from "@pdf-lib/fontkit";
 import {
   getBoundingBox,
+  getCustomerNameWithBranch,
   getPaymentCondition,
   loadSignatureImage,
   PDFDateFormat,
@@ -429,9 +430,8 @@ const drawCustomerInfo = (page: PDFPage, contact: Contact) => {
   const Y_Start = 670;
   const X_Start = 80;
   // name + branchId
-  const fullContact =
-    contact.name + (contact.branchId ? ` (${contact.branchId})` : "");
-  page.drawText(fullContact, {
+
+  page.drawText(getCustomerNameWithBranch(contact.name, contact.branchId), {
     x: X_Start,
     y: Y_Start,
     maxWidth: 600,
@@ -658,7 +658,7 @@ const drawStaticInfo = (page: PDFPage, currentPageNumber: number) => {
     deliveryPeriod: _DATA.deliveryPeriod
       ? _DATA.deliveryPeriod?.toString() + " วัน"
       : "",
-    validPricePeriod: _DATA.validPricePeriod 
+    validPricePeriod: _DATA.validPricePeriod
       ? _DATA.validPricePeriod?.toString() + " วัน"
       : "",
     // paymentCondition: _DATA.paymentCondition ?? "",
