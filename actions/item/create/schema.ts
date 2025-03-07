@@ -9,4 +9,6 @@ export const Schema = z.object({
   serialNumber: z.string().optional(),
   warrantyDate: z.string().optional(),
   status: z.enum(["pending", "available", "sold", "claimed", "lost"]),
+  description: z.string().optional(),
+  purchaseOrderItemId: z.number().optional(),
 });

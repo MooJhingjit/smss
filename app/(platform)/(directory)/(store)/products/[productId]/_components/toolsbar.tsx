@@ -38,9 +38,9 @@ export default function Toolbar(props: Props) {
           />
         </div>
       </div>
-      {/* <Button variant="secondary" className="h-[36px]" onClick={onCreate}>
+      <Button variant="secondary" className="h-[36px]" onClick={onCreate}>
         <Plus size={20} />
-      </Button> */}
+      </Button>
     </div>
   );
 }

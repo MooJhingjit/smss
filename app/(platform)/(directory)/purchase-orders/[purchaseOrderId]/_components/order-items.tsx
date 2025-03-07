@@ -104,13 +104,13 @@ export default function PurchaseOrderItems({
       },
     },
     {
-      name: "รับเข้า",
+      name: "สินค้ารับเข้า",
       key: "quantity",
       render: (item: PurchaseOrderItemWithRelations) => {
         const total = item.items.filter((i) => !!i.serialNumber).length;
         return (
           <p>
-            {total}/{item.quantity}
+            {total}
           </p>
         );
       },

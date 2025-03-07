@@ -6,17 +6,20 @@ import { InputType, ReturnType } from "./types";
 import { Schema } from "./schema";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-  const { productId, name, cost, warrantyDate, serialNumber, status } = data;
+  const { productId, name, cost, warrantyDate, serialNumber, status, description, purchaseOrderItemId } = data;
   let item;
   try {
+
     item = await db.item.create({
       data: {
         productId,
         name,
         cost: cost ? parseFloat(cost) : null,
         warrantyDate: warrantyDate ? new Date(warrantyDate) : null,
-        serialNumber,
+        serialNumber: serialNumber ?? null,
         status,
+        description: description ?? null,
+        purchaseOrderItemId: purchaseOrderItemId ?? null,
       },
     });
   } catch (error) {
