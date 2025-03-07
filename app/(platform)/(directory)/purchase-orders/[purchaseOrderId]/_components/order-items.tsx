@@ -107,7 +107,7 @@ export default function PurchaseOrderItems({
       name: "สินค้ารับเข้า",
       key: "quantity",
       render: (item: PurchaseOrderItemWithRelations) => {
-        const total = item.items.filter((i) => !!i.serialNumber).length;
+        const total = item.items.length;
         return (
           <p>
             {total}
