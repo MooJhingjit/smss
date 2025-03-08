@@ -5,7 +5,13 @@ import { useRef, useState } from "react";
 import ConfirmActionButton from "@/components/confirm-action";
 import { revalidatePath } from "next/cache";
 
-export const ReceiptPrint = ({ endpoint, defaultBillDate }: { endpoint: string, defaultBillDate?: Date }) => {
+export const ReceiptPrint = ({
+  endpoint,
+  defaultBillDate,
+}: {
+  endpoint: string;
+  defaultBillDate?: Date;
+}) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const formRef = useRef<HTMLFormElement>(null);
@@ -17,7 +23,6 @@ export const ReceiptPrint = ({ endpoint, defaultBillDate }: { endpoint: string, 
       );
     }
   };
-
 
   const onPrintClick = async (date: Date) => {
     setIsSubmitting(true);
@@ -38,11 +43,12 @@ export const ReceiptPrint = ({ endpoint, defaultBillDate }: { endpoint: string, 
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
-          window.URL.revokeObjectURL(url);
+          setTimeout(() => {
+            window.URL.revokeObjectURL(url);
+          }, 60000 * 5); //
 
-         // reload page
-         window.location.reload();
-
+          // reload page
+          window.location.reload();
         });
     } catch (error) {
       console.log("error", error);
@@ -69,7 +75,10 @@ export const ReceiptPrint = ({ endpoint, defaultBillDate }: { endpoint: string, 
         name="bill"
         type="date"
         placeholder="วันที่"
-        defaultValue={defaultBillDate?.toISOString().split("T")[0] ?? new Date().toISOString().split("T")[0]}
+        defaultValue={
+          defaultBillDate?.toISOString().split("T")[0] ??
+          new Date().toISOString().split("T")[0]
+        }
       />
 
       <ConfirmActionButton
@@ -77,12 +86,15 @@ export const ReceiptPrint = ({ endpoint, defaultBillDate }: { endpoint: string, 
           triggerSubmit(); // Call this to programmatically trigger the form submission
         }}
       >
-        <Button size={"sm"} variant={"secondary"} type="button" disabled={isSubmitting}>
+        <Button
+          size={"sm"}
+          variant={"secondary"}
+          type="button"
+          disabled={isSubmitting}
+        >
           <PrinterIcon className="w-4 h-4" />
         </Button>
       </ConfirmActionButton>
-
-
     </form>
   );
 };

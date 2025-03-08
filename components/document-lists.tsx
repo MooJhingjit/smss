@@ -13,6 +13,8 @@ import {
 } from "@/components/providers/query-provider";
 import { toast } from "sonner";
 import Image from "next/image";
+import ConfirmActionButton from "@/components/confirm-action";
+
 type Props = {
   refType: string;
   refId: number;
@@ -43,7 +45,6 @@ export default function DocumentItems(props: Props) {
     }
   >({
     mutationFn: async (formData) => {
-      console.log(formData);
       const res = await MEDIA_SERVICES.post({
         refType: refType,
         refId: refId,
@@ -58,6 +59,21 @@ export default function DocumentItems(props: Props) {
     },
   });
 
+  const { mutate: deleteMutate } = useMutation<
+    MutationResponseType,
+    Error,
+    { id: number }
+  >({
+    mutationFn: async ({ id }) => {
+      const res = await MEDIA_SERVICES.deleteMedia(id);
+      return { ...res };
+    },
+    onSuccess: async () => {
+      queryClient.invalidateQueries({ queryKey });
+      toast.success("Deleted successfully");
+    },
+  });
+
   // upload file to the server
   const onUpload = (value: string) => {
     mutate({
@@ -65,6 +81,10 @@ export default function DocumentItems(props: Props) {
       refId,
       url: value,
     });
+  };
+
+  const onDelete = async (id: number) => {
+    deleteMutate({ id });
   };
 
   const renderPreview = (doc: Media) => {
@@ -88,7 +108,13 @@ export default function DocumentItems(props: Props) {
     }
     return (
       <div className="flex items-center justify-center w-16 h-16 bg-gray-100 rounded-md">
-        <Image width="64" height="64" src="/file.svg" alt="file" className="w-8 h-8" />
+        <Image
+          width="64"
+          height="64"
+          src="/file.svg"
+          alt="file"
+          className="w-8 h-8"
+        />
       </div>
     );
   };
@@ -126,7 +152,13 @@ export default function DocumentItems(props: Props) {
                   window.open(doc.url, "_blank");
                 }}
               />
-              <Trash2 className="w-4 h-4 text-red-300 cursor-pointer hover:text-red-700" />
+              <ConfirmActionButton
+                onConfirm={() => {
+                  onDelete(doc.id);
+                }}
+              >
+                <Trash2 className="w-4 h-4 text-red-300 cursor-pointer hover:text-red-700" />
+              </ConfirmActionButton>
             </div>
           </li>
         ))}

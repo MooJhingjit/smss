@@ -12,9 +12,16 @@ const post = (data: Record<string, any>) => {
   });
 };
 
+const deleteMedia = (id: number) => {
+  return fetcher(`/api/media/${id}`, {
+    method: "DELETE",
+  });
+};
+
 const APIs = {
   get,
   post,
+  deleteMedia
 };
 
 export default APIs;

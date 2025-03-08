@@ -266,7 +266,7 @@ const MainForm = ({
             paymentDue={data.paymentDue?.toDateString() ?? ""}
           />
         </ItemList>
-        <ItemList label="เลขใบเสนอราคา">
+        <ItemList label="เลขใบเสนอราคา (Vendor)">
           <div className="flex space-x-3 items-center">
             <FormInput
               id="deliveryPeriod"
