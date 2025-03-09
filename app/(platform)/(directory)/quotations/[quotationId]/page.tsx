@@ -54,6 +54,9 @@ const getData = async (
             },
           },
         },
+        orderBy: {
+          id: "asc",
+        }
       },
     },
   })) as QuotationWithRelations;

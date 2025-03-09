@@ -180,6 +180,7 @@ model QuotationList {
   quantity              Int?
   withholdingTax        Float?
   withholdingTaxPercent Float?
+  allowedWithholdingTax Boolean?         @default(false)
   discount              Float?
   totalPrice            Float?
   description           String?         @db.Text

@@ -206,8 +206,9 @@ const writeMainItem = (
     ...config,
   });
 
+  const itemName = `${!!data.allowedWithholdingTax ? "(**)" : ""} ${data.name}` ;
 
-  currentPage.drawText(data.name, {
+  currentPage.drawText(itemName, {
     x: columnPosition.description,
     y: lineStart,
     maxWidth: 600,
