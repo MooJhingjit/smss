@@ -437,16 +437,22 @@ const drawRemarkInfo = (page: PDFPage) => {
     }, 0) ?? 0
 
   if (withholdingTaxSummary) {
-    const priceAfterTax = (_DATA?.grandTotal ?? 0) - withholdingTaxSummary
+
+    const withholdingTaxTotal = (_DATA?.totalPrice ?? 0) * 0.03
+    const priceAfterTax = (_DATA?.grandTotal ?? 0) - withholdingTaxTotal
 
     const items = [
       {
         label: 'ราคาก่อนภาษี',
         value: _DATA.totalPrice?.toLocaleString("th-TH", CURRENCY_FORMAT) + ' บาท'
       },
+      // {
+      //   label: 'หัก ณ ที่จ่าย 3%',
+      //   value: withholdingTaxSummary?.toLocaleString("th-TH", CURRENCY_FORMAT) + ' บาท'
+      // },
       {
         label: 'หัก ณ ที่จ่าย 3%',
-        value: withholdingTaxSummary?.toLocaleString("th-TH", CURRENCY_FORMAT) + ' บาท'
+        value: withholdingTaxTotal?.toLocaleString("th-TH", CURRENCY_FORMAT) + ' บาท'
       },
       {
         label: 'ราคาหลังจากหัก ณ ที่จ่าย',
