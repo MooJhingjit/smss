@@ -9,7 +9,7 @@ export const updatePurchaseOrderSummary = async (purchaseOrderId: number) => {
   });
 
   const totalPrice = purchaseOrderItems.reduce(
-    (acc, item) => acc + (item.price ?? 0) * (item.quantity ?? 1),
+    (acc, item) => acc + (item.price ?? 0),
     0
   );
 
