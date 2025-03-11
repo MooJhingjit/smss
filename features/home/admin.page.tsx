@@ -123,6 +123,9 @@ async function getData(): Promise<
       totalPrice: true,
     },
     where: {
+      quotationId: {
+        not: null,
+      },
       createdAt: {
         gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
       },
