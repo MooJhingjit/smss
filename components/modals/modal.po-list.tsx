@@ -14,7 +14,14 @@ import { FormSubmit } from "../form/form-submit";
 import { useAction } from "@/hooks/use-action";
 import { toast } from "sonner";
 import { Item, ItemStatus, ProductType } from "@prisma/client";
-import { ArrowRight, InfoIcon, PackageOpen, PackageOpenIcon, PackagePlus, TrashIcon } from "lucide-react";
+import {
+  ArrowRight,
+  InfoIcon,
+  PackageOpen,
+  PackageOpenIcon,
+  PackagePlus,
+  TrashIcon,
+} from "lucide-react";
 import { updateItem } from "@/actions/item/update";
 import { createPurchaseItem } from "@/actions/po-list/create";
 import { updatePurchaseItem } from "@/actions/po-list/update";
@@ -26,7 +33,7 @@ import { Button } from "../ui/button";
 import { FormTextarea } from "../form/form-textarea";
 import ProductBadge from "../badges/product-badge";
 import { Label } from "../ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createItem } from "@/actions/item/create";
 import { cn } from "@/lib/utils";
 import { deleteItem } from "@/actions/item/delete";
@@ -70,7 +77,6 @@ export const PurchaseOrderListModal = () => {
       type: defaultData?.type,
     };
     reset(formData);
-
   }, [purchaseOrderRelations?.timestamps]);
 
   const handleCreate = useAction(createPurchaseItem, {
@@ -163,17 +169,13 @@ export const PurchaseOrderListModal = () => {
     updatedAt: new Date(),
   };
 
-
   return (
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
       <DialogContent className="sm:max-w-[425px] md:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>
-            {purchaseOrderRelations?.vendor?.name}
-          </DialogTitle>
+          <DialogTitle>{purchaseOrderRelations?.vendor?.name}</DialogTitle>
         </DialogHeader>
         <div className="">
-
           <Tabs defaultValue="itemForm" className="w-auto">
             <TabsList>
               <TabsTrigger value="itemForm">
@@ -182,12 +184,20 @@ export const PurchaseOrderListModal = () => {
                   <p>รายการสินค้า</p>
                 </div>
               </TabsTrigger>
-              <TabsTrigger value="store"> <div className="flex items-center justify-center space-x-1">
-                <PackageOpenIcon size={16} />
-                <p>สินค้าในระบบ ({defaultData?.items.length})</p>
-              </div></TabsTrigger>
+              {!!itemId && (
+                <TabsTrigger value="store">
+                  {" "}
+                  <div className="flex items-center justify-center space-x-1">
+                    <PackageOpenIcon size={16} />
+                    <p>สินค้าในระบบ ({defaultData?.items.length})</p>
+                  </div>
+                </TabsTrigger>
+              )}
             </TabsList>
-            <TabsContent value="itemForm" className="grid grid-cols-4 gap-3 mt-3 ">
+            <TabsContent
+              value="itemForm"
+              className="grid grid-cols-4 gap-3 mt-3 "
+            >
               <form action={onSubmit} className="grid col-span-4 gap-3">
                 <FormInput
                   id="type"
@@ -324,7 +334,9 @@ export const PurchaseOrderListModal = () => {
                     <div className="flex n space-x-3">
                       <RemoveButton
                         quotationId={purchaseOrderRelations?.quotationId}
-                        onDelete={() => handleDelete.execute({ id: defaultData.id })}
+                        onDelete={() =>
+                          handleDelete.execute({ id: defaultData.id })
+                        }
                       />
                       <div className="">
                         <FormSubmit>อัพเดทรายการ</FormSubmit>
@@ -343,9 +355,7 @@ export const PurchaseOrderListModal = () => {
                       key={item.id}
                       onDeleted={(id) => {
                         setItemLists(itemLists.filter((i) => i.id !== id));
-                      }
-                      }
-
+                      }}
                     />
                   ))}
                 </div>
@@ -367,18 +377,12 @@ export const PurchaseOrderListModal = () => {
                   onCreated={(newItem: Item) => {
                     setItemLists([...itemLists, newItem]);
                     setShowNewItemForm(false);
-                  }
-                  }
+                  }}
                   onCancel={() => setShowNewItemForm(false)}
                 />
               )}
             </TabsContent>
           </Tabs>
-
-
-
-
-
         </div>
       </DialogContent>
     </Dialog>
@@ -392,17 +396,15 @@ const RemoveButton = ({
   quotationId?: number | null;
   onDelete: () => void;
 }) => {
-  if (quotationId) return
+  if (quotationId) return;
   return (
-    <ConfirmActionButton
-      onConfirm={onDelete}
-    >
+    <ConfirmActionButton onConfirm={onDelete}>
       <Button variant="link" size="sm" className="text-red-500">
         ลบรายการ
       </Button>
     </ConfirmActionButton>
-  )
-}
+  );
+};
 
 type ItemInput = {
   name: string;
@@ -411,10 +413,17 @@ type ItemInput = {
   description: string;
 };
 
-const NewItemForm = (
-  { data, onCancel, onCreated, onDeleted }:
-    { data: Item, onCancel?: () => void, onCreated?: (newItem: Item) => void, onDeleted?: (id: number) => void }
-) => {
+const NewItemForm = ({
+  data,
+  onCancel,
+  onCreated,
+  onDeleted,
+}: {
+  data: Item;
+  onCancel?: () => void;
+  onCreated?: (newItem: Item) => void;
+  onDeleted?: (id: number) => void;
+}) => {
   const {
     register,
     watch,
@@ -465,10 +474,10 @@ const NewItemForm = (
   const onDelete = () => {
     if (data.id) {
       handleDelete.execute({
-        id: data.id
+        id: data.id,
       });
     }
-  }
+  };
 
   const onSubmit = (formData: FormData) => {
     const serialNumber = formData.get("serialNumber") as string;
@@ -497,7 +506,6 @@ const NewItemForm = (
       });
     }
 
-
     // reset data
     reset({
       name,
@@ -510,18 +518,23 @@ const NewItemForm = (
   const isNew = data.id === 0;
 
   return (
-    <form action={onSubmit} className={cn(
-      "grid grid-cols-4 gap-3 p-4 border",
-      data.id === 0 ? "border-dashed border-green-200 bg-green-50" : "border-gray-200"
-    )}>
+    <form
+      action={onSubmit}
+      className={cn(
+        "grid grid-cols-4 gap-3 p-4 border",
+        data.id === 0
+          ? "border-dashed border-green-200 bg-green-50"
+          : "border-gray-200"
+      )}
+    >
       <div className="col-span-2">
         <FormInput
           id="name"
           label="ชื่อรุ่น"
           type="text"
           register={register}
-        // defaultValue={item?.serialNumber}
-        // errors={fieldErrors}
+          // defaultValue={item?.serialNumber}
+          // errors={fieldErrors}
         />
       </div>
       <div className="col-span-2">
@@ -530,8 +543,8 @@ const NewItemForm = (
           label="รหัส (SN)"
           type="text"
           register={register}
-        // defaultValue={item?.serialNumber}
-        // errors={fieldErrors}
+          // defaultValue={item?.serialNumber}
+          // errors={fieldErrors}
         />
       </div>
       <div className="col-span-2">
@@ -553,21 +566,21 @@ const NewItemForm = (
       <div className="col-span-4 flex justify-end">
         {!isNew && isDirty && <FormSubmit>อัพเดท</FormSubmit>}
         {isNew && isDirty && <FormSubmit>เพิ่ม</FormSubmit>}
-        {!isNew &&
-          <ConfirmActionButton
-            onConfirm={onDelete}
-          >
+        {!isNew && (
+          <ConfirmActionButton onConfirm={onDelete}>
             <Button type="button" variant={"link"} size="sm">
               <TrashIcon size={16} className="text-red-300 mr-1" />
               <p className="text-red-300">ลบ</p>
             </Button>
           </ConfirmActionButton>
-        }
+        )}
 
-        {onCancel && <Button onClick={onCancel} variant="link" size="sm">ยกเลิก</Button>}
+        {onCancel && (
+          <Button onClick={onCancel} variant="link" size="sm">
+            ยกเลิก
+          </Button>
+        )}
       </div>
     </form>
   );
 };
-
-

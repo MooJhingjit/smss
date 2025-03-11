@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     const quotationListsByVendor = groupQuotationByVendor(
       quotationLists as QuotationListWithRelations[]
     );
-    
+
     // const today = new Date(Date.UTC(2025, 1, 1));
     const today = new Date();
 
@@ -36,18 +36,18 @@ export async function POST(req: NextRequest) {
         const lists = quotationListsByVendor[Number(vendorId)];
 
         // all lists are from the same vendor
-        const { totalCost } = calculateQuotationItemPrice(lists);
+        const { totalCost: totalPrice } = calculateQuotationItemPrice(lists);
 
-        const PO_tax = 0; // totalCost * 0.03;
-        const PO_vat = totalCost * 0.07;
+        const PO_tax = 0;
+        const PO_vat = totalPrice * 0.07;
         const purchaseOrder = await db.purchaseOrder.create({
           data: {
             code: "DRAFT-PO-" + Math.floor(Math.random() * 1000000),
             vendorId: Number(vendorId),
             quotationId: body.quotationId,
-            price: totalCost,
-            totalPrice: totalCost,
-            grandTotal: totalCost - PO_tax + PO_vat,
+            price: totalPrice,
+            totalPrice: totalPrice,
+            grandTotal: totalPrice - PO_tax + PO_vat,
             tax: PO_tax,
             vat: PO_vat,
             status: "draft",
@@ -55,7 +55,6 @@ export async function POST(req: NextRequest) {
             updatedAt: today,
           },
         });
-
 
         // 1) Find the most recently created quotation (descending by code)
         // that starts with prefix + year + month.

@@ -28,6 +28,10 @@ export const columns: ColumnDef<
     {
       accessorKey: "quotation.code",
       header: "ใบเสนอราคา",
+      cell: ({ row }) => {
+        const { quotation } = row.original;
+        return quotation?.code ?? "--Manual--"; 
+      },
     },
     {
       accessorKey: "vendor.name",

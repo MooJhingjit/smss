@@ -4,6 +4,7 @@ import { createSafeAction } from "@/lib/create-safe-action";
 import { InputType, ReturnType } from "./types";
 import { schema } from "./schema";
 import { revalidatePath } from "next/cache";
+import { updatePurchaseOrderSummary } from "@/app/services/service.purchase-order";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
   const { id, price, unitPrice, unit, quantity, description } = data;
@@ -14,7 +15,8 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       where: {
         id,
       },
-      data: { // do not allow to update quantity and type for now
+      data: {
+        // do not allow to update quantity and type for now
         price,
         unitPrice,
         unit,
@@ -22,6 +24,9 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         description,
       },
     });
+
+    // update purchase order summary
+    await updatePurchaseOrderSummary(purchaseOrderItem.purchaseOrderId);
   } catch (error) {
     console.log("error", error);
     return {

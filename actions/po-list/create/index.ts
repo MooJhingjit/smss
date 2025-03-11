@@ -5,6 +5,7 @@ import { InputType, ReturnType } from "./types";
 import { schema } from "./schema";
 import { revalidatePath } from "next/cache";
 import { PurchaseOrderItem } from "@prisma/client";
+import { updatePurchaseOrderSummary } from "@/app/services/service.purchase-order";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
   const {
@@ -33,6 +34,9 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         type,
       },
     });
+
+    // update purchase order summary
+    await updatePurchaseOrderSummary(purchaseOrderId);
 
     if (type === "product") {
       await Promise.all(

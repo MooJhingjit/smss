@@ -1,6 +1,6 @@
 import { PurchaseOrderWithRelations } from "@/types";
 import React from "react";
-import useBillingInfo from './useBillingInfo';
+import useBillingInfo from "./useBillingInfo";
 import { Button } from "@/components/ui/button";
 import { usePurchaseOrderSummaryModal } from "@/hooks/use-po-summary-modal";
 
@@ -11,15 +11,9 @@ export default function BillingInfo({
   isManual: boolean;
   data: PurchaseOrderWithRelations;
 }) {
-  const {
-    discount,
-    extraCost,
-    price,
-    vat,
-    grandTotal,
-    priceBeforeVat,
-  } = useBillingInfo({ data });
-  const {onOpen } = usePurchaseOrderSummaryModal();
+  const { discount, extraCost, price, vat, grandTotal, priceBeforeVat } =
+    useBillingInfo({ data });
+  const { onOpen } = usePurchaseOrderSummaryModal();
 
   return (
     <div className="bg-gray-100 px-4 py-2 w-full sm:rounded-lg sm:px-6">
@@ -28,12 +22,10 @@ export default function BillingInfo({
           <dt className="text-gray-600">ราคา</dt>
           <dd className="font-medium text-gray-900">
             <p>
-              {isManual
-                ? price
-                : price?.toLocaleString("th-TH", {
-                  style: "currency",
-                  currency: "THB",
-                }) ?? 0}
+              {price?.toLocaleString("th-TH", {
+                style: "currency",
+                currency: "THB",
+              }) ?? 0}
             </p>
           </dd>
         </div>
@@ -41,18 +33,18 @@ export default function BillingInfo({
           <dt className="text-gray-600">ส่วนลด</dt>
           <dd className="font-medium text-gray-900">
             {discount?.toLocaleString("th-TH", {
-                style: "currency",
-                currency: "THB",
-              }) ?? 0}
+              style: "currency",
+              currency: "THB",
+            }) ?? 0}
           </dd>
         </div>
         <div className="flex items-center justify-between py-1">
           <dt className="text-gray-600">ต้นทุนเพิ่ม</dt>
           <dd className="font-medium text-gray-900">
             {extraCost?.toLocaleString("th-TH", {
-                style: "currency",
-                currency: "THB",
-              }) ?? 0}
+              style: "currency",
+              currency: "THB",
+            }) ?? 0}
           </dd>
         </div>
         <div className="flex items-center justify-between py-1">
@@ -87,7 +79,9 @@ export default function BillingInfo({
           </dd>
         </div> */}
         <div className="flex items-center justify-between pt-4">
-          <dt className="font-medium text-gray-900">ราคาทั้งหมด (ไม่รวม หัก ณ ที่จ่าย)</dt>
+          <dt className="font-medium text-gray-900">
+            ราคาทั้งหมด (ไม่รวม หัก ณ ที่จ่าย)
+          </dt>
 
           <dd className="font-medium text-primary-600 flex items-center space-x-2">
             <Button
@@ -95,7 +89,7 @@ export default function BillingInfo({
                 onOpen(data);
               }}
               size="sm"
-              variant={'ghost'}
+              variant={"ghost"}
             >
               แก้ไข
             </Button>

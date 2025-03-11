@@ -19,7 +19,6 @@ export const groupQuotationByVendor = (
 export const calculateQuotationItemPrice = (
   items: QuotationList[]
 ) => {
-  console.log(items)
 
   // get total price and discount for each vendor
   const summary = items.reduce(
