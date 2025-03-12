@@ -25,8 +25,8 @@ enum UserRole {
 model User {
   id               Int             @id @default(autoincrement())
   name             String
-  email            String          @unique
-  taxId            String?         @unique
+  email            String?          @unique
+  taxId            String?         
   phone            String?
   address          String?         @db.Text
   contact          String?         @db.Text

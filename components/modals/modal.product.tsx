@@ -57,6 +57,7 @@ export const NewProductModal = () => {
     if (product?.id) {
       handleUpdate.execute({
         id: product.id,
+        name,
         percentage,
         unit,
         cost,
@@ -135,9 +136,9 @@ export const NewProductModal = () => {
               errors={fieldErrors}
             />
           </div>
-          <div className="">
+          <div className="col-span-2">
             <FormInput
-              disabled={product?.id ? true : false}
+              // disabled={product?.id ? true : false}
               id="name"
               label="ชื่อสินค้า/บริการ"
               type="text"

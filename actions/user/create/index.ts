@@ -13,7 +13,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       data: {
         role,
         name,
-        taxId,
+        taxId: taxId ?? "",
         email,
         phone,
         contact,
@@ -22,6 +22,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       },
     });
   } catch (error) {
+    console.log("🚀 ~ handler ~ error:", error)
     return {
       error: "Failed to create.",
     };

@@ -66,7 +66,6 @@ export const NewUserModal = () => {
       address,
       password,
     };
-    console.log("🚀 ~ onSubmit ~ payload.role:", payload)
     if (user?.id) {
       // update user
       handleUpdate.execute({

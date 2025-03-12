@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const UserSchema = z.object({
   role: z.enum(["buyer", "vendor", "sale", "seller", "admin"]),
-  taxId: z.string(),
+  taxId: z.string().optional(),
   name: z
     .string({
       required_error: "Name is required",
@@ -10,13 +10,7 @@ export const UserSchema = z.object({
     .min(3, {
       message: "Name is too short.",
     }),
-  email: z
-    .string({
-      required_error: "Email is required",
-    })
-    .email({
-      message: "Email is invalid.",
-    }),
+  email: z.union([z.literal(""), z.string().email()]),
   phone: z.string().optional(),
   contact: z.string().optional(),
   fax: z.string().optional(),
