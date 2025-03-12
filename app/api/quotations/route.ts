@@ -49,6 +49,9 @@ export async function GET(req: NextRequest) {
     const quotations = await db.quotation.findMany({
       include: {
         contact: true,
+        invoice: {
+          select: { date: true, receiptDate: true },
+        },
         seller: {
           select: { name: true },
         },
@@ -60,6 +63,7 @@ export async function GET(req: NextRequest) {
         // or where
         ...conditions,
       },
+      orderBy: [{ invoice: { receiptDate: { sort: "desc", nulls: "last" } } }],
     });
     return NextResponse.json(quotations);
   } catch (error) {

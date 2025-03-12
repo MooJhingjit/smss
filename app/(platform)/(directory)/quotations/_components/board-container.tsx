@@ -1,7 +1,7 @@
 "use client";
 import React, { SyntheticEvent, useEffect, useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { QuotationWithBuyer, QuotationWithRelations } from "@/types";
+import { QuotationWithRelations } from "@/types";
 import { QuotationStatus, QuotationType } from "@prisma/client";
 import { useQueries, useMutation } from "@tanstack/react-query";
 import {
@@ -15,6 +15,7 @@ import { FormInput } from "@/components/form/form-input";
 import { useSearchParams } from "next/navigation";
 import { productTypeMapping, quotationStatusMapping } from "@/app/config";
 import {
+  ClipboardCheckIcon,
   FileIcon,
   Files,
   ListFilter,
@@ -27,11 +28,11 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuotationModal } from "@/hooks/use-quotation-modal";
-import { classNames, cn } from "@/lib/utils";
+import { classNames, cn, getDateFormat } from "@/lib/utils";
 import { Select } from "@/components/ui/select";
 import { FormSelect } from "@/components/form/form-select";
 
-interface Props { }
+interface Props {}
 
 type QuotationWithCounts = QuotationWithRelations & {
   _count: {
@@ -43,7 +44,6 @@ type QuotationWithCounts = QuotationWithRelations & {
 
 export default function BoardContainer(props: Props) {
   const allQuotationStatus = Object.values(QuotationStatus);
-  const [filterdData, setFilterdData] = useState([] as QuotationWithBuyer[]);
   const { onOpen } = useQuotationModal();
 
   const [searchParams, setSearchParams] = useState({
@@ -192,14 +192,14 @@ export default function BoardContainer(props: Props) {
             >
               <BoardColumn
                 color="gray"
-                items={queries[0].data ?? ([] as QuotationWithBuyer[])}
+                items={queries[0].data ?? ([] as QuotationWithRelations[])}
                 columnKey={QuotationStatus.open}
                 label={quotationStatusMapping[QuotationStatus.open].label}
                 progress={quotationStatusMapping[QuotationStatus.open].progress}
               />
               <BoardColumn
                 color="yellow"
-                items={queries[1].data ?? ([] as QuotationWithBuyer[])}
+                items={queries[1].data ?? ([] as QuotationWithRelations[])}
                 columnKey={QuotationStatus.pending_approval}
                 label={
                   quotationStatusMapping[QuotationStatus.pending_approval].label
@@ -211,7 +211,7 @@ export default function BoardContainer(props: Props) {
               />
               <BoardColumn
                 color="gray"
-                items={queries[2].data ?? ([] as QuotationWithBuyer[])}
+                items={queries[2].data ?? ([] as QuotationWithRelations[])}
                 columnKey={QuotationStatus.offer}
                 label={quotationStatusMapping[QuotationStatus.offer].label}
                 progress={
@@ -220,7 +220,7 @@ export default function BoardContainer(props: Props) {
               />
               <BoardColumn
                 color="yellow"
-                items={queries[3].data ?? ([] as QuotationWithBuyer[])}
+                items={queries[3].data ?? ([] as QuotationWithRelations[])}
                 columnKey={QuotationStatus.approved}
                 label={quotationStatusMapping[QuotationStatus.approved].label}
                 progress={
@@ -228,7 +228,7 @@ export default function BoardContainer(props: Props) {
                 }
               />
               <BoardColumn
-                items={queries[4].data ?? ([] as QuotationWithBuyer[])}
+                items={queries[4].data ?? ([] as QuotationWithRelations[])}
                 columnKey={QuotationStatus.po_preparing}
                 label={
                   quotationStatusMapping[QuotationStatus.po_preparing].label
@@ -238,7 +238,7 @@ export default function BoardContainer(props: Props) {
                 }
               />
               <BoardColumn
-                items={queries[5].data ?? ([] as QuotationWithBuyer[])}
+                items={queries[5].data ?? ([] as QuotationWithRelations[])}
                 columnKey={QuotationStatus.po_sent}
                 label={quotationStatusMapping[QuotationStatus.po_sent].label}
                 progress={
@@ -246,7 +246,7 @@ export default function BoardContainer(props: Props) {
                 }
               />
               <BoardColumn
-                items={queries[6].data ?? ([] as QuotationWithBuyer[])}
+                items={queries[6].data ?? ([] as QuotationWithRelations[])}
                 columnKey={QuotationStatus.product_received}
                 label={
                   quotationStatusMapping[QuotationStatus.product_received].label
@@ -257,7 +257,7 @@ export default function BoardContainer(props: Props) {
                 }
               />
               <BoardColumn
-                items={queries[7].data ?? ([] as QuotationWithBuyer[])}
+                items={queries[7].data ?? ([] as QuotationWithRelations[])}
                 columnKey={QuotationStatus.order_preparing}
                 label={
                   quotationStatusMapping[QuotationStatus.order_preparing].label
@@ -269,7 +269,7 @@ export default function BoardContainer(props: Props) {
               />
               <BoardColumn
                 color="yellow"
-                items={queries[8].data ?? ([] as QuotationWithBuyer[])}
+                items={queries[8].data ?? ([] as QuotationWithRelations[])}
                 columnKey={QuotationStatus.delivered}
                 label={quotationStatusMapping[QuotationStatus.delivered].label}
                 progress={
@@ -278,7 +278,7 @@ export default function BoardContainer(props: Props) {
               />
               <BoardColumn
                 color="green"
-                items={queries[9].data ?? ([] as QuotationWithBuyer[])}
+                items={queries[9].data ?? ([] as QuotationWithRelations[])}
                 columnKey={QuotationStatus.paid}
                 label={quotationStatusMapping[QuotationStatus.paid].label}
                 progress={quotationStatusMapping[QuotationStatus.paid].progress}
@@ -354,7 +354,7 @@ const BoardColumn = ({
   color?: "yellow" | "green" | "gray";
 }) => {
   return (
-    <div className="h-full min-w-[220px] select-none border-primary/10 border">
+    <div className="h-full min-w-[260px] select-none border-primary/10 border">
       <div
         className={classNames(
           "w-full rounded-md  shadow-md pb-2 h-full bg-secondary relative"
@@ -423,7 +423,7 @@ const BoardCard = ({
               <Link
                 href={`/quotations/${item.id}`}
                 className={classNames(
-                  "inline-flex items-center capitalize rounded bg-gray-100  py-0.5 text-xs font-medium text-gray-700 underline",
+                  "inline-flex items-center capitalize rounded bg-gray-100  py-0.5 text-xs font-medium text-gray-700 underline"
                   // item.type === QuotationType.product
                   //   ? "bg-white"
                   //   : "bg-green-100"
@@ -440,7 +440,7 @@ const BoardCard = ({
             </div>
             {/* <p className=" text-slate-700 capitalize">{item.paymentType}</p> */}
 
-            <div className="font-medium text-slate-900 mt-2">
+            <div className="font-medium text-slate-900 my-2">
               {item.contact?.name || ""}
             </div>
             {/* <div className="font-medium text-slate-900 mt-2 flex items-center space-x-2">
@@ -460,7 +460,7 @@ const BoardCard = ({
               
             </div> */}
           </div>
-          <div className="bg-gray-50 flex justify-between items-center px-2">
+          <div className="bg-gray-50 flex justify-between items-center px-2 py-1">
             <div className=" text-slate-900 text-xs flex items-center space-x-1 ">
               <UserIcon className="w-3 h-3  text-gray-500" />
               <span>{item.seller?.name || ""}</span>
@@ -498,6 +498,12 @@ const BoardCard = ({
               )}
             </div>
           </div>
+          {item.invoice?.receiptDate && (
+            <div className="bg-green-50 flex  items-center gap-1 px-2 py-1 text-green-700">
+              <ClipboardCheckIcon className="size-3.5 " />
+              <p className="text-xs">ออกใบเสร็จ {getDateFormat(item.invoice?.receiptDate)}</p>
+            </div>
+          )}
         </li>
       )}
     </Draggable>

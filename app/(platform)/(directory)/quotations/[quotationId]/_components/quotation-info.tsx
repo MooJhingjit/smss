@@ -32,7 +32,7 @@ import ConfirmActionButton from "@/components/confirm-action";
 import { useAction } from "@/hooks/use-action";
 import { toast } from "sonner";
 import { ReceiptPrint } from "@/components/print-receipt";
-import { cn } from "@/lib/utils";
+import { cn, getDateFormat } from "@/lib/utils";
 import { PDFDateFormat } from "@/app/services/PDF/pdf.helpers";
 import { Input } from "@/components/ui/input";
 
@@ -82,7 +82,7 @@ export default function QuotationInfo(props: Readonly<Props>) {
           value: `${data.validPricePeriod ?? "-"} วัน`,
         },
         { label: "อ้างอิงใบสั่งซื้อ", value: data.purchaseOrderRef ?? "" },
-        { label: "INV (ใบกำกับภาษี)", value: data.invoice?.receiptCode ?? "" },
+        { label: "INV (ใบกำกับ/ใบเสร็จ)", value: data.invoice?.receiptDate ?  `${data.invoice?.receiptCode ?? ""} (${getDateFormat(data.invoice?.receiptDate ?? "")})` : "-" },
 
       ]}
       onEdit={() => modal.onOpen(data)}
