@@ -74,7 +74,7 @@ export const generateInvoice = async (id: number, defaultDate: string) => {
 
     const quotation = await getData(id);
 
-    const invoiceDate = quotation?.invoice?.date ?? defaultDate
+    const invoiceDate = quotation?.invoice?.receiptDate ?? defaultDate
     _BILL_DATE = PDFDateFormat(new Date(invoiceDate))
 
     if (!quotation) {
@@ -94,7 +94,7 @@ const main = async () => {
   // list start position
 
   const templates = [
-    "pdf/service-tax-invoice-to-customer-template.pdf"
+    "pdf/service-receipt-invoice-to-customer-template.pdf"
   ];
 
   let results = []
@@ -394,7 +394,7 @@ const drawCustomerInfo = (page: PDFPage) => {
 
   const rightXStart = 500;
   // code
-  page.drawText(quotation?.invoice?.code ?? "", {
+  page.drawText(quotation?.invoice?.receiptCode ?? "", {
     x: rightXStart,
     y: Y_Start,
     maxWidth: 100,

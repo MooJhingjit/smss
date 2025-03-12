@@ -10,7 +10,7 @@ import {
 import { toast } from "sonner";
 import { useQuotationInfoModal } from "@/hooks/use-quotation-info-modal";
 import React, { useRef, useState } from "react";
-import { ChevronsUpDown } from "lucide-react";
+import { ChevronsUpDown, ClipboardCheckIcon } from "lucide-react";
 
 import {
   Collapsible,
@@ -182,8 +182,8 @@ const MainForm = (props: {
     validPricePeriod?: string;
     type?: "product" | "service";
   }) => {
-    console.log("🚀 ~ data:", data)
-    console.log("🚀 ~ payload:", payload)
+    console.log("🚀 ~ data:", data);
+    console.log("🚀 ~ payload:", payload);
     let payloadBody: Record<string, any> = {};
 
     const updateField = <T,>(
@@ -197,8 +197,8 @@ const MainForm = (props: {
       // console.log("🚀 ~ oldValue:", oldValue)
       // For fields that allow empty strings, we only check for undefined.
       // Otherwise, we require a truthy value.
-      console.log("🚀 ~ newValue:", newValue)
-      console.log("🚀 ~ oldValue:", oldValue)
+      console.log("🚀 ~ newValue:", newValue);
+      console.log("🚀 ~ oldValue:", oldValue);
 
       if (
         newValue !== undefined &&
@@ -420,11 +420,20 @@ const MainForm = (props: {
             {data.type === "service" && (
               <ItemList
                 label="ออกใบกำกับภาษี"
-                // info="ออกเมื่อ 20/12/2023"
+                successInfo={
+                  data.invoice?.receiptCode
+                    ? "ออกใบกำกับภาษีแล้ว " + data.invoice.receiptCode
+                    : undefined
+                }
+                info={
+                  !data.invoice?.receiptCode
+                    ? "ออกครั้งถัดไป เลข INV จะไม่เปลี่ยน"
+                    : undefined
+                }
               >
                 {data.invoice ? (
                   <div className="flex space-x-3 items-center">
-                    <PrintTaxInvoice hasList={hasList} quotation={data} />
+                    <ReceiptInvoice hasList={hasList} quotation={data} />
                   </div>
                 ) : (
                   <div className="flex space-x-2 items-center">
@@ -563,7 +572,7 @@ const ApprovalButton = ({
     />
   );
 };
-const PrintTaxInvoice = ({
+const ReceiptInvoice = ({
   hasList,
   quotation,
 }: {
@@ -572,14 +581,18 @@ const PrintTaxInvoice = ({
 }) => {
   const { invoice } = quotation;
 
-  const lastInvoiceDate = invoice?.date ? new Date(invoice.date) : new Date();
+  const alreadyHasInvoice = !!invoice?.receiptDate;
+
+  const firstInvoiceDate = invoice?.receiptDate
+    ? new Date(invoice.receiptDate)
+    : new Date();
 
   const [isDone, setIsDone] = React.useState(false);
 
   const onPrintClick = (date: Date) => {
     setIsDone(false);
     try {
-      fetch(`/api/quotations/tax-invoice/${quotation.id}`, {
+      fetch(`/api/quotations/receipt-invoice/${quotation.id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -643,8 +656,9 @@ const PrintTaxInvoice = ({
         name="date"
         type="date"
         placeholder="วันที่"
-        defaultValue={lastInvoiceDate.toISOString().split("T")[0]}
+        defaultValue={firstInvoiceDate.toISOString().split("T")[0]}
       />
+
       <ConfirmActionButton isDone={isDone} onConfirm={triggerSubmit}>
         <Button size={"sm"} variant={"secondary"} type="button">
           <PrinterIcon className="w-4 h-4" />
@@ -751,10 +765,12 @@ const PurchaseOrderRefInput = ({
 const ItemList = ({
   label,
   info,
+  successInfo,
   children,
 }: {
   label?: string;
   info?: string;
+  successInfo?: string;
   children: React.ReactNode;
 }) => {
   return (
@@ -766,7 +782,18 @@ const ItemList = ({
               {label}
             </p>
           )}
-          {info && <HoverInfo message={info} />}
+          {info && (
+            <HoverInfo
+              icon={<InfoIcon className="w-4 h-4 text-orange-500" />}
+              message={info}
+            />
+          )}
+          {successInfo && (
+            <HoverInfo
+              icon={<ClipboardCheckIcon className="w-4 h-4 text-green-700" />}
+              message={successInfo}
+            />
+          )}
         </div>
         <div className="w-[250px]">{children}</div>
       </div>
@@ -774,13 +801,17 @@ const ItemList = ({
   );
 };
 
-const HoverInfo = ({ message }: { message: string }) => {
+const HoverInfo = ({
+  message,
+  icon,
+}: {
+  message: string;
+  icon?: React.ReactNode;
+}) => {
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger asChild>
-          <InfoIcon className="w-4 h-4 text-orange-500" />
-        </TooltipTrigger>
+        <TooltipTrigger asChild>{icon}</TooltipTrigger>
         <TooltipContent>
           <p>{message}</p>
         </TooltipContent>

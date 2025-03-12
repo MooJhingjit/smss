@@ -313,6 +313,8 @@ model Invoice {
   id          Int       @id @default(autoincrement())
   code        String?
   date  DateTime
+  receiptCode        String?
+  receiptDate  DateTime?
   billGroupId Int
   billGroup   BillGroup @relation(fields: [billGroupId], references: [id])
   quotationId Int @unique

@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
-import { generateTaxInvoice } from "./bill-service";
+import { generateReceiptInvoice } from "./receipt-inv-service";
 
 export async function POST(
   req: NextRequest,
@@ -12,7 +12,7 @@ export async function POST(
     };
 
     // Generate the merged PDF
-    const mergedPdfBytes = await generateTaxInvoice(parseInt(id), data.date);
+    const mergedPdfBytes = await generateReceiptInvoice(parseInt(id), data.date);
 
     
     // Set response headers and return the merged PDF

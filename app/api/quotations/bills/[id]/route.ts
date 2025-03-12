@@ -1,6 +1,8 @@
 import { NextResponse, NextRequest } from "next/server";
 import { generateGroupInvoices } from "./bill-service";
 
+// Generate all bills for a group of QTs
+
 export async function POST(
   req: NextRequest,
   context: { params: { id: string } }

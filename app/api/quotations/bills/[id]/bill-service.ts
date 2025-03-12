@@ -6,7 +6,6 @@ import { QT_TYPE } from "@/types";
 import { Invoice, QuotationType } from "@prisma/client";
 import { PDFDocument } from "pdf-lib";
 
-
 // create group bills (product and service) and merge them into a single PDF
 export async function generateGroupInvoices(id: string, customDate: string) {
   const billGroupId = parseInt(id);
@@ -21,7 +20,10 @@ export async function generateGroupInvoices(id: string, customDate: string) {
       const result = await generateBillToCustomer(quotation.id, customDate);
       await addQuotationToMergedPdf(result, quotation.id, mergedPdf);
     } else if (quotation.type === "service") {
-      const result = await generateServiceInvoiceToCustomer(quotation.id, customDate);
+      const result = await generateServiceInvoiceToCustomer(
+        quotation.id,
+        customDate
+      );
       await addQuotationToMergedPdf(result, quotation.id, mergedPdf);
     }
   }
@@ -70,8 +72,8 @@ async function validateQuotationInvoice(
 async function addQuotationToMergedPdf(
   pdfResult:
     | {
-      pdfBytes: Uint8Array;
-    }
+        pdfBytes: Uint8Array;
+      }
     | undefined,
   quotationId: number,
   mergedPdf: PDFDocument
@@ -109,7 +111,6 @@ async function createNewInvoice(
   billGroupId: number,
   customDate: string
 ) {
-
   const invoiceDate = new Date(customDate);
   const newInvoice = await db.invoice.create({
     data: {
@@ -120,9 +121,10 @@ async function createNewInvoice(
       quotationId: quotation.id,
     },
   });
+  const isProduct = quotation.type === QuotationType.product;
 
   // Generate the invoice code
-  const prefix = quotation.type === QuotationType.product ? "" : "S";
+  const prefix = isProduct ? "" : "S";
 
   // 1) Find the most recently created quotation (descending by code)
   // that starts with prefix + year + month.
@@ -148,17 +150,24 @@ async function createNewInvoice(
   }
 
   // format:  [S]YYYY-MMDDD
-  const code = `${prefix}${datePrefix}${nextSequence.toString().padStart(3, "0")}`;
+  const code = `${prefix}${datePrefix}${nextSequence
+    .toString()
+    .padStart(3, "0")}`;
 
+  // for product, the code and data are the same for code and receiptCode
 
+  const data = {
+    code,
+    date: invoiceDate,
+    receiptCode: isProduct ? code : "",
+    receiptDate: isProduct ? invoiceDate : null,
+  };
 
   await db.invoice.update({
     where: {
       id: newInvoice.id,
     },
-    data: {
-      code,
-    },
+    data,
   });
 
   return newInvoice;

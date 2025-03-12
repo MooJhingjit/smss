@@ -82,6 +82,8 @@ export default function QuotationInfo(props: Readonly<Props>) {
           value: `${data.validPricePeriod ?? "-"} วัน`,
         },
         { label: "อ้างอิงใบสั่งซื้อ", value: data.purchaseOrderRef ?? "" },
+        { label: "INV (ใบกำกับภาษี)", value: data.invoice?.receiptCode ?? "" },
+
       ]}
       onEdit={() => modal.onOpen(data)}
     />
