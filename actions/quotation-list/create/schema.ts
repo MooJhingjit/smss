@@ -4,14 +4,14 @@ import { z } from "zod";
 export const schema = z.object({
   quotationId: z.number().int().positive(),
   name: z.string(),
-  totalPrice: z.number().positive(),
-  unitPrice: z.number().positive(),
+  totalPrice: z.number().nonnegative(),
+  unitPrice: z.number().nonnegative(),
   quantity: z.number().positive(),
   quotationType: z.enum(["product", "service"]),
 
   // required for product
   productId: z.number().int(),
-  price: z.number().positive(),
+  price: z.number().nonnegative(),
   cost: z.number().positive(),
 
   percentage: z.number().optional(),

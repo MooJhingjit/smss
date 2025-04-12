@@ -171,16 +171,15 @@ export const QuotationListModal = () => {
   useEffect(() => {
     const cost = watch("cost");
     const unitPrice = parseFloat(watch("unitPrice") || "0");
-    if (cost && unitPrice) {
-      const percentage = (
-        ((unitPrice - parseFloat(cost)) / parseFloat(cost)) *
-        100
-      ).toFixed(3);
+    if (cost) {
+      const percentage =
+        unitPrice > 0
+          ? (((unitPrice - parseFloat(cost)) / parseFloat(cost)) * 100).toFixed(3)
+          : "-100";
       setValue("percentage", percentage.toString());
 
       // multiply by quantity
       const quantity = watch("quantity");
-      // console.log("quantity", quantity)
       let totalPrice = unitPrice;
       if (quantity) {
         totalPrice = unitPrice * parseFloat(quantity);

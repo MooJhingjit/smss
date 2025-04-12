@@ -84,20 +84,21 @@ export default function QuotationLists(props: Props) {
       render: (item: QuotationListWithRelations) => {
         return item.product.vendor?.name;
       },
-    },
-    {
+        },
+        {
       name: "ต้นทุน",
       key: "cost",
-    },
-    {
+        },
+        {
       name: "ราคาต่อหน่วย",
       key: "unitPrice",
       render: (item: QuotationListWithRelations) => {
-        return `(+${item.percentage}%) ${item.unitPrice?.toLocaleString()}`;
+        const percentageSign = item.percentage && item.percentage >= 0 ? "+" : "";
+        return `(${percentageSign}${item.percentage}%) ${item.unitPrice?.toLocaleString()}`;
       },
-    },
-    { name: "จำนวน", key: "quantity" },
-    {
+        },
+        { name: "จำนวน", key: "quantity" },
+        {
       name: "รายการหัก ณ ที่จ่าย",
       key: "withholdingTaxEnabled",
       render: (item: QuotationListWithRelations) => {

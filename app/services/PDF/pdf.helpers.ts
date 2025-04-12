@@ -102,7 +102,7 @@ export async function loadSignatureImage(userKey: string) {
   const userConfig = {
     "1": {
       path: "signature/1.png",
-      scale: 0.5,
+      scale: 0.15,
     },
     "2": {
       path: "signature/2.png",
