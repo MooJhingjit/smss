@@ -4,7 +4,7 @@ import { createSafeAction } from "@/lib/create-safe-action";
 import { InputType, ReturnType } from "./types";
 import { schema } from "./schema";
 import { PurchaseOrderPaymentType, PurchaseOrderStatus } from "@prisma/client";
-import { generateCode, parseSequenceNumber } from "@/lib/utils";
+import { generateCode, getCurrentDateTime, parseSequenceNumber } from "@/lib/utils";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
   const { vendorId } = data;
@@ -17,7 +17,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     }
     
     // const today = new Date(Date.UTC(2025, 1, 1));
-    const today = new Date();
+    const today = getCurrentDateTime();
 
     purchaseOrder = await db.purchaseOrder.create({
       data: {

@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import { db } from "@/lib/db";
-import { generateCode, parseSequenceNumber } from "@/lib/utils";
+import { generateCode, getCurrentDateTime, parseSequenceNumber } from "@/lib/utils";
 import {
   groupQuotationByVendor,
   calculateQuotationItemPrice,
@@ -28,7 +28,8 @@ export async function POST(req: NextRequest) {
     );
 
     // const today = new Date(Date.UTC(2025, 1, 1));
-    const today = new Date();
+    // const today = new Date();
+    const today = getCurrentDateTime();
 
     // create purchase orders for each vendor
     const purchaseOrders = await Promise.all(
