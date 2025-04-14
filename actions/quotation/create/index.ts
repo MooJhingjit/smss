@@ -18,8 +18,8 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         error: "Failed to create.",
       };
     }
-    const today = new Date(Date.UTC(2025, 2, 1));
-    // const today = getCurrentDateTime();
+    // const today = new Date(Date.UTC(2025, 2, 1));
+    const today = getCurrentDateTime();
 
     // return {}
     quotation = await db.quotation.create({
