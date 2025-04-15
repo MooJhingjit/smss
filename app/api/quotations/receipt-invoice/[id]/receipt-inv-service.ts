@@ -125,9 +125,10 @@ async function updateReceiptInvoice(
         },
       },
       orderBy: {
-        id: "desc",
+        receiptCode: "desc",
       },
     });
+    // console.log("🚀 ~ lastReceipt:", lastReceipt)
 
     // 2) Parse the last 3 digits to figure out the sequence number
     let nextSequence = 1;

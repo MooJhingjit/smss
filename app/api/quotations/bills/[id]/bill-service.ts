@@ -139,7 +139,7 @@ async function createNewInvoice(
       },
     },
     orderBy: {
-      id: "desc",
+      code: "desc",
     },
   });
 
