@@ -44,6 +44,11 @@ const getData = async (id: number): Promise<QuotationWithRelations[]> => {
     where: {
       billGroupId: id,
     },
+    orderBy: {
+      invoice: {
+        code: "asc",
+      },
+    },
   });
 
   return quotations;
@@ -227,6 +232,7 @@ const drawHeaderInfo = (page: PDFPage) => {
     y: Y_Start - config.lineHeight,
     maxWidth: 500,
     ...config,
+    size: 6 // custom
   });
 
   const groupBillCode = _DATA[0].billGroup?.code ?? "";

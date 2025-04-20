@@ -206,12 +206,12 @@ const writeMainItem = (
     ...config,
   });
 
-  const itemName = `${!!data.allowedWithholdingTax ? "(**)" : ""} ${data.name}` ;
+  const itemName = `${!!data.allowedWithholdingTax ? "(**)" : ""} ${data.name}`;
 
   currentPage.drawText(itemName, {
     x: columnPosition.description,
     y: lineStart,
-    maxWidth: 600,
+    maxWidth: 300,
     ...config,
     // lineHeight: breakLineHeight,
   });
@@ -247,12 +247,12 @@ const writeMainItem = (
   });
 
   const bounding = getBoundingBox(
-    data.name,
+    itemName,
     pdfDoc,
     _FONT,
     PAGE_FONT_SIZE,
     config.lineHeight + 4,
-    600
+    300
   );
 
   return bounding.height / 10;
@@ -342,7 +342,7 @@ const drawCustomerInfo = (page: PDFPage) => {
   page.drawText(customer.address ?? "", {
     x: X_Start,
     y: Y_Start - config.lineHeight * 2,
-    maxWidth: 500,
+    maxWidth: 300,
     ...config,
   });
 

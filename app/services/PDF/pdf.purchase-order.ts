@@ -207,7 +207,7 @@ const writeMainItem = (
   currentPage.drawText(data.name, {
     x: columnPosition.description,
     y: lineStart,
-    maxWidth: 600,
+    maxWidth: 300,
     ...config,
     // lineHeight: breakLineHeight,
   });
@@ -254,7 +254,7 @@ const writeMainItem = (
     _FONT,
     PAGE_FONT_SIZE,
     config.lineHeight + 4,
-    600
+    300
   );
 
   return bounding.height / 10;
