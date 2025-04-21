@@ -6,7 +6,7 @@ export type ItemRefs =
   | undefined
   | {
       productRef?: { id: number; name: string };
-      quotationRef: { id: number; type: QuotationType };
+      quotationRef: { id: number; type: QuotationType; isLocked?: boolean };
       timestamps: number;
     };
 

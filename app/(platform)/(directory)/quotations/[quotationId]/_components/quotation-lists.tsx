@@ -159,7 +159,7 @@ export default function QuotationLists(props: Props) {
             onClick={() =>
               !isLocked &&
               modal.onOpen(undefined, {
-                quotationRef: { id: quotationId, type: quotationType },
+                quotationRef: { id: quotationId, type: quotationType},
                 timestamps: Date.now(),
               })
             }
@@ -177,11 +177,12 @@ export default function QuotationLists(props: Props) {
           columns={columns}
           data={data}
           onManage={
-            isLocked
-              ? undefined
-              : (item) => {
+            // isLocked
+            //   ? undefined
+            //   : 
+              (item) => {
                   return modal.onOpen(item, {
-                    quotationRef: { id: item.quotationId, type: quotationType },
+                    quotationRef: { id: item.quotationId, type: quotationType, isLocked },
                     productRef: {
                       id: item.productId ?? 0,
                       name: item.product?.name ?? "",

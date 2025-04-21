@@ -19,13 +19,14 @@ import { QuotationType } from "@prisma/client";
 import { useForm } from "react-hook-form";
 import { FormTextarea } from "../form/form-textarea";
 import { Input } from "@/components/ui/input";
-import { MinusCircle, PlusCircle } from "lucide-react";
+import { LockIcon, MinusCircle, PlusCircle } from "lucide-react";
 import { quotationTypeMapping } from "@/app/config";
 import { classNames } from "@/lib/utils";
 import { ProductWithRelations } from "@/types";
 import { Button } from "../ui/button";
 import ConfirmActionButton from "../confirm-action";
 import { deleteQuotationList } from "@/actions/quotation-list/delete";
+import { Badge } from "../ui/badge";
 
 type FormInput = {
   productId: string;
@@ -52,6 +53,9 @@ export const QuotationListModal = () => {
   const { register, watch, reset, getValues, setValue } = useForm<FormInput>({
     mode: "onChange",
   });
+
+  // normally user cannot edit the quotation list after PO is created (isLocked will be true)
+  const isLocked = refs?.quotationRef?.isLocked;
 
   useEffect(() => {
     const formData = {
@@ -174,7 +178,9 @@ export const QuotationListModal = () => {
     if (cost) {
       const percentage =
         unitPrice > 0
-          ? (((unitPrice - parseFloat(cost)) / parseFloat(cost)) * 100).toFixed(3)
+          ? (((unitPrice - parseFloat(cost)) / parseFloat(cost)) * 100).toFixed(
+              3
+            )
           : "-100";
       setValue("percentage", percentage.toString());
 
@@ -204,7 +210,6 @@ export const QuotationListModal = () => {
     watch("unitPrice"),
   ]);
 
-
   const subItems = getValues("subItems");
 
   if (!modal.isOpen) return;
@@ -214,13 +219,14 @@ export const QuotationListModal = () => {
       <form
         key={`form_${refs?.timestamps}`}
         action={onSubmit}
-        className="grid grid-cols-4 gap-3 mt-3"
+        className="grid grid-cols-4 gap-3 mt-3 "
       >
         <div className="col-span-2">
           <FormSearchAsync
             id="productId"
             label="ค้นหาชื่อสินค้า/บริการ"
             required
+            disabled={!!isLocked}
             config={{
               endpoint: "products",
               params: {},
@@ -251,6 +257,7 @@ export const QuotationListModal = () => {
             id="name"
             label="ชื่อสินค้า/บริการ (ชื่อเต็มแสดงในใบเสนอราคา)"
             type="text"
+            readOnly={!!isLocked}
             register={register}
             defaultValue={defaultData?.name}
             errors={fieldErrors}
@@ -263,6 +270,7 @@ export const QuotationListModal = () => {
             id="cost"
             label="ต้นทุน"
             required
+            readOnly={!!isLocked}
             step="0.01"
             register={register}
             type="number"
@@ -288,6 +296,7 @@ export const QuotationListModal = () => {
             label="ราคาขายต่อหน่วย"
             required
             type="number"
+            readOnly={!!isLocked}
             register={register}
             errors={fieldErrors}
           />
@@ -298,6 +307,7 @@ export const QuotationListModal = () => {
             id="quantity"
             label="จำนวน"
             required
+            readOnly={!!isLocked}
             type="number"
             register={register}
             defaultValue={defaultData?.quantity}
@@ -335,6 +345,7 @@ export const QuotationListModal = () => {
             id="discount"
             label="ส่วนลด"
             type="number"
+            readOnly={!!isLocked}
             register={register}
             // defaultValue={defaultData?.withholdingTax}
             errors={fieldErrors}
@@ -370,7 +381,7 @@ export const QuotationListModal = () => {
         <SubItems setValue={setValue} defaultSubItems={subItems} />
 
         <div className="col-start-4 col-span-1 flex justify-end space-x-3">
-          {defaultData?.id && (
+          {!isLocked && defaultData?.id && (
             <ConfirmActionButton
               onConfirm={() =>
                 handleDelete.execute({
@@ -391,9 +402,9 @@ export const QuotationListModal = () => {
 
   return (
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
-      <DialogContent className="sm:max-w-[425px] md:max-w-[600px]">
+      <DialogContent className="sm:max-w-[425px] md:max-w-[600px] ">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="space-x-2">
             <span>รายละเอียดสินค้าในใบ QT</span>
             {refs?.quotationRef.type && (
               <span
@@ -406,6 +417,12 @@ export const QuotationListModal = () => {
               >
                 {quotationTypeMapping[refs?.quotationRef.type]}
               </span>
+            )}
+
+            {isLocked && (
+              <Badge variant="outline" className="text-xs text-orange-400">
+                <span>แก้ได้เฉพาะรายละเอียดเท่านั้น</span>
+              </Badge>
             )}
           </DialogTitle>
         </DialogHeader>
@@ -489,7 +506,6 @@ const SubItems = ({
               }
               className="w-20"
             />
-
             <MinusCircle
               onClick={() => handleRemove(index)}
               className="text-red-300 w-5  hover:text-red-400 cursor-pointer"
