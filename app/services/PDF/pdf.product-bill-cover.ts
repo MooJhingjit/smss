@@ -224,7 +224,7 @@ const drawHeaderInfo = (page: PDFPage) => {
 
   const contactDetails = [
     contactRef.address ?? "",
-    "เลขประจำตัวผู้เสียภาษี " + contactRef.taxId,
+    "Tax ID " + contactRef.taxId,
   ];
 
   page.drawText(contactDetails.join(" "), {
