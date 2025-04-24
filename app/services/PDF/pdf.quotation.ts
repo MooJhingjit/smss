@@ -297,7 +297,7 @@ const generate = async (id: number) => {
   page.drawImage(approverSignatureImage, {
     x: 460,
     y: 70,
-    ...approverSignatureImage.scale(0.1),
+    ...approverSignatureImage.scale(0.12),
   });
 
   // phone
@@ -306,6 +306,7 @@ const generate = async (id: number) => {
     x: 460,
     y: 63,
     ...config,
+    size: PAGE_FONT_SIZE - 1,
   });
   page.drawText(_BILL_DATE, {
     x: 450,
@@ -324,13 +325,15 @@ const generate = async (id: number) => {
     page.drawImage(sellerSignatureImage, {
       x: 290,
       y: 70,
-      ...approverSignatureImage.scale(0.1),
+      ...approverSignatureImage.scale(0.12),
     });
 
     page.drawText(sellerPhone ?? "", {
       x: 290,
       y: 63,
       ...config,
+    size: PAGE_FONT_SIZE - 1,
+
     });
 
     page.drawText(_BILL_DATE, {
