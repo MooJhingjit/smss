@@ -304,7 +304,7 @@ const generate = async (id: number) => {
   const approverPhone = approver?.phone;
   page.drawText(approverPhone ?? "", {
     x: 460,
-    y: 63,
+    y: 62,
     ...config,
     size: PAGE_FONT_SIZE - 1,
   });
@@ -330,7 +330,7 @@ const generate = async (id: number) => {
 
     page.drawText(sellerPhone ?? "", {
       x: 290,
-      y: 63,
+      y: 62,
       ...config,
     size: PAGE_FONT_SIZE - 1,
 
