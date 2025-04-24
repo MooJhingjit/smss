@@ -42,6 +42,7 @@ type QuotationWithRelations = Quotation & {
 const getQuotation = async (
   id: number
 ): Promise<QuotationWithRelations | null> => {
+
   const quotation = await db.quotation.findUnique({
     include: {
       lists: {
@@ -282,17 +283,32 @@ const generate = async (id: number) => {
   // drawSignature
   // approver
   // const approverSignatureImageBytes = await readFile(path.join(process.cwd(), "/public/signature/1.png"));
-  const approverSignature = await loadSignatureImage("2");
+  const APPROVER_ID = 2
+  const approver = await db.user.findFirst({
+    where: {
+      id: APPROVER_ID
+    },
+  });
+
+  const approverSignature = await loadSignatureImage(APPROVER_ID.toString());
   const approverSignatureImage = await page.doc.embedPng(
     approverSignature.imageBytes as any
   );
   page.drawImage(approverSignatureImage, {
-    x: 440,
-    y: 60,
-    ...approverSignatureImage.scale(approverSignature.scale),
+    x: 460,
+    y: 70,
+    ...approverSignatureImage.scale(0.1),
+  });
+
+  // phone
+  const approverPhone = approver?.phone;
+  page.drawText(approverPhone ?? "", {
+    x: 460,
+    y: 63,
+    ...config,
   });
   page.drawText(_BILL_DATE, {
-    x: 440,
+    x: 450,
     y: 45,
     ...config,
   });
@@ -300,15 +316,29 @@ const generate = async (id: number) => {
   // seller
   const sellerId = _DATA.seller?.id;
   if (sellerId) {
+    const sellerPhone = _DATA.seller?.phone;
     const sellerSignature = await loadSignatureImage(sellerId.toString());
     const sellerSignatureImage = await page.doc.embedPng(
       sellerSignature.imageBytes as any
     );
     page.drawImage(sellerSignatureImage, {
-      x: 280,
-      y: 60,
-      ...approverSignatureImage.scale(sellerSignature.scale),
+      x: 290,
+      y: 70,
+      ...approverSignatureImage.scale(0.1),
     });
+
+    page.drawText(sellerPhone ?? "", {
+      x: 290,
+      y: 63,
+      ...config,
+    });
+
+    page.drawText(_BILL_DATE, {
+      x: 280,
+      y: 45,
+      ...config,
+    });
+
   }
 
   drawStaticInfo(page, currentPageNumber);

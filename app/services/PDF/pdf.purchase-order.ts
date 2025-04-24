@@ -100,8 +100,8 @@ const generate = async () => {
   const approverSignatureImage = await page.doc.embedPng(approverSignature.imageBytes as any);
   page.drawImage(approverSignatureImage, {
     x: 380,
-    y: 45,
-    ...approverSignatureImage.scale(approverSignature.scale)
+    y: 50,
+    ...approverSignatureImage.scale(0.4)
   })
   page.drawText(_BILL_DATE, {
     x: 380,
