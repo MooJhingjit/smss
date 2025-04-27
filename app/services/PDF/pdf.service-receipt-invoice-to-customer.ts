@@ -351,7 +351,7 @@ const drawCustomerInfo = (page: PDFPage) => {
   page.drawText(customer.address ?? "", {
     x: X_Start,
     y: Y_Start - config.lineHeight * 2,
-    maxWidth: 500,
+    maxWidth: 350,
     ...config,
   });
 
