@@ -1,6 +1,10 @@
 import { NextResponse, NextRequest } from "next/server";
 import { db } from "@/lib/db";
-import { generateCode, getCurrentDateTime, parseSequenceNumber } from "@/lib/utils";
+import {
+  generateCode,
+  getCurrentDateTime,
+  parseSequenceNumber,
+} from "@/lib/utils";
 import {
   groupQuotationByVendor,
   calculateQuotationItemPrice,
@@ -115,9 +119,9 @@ export async function POST(req: NextRequest) {
               const purchaseOrderItem = await db.purchaseOrderItem.create({
                 data: {
                   purchaseOrderId: purchaseOrder.id,
-                  name: quotationList.product.name,
+                  name: quotationList.name, // changed to use from list
                   quantity: quotationList.quantity,
-                  description: quotationList.product.description,
+                  description: quotationList.description, // changed to use from list
                   unit: quotationList.product.unit,
                   price:
                     (quotationList.cost ?? 0) * (quotationList.quantity ?? 1),
@@ -136,7 +140,7 @@ export async function POST(req: NextRequest) {
                         data: {
                           productId: quotationList.productId ?? 0,
                           purchaseOrderItemId: purchaseOrderItem.id,
-                          name: quotationList.product.name,
+                          name: quotationList.name, // changed to use from list
                           cost: quotationList.cost,
                         },
                       })
