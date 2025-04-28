@@ -54,27 +54,29 @@ export const QuotationListModal = () => {
     mode: "onChange",
   });
 
+  // console.log("getValues", getValues());
+
   // normally user cannot edit the quotation list after PO is created (isLocked will be true)
   const isLocked = refs?.quotationRef?.isLocked;
 
   useEffect(() => {
     const formData = {
       name: defaultData?.name ?? "",
-      price: defaultData?.price ? defaultData.price.toString() : "",
-      unitPrice: defaultData?.unitPrice ? defaultData.unitPrice.toString() : "",
-      cost: defaultData?.cost ? defaultData.cost.toString() : "",
+      price: defaultData?.price ? defaultData.price.toString() : "0",
+      unitPrice: defaultData?.unitPrice ? defaultData.unitPrice.toString() : "0",
+      cost: defaultData?.cost ? defaultData.cost.toString() : "0",
       percentage: p,
       quantity: defaultData?.quantity ? defaultData.quantity.toString() : "1",
       withholdingTax: defaultData?.withholdingTax
         ? defaultData.withholdingTax.toString()
-        : "",
+        : "0",
       withholdingTaxPercent: defaultData?.withholdingTaxPercent
         ? defaultData.withholdingTaxPercent.toString()
         : "7",
       totalPrice: defaultData?.totalPrice
         ? defaultData.totalPrice.toString()
-        : "",
-      discount: defaultData?.discount ? defaultData.discount.toString() : "",
+        : "0",
+      discount: defaultData?.discount ? defaultData.discount.toString() : "0",
       description: defaultData?.description ?? "",
       subItems: defaultData?.subItems ? defaultData.subItems : "[]",
     };
@@ -147,7 +149,7 @@ export const QuotationListModal = () => {
       price: parseFloat(unitPrice) * parseFloat(quantity),
       unitPrice: parseFloat(unitPrice),
       cost: parseFloat(cost),
-      percentage: parseFloat(percentage),
+      percentage: percentage ? parseFloat(percentage) : 0,
       quantity: parseFloat(quantity),
       withholdingTax: parseFloat(withholdingTax),
       withholdingTaxPercent: parseFloat(withholdingTaxPercent),
@@ -157,6 +159,7 @@ export const QuotationListModal = () => {
       subItems: getValues("subItems"),
       quotationType: refs.quotationRef.type,
     };
+
 
     if (defaultData?.id) {
       handleUpdate.execute({
@@ -175,33 +178,35 @@ export const QuotationListModal = () => {
   useEffect(() => {
     const cost = watch("cost");
     const unitPrice = parseFloat(watch("unitPrice") || "0");
-    if (cost) {
-      const percentage =
-        unitPrice > 0
-          ? (((unitPrice - parseFloat(cost)) / parseFloat(cost)) * 100).toFixed(
-              3
-            )
-          : "-100";
-      setValue("percentage", percentage.toString());
+    // if (cost) {
 
-      // multiply by quantity
-      const quantity = watch("quantity");
-      let totalPrice = unitPrice;
-      if (quantity) {
-        totalPrice = unitPrice * parseFloat(quantity);
-      }
-      // calculate tax 7%
-      const tax = (totalPrice * 7) / 100;
-      setValue("withholdingTax", tax.toString());
+    const percentage =
+      unitPrice > 0
+        ? (((unitPrice - parseFloat(cost)) / parseFloat(cost)) * 100).toFixed(
+          3
+        )
+        : 0;
+    setValue("percentage", percentage.toString());
 
-      // set total price + tax - discount
-      const discount = watch("discount");
-      let total = totalPrice + tax;
-      if (discount) {
-        total = total - parseFloat(discount);
-      }
-      setValue("totalPrice", total.toString());
+    // multiply by quantity
+    const quantity = watch("quantity");
+    let totalPrice = unitPrice;
+    if (quantity) {
+      totalPrice = unitPrice * parseFloat(quantity);
     }
+    // calculate tax 7%
+    const tax = (totalPrice * 7) / 100;
+    setValue("withholdingTax", tax ? tax.toString() : "0");
+
+    // set total price + tax - discount
+    const discount = watch("discount");
+    let total = totalPrice + tax;
+    if (discount) {
+      total = total - parseFloat(discount);
+    }
+
+    setValue("totalPrice", total ? total.toString() : "0");
+
   }, [
     watch("cost"),
     watch("percentage"),
@@ -213,6 +218,7 @@ export const QuotationListModal = () => {
   const subItems = getValues("subItems");
 
   if (!modal.isOpen) return;
+
 
   const renderProductForm = () => {
     return (
@@ -441,9 +447,9 @@ const SubItems = ({
 }) => {
   const [subItems, setSubItems] = useState<
     | {
-        label: string;
-        quantity: string;
-      }[]
+      label: string;
+      quantity: string;
+    }[]
     | null
   >(null);
 
