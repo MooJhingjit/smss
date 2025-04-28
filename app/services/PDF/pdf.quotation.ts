@@ -185,7 +185,7 @@ const generate = async (id: number) => {
     // Unit Price
     const unitPriceText = data.unitPrice
       ? data.unitPrice.toLocaleString("th-TH", CURRENCY_FORMAT)
-      : "";
+      : "0.00";
     currentPage.drawText(unitPriceText, {
       x: columnPosition.unitPrice + 44 - getTextWidth(unitPriceText, config),
       y: lineStart,

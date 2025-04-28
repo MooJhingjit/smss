@@ -227,7 +227,7 @@ const writeMainItem = (
 
   const unitPrice = data.unitPrice
     ? data.unitPrice.toLocaleString("th-TH", CURRENCY_FORMAT)
-    : "";
+    : "0.00";
 
   currentPage.drawText(data.unitPrice?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "", {
     x: columnPosition.unitPrice + 44 - getTextWidth(unitPrice, config),
