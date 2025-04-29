@@ -369,22 +369,31 @@ const generate = async (id: number) => {
     page = mainItemRes.page;
 
     if (list.description) {
-      const mainDescriptionRes = validatePageArea(
-        page,
-        pdfDoc,
-        templatePage,
-        lineStart,
-        ITEM_Y_Start,
-        (currentPage: PDFPage, currentLineStart: number) =>
-          writeMainDescription(
-            currentPage,
-            list.description ?? "",
-            currentLineStart
-          )
-      );
 
-      lineStart = mainDescriptionRes.lineStart;
-      page = mainDescriptionRes.page;
+      const descriptionLines = list.description.split("\n");
+
+      descriptionLines.forEach((descriptionLine, idx) => {
+
+        const text = typeof descriptionLine === "string" ? descriptionLine : " ";
+        
+        const mainDescriptionRes = validatePageArea(
+          page,
+          pdfDoc,
+          templatePage,
+          lineStart,
+          ITEM_Y_Start,
+          (currentPage: PDFPage, currentLineStart: number) =>
+            writeMainDescription(
+              currentPage,
+              text || " ",
+              currentLineStart
+            )
+        );
+
+        lineStart = mainDescriptionRes.lineStart;
+        page = mainDescriptionRes.page;
+      });
+
     }
 
     // write subItems
