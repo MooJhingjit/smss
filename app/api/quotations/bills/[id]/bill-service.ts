@@ -10,6 +10,8 @@ import { PDFDocument } from "pdf-lib";
 export async function generateGroupInvoices(id: string, customDate: string) {
   const billGroupId = parseInt(id);
   const quotations = await getQuotationsByGroup(billGroupId);
+  // console.log("🚀 ~ generateGroupInvoices ~ quotations:", quotations.map((q) => q.id));
+  // return
 
   const mergedPdf = await PDFDocument.create();
   for (const quotation of quotations) {
@@ -44,6 +46,9 @@ async function getQuotationsByGroup(billGroupId: number) {
     where: {
       billGroupId,
     },
+    orderBy: {
+      id: 'asc'
+    }
   });
 }
 
