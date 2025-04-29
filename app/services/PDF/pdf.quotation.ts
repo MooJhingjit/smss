@@ -335,7 +335,7 @@ const generate = async (id: number) => {
       x: 290,
       y: 62,
       ...config,
-    size: PAGE_FONT_SIZE - 1,
+      size: PAGE_FONT_SIZE - 1,
 
     });
 
@@ -407,6 +407,19 @@ const generate = async (id: number) => {
         }
       );
     }
+  });
+
+
+  // show price on the last page
+  const currencyFormat = {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  };
+  drawPriceInfo(page, {
+    discount: _DATA.discount?.toLocaleString("th-TH", currencyFormat) ?? "",
+    tax: _DATA.tax?.toLocaleString("th-TH", currencyFormat) ?? "",
+    totalPrice: _DATA.totalPrice?.toLocaleString("th-TH", currencyFormat) ?? "",
+    grandTotal: _DATA.grandTotal?.toLocaleString("th-TH", currencyFormat) ?? "",
   });
 
   const modifiedPdfBytes = await pdfDoc.save();
@@ -701,15 +714,15 @@ const drawStaticInfo = (page: PDFPage, currentPageNumber: number) => {
   });
   drawRemarkInfo(page, _DATA.remark ?? "");
 
-  const currencyFormat = {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  };
-  drawPriceInfo(page, {
-    discount: _DATA.discount?.toLocaleString("th-TH", currencyFormat) ?? "",
-    tax: _DATA.tax?.toLocaleString("th-TH", currencyFormat) ?? "",
-    totalPrice: _DATA.totalPrice?.toLocaleString("th-TH", currencyFormat) ?? "",
-    grandTotal: _DATA.grandTotal?.toLocaleString("th-TH", currencyFormat) ?? "",
-  });
+  // const currencyFormat = {
+  //   minimumFractionDigits: 2,
+  //   maximumFractionDigits: 2,
+  // };
+  // drawPriceInfo(page, {
+  //   discount: _DATA.discount?.toLocaleString("th-TH", currencyFormat) ?? "",
+  //   tax: _DATA.tax?.toLocaleString("th-TH", currencyFormat) ?? "",
+  //   totalPrice: _DATA.totalPrice?.toLocaleString("th-TH", currencyFormat) ?? "",
+  //   grandTotal: _DATA.grandTotal?.toLocaleString("th-TH", currencyFormat) ?? "",
+  // });
   // drawSignature(page);
 };
