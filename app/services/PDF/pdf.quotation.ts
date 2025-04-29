@@ -49,6 +49,9 @@ const getQuotation = async (
         include: {
           product: true,
         },
+        orderBy: {
+          id: 'asc'
+        }
       },
       seller: true,
       contact: true,
@@ -112,7 +115,7 @@ const generate = async (id: number) => {
     amount: ITEM_X_Start + 462,
   };
 
-  const fontResolvePath = path.resolve("./public", "fonts/Sarabun-Regular.ttf");
+  const fontResolvePath = path.resolve("./public", "fonts/Sarabun-Regular.ttf"); // sarabun-new
   const fontPath = path.join(fontResolvePath);
 
   const templateResolvePath = path.resolve(
