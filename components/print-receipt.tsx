@@ -43,9 +43,9 @@ export const ReceiptPrint = ({
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
-          setTimeout(() => {
+            setTimeout(() => {
             window.URL.revokeObjectURL(url);
-          }, 60000 * 5); //
+            }, 10000); // 10 seconds
 
           // reload page
           window.location.reload();

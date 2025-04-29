@@ -703,7 +703,7 @@ const PrintQuotation = ({
           // window.URL.revokeObjectURL(url);
           setTimeout(() => {
             window.URL.revokeObjectURL(url); // Clean up the blob URL after it's no longer needed
-          }, 60000 * 5); // for example, after 5 minute
+          }, 10000); // for example, after 5 minute
         });
     } catch (error) {
       console.log("error", error);
