@@ -105,6 +105,9 @@ const generate = async (id: number) => {
   // list start position
   const ITEM_Y_Start = 545;
   const ITEM_X_Start = 60;
+  
+  // Track the current page number as a reference object so it can be updated from validatePageArea
+  const pageNumberRef = { currentPageNumber: 1 };
 
   // horizontal position
   const columnPosition = {
@@ -347,7 +350,7 @@ const generate = async (id: number) => {
 
   }
 
-  drawStaticInfo(page, currentPageNumber);
+  drawStaticInfo(page, pageNumberRef.currentPageNumber);
 
   let lineStart = ITEM_Y_Start;
 
@@ -363,7 +366,8 @@ const generate = async (id: number) => {
       lineStart,
       ITEM_Y_Start,
       (currentPage: PDFPage, currentLineStart: number) =>
-        writeMainItem(currentPage, index, list, currentLineStart)
+        writeMainItem(currentPage, index, list, currentLineStart),
+      pageNumberRef
     );
     lineStart = mainItemRes.lineStart;
     page = mainItemRes.page;
@@ -387,7 +391,8 @@ const generate = async (id: number) => {
               currentPage,
               text || " ",
               currentLineStart
-            )
+            ),
+          pageNumberRef
         );
 
         lineStart = mainDescriptionRes.lineStart;
@@ -408,7 +413,8 @@ const generate = async (id: number) => {
             lineStart,
             ITEM_Y_Start,
             (currentPage: PDFPage, currentLineStart: number) =>
-              writeSubItem(currentPage, subItem, currentLineStart)
+              writeSubItem(currentPage, subItem, currentLineStart),
+            pageNumberRef
           );
 
           lineStart = subItemRes.lineStart;
@@ -664,21 +670,22 @@ type ListConfig = {
 };
 
 const END_POSITION = 210;
-let currentPageNumber = 1;
+
 const validatePageArea = (
   page: PDFPage,
   pdfDoc: PDFDocument,
   templatePage: PDFEmbeddedPage,
   lineStart: number,
   ITEM_Y_Start: number,
-  exc: any
+  exc: any,
+  pageNumberRef: { currentPageNumber: number }
 ) => {
   if (!_DATA) return { page, lineStart };
   if (lineStart < END_POSITION) {
-    currentPageNumber++;
+    pageNumberRef.currentPageNumber++;
     const newPage = pdfDoc.addPage();
     newPage.drawPage(templatePage);
-    drawStaticInfo(newPage, currentPageNumber);
+    drawStaticInfo(newPage, pageNumberRef.currentPageNumber);
 
     lineStart = ITEM_Y_Start;
 
