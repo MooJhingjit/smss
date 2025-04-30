@@ -52,7 +52,11 @@ const getData = async (
 ): Promise<QuotationWithRelations | null> => {
   const quotation = await db.quotation.findUnique({
     include: {
-      lists: true,
+      lists: {
+        orderBy: {
+          id: "asc",
+        },
+      },
       contact: true,
       seller: true,
       invoice: true,
