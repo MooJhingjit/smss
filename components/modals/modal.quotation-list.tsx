@@ -34,6 +34,7 @@ type FormInput = {
   price: string;
   unitPrice: string;
   cost: string;
+  unit: string;
   percentage: string;
   quantity: string;
   withholdingTax: string;
@@ -65,7 +66,9 @@ export const QuotationListModal = () => {
       price: defaultData?.price ? defaultData.price.toString() : "0",
       unitPrice: defaultData?.unitPrice ? defaultData.unitPrice.toString() : "0",
       cost: defaultData?.cost ? defaultData.cost.toString() : "0",
+      unit: defaultData?.unit ?? "",
       percentage: p,
+
       quantity: defaultData?.quantity ? defaultData.quantity.toString() : "1",
       withholdingTax: defaultData?.withholdingTax
         ? defaultData.withholdingTax.toString()
@@ -122,6 +125,7 @@ export const QuotationListModal = () => {
     // const price = formData.get("price") as string;
     const unitPrice = formData.get("unitPrice") as string;
     const cost = formData.get("cost") as string;
+    const unit = formData.get("unit") as string;
     const percentage = formData.get("percentage") as string;
     const quantity = formData.get("quantity") as string;
     const withholdingTax = formData.get("withholdingTax") as string;
@@ -148,6 +152,7 @@ export const QuotationListModal = () => {
       name,
       price: parseFloat(unitPrice) * parseFloat(quantity),
       unitPrice: parseFloat(unitPrice),
+      unit,
       cost: parseFloat(cost),
       percentage: percentage ? parseFloat(percentage) : 0,
       quantity: parseFloat(quantity),
@@ -225,9 +230,9 @@ export const QuotationListModal = () => {
       <form
         key={`form_${refs?.timestamps}`}
         action={onSubmit}
-        className="grid grid-cols-4 gap-3 mt-3 "
+        className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3 "
       >
-        <div className="col-span-2">
+        <div className="md:col-span-2 pb-7">
           <FormSearchAsync
             id="productId"
             label="ค้นหาชื่อสินค้า/บริการ"
@@ -253,12 +258,13 @@ export const QuotationListModal = () => {
               setValue("percentage", item.data.percentage);
               setValue("cost", item.data.cost);
               setValue("description", item.data.description);
+              setValue("unit", item.data.unit);
             }}
             errors={fieldErrors}
           />
         </div>
 
-        <div className="col-span-4">
+        <div className="md:col-span-3 ">
           <FormInput
             id="name"
             label="ชื่อสินค้า/บริการ (ชื่อเต็มแสดงในใบเสนอราคา)"
@@ -323,6 +329,19 @@ export const QuotationListModal = () => {
 
         <div className="">
           <FormInput
+            key={`unit_${refs?.timestamps}`}
+            id="unit"
+            label="หน่วย"
+            required
+            readOnly={!!isLocked}
+            register={register}
+            defaultValue={defaultData?.unit}
+            errors={fieldErrors}
+          />
+        </div>
+
+        <div className="">
+          <FormInput
             key={`withholdingTaxPercent_${refs?.timestamps}`} // need to change to vat
             id="withholdingTaxPercent"
             label="ภาษี (%)"
@@ -372,7 +391,7 @@ export const QuotationListModal = () => {
           />
         </div>
 
-        <div className="col-span-4">
+        <div className="md:col-span-3">
           <FormTextarea
             key={`description_${refs?.timestamps}`}
             id="description"
@@ -384,9 +403,12 @@ export const QuotationListModal = () => {
           />
         </div>
 
-        <SubItems setValue={setValue} defaultSubItems={subItems} />
+        <div className="md:col-span-3 col-span-1">
+          <SubItems setValue={setValue} defaultSubItems={subItems} />
 
-        <div className="col-start-4 col-span-1 flex justify-end space-x-3">
+        </div>
+
+        <div className="md:col-start-3 col-span-1 flex justify-end space-x-3">
           {!isLocked && defaultData?.id && (
             <ConfirmActionButton
               onConfirm={() =>
@@ -483,8 +505,8 @@ const SubItems = ({
   };
 
   return (
-    <div className="col-span-4">
-      <div className="flex space-x-2 items-center">
+    <div className="">
+      <div className="flex space-x-2 items-center ">
         <h3 className="font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-xs capitalize">
           รายละเอียดย่อย
         </h3>

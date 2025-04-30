@@ -106,7 +106,7 @@ const generate = async (id: number) => {
   // list start position
   const ITEM_Y_Start = 545;
   const ITEM_X_Start = 60;
-  
+
   // Track the current page number as a reference object so it can be updated from validatePageArea
   const pageNumberRef = { currentPageNumber: 1 };
 
@@ -186,6 +186,17 @@ const generate = async (id: number) => {
       x: columnPosition.quantity,
       y: lineStart,
       maxWidth: 20,
+      ...config,
+    });
+
+    // Unit
+    const unitText = data.unit ? data.unit : "";
+    const unitTextWidth = getTextWidth(unitText, config);
+    const unitTextX = columnPosition.quantity + 34 - unitTextWidth / 2; // Center align
+    currentPage.drawText(unitText, {
+      x: unitTextX,
+      y: lineStart,
+      maxWidth: 50,
       ...config,
     });
 
@@ -299,7 +310,7 @@ const generate = async (id: number) => {
   const approverSignatureImage = await pdfDoc.embedPng(
     approverSignature.imageBytes as any
   );
-  
+
   // Load seller signature if available
   const sellerId = _DATA.seller?.id;
   let sellerSignatureImage = null;
@@ -309,7 +320,7 @@ const generate = async (id: number) => {
       sellerSignature.imageBytes as any
     );
   }
-  
+
   // Store these values to be used in drawSignature function
   const signatureData = {
     approverSignatureImage,
@@ -317,7 +328,7 @@ const generate = async (id: number) => {
     sellerSignatureImage,
     sellerPhone: _DATA.seller?.phone ?? ""
   };
-  
+
   // Draw signatures on the first page
   drawSignature(page, signatureData);
 
@@ -351,7 +362,7 @@ const generate = async (id: number) => {
       descriptionLines.forEach((descriptionLine, idx) => {
 
         const text = typeof descriptionLine === "string" ? descriptionLine : " ";
-        
+
         const mainDescriptionRes = validatePageArea(
           page,
           pdfDoc,
@@ -404,10 +415,16 @@ const generate = async (id: number) => {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   };
+  // total = sub total - discount
+
+  const total = _DATA.totalPrice
+    ? _DATA.totalPrice - (_DATA.discount ?? 0)
+    : 0;  
   drawPriceInfo(page, {
     discount: _DATA.discount?.toLocaleString("th-TH", currencyFormat) ?? "",
     tax: _DATA.tax?.toLocaleString("th-TH", currencyFormat) ?? "",
-    totalPrice: _DATA.totalPrice?.toLocaleString("th-TH", currencyFormat) ?? "",
+    totalPrice: _DATA.totalPrice?.toLocaleString("th-TH", currencyFormat) ?? "", // sub total
+    total: total.toLocaleString("th-TH", currencyFormat) ?? "",
     grandTotal: _DATA.grandTotal?.toLocaleString("th-TH", currencyFormat) ?? "",
   });
 
@@ -588,12 +605,14 @@ const drawRemarkInfo = (page: PDFPage, text: string) => {
 const drawPriceInfo = (
   page: PDFPage,
   {
-    totalPrice,
+    totalPrice, // sub total
+    total,
     discount,
     tax,
     grandTotal,
   }: {
-    totalPrice: string;
+    totalPrice: string; // sub total
+    total: string;
     discount: string;
     tax: string;
     grandTotal: string;
@@ -618,6 +637,13 @@ const drawPriceInfo = (
   page.drawText(discount, {
     x: columnPosition + 46 - getTextWidth(discount, config),
     y: 148,
+    maxWidth: 100,
+    ...config,
+  });
+
+  page.drawText(total, {
+    x: columnPosition + 46 - getTextWidth(total, config),
+    y: 133,
     maxWidth: 100,
     ...config,
   });
@@ -647,7 +673,7 @@ type SignatureData = {
 
 const drawSignature = (page: PDFPage, signatureData: SignatureData) => {
   if (!_FONT) return;
-  
+
   const config = {
     font: _FONT,
     size: PAGE_FONT_SIZE - 1,
@@ -667,7 +693,7 @@ const drawSignature = (page: PDFPage, signatureData: SignatureData) => {
     y: 62,
     ...config,
   });
-  
+
   // Approver date
   page.drawText(_BILL_DATE, {
     x: 450,

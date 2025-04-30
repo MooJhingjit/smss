@@ -13,6 +13,7 @@ export const schema = z.object({
   productId: z.number().int(),
   price: z.number(),
   cost: z.number(),
+  unit: z.string(),
 
   percentage: z.number().optional(),
   withholdingTax: z.number().optional(),

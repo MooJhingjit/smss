@@ -10,6 +10,7 @@ export const schema = z.object({
   price: z.number().nonnegative(),
   unitPrice: z.number().nonnegative(),
   cost: z.number(),
+  unit: z.string(),
   percentage: z.number().optional(),
   quantity: z.number().optional(),
   withholdingTax: z.number().optional(),

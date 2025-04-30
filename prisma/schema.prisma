@@ -175,6 +175,7 @@ model QuotationList {
   name                  String
   price                 Float?
   unitPrice             Float?
+  unit                  String?
   cost                  Float?
   percentage            Float?
   quantity              Int?

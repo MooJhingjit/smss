@@ -44,9 +44,11 @@ export default function QuotationLists(props: Props) {
   const { mutate } = useMutation<
     MutationResponseType,
     Error,
-    { id: number; payload: {
-      allowedWithholdingTax: boolean;
-    } }
+    {
+      id: number; payload: {
+        allowedWithholdingTax: boolean;
+      }
+    }
   >({
     mutationFn: async (fields) => {
       return await QUOTATION_LIST_SERVICES.put(fields.id, {
@@ -84,21 +86,36 @@ export default function QuotationLists(props: Props) {
       render: (item: QuotationListWithRelations) => {
         return item.product.vendor?.name;
       },
-        },
-        {
+    },
+    {
       name: "ต้นทุน",
       key: "cost",
-        },
-        {
+    },
+    {
       name: "ราคาต่อหน่วย",
       key: "unitPrice",
       render: (item: QuotationListWithRelations) => {
         const percentageSign = item.percentage && item.percentage >= 0 ? "+" : "";
         return `(${percentageSign}${item.percentage}%) ${item.unitPrice?.toLocaleString()}`;
       },
-        },
-        { name: "จำนวน", key: "quantity" },
-        {
+    },
+    {
+      name: "จำนวน", key: "quantity",
+      render: (item: QuotationListWithRelations) => {
+        return (
+          <div className="flex items-center justify-start pl-8 space-x-3">
+            <p>{item.quantity} </p> {
+              item.unit && (
+                <p className="text-xs text-gray-400">
+                  {item.unit}
+                </p>
+              )
+            }
+          </div>
+        );
+      },
+    },
+    {
       name: "รายการหัก ณ ที่จ่าย",
       key: "withholdingTaxEnabled",
       render: (item: QuotationListWithRelations) => {
@@ -159,7 +176,7 @@ export default function QuotationLists(props: Props) {
             onClick={() =>
               !isLocked &&
               modal.onOpen(undefined, {
-                quotationRef: { id: quotationId, type: quotationType},
+                quotationRef: { id: quotationId, type: quotationType },
                 timestamps: Date.now(),
               })
             }
@@ -180,16 +197,16 @@ export default function QuotationLists(props: Props) {
             // isLocked
             //   ? undefined
             //   : 
-              (item) => {
-                  return modal.onOpen(item, {
-                    quotationRef: { id: item.quotationId, type: quotationType, isLocked },
-                    productRef: {
-                      id: item.productId ?? 0,
-                      name: item.product?.name ?? "",
-                    },
-                    timestamps: Date.now(),
-                  });
-                }
+            (item) => {
+              return modal.onOpen(item, {
+                quotationRef: { id: item.quotationId, type: quotationType, isLocked },
+                productRef: {
+                  id: item.productId ?? 0,
+                  name: item.product?.name ?? "",
+                },
+                timestamps: Date.now(),
+              });
+            }
           }
         />
       </div>
@@ -220,7 +237,7 @@ const BillingSummary = (props: {
   const summary = calculateQuotationItemPrice(data);
 
   const { execute, isLoading } = useAction(updateServiceQuotationSummary, {
-    onSuccess: (data) => {},
+    onSuccess: (data) => { },
     onError: (error) => {
       toast.error(error);
     },
