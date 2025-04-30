@@ -4,15 +4,21 @@ import {
   PurchaseOrderItem,
   User,
 } from "@prisma/client";
-import { PDFDocument, PDFFont, PDFPage, rgb } from "pdf-lib";
-import { getBoundingBox, loadSignatureImage, PDFDateFormat, loadPdfAssets, validatePageArea, getTextWidth } from "./pdf.helpers";
+import {
+  PDFDocument, 
+  PDFFont, 
+  PDFPage, 
+  rgb,
+  PDFImage
+} from "pdf-lib";
+import { getBoundingBox, loadSignatureImage, PDFDateFormat, loadPdfAssets, getTextWidth } from "./pdf.helpers";
 
 
 let _BILL_DATE = ""
 let _DATA: PurchaseOrderWithRelations | null = null
 let _FONT: PDFFont | null = null;
 const PAGE_FONT_SIZE = 8;
-const LIST_END_AT = 210;
+const END_POSITION = 210; // Renamed from LIST_END_AT to END_POSITION for consistency
 
 const ITEM_X_Start = 44;
 // horizontal position
@@ -80,6 +86,8 @@ const generate = async () => {
   // list start position
   const ITEM_Y_Start = 585;
 
+  // Track the current page number as a reference object so it can be updated from validatePageArea
+  const pageNumberRef = { currentPageNumber: 1 };
 
   const { pdfDoc, font, template } = await loadPdfAssets("pdf/purchase-order-template.pdf");
   const templatePage = await pdfDoc.embedPage(template.getPages()[0]);
@@ -95,31 +103,25 @@ const generate = async () => {
   let page = pdfDoc.addPage();
   page.drawPage(templatePage);
 
-  // draw approver signature
+  // Load signature images once at the beginning - this is more efficient
   const approverSignature = await loadSignatureImage("1");
-  const approverSignatureImage = await page.doc.embedPng(approverSignature.imageBytes as any);
-  page.drawImage(approverSignatureImage, {
-    x: 380,
-    y: 50,
-    ...approverSignatureImage.scale(0.4)
-  })
-  page.drawText(_BILL_DATE, {
-    x: 380,
-    y: 35,
-    ...config
-  })
-
-  // orderer signature
+  const approverSignatureImage = await pdfDoc.embedPng(approverSignature.imageBytes as any);
+  
   const ordererSignature = await loadSignatureImage("2");
-  const ordererSignatureImage = await page.doc.embedPng(ordererSignature.imageBytes as any);
-  page.drawImage(ordererSignatureImage, {
-    x: 355,
-    y: 640,
-    ...ordererSignatureImage.scale(ordererSignature.scale)
-  });
+  const ordererSignatureImage = await pdfDoc.embedPng(ordererSignature.imageBytes as any);
+  
+  // Store these values to be used in drawSignature function
+  const signatureData = {
+    approverSignatureImage,
+    ordererSignatureImage,
+    scale: ordererSignature.scale
+  };
+  
+  // Draw signatures on the first page
+  drawSignature(page, signatureData);
 
-
-  drawStaticInfo(page, 1);
+  // Draw static info with current page number
+  drawStaticInfo(page, pageNumberRef.currentPageNumber);
 
   let lineStart = ITEM_Y_Start;
 
@@ -134,10 +136,11 @@ const generate = async () => {
       pdfDoc,
       templatePage,
       lineStart,
-      LIST_END_AT,
       ITEM_Y_Start,
       (currentPage: PDFPage, currentLineStart: number) =>
-        writeMainItem(currentPage, index, list, currentLineStart, config, pdfDoc)
+        writeMainItem(currentPage, index, list, currentLineStart, config, pdfDoc),
+      pageNumberRef,
+      signatureData
     );
     lineStart = mainItemRes.lineStart;
     page = mainItemRes.page;
@@ -148,7 +151,6 @@ const generate = async () => {
         pdfDoc,
         templatePage,
         lineStart,
-        LIST_END_AT,
         ITEM_Y_Start,
         (currentPage: PDFPage, currentLineStart: number) =>
           writeMainDescription(
@@ -157,7 +159,9 @@ const generate = async () => {
             currentLineStart,
             config,
             pdfDoc
-          )
+          ),
+        pageNumberRef,
+        signatureData
       );
 
       lineStart = mainDescriptionRes.lineStart;
@@ -550,4 +554,79 @@ const drawStaticInfo = (
   drawOrdererInfo(page);
   drawRemarkInfo(page);
   drawPriceInfo(page);
+};
+
+// Define a type for signature data to pass around
+type SignatureData = {
+  approverSignatureImage: PDFImage;
+  ordererSignatureImage: PDFImage;
+  scale: number;
+};
+
+// Function to draw signatures on a page
+const drawSignature = (page: PDFPage, signatureData: SignatureData) => {
+  if (!_FONT) return;
+  
+  const config = {
+    size: PAGE_FONT_SIZE,
+    lineHeight: 11,
+    font: _FONT,
+  };
+
+  // Draw approver signature
+  page.drawImage(signatureData.approverSignatureImage, {
+    x: 380,
+    y: 50,
+    ...signatureData.approverSignatureImage.scale(0.4)
+  });
+  
+  // Draw approver date
+  page.drawText(_BILL_DATE, {
+    x: 380,
+    y: 35,
+    ...config
+  });
+
+  // Draw orderer signature
+  page.drawImage(signatureData.ordererSignatureImage, {
+    x: 355,
+    y: 640,
+    ...signatureData.ordererSignatureImage.scale(signatureData.scale)
+  });
+};
+
+// Create our own validatePageArea function that includes signature handling
+const validatePageArea = (
+  page: PDFPage,
+  pdfDoc: PDFDocument,
+  templatePage: any,
+  lineStart: number,
+  ITEM_Y_Start: number,
+  exc: any,
+  pageNumberRef: { currentPageNumber: number },
+  signatureData: SignatureData
+) => {
+  if (lineStart < END_POSITION) {
+    pageNumberRef.currentPageNumber++;
+    const newPage = pdfDoc.addPage();
+    newPage.drawPage(templatePage);
+    
+    // Draw static information and signatures on each new page
+    drawStaticInfo(newPage, pageNumberRef.currentPageNumber);
+    drawSignature(newPage, signatureData);
+    
+    lineStart = ITEM_Y_Start;
+
+    let heightUsed = exc(newPage, lineStart);
+    return {
+      page: newPage,
+      lineStart: lineStart - heightUsed,
+    };
+  }
+
+  let heightUsed = exc(page, lineStart);
+  return {
+    page: page,
+    lineStart: lineStart - heightUsed,
+  };
 };

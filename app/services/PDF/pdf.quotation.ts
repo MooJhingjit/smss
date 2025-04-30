@@ -7,6 +7,7 @@ import {
   rgb,
   PDFEmbeddedPage,
   degrees,
+  PDFImage,
 } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
 import {
@@ -286,9 +287,7 @@ const generate = async (id: number) => {
   let page = pdfDoc.addPage();
   page.drawPage(templatePage);
 
-  // drawSignature
-  // approver
-  // const approverSignatureImageBytes = await readFile(path.join(process.cwd(), "/public/signature/1.png"));
+  // Load signature images once at the beginning - this is more efficient
   const APPROVER_ID = 2
   const approver = await db.user.findFirst({
     where: {
@@ -297,58 +296,30 @@ const generate = async (id: number) => {
   });
 
   const approverSignature = await loadSignatureImage(APPROVER_ID.toString());
-  const approverSignatureImage = await page.doc.embedPng(
+  const approverSignatureImage = await pdfDoc.embedPng(
     approverSignature.imageBytes as any
   );
-  page.drawImage(approverSignatureImage, {
-    x: 460,
-    y: 70,
-    ...approverSignatureImage.scale(0.12),
-  });
-
-  // phone
-  const approverPhone = approver?.phone;
-  page.drawText(approverPhone ?? "", {
-    x: 460,
-    y: 62,
-    ...config,
-    size: PAGE_FONT_SIZE - 1,
-  });
-  page.drawText(_BILL_DATE, {
-    x: 450,
-    y: 45,
-    ...config,
-  });
-
-  // seller
+  
+  // Load seller signature if available
   const sellerId = _DATA.seller?.id;
+  let sellerSignatureImage = null;
   if (sellerId) {
-    const sellerPhone = _DATA.seller?.phone;
     const sellerSignature = await loadSignatureImage(sellerId.toString());
-    const sellerSignatureImage = await page.doc.embedPng(
+    sellerSignatureImage = await pdfDoc.embedPng(
       sellerSignature.imageBytes as any
     );
-    page.drawImage(sellerSignatureImage, {
-      x: 290,
-      y: 70,
-      ...approverSignatureImage.scale(0.12),
-    });
-
-    page.drawText(sellerPhone ?? "", {
-      x: 290,
-      y: 62,
-      ...config,
-      size: PAGE_FONT_SIZE - 1,
-
-    });
-
-    page.drawText(_BILL_DATE, {
-      x: 280,
-      y: 45,
-      ...config,
-    });
-
   }
+  
+  // Store these values to be used in drawSignature function
+  const signatureData = {
+    approverSignatureImage,
+    approverPhone: approver?.phone ?? "",
+    sellerSignatureImage,
+    sellerPhone: _DATA.seller?.phone ?? ""
+  };
+  
+  // Draw signatures on the first page
+  drawSignature(page, signatureData);
 
   drawStaticInfo(page, pageNumberRef.currentPageNumber);
 
@@ -367,7 +338,8 @@ const generate = async (id: number) => {
       ITEM_Y_Start,
       (currentPage: PDFPage, currentLineStart: number) =>
         writeMainItem(currentPage, index, list, currentLineStart),
-      pageNumberRef
+      pageNumberRef,
+      signatureData
     );
     lineStart = mainItemRes.lineStart;
     page = mainItemRes.page;
@@ -392,7 +364,8 @@ const generate = async (id: number) => {
               text || " ",
               currentLineStart
             ),
-          pageNumberRef
+          pageNumberRef,
+          signatureData
         );
 
         lineStart = mainDescriptionRes.lineStart;
@@ -414,7 +387,8 @@ const generate = async (id: number) => {
             ITEM_Y_Start,
             (currentPage: PDFPage, currentLineStart: number) =>
               writeSubItem(currentPage, subItem, currentLineStart),
-            pageNumberRef
+            pageNumberRef,
+            signatureData
           );
 
           lineStart = subItemRes.lineStart;
@@ -663,6 +637,70 @@ const drawPriceInfo = (
   });
 };
 
+// Define a type for signature data to pass around
+type SignatureData = {
+  approverSignatureImage: PDFImage;
+  approverPhone: string;
+  sellerSignatureImage: PDFImage | null;
+  sellerPhone: string;
+};
+
+const drawSignature = (page: PDFPage, signatureData: SignatureData) => {
+  if (!_FONT) return;
+  
+  const config = {
+    font: _FONT,
+    size: PAGE_FONT_SIZE - 1,
+    lineHeight: 14,
+  };
+
+  // Draw approver signature
+  page.drawImage(signatureData.approverSignatureImage, {
+    x: 460,
+    y: 70,
+    ...signatureData.approverSignatureImage.scale(0.12),
+  });
+
+  // Approver phone
+  page.drawText(signatureData.approverPhone, {
+    x: 460,
+    y: 62,
+    ...config,
+  });
+  
+  // Approver date
+  page.drawText(_BILL_DATE, {
+    x: 450,
+    y: 45,
+    ...config,
+    size: PAGE_FONT_SIZE,
+  });
+
+  // Draw seller signature if available
+  if (signatureData.sellerSignatureImage) {
+    page.drawImage(signatureData.sellerSignatureImage, {
+      x: 290,
+      y: 70,
+      ...signatureData.approverSignatureImage.scale(0.12),
+    });
+
+    // Seller phone
+    page.drawText(signatureData.sellerPhone, {
+      x: 290,
+      y: 62,
+      ...config,
+    });
+
+    // Seller date
+    page.drawText(_BILL_DATE, {
+      x: 280,
+      y: 45,
+      ...config,
+      size: PAGE_FONT_SIZE,
+    });
+  }
+};
+
 type ListConfig = {
   size: number;
   lineHeight: number;
@@ -678,7 +716,8 @@ const validatePageArea = (
   lineStart: number,
   ITEM_Y_Start: number,
   exc: any,
-  pageNumberRef: { currentPageNumber: number }
+  pageNumberRef: { currentPageNumber: number },
+  signatureData: SignatureData
 ) => {
   if (!_DATA) return { page, lineStart };
   if (lineStart < END_POSITION) {
@@ -686,6 +725,8 @@ const validatePageArea = (
     const newPage = pdfDoc.addPage();
     newPage.drawPage(templatePage);
     drawStaticInfo(newPage, pageNumberRef.currentPageNumber);
+    // Draw signatures on each new page
+    drawSignature(newPage, signatureData);
 
     lineStart = ITEM_Y_Start;
 
