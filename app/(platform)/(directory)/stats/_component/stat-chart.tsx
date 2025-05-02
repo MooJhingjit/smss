@@ -74,18 +74,11 @@ export function NewStats({ data, year }: NewStatsProps) {
       <CardHeader>
         <div className="flex flex-col md:flex-row justify-between md:items-center space-y-4 md:space-y-0">
           <CardTitle className="flex items-start gap-2">
-
-            <div className="text-primary/80">
-              <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-chart-column-increasing-icon lucide-chart-column-increasing"><path d="M13 17V9" /><path d="M18 17V5" /><path d="M3 3v16a2 2 0 0 0 2 2h16" /><path d="M8 17v-3" /></svg>
-            </div>
             <div className="space-y-1">
-              <p>{`ยอดขาย และยอดสั่งซื้อประจำปี`}</p>
-              <div className="flex space-x-1 items-center">
-                <YearSelector currentYear={year} />
-              </div>
+              <p>{`ยอดขาย และยอดสั่งซื้อทั้งปี`}</p>
             </div>
           </CardTitle>
-          <div className="flex flex-col sm:flex-row  gap-2 md:gap-4">
+          <div className="flex flex-col sm:flex-row  gap-2 md:gap-x-10">
             {Object.entries(chartConfig).map(([key, { label, color }]) => (
               <>
                 <div key={key} className="">
