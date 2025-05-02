@@ -27,7 +27,7 @@ ChartJS.register(
   Legend
 );
 
-export default function StatChart({ data }: { data: any }) {
+export default function StatChartB({ data }: { data: any }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();

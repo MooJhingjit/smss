@@ -1,6 +1,7 @@
 import React from "react";
 import { db } from "@/lib/db";
 import { NewStats } from "./_component/stat-chart";
+import StatChartB from "./_component/stat-chart-b";
 
 const labels = [
   "January",
@@ -16,15 +17,12 @@ const labels = [
   "November",
   "December",
 ];
-
-const getData = async (year = new Date().getFullYear()) => {
-  // Get sales data with and without VAT
+const getData = async (year = new Date().getUTCFullYear()) => {
   const salesData = await Promise.all(
-    Array.from({ length: 12 }, async (_, month) => {
-      const startDate = new Date(year, month, 1);
-      const endDate = new Date(year, month + 1, 0);
+    Array.from({ length: 12 }).map(async (_, month) => {
+      const startDate = new Date(Date.UTC(year, month, 1));
+      const endDate = new Date(Date.UTC(year, month + 1, 1)); // First day of next month (exclusive)
 
-      // For sales with VAT (grandTotal)
       const salesWithVAT = await db.quotation.aggregate({
         _sum: {
           grandTotal: true,
@@ -32,12 +30,11 @@ const getData = async (year = new Date().getFullYear()) => {
         where: {
           createdAt: {
             gte: startDate,
-            lte: endDate,
+            lt: endDate,
           },
         },
       });
 
-      // For sales without VAT (totalPrice)
       const salesWithoutVAT = await db.quotation.aggregate({
         _sum: {
           totalPrice: true,
@@ -45,7 +42,7 @@ const getData = async (year = new Date().getFullYear()) => {
         where: {
           createdAt: {
             gte: startDate,
-            lte: endDate,
+            lt: endDate,
           },
         },
       });
@@ -57,11 +54,10 @@ const getData = async (year = new Date().getFullYear()) => {
     })
   );
 
-  // Get purchase order data
   const purchaseData = await Promise.all(
-    Array.from({ length: 12 }, async (_, month) => {
-      const startDate = new Date(year, month, 1);
-      const endDate = new Date(year, month + 1, 0);
+    Array.from({ length: 12 }).map(async (_, month) => {
+      const startDate = new Date(Date.UTC(year, month, 1));
+      const endDate = new Date(Date.UTC(year, month + 1, 1)); // First day of next month
 
       const purchaseAmount = await db.purchaseOrder.aggregate({
         _sum: {
@@ -70,7 +66,7 @@ const getData = async (year = new Date().getFullYear()) => {
         where: {
           createdAt: {
             gte: startDate,
-            lte: endDate,
+            lt: endDate,
           },
         },
       });
@@ -79,26 +75,24 @@ const getData = async (year = new Date().getFullYear()) => {
     })
   );
 
+  const labels = Array.from({ length: 12 }, (_, i) =>
+    new Date(Date.UTC(year, i)).toLocaleString("default", { month: "short" })
+  );
+
   return {
     labels,
     datasets: [
       {
         label: "ยอดขายรวม VAT",
         data: salesData.map((data) => data.withVAT),
-        // borderColor: "rgb(255, 99, 132)",
-        // backgroundColor: "rgba(255, 99, 132, 0.5)",
       },
       {
         label: "ยอดขายไม่รวม VAT",
         data: salesData.map((data) => data.withoutVAT),
-        // borderColor: "rgb(75, 192, 192)",
-        // backgroundColor: "rgba(75, 192, 192, 0.5)",
       },
       {
         label: "ยอดสั่งซื้อ",
         data: purchaseData,
-        // borderColor: "rgb(53, 162, 235)",
-        // backgroundColor: "rgba(53, 162, 235, 0.5)",
       },
     ],
   };

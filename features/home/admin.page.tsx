@@ -5,9 +5,7 @@ import PurchaseOrders from "./components/overview.purchase-orders";
 import { db } from "@/lib/db";
 import { QuotationWithBuyer } from "@/types";
 import { PurchaseOrder, PurchaseOrderStatus, QuotationStatus, User } from "@prisma/client";
-import StatisticCard from "./components/statistics";
 import Tasks from "./components/tasks";
-import { currentUser } from "@/lib/auth";
 import { quotationStatusMapping } from "@/app/config";
 import PaymentDue from "./components/paymentDue";
 
@@ -196,9 +194,9 @@ export default async function AdminHomePage() {
       <div className="lg:col-span-6 col-span-12">
         <PurchaseOrders data={purchaseOrders} />
       </div>
-      <div className="col-span-12">
+      {/* <div className="col-span-12">
         <StatisticCard />
-      </div>
+      </div> */}
     </div>
   );
 }

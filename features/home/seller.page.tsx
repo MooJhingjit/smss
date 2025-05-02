@@ -1,12 +1,10 @@
 import React from "react";
 import Quotations from "./components/overview.quotations";
 import ShortcutMenus from "./components/seller.shortcut-menus";
-import StatisticCard from "./components/statistics";
 import { db } from "@/lib/db";
 import { QuotationWithBuyer } from "@/types";
 import { useUser } from "@/hooks/use-user";
 import Tasks from "./components/tasks";
-import { quotationStatusMapping } from "@/app/config";
 
 async function GetData(): Promise<[QuotationWithBuyer[], QuotationWithBuyer[], { _sum: { totalPrice: number | null } }]> {
   const { info } = await useUser();
@@ -81,9 +79,9 @@ export default async function SellerHomePage() {
         <div className="col-span-12">
           <Quotations data={quotations} />
         </div>
-        <div className="col-span-12 ">
+        {/* <div className="col-span-12 ">
           <StatisticCard />
-        </div>
+        </div> */}
       </div>
     </div>
   );
