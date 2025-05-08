@@ -23,6 +23,10 @@ export const columns: ColumnDef<User & { user?: Contact }>[] = [
     enableColumnFilter: true,
   },
   {
+    accessorKey: "taxId",
+    header: "Tax ID",
+  },
+  {
     accessorKey: "name",
     header: "ชื่อ",
     cell: ({ row }) => {
