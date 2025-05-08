@@ -65,6 +65,9 @@ const getData = async (year = new Date().getUTCFullYear()) => {
           totalPrice: true,
         },
         where: {
+          quotation: {
+            isNot: null,
+          },
           createdAt: {
             gte: startDate,
             lt: endDate,

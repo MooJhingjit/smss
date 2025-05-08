@@ -15,7 +15,7 @@ export const quotationStatusMapping = {
     progress: 20,
   },
   offer: {
-    label: "รอส่ง QT (ให้ลูกค้า)",
+    label: "ส่ง QT ให้ลูกค้าแล้ว",
     progress: 30,
   },
   approved: {
