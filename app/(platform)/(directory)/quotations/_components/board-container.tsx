@@ -305,7 +305,7 @@ const BoardFilters = (props: BoardFiltersProps) => {
       <form onSubmit={onSubmit} className="grid grid-cols-7 gap-2 items-center">
         <Button variant={"default"} onClick={onCreate} className="p-2 h-auto">
           <PlusIcon className="w-4 h-4 mr-1 text-white" />
-          QT ใหม่
+          Quotation
         </Button>
 
         <div className="w-full ">

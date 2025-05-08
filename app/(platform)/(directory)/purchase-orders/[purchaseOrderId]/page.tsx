@@ -72,7 +72,7 @@ export default async function PurchaseOrderDetails(props: Readonly<Props>) {
 
   const pages = [
     {
-      name: "การสั่งซื้อทั้งหมด (POs)",
+      name: "การสั่งซื้อทั้งหมด (Purchase Orders)",
       href: "/purchase-orders",
       current: false,
     },

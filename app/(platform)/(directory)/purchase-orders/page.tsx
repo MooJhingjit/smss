@@ -40,7 +40,7 @@ export default async function PurchaseOrders(props: Readonly<Props>) {
   const data = await getData();
   const pages = [
     {
-      name: "การสั่งซื้อทั้งหมด (POs)",
+      name: "การสั่งซื้อทั้งหมด (Purchase Orders)",
       href: "/purchase-orders",
       current: false,
     },

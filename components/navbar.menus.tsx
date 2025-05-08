@@ -6,10 +6,10 @@ import { classNames } from "@/lib/utils";
 import { UserRole } from "@prisma/client";
 
 const links = [
-  { href: "/quotations", label: "ใบเสนอราคา (QT)", permission: ["*"] },
+  { href: "/quotations", label: "Quotations", permission: ["*"] },
   {
     href: "/purchase-orders",
-    label: "การสั่งซื้อ (PO)",
+    label: "Purchase Orders",
     permission: ["admin"],
   },
   { href: "/products", label: "กลุ่มสินค้า/บริการ", permission: ["*"] },
