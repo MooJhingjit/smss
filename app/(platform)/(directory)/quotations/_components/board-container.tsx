@@ -32,7 +32,7 @@ import { classNames, cn, getDateFormat } from "@/lib/utils";
 import { Select } from "@/components/ui/select";
 import { FormSelect } from "@/components/form/form-select";
 
-interface Props {}
+interface Props { }
 
 type QuotationWithCounts = QuotationWithRelations & {
   _count: {
@@ -158,11 +158,11 @@ export default function BoardContainer(props: Props) {
     const vendor = (e.target as any).vendor.value;
     const type = (e.target as any).type.value;
 
-    console.log({
-      code,
-      buyer,
-      vendor,
-    });
+    // console.log({
+    //   code,
+    //   buyer,
+    //   vendor,
+    // });
     setSearchParams({
       code,
       buyer,
@@ -283,6 +283,17 @@ export default function BoardContainer(props: Props) {
                 label={quotationStatusMapping[QuotationStatus.paid].label}
                 progress={quotationStatusMapping[QuotationStatus.paid].progress}
               />
+              <BoardColumn
+                color="gray"
+                items={queries[10].data ?? ([] as QuotationWithRelations[])}
+                columnKey={QuotationStatus.archived}
+                label={
+                  quotationStatusMapping[QuotationStatus.archived].label
+                }
+                progress={
+                  quotationStatusMapping[QuotationStatus.archived].progress
+                }
+              />
               {provided.placeholder}
               <div className="flex-shrink-0 w-1" />
             </div>
@@ -303,7 +314,7 @@ const BoardFilters = (props: BoardFiltersProps) => {
   return (
     <div className="gap-x-2 mb-3 border border-gray-100  p-2  rounded-lg bg-gray-50 flex justify-end">
       <form onSubmit={onSubmit} className="grid grid-cols-7 gap-2 items-center">
-        <Button variant={"default"} onClick={onCreate} className="p-2 h-auto">
+        <Button variant={"default"} onClick={onCreate} className="p-2 h-auto" type="button">
           <PlusIcon className="w-4 h-4 mr-1 text-white" />
           Quotation
         </Button>
@@ -366,7 +377,8 @@ const BoardColumn = ({
           className={cn(
             "absolute h-1 right-0 left-0 top-0 bg-primary",
             color === "yellow" && "bg-orange-400",
-            color === "green" && "bg-green-600"
+            color === "green" && "bg-green-600",
+            color === "gray" && "bg-gray-400",
           )}
         ></div>
         <div className="flex justify-between items-center px-3 py-4 bg-secondary border-b border-dotted">
@@ -374,7 +386,15 @@ const BoardColumn = ({
             <p className="text-sm font-semibold text-[#4a4a4a] whitespace-nowrap">
               {label}
             </p>
-            <p className="text-xs text-[#4a4a4a]">ความคืบหน้า {progress}%</p>
+            {
+              label === quotationStatusMapping.archived.label ?
+                <p className="text-xs text-[#4a4a4a]">
+                  ข้อมูลที่เก็บไว้
+                </p>
+                :
+                <p className="text-xs text-[#4a4a4a]">ความคืบหน้า {progress}%</p>
+
+            }
           </div>
           <div className="text-xs font-semibold text-[#4a4a4a]">
             ({items.length})
@@ -398,7 +418,7 @@ const BoardColumn = ({
           </Droppable>
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 

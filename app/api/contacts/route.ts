@@ -47,16 +47,19 @@ export async function GET(
             {
               email: {
                 contains: search,
+                mode: 'insensitive',
               },
             },
             {
               branchId: {
                 contains: search,
+                mode: 'insensitive',
               },
             },
             {
               name: {
                 contains: search,
+                mode: 'insensitive',
               },
             },
           ],

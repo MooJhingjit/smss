@@ -70,6 +70,12 @@ export default function TableLists<T>(props: Readonly<Props<T>>) {
     <Table className="min-w-full divide-y divide-gray-300">
       <TableHeader className="">
         <TableRow>
+          {onManage && (
+            <TableHead
+              key="manage"
+              className="px-3 py-3 text-left text-sm font-semibold text-gray-900"
+            ></TableHead>
+          )}
           {link && (
             <TableHead
               key="link"
@@ -90,6 +96,17 @@ export default function TableLists<T>(props: Readonly<Props<T>>) {
       <TableBody className="divide-y divide-gray-200 bg-white" >
         {data.map((item: any, rowIdx) => (
           <TableRow key={item.id} className="hover:bg-gray-50">
+            {onManage && (
+              <TableCell>
+                <Button
+                  onClick={() => onManage(item)}
+                  variant="secondary"
+                  className="text-xs h-6"
+                >
+                  จัดการ
+                </Button>
+              </TableCell>
+            )}
             {link && (
               <TableCell className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
                 <Link target="_blank" href={`${link}/${item.id}`} passHref>
@@ -105,18 +122,6 @@ export default function TableLists<T>(props: Readonly<Props<T>>) {
                 {getFormatValue(item, column, rowIdx)}
               </TableCell>
             ))}
-
-            {onManage && (
-              <TableCell>
-                <Button
-                  onClick={() => onManage(item)}
-                  variant="secondary"
-                  className="text-xs h-6"
-                >
-                  จัดการ
-                </Button>
-              </TableCell>
-            )}
           </TableRow>
         ))}
       </TableBody>

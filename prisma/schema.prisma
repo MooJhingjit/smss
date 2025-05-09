@@ -129,6 +129,7 @@ enum QuotationStatus {
   order_preparing
   delivered
   paid
+  archived
 }
 
 model Quotation {

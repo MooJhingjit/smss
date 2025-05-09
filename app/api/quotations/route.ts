@@ -15,6 +15,8 @@ export async function GET(req: NextRequest) {
       return new NextResponse("Missing status", { status: 400 });
     }
 
+  
+
     let conditions = {};
     // check if filter provided
 
@@ -29,7 +31,7 @@ export async function GET(req: NextRequest) {
       conditions = { ...conditions, code: { contains: code } };
     }
     if (buyerName) {
-      conditions = { ...conditions, buyer: { name: { contains: buyerName } } };
+      conditions = { ...conditions, contact: { name: { contains: buyerName } } };
     }
     if (vendorName) {
       conditions = {
