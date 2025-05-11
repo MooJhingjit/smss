@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { InfoIcon, Plus, ShieldCheckIcon } from "lucide-react";
 import PageComponentWrapper from "@/components/page-component-wrapper";
 import TableLists from "@/components/table-lists";
@@ -26,6 +26,7 @@ import { useMutation } from "@tanstack/react-query";
 import { MutationResponseType } from "@/components/providers/query-provider";
 import { customRevalidatePath } from "@/actions/revalidateTag";
 import QUOTATION_LIST_SERVICES from "@/app/services/api.quotation-lists";
+import { reorderQuotationList } from "@/actions/quotation-list/reorder";
 
 type Props = {
   quotationId: number;
@@ -37,9 +38,25 @@ type Props = {
 };
 
 export default function QuotationLists(props: Props) {
-  const { data, quotationId, quotationType, remark, isLocked, grandTotal } =
-    props;
+  const { quotationId, quotationType, remark, isLocked, grandTotal } = props;
+  const [quotationItems, setQuotationItems] = useState<QuotationListWithRelations[]>(props.data);
   const modal = useQuotationListModal();
+
+  // Update local state when props change
+  useEffect(() => {
+    setQuotationItems(props.data);
+  }, [props.data]);
+
+  const { execute: executeReorder } = useAction(reorderQuotationList, {
+    onSuccess: () => {
+      toast.success("รายการถูกเรียงลำดับแล้ว");
+    },
+    onError: (error) => {
+      toast.error(error || "เกิดข้อผิดพลาดในการเรียงลำดับรายการ");
+      // Reset to original order if server action fails
+      setQuotationItems(props.data);
+    },
+  });
 
   const { mutate } = useMutation<
     MutationResponseType,
@@ -57,9 +74,42 @@ export default function QuotationLists(props: Props) {
     },
     onSuccess: async () => {
       toast.success("สำเร็จ");
-      customRevalidatePath(`/purchase-orders/${props.quotationId}`);
+      customRevalidatePath(`/purchase-orders/${quotationId}`);
     },
   });
+  
+  // Handle reordering when rows are dragged
+  const handleReorder = (result: QuotationListWithRelations[]) => {
+    // if (!result.destination) return;
+
+
+    if (!result) return;
+    // const items = Array.from(quotationItems);
+    // const [reorderedItem] = items.splice(result.source.index, 1);
+    // items.splice(result.destination.index, 0, reorderedItem);
+    
+    // Update order field for each item based on new position
+    const updatedItems = result.map((item, index) => ({
+      ...item,
+      order: index,
+    }));
+    
+    // Update local state immediately for better UX
+    setQuotationItems(updatedItems);
+    
+    // Prepare data for server action
+    const reorderData = {
+      quotationId,
+      items: updatedItems.map((item) => ({
+        id: item.id,
+        order: item.order || 0,
+      })),
+    };
+    
+    // Call server action to persist changes
+    executeReorder(reorderData);
+  };
+
   const columns = [
     { name: "#", key: "index" },
     {
@@ -158,7 +208,7 @@ export default function QuotationLists(props: Props) {
     // { name: "Price", key: "price" },
     {
       name: "อัพเดทล่าสุด",
-      key: "quantity",
+      key: "updatedAt",
       render: (item: QuotationListWithRelations) => {
         const date = new Date(item.updatedAt);
         return date.toLocaleDateString("th-TH");
@@ -192,7 +242,9 @@ export default function QuotationLists(props: Props) {
       <div className="overflow-x-scroll md:overflow-auto">
         <TableLists<QuotationListWithRelations>
           columns={columns}
-          data={data}
+          data={quotationItems}
+          onDropped={handleReorder}
+          showGroupNameAt={"name"}
           onManage={
             // isLocked
             //   ? undefined
@@ -210,7 +262,7 @@ export default function QuotationLists(props: Props) {
           }
         />
       </div>
-      {data.length > 0 && (
+      {quotationItems.length > 0 && (
         <div className="grid grid-cols-5 gap-4 mt-4">
           <div className="col-span-5 md:col-span-3 ">
             <Remarks id={quotationId} remark={remark} />
@@ -219,7 +271,7 @@ export default function QuotationLists(props: Props) {
             <BillingSummary
               quotationType={quotationType}
               grandTotal={grandTotal}
-              data={data}
+              data={quotationItems}
             />
           </div>
         </div>

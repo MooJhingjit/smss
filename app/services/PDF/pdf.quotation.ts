@@ -51,7 +51,7 @@ const getQuotation = async (
           product: true,
         },
         orderBy: {
-          id: 'asc'
+          order: 'asc'
         }
       },
       seller: true,
@@ -151,7 +151,6 @@ const generate = async (id: number) => {
     data: QuotationList,
     lineStart: number
   ) => {
-    // Description
     currentPage.drawText((index + 1).toString(), {
       x: columnPosition.index,
       y: lineStart,
@@ -159,20 +158,7 @@ const generate = async (id: number) => {
       ...config,
     });
 
-    // // remark withholdingTax
-    // if (
-    //   data.withholdingTax
-    // ) {
-    //   currentPage.drawText("**", {
-    //     x: columnPosition.description - 8,
-    //     y: lineStart,
-    //     maxWidth: 5,
-    //     color: rgb(255 / 255, 0 / 255, 0 / 255),
-    //     ...config,
-    //     // lineHeight: breakLineHeight,
-    //   });
-    // }
-
+    // main item name
     currentPage.drawText(data.name, {
       x: columnPosition.description,
       y: lineStart,
@@ -236,6 +222,39 @@ const generate = async (id: number) => {
     );
 
     return bounding.height / 10;
+  };
+
+  const writeGroupName = (
+    currentPage: PDFPage,
+    groupName: string,
+    lineStart: number
+  ) => {
+    // Draw a border around the group name
+    const padding = 0;
+    const text = groupName || "";
+    // const textWidth = getTextWidth(text, config);
+    // const boxWidth = textWidth + (padding * 2);
+    
+    // Draw border
+    // currentPage.drawRectangle({
+    //   x: columnPosition.description,
+    //   y: lineStart - padding,
+    //   width: boxWidth,
+    //   height: config.lineHeight + padding,
+    //   borderColor: rgb(0, 0, 0),
+    //   borderWidth: 0.5,
+    //   color: rgb(245/255, 245/255, 245/255),
+    // });
+    
+    // Draw text
+    currentPage.drawText(text, {
+      x: columnPosition.description + padding,
+      y: lineStart,
+      maxWidth: 300,
+      ...config,
+    });
+
+    return config.lineHeight + 5; // Return height used including some spacing
   };
 
   const writeMainDescription = (
@@ -339,6 +358,23 @@ const generate = async (id: number) => {
   _DATA.lists?.forEach((list, index) => {
     if (index > 0) {
       lineStart -= config.lineHeight; // space between main items
+    }
+
+    // Check if groupName exists and render it with border
+    if (list.groupName) {
+      const groupNameRes = validatePageArea(
+        page,
+        pdfDoc,
+        templatePage,
+        lineStart,
+        ITEM_Y_Start,
+        (currentPage: PDFPage, currentLineStart: number) =>
+          writeGroupName(currentPage, list.groupName as string, currentLineStart),
+        pageNumberRef,
+        signatureData
+      );
+      lineStart = groupNameRes.lineStart;
+      page = groupNameRes.page;
     }
 
     const mainItemRes = validatePageArea(

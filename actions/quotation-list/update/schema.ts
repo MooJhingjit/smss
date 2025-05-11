@@ -18,5 +18,6 @@ export const schema = z.object({
   discount: z.number().optional(),
   totalPrice: z.number().nonnegative(),
   description: z.string().optional(),
+  groupName: z.string().optional(),
   subItems: z.string().optional(),
 });

@@ -24,6 +24,7 @@ import {
   Paperclip,
   PlusIcon,
   Receipt,
+  ReceiptIcon,
   UserIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -518,10 +519,22 @@ const BoardCard = ({
               )}
             </div>
           </div>
-          {item.invoice?.receiptDate && (
-            <div className="bg-green-50 flex  items-center gap-1 px-2 py-1 text-green-700">
-              <ClipboardCheckIcon className="size-3.5 " />
-              <p className="text-xs">ออกใบเสร็จ {getDateFormat(item.invoice?.receiptDate)}</p>
+          {item.invoice?.code && (
+            <div className=" flex  items-center gap-1 px-2 py-1 text-orange-700 justify-between">
+              <div className="flex space-x-1">
+                <ReceiptIcon className="size-3.5 " />
+                <span className="text-xs font-medium" >ใบแจ้งหนี้</span>
+              </div>
+              <p className="text-xs" title={getDateFormat(item.invoice?.date ?? "")}> {item.invoice?.code}</p>
+            </div>
+          )}
+          {item.invoice?.receiptCode && (
+            <div className=" flex  items-center gap-1 px-2 py-1 text-green-700 justify-between">
+              <div className="flex space-x-1">
+                <ClipboardCheckIcon className="size-3.5 " />
+                <span className="text-xs font-medium">ใบเสร็จ</span>
+              </div>
+              <p className="text-xs" title={getDateFormat(item.invoice?.receiptDate ?? "")}> {item.invoice?.receiptCode}</p>
             </div>
           )}
         </li>

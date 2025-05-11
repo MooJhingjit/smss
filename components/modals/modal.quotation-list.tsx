@@ -42,6 +42,7 @@ type FormInput = {
   totalPrice: string;
   discount: string;
   description: string;
+  groupName: string;
   subItems: string;
 };
 
@@ -68,7 +69,7 @@ export const QuotationListModal = () => {
       cost: defaultData?.cost ? defaultData.cost.toString() : "0",
       unit: defaultData?.unit ?? "",
       percentage: p,
-
+      groupName: defaultData?.groupName ?? "",
       quantity: defaultData?.quantity ? defaultData.quantity.toString() : "1",
       withholdingTax: defaultData?.withholdingTax
         ? defaultData.withholdingTax.toString()
@@ -132,6 +133,7 @@ export const QuotationListModal = () => {
     const withholdingTaxPercent = formData.get(
       "withholdingTaxPercent"
     ) as string;
+    const groupName = formData.get("groupName") as string;
 
     const product = productId
       ? parseInt(productId)
@@ -161,6 +163,7 @@ export const QuotationListModal = () => {
       totalPrice: parseFloat(total),
       discount: discount ? parseFloat(discount) : 0,
       description,
+      groupName,
       subItems: getValues("subItems"),
       quotationType: refs.quotationRef.type,
     };
@@ -264,10 +267,23 @@ export const QuotationListModal = () => {
           />
         </div>
 
+
+        <div className="md:col-span-3 ">
+          <FormInput
+            id="groupName"
+            label="ชื่อกลุ่ม (แสดงในใบเสนอราคา PDF)"
+            type="text"
+            readOnly={!!isLocked}
+            register={register}
+            defaultValue={defaultData?.groupName}
+            errors={fieldErrors}
+          />
+        </div>
+
         <div className="md:col-span-3 ">
           <FormInput
             id="name"
-            label="ชื่อสินค้า/บริการ (ชื่อเต็มแสดงในใบเสนอราคา)"
+            label="ชื่อสินค้า/บริการ (แสดงในใบเสนอราคา PDF)"
             type="text"
             readOnly={!!isLocked}
             register={register}
@@ -275,6 +291,7 @@ export const QuotationListModal = () => {
             errors={fieldErrors}
           />
         </div>
+
 
         <div className="">
           <FormInput

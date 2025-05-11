@@ -55,7 +55,7 @@ const getData = async (
           },
         },
         orderBy: {
-          id: "asc",
+          order: "asc",
         }
       },
     },

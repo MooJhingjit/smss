@@ -20,5 +20,6 @@ export const schema = z.object({
   withholdingTaxPercent: z.number().optional(),
   discount: z.number().nullable().optional(),
   description: z.string().optional(),
+  groupName: z.string().optional(),
   subItems: z.string().optional(),
 });

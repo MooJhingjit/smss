@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
       include: {
         contact: true,
         invoice: {
-          select: { date: true, receiptDate: true },
+          select: {code:true, date: true, receiptCode: true, receiptDate: true },
         },
         seller: {
           select: { name: true },
