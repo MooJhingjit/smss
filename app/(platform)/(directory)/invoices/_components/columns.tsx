@@ -33,10 +33,10 @@ export const columns: ColumnDef<any>[] = [
         header: "วันที่ออกใบแจ้งหนี้",
         sortingFn: "datetime",
         enableSorting: true,
-        cell: ({ row }) => {
-            const { date } = row.original;
-            return getDateFormat(date);
-        },
+        // cell: ({ row }) => {
+        //     const { date } = row.original;
+        //     return getDateFormat(date);
+        // },
     },
     {
         accessorKey: "receiptCode",
@@ -45,7 +45,7 @@ export const columns: ColumnDef<any>[] = [
         enableSorting: true,
         cell: ({ row }) => {
             const { receiptCode } = row.original;
-            return receiptCode || "-";
+            return receiptCode || "";
         },
     },
     {
@@ -53,10 +53,10 @@ export const columns: ColumnDef<any>[] = [
         header: "วันที่ออกใบเสร็จ",
         sortingFn: "datetime",
         enableSorting: true,
-        cell: ({ row }) => {
-            const { receiptDate } = row.original;
-            return receiptDate ? getDateFormat(receiptDate) : "-";
-        },
+        // cell: ({ row }) => {
+        //     const { receiptDate } = row.original;
+        //     return receiptDate ? getDateFormat(receiptDate) : "-";
+        // },
     },
     {
         accessorKey: "quotation.code",

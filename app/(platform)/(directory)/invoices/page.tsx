@@ -2,6 +2,7 @@ import Breadcrumbs from "@/components/breadcrumbs";
 import { columns } from "./_components/columns";
 import InvoiceTable from "./_components/data-table";
 import { db } from "@/lib/db";
+import { getDateFormat } from "@/lib/utils";
 
 async function getData(): Promise<any[]> {
   const items = await db.invoice.findMany({
@@ -35,6 +36,14 @@ interface Props {
 
 export default async function Invoices(props: Readonly<Props>) {
   const data = await getData();
+
+  // Format the dates
+  const formattedData = data.map((invoice) => ({
+    ...invoice,
+    date: invoice.date ? getDateFormat(invoice.date) : null,
+    receiptDate: invoice.receiptDate ? getDateFormat(invoice.receiptDate) : null,
+  }));
+
   const pages = [
     {
       name: "ใบแจ้งหนี้ - ใบเสร็จ",
@@ -46,7 +55,7 @@ export default async function Invoices(props: Readonly<Props>) {
   return (
     <>
       <Breadcrumbs pages={pages} />
-      <InvoiceTable columns={columns} data={data} />
+      <InvoiceTable columns={columns} data={formattedData} />
     </>
   );
 }

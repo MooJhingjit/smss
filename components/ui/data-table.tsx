@@ -40,6 +40,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./select";
+import { cn } from "@/lib/utils";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -54,9 +55,9 @@ export function DataTable<TData, TValue>({
 }: Readonly<DataTableProps<TData, TValue>>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
 
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    [],
-  );
+  // const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+  //   [],
+  // );
   const [globalFilter, setGlobalFilter] = React.useState("");
 
   // Process columns to add enableSorting: false by default if not specified
@@ -170,7 +171,14 @@ export function DataTable<TData, TValue>({
                 {row.getVisibleCells().map((cell) => (
                   <TableCell
                     key={cell.id}
-                    className="whitespace-nowrap px-3 py-4 text-sm text-gray-500  max-w-52 truncate"
+                    className={cn(
+                      "whitespace-nowrap px-3 py-4 text-sm text-gray-500 max-w-52 truncate",
+                      typeof cell.getValue() === "string" &&
+                        globalFilter &&
+                        String(cell.getValue()).toLowerCase().includes(globalFilter.toLowerCase())
+                        ? "bg-yellow-50 text-black font-semibold"
+                        : ""
+                    )}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>

@@ -50,22 +50,25 @@ export async function GET(req: NextRequest) {
 
     const quotations = await db.quotation.findMany({
       include: {
-        contact: true,
-        invoice: {
-          select: {code:true, date: true, receiptCode: true, receiptDate: true },
-        },
-        seller: {
-          select: { name: true },
-        },
-        _count: {
-          select: { purchaseOrders: true, lists: true, medias: true },
-        },
+      contact: true,
+      invoice: {
+        select: { code: true, date: true, receiptCode: true, receiptDate: true },
+      },
+      seller: {
+        select: { name: true },
+      },
+      _count: {
+        select: { purchaseOrders: true, lists: true, medias: true },
+      },
       },
       where: {
-        // or where
-        ...conditions,
+      // or where
+      ...conditions,
       },
-      orderBy: [{ invoice: { receiptDate: { sort: "desc", nulls: "last" } } }],
+      orderBy: [
+      // { invoice: { receiptDate: { sort: "desc", nulls: "last" } } },
+      { id: "desc" },
+      ],
     });
     return NextResponse.json(quotations);
   } catch (error) {
