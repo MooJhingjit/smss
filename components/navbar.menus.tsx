@@ -12,10 +12,15 @@ const links = [
     label: "Purchase Orders",
     permission: ["admin"],
   },
-  { href: "/products", label: "กลุ่มสินค้า/บริการ", permission: ["*"] },
-  { href: "/items", label: "คลังสินค้า", permission: ["admin"] },
-  { href: "/contacts", label: "ลูกค้า", permission: ["*"] },
-  { href: "/users", label: "ผู้ใช้งาน", permission: ["admin"] },
+  {
+    href: "/invoices",
+    label: "Invoices",
+    permission: ["admin"],
+  },
+  { href: "/products", label: "Products/Services", permission: ["*"] },
+  { href: "/items", label: "Stock", permission: ["admin"] },
+  { href: "/contacts", label: "Customers", permission: ["*"] },
+  { href: "/users", label: "Users", permission: ["admin"] },
 ];
 
 export default function MenuItems({ userRole }: { userRole: UserRole }) {

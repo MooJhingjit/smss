@@ -9,6 +9,8 @@ import {
   getPaginationRowModel,
   getFilteredRowModel,
   ColumnFiltersState,
+  getSortedRowModel,
+  SortingState,
 } from "@tanstack/react-table";
 
 import {
@@ -27,6 +29,8 @@ import {
   ChevronsLeft,
   ChevronsRight,
   Plus,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { Input } from "./input";
 import {
@@ -48,22 +52,34 @@ export function DataTable<TData, TValue>({
   data,
   onCreate,
 }: Readonly<DataTableProps<TData, TValue>>) {
+  const [sorting, setSorting] = React.useState<SortingState>([])
+
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
   );
   const [globalFilter, setGlobalFilter] = React.useState("");
 
+  // Process columns to add enableSorting: false by default if not specified
+  const processedColumns = React.useMemo(() => {
+    return columns.map(column => ({
+      ...column,
+      enableSorting: column.enableSorting ?? false // Set false as default if not explicitly set
+    }));
+  }, [columns]);
+
   const table = useReactTable({
     data,
-    columns,
+    columns: processedColumns,
+    // We enable sorting at the table level, but disable it by default at column level
+    enableSorting: true,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    onSortingChange: setSorting,
     getPaginationRowModel: getPaginationRowModel(),
-    // onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
-
     getFilteredRowModel: getFilteredRowModel(),
     state: {
-      // columnFilters,
+      sorting,
       globalFilter,
     },
     getColumnCanGlobalFilter: () => true,
@@ -102,13 +118,42 @@ export function DataTable<TData, TValue>({
                   <TableHead
                     key={header.id}
                     className="py-3.5 px-3  text-left text-sm font-semibold text-gray-900  "
+
                   >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
+                    <div className="flex items-center">
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
                           header.column.columnDef.header,
                           header.getContext(),
                         )}
+
+                      {/* Debug info - will show if the column can be sorted */}
+                      {/* <span className="ml-2 text-xs text-blue-500">
+                        {JSON.stringify({
+                          enableSorting: header.column.columnDef.enableSorting,
+                          canSort: header.column.getCanSort()
+                        })}
+                      </span> */}
+
+                      {header.column.getCanSort() && (
+                        <>
+                          {header.column.getIsSorted() === 'desc' ? (
+                            <span className="text-gray-400" onClick={header.column.getToggleSortingHandler()}>
+                              <ChevronDown className="h-4 w-4 ml-2 cursor-pointer hover:text-gray-600 font-semibold" />
+                            </span>
+                          ) : header.column.getIsSorted() === 'asc' ? (
+                            <span className="text-gray-400" onClick={header.column.getToggleSortingHandler()}>
+                              <ChevronUp className="h-4 w-4 ml-2 cursor-pointer hover:text-gray-600 font-semibold" />
+                            </span>
+                          ) : (
+                            <span className="text-gray-400" onClick={header.column.getToggleSortingHandler()}>
+                              <ChevronUp className="h-4 w-4 ml-2 cursor-pointer hover:text-gray-600 font-semibold opacity-30" />
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </div>
                   </TableHead>
                 );
               })}
