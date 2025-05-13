@@ -35,9 +35,27 @@ export async function POST(req: NextRequest) {
     // const today = new Date();
     const today = getCurrentDateTime();
 
+    // 1) Find the most recently created PO (descending by code)
+    // that starts with prefix + year + month.
+    const year = today.getFullYear();
+    const month = (today.getMonth() + 1).toString().padStart(2, "0");
+    const lastPO = await db.purchaseOrder.findFirst({
+      where: {
+        code: {
+          startsWith: `PO${year}${month}`,
+        },
+      },
+      orderBy: {
+        code: "desc",
+      },
+    });
+
+    // 2) Parse the last 4 digits to figure out the sequence number
+    let nextSequence = parseSequenceNumber(lastPO?.code ?? "");
+
     // create purchase orders for each vendor
     const purchaseOrders = await Promise.all(
-      Object.keys(quotationListsByVendor).map(async (vendorId) => {
+      Object.keys(quotationListsByVendor).map(async (vendorId, index) => {
         const lists = quotationListsByVendor[Number(vendorId)];
 
         // all lists are from the same vendor
@@ -45,9 +63,20 @@ export async function POST(req: NextRequest) {
 
         const PO_tax = 0;
         const PO_vat = totalPrice * 0.07;
+        
+        // Generate a unique code for this purchase order
+        // Use the current sequence number + index to ensure uniqueness across vendors
+        const currentSequence = nextSequence + index;
+        const code = generateCode(
+          0, // ID parameter is unused in the function
+          "PO",
+          today,
+          currentSequence
+        );
+
         const purchaseOrder = await db.purchaseOrder.create({
           data: {
-            code: "DRAFT-PO-" + Math.floor(Math.random() * 1000000),
+            code,
             vendorId: Number(vendorId),
             quotationId: body.quotationId,
             price: totalPrice,
@@ -59,36 +88,6 @@ export async function POST(req: NextRequest) {
             createdAt: today,
             updatedAt: today,
           },
-        });
-
-        // 1) Find the most recently created quotation (descending by code)
-        // that starts with prefix + year + month.
-        const year = today.getFullYear();
-        const month = (today.getMonth() + 1).toString().padStart(2, "0");
-        const lastPO = await db.purchaseOrder.findFirst({
-          where: {
-            code: {
-              startsWith: `PO${year}${month}`,
-            },
-          },
-          orderBy: {
-            code: "desc",
-          },
-        });
-
-        // 2) Parse the last 4 digits to figure out the sequence number
-        let nextSequence = parseSequenceNumber(lastPO?.code ?? "");
-
-        // update code based on purchaseOrder ID
-        const code = generateCode(
-          purchaseOrder.id,
-          "PO",
-          purchaseOrder.createdAt,
-          nextSequence
-        );
-        await db.purchaseOrder.update({
-          where: { id: purchaseOrder.id },
-          data: { code },
         });
 
         return purchaseOrder;
