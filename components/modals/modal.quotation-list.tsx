@@ -14,12 +14,13 @@ import { createQuotationList } from "@/actions/quotation-list/create";
 import { updateQuotationList } from "@/actions/quotation-list/update";
 import { FormInput } from "../form/form-input";
 import { useQuotationListModal } from "@/hooks/use-quotation-list";
+import { useProductModal } from "@/hooks/use-product-modal";
 import { useEffect, useState } from "react";
 import { QuotationType } from "@prisma/client";
 import { useForm } from "react-hook-form";
 import { FormTextarea } from "../form/form-textarea";
 import { Input } from "@/components/ui/input";
-import { LockIcon, MinusCircle, PlusCircle } from "lucide-react";
+import { ArrowRight, LockIcon, MinusCircle, PlusCircle } from "lucide-react";
 import { quotationTypeMapping } from "@/app/config";
 import { classNames } from "@/lib/utils";
 import { ProductWithRelations } from "@/types";
@@ -27,6 +28,7 @@ import { Button } from "../ui/button";
 import ConfirmActionButton from "../confirm-action";
 import { deleteQuotationList } from "@/actions/quotation-list/delete";
 import { Badge } from "../ui/badge";
+import { NewProductModal } from "./modal.product";
 
 type FormInput = {
   productId: string;
@@ -48,6 +50,7 @@ type FormInput = {
 
 export const QuotationListModal = () => {
   const modal = useQuotationListModal();
+  const productModal = useProductModal();
   const defaultData = modal.data;
   const p = defaultData?.percentage?.toString() ?? "";
   const refs = modal.refs;
@@ -55,6 +58,42 @@ export const QuotationListModal = () => {
   const { register, watch, reset, getValues, setValue } = useForm<FormInput>({
     mode: "onChange",
   });
+  // Add state to track if the modal should be visually hidden
+  const [isHidden, setIsHidden] = useState(false);
+
+  const handleOpenProductModal = () => {
+    // Hide the quotation list modal visually instead of closing it
+    setIsHidden(true);
+
+    // Open the product modal and provide callbacks for creation and closing
+    productModal.onOpen(
+      undefined,
+      // Callback for when a product is created
+      (newProduct) => {
+        // Show the quotation list modal again
+        setIsHidden(false);
+
+        // If we have a new product, update the form with its data
+        if (newProduct) {
+          setValue("name", newProduct.name);
+          setValue("percentage", newProduct.percentage?.toString() ?? "");
+          setValue("cost", newProduct.cost?.toString() ?? "");
+          setValue("description", newProduct.description || "");
+          setValue("unit", newProduct.unit || "");
+
+          // Set the product ID in the form
+          if (newProduct.id) {
+            setValue("productId", newProduct.id.toString());
+          }
+        }
+      },
+      // Callback for when modal is closed (without creating a product)
+      () => {
+        // Show the quotation list modal again
+        setIsHidden(false);
+      }
+    );
+  };
 
   // console.log("getValues", getValues());
 
@@ -142,7 +181,8 @@ export const QuotationListModal = () => {
     const total = formData.get("totalPrice") as string;
     const discount = formData.get("discount") as string;
     const description = formData.get("description") as string;
-
+    console.log("Form Data Submitted: quotationRef id", refs?.quotationRef?.id);
+    console.log("Form Data Submitted: product id", product);
     if (!refs?.quotationRef?.id || !product) {
       toast.error("จำเป็นต้องกรอกข้อมูลให้ครบ");
       return;
@@ -235,36 +275,50 @@ export const QuotationListModal = () => {
         action={onSubmit}
         className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3 "
       >
-        <div className="md:col-span-2 pb-7">
-          <FormSearchAsync
-            id="productId"
-            label="ค้นหาชื่อสินค้า/บริการ"
-            required
-            disabled={!!isLocked}
-            config={{
-              endpoint: "products",
-              params: {},
-              customRender: (data: ProductWithRelations) => {
-                return {
-                  value: data.id,
-                  label: `${data.name} (${data.vendor?.name})`,
-                  data: data,
-                };
-              },
-            }}
-            defaultValue={{
-              id: defaultData?.product.id,
-              label: defaultData?.product.name,
-            }}
-            onSelected={(item) => {
-              setValue("name", item.data.name);
-              setValue("percentage", item.data.percentage);
-              setValue("cost", item.data.cost);
-              setValue("description", item.data.description);
-              setValue("unit", item.data.unit);
-            }}
-            errors={fieldErrors}
-          />
+        <div className="md:col-span-3 pb-7 flex items-end space-x-2">
+          <div className="flex-1">
+            {/* Hidden input to store the product ID for form submission */}
+            <input 
+              type="hidden" 
+              id="hiddenProductId" 
+              {...register("productId")}
+            />
+            <FormSearchAsync
+              id="productId"
+              label="ค้นหาชื่อสินค้า/บริการ"
+              required
+              disabled={!!isLocked}
+              config={{
+                endpoint: "products",
+                params: {},
+                customRender: (data: ProductWithRelations) => {
+                  return {
+                    value: data.id,
+                    label: `${data.name} (${data.vendor?.name})`,
+                    data: data,
+                  };
+                },
+              }}
+              defaultValue={{
+                id: defaultData?.product.id,
+                label: defaultData?.product.name,
+              }}
+              onSelected={(item) => {
+                // Update hidden input when product is selected
+                setValue("productId", item.data.id);
+                setValue("name", item.data.name);
+                setValue("percentage", item.data.percentage);
+                setValue("cost", item.data.cost);
+                setValue("description", item.data.description);
+                setValue("unit", item.data.unit);
+              }}
+              errors={fieldErrors}
+            />
+          </div>
+          <Button className="h-9" onClick={() => handleOpenProductModal()}>
+            <p>สร้างใหม่</p>
+            <ArrowRight className="w-4 h-4" />
+          </Button>
         </div>
 
 
@@ -447,7 +501,7 @@ export const QuotationListModal = () => {
 
   return (
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
-      <DialogContent className="sm:max-w-[425px] md:max-w-[600px] ">
+      <DialogContent className={`sm:max-w-[425px] md:max-w-[600px] ${isHidden ? 'opacity-0 pointer-events-none' : 'opacity-100'} transition-opacity duration-200`}>
         <DialogHeader>
           <DialogTitle className="space-x-2">
             <span>รายละเอียดสินค้าในใบ QT</span>

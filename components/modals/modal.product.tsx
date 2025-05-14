@@ -27,6 +27,9 @@ export const NewProductModal = () => {
   const handleCreate = useAction(createProduct, {
     onSuccess: (data) => {
       toast.success("สำเร็จ");
+      if (modal.onProductCreated) {
+        modal.onProductCreated(data);
+      }
       modal.onClose();
     },
     onError: (error) => {
