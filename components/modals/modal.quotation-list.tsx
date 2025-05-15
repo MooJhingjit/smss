@@ -20,7 +20,7 @@ import { QuotationType } from "@prisma/client";
 import { useForm } from "react-hook-form";
 import { FormTextarea } from "../form/form-textarea";
 import { Input } from "@/components/ui/input";
-import { ArrowRight, LockIcon, MinusCircle, PlusCircle } from "lucide-react";
+import { ArrowRight, LockIcon, MinusCircle, PlusCircle, PlusIcon } from "lucide-react";
 import { quotationTypeMapping } from "@/app/config";
 import { classNames } from "@/lib/utils";
 import { ProductWithRelations } from "@/types";
@@ -275,12 +275,12 @@ export const QuotationListModal = () => {
         action={onSubmit}
         className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3 "
       >
-        <div className="md:col-span-3 pb-7 flex items-end space-x-2">
+        <div className="md:col-span-3 pb-8 mb-4 flex items-end space-x-2 border-dashed border-b-2">
           <div className="flex-1">
             {/* Hidden input to store the product ID for form submission */}
-            <input 
-              type="hidden" 
-              id="hiddenProductId" 
+            <input
+              type="hidden"
+              id="hiddenProductId"
               {...register("productId")}
             />
             <FormSearchAsync
@@ -315,10 +315,11 @@ export const QuotationListModal = () => {
               errors={fieldErrors}
             />
           </div>
-          <Button className="h-9" onClick={() => handleOpenProductModal()}>
-            <p>สร้างใหม่</p>
-            <ArrowRight className="w-4 h-4" />
-          </Button>
+          <div className="h-full flex items-end -mb-0.5">
+            <Button variant="secondary" className="h-10" onClick={handleOpenProductModal}>
+              <PlusIcon className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
 
 

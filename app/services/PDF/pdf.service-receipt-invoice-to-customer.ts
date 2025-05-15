@@ -247,7 +247,8 @@ const writeMainItem = (
 
   const amountText = data.price
     ? data.price.toLocaleString("th-TH", CURRENCY_FORMAT)
-    : "";
+    : "0.00";
+    
   currentPage.drawText(amountText, {
     x: columnPosition.amount + 44 - getTextWidth(amountText, config),
     y: lineStart,
