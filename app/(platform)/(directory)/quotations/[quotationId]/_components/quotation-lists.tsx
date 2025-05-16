@@ -118,7 +118,7 @@ export default function QuotationLists(props: Props) {
       render: (item: QuotationListWithRelations) => {
         return (
           <div className="">
-            <ProductBadge name={item.product.name} type={item.product.type} />
+            <ProductBadge name={item.name} type={item.product.type} />
             {item.subItems && !!JSON.parse(item.subItems).length && (
               <div className="text-xs text-gray-400">
                 <span>+</span>
