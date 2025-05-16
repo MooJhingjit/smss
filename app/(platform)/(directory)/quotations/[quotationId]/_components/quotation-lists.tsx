@@ -39,7 +39,9 @@ type Props = {
 
 export default function QuotationLists(props: Props) {
   const { quotationId, quotationType, remark, isLocked, grandTotal } = props;
-  const [quotationItems, setQuotationItems] = useState<QuotationListWithRelations[]>(props.data);
+  const [quotationItems, setQuotationItems] = useState<
+    QuotationListWithRelations[]
+  >(props.data);
   const modal = useQuotationListModal();
 
   // Update local state when props change
@@ -62,9 +64,10 @@ export default function QuotationLists(props: Props) {
     MutationResponseType,
     Error,
     {
-      id: number; payload: {
+      id: number;
+      payload: {
         allowedWithholdingTax: boolean;
-      }
+      };
     }
   >({
     mutationFn: async (fields) => {
@@ -77,26 +80,25 @@ export default function QuotationLists(props: Props) {
       customRevalidatePath(`/purchase-orders/${quotationId}`);
     },
   });
-  
+
   // Handle reordering when rows are dragged
   const handleReorder = (result: QuotationListWithRelations[]) => {
     // if (!result.destination) return;
-
 
     if (!result) return;
     // const items = Array.from(quotationItems);
     // const [reorderedItem] = items.splice(result.source.index, 1);
     // items.splice(result.destination.index, 0, reorderedItem);
-    
+
     // Update order field for each item based on new position
     const updatedItems = result.map((item, index) => ({
       ...item,
       order: index,
     }));
-    
+
     // Update local state immediately for better UX
     setQuotationItems(updatedItems);
-    
+
     // Prepare data for server action
     const reorderData = {
       quotationId,
@@ -105,7 +107,7 @@ export default function QuotationLists(props: Props) {
         order: item.order || 0,
       })),
     };
-    
+
     // Call server action to persist changes
     executeReorder(reorderData);
   };
@@ -131,10 +133,15 @@ export default function QuotationLists(props: Props) {
       },
     },
     {
-      name: "ผู้ขาย/ร้านค้า",
-      key: "vendor",
+      name: "จำนวน",
+      key: "quantity",
       render: (item: QuotationListWithRelations) => {
-        return item.product.vendor?.name;
+        return (
+          <div className="flex items-center justify-start pl-8 space-x-3">
+            <p>{item.quantity} </p>{" "}
+            {item.unit && <p className="text-xs text-gray-400">{item.unit}</p>}
+          </div>
+        );
       },
     },
     {
@@ -145,26 +152,14 @@ export default function QuotationLists(props: Props) {
       name: "ราคาต่อหน่วย",
       key: "unitPrice",
       render: (item: QuotationListWithRelations) => {
-        const percentageSign = item.percentage && item.percentage >= 0 ? "+" : "";
-        return `(${percentageSign}${item.percentage}%) ${item.unitPrice?.toLocaleString()}`;
+        const percentageSign =
+          item.percentage && item.percentage >= 0 ? "+" : "";
+        return `(${percentageSign}${
+          item.percentage
+        }%) ${item.unitPrice?.toLocaleString()}`;
       },
     },
-    {
-      name: "จำนวน", key: "quantity",
-      render: (item: QuotationListWithRelations) => {
-        return (
-          <div className="flex items-center justify-start pl-8 space-x-3">
-            <p>{item.quantity} </p> {
-              item.unit && (
-                <p className="text-xs text-gray-400">
-                  {item.unit}
-                </p>
-              )
-            }
-          </div>
-        );
-      },
-    },
+
     {
       name: "รายการหัก ณ ที่จ่าย",
       key: "withholdingTaxEnabled",
@@ -214,6 +209,13 @@ export default function QuotationLists(props: Props) {
         return date.toLocaleDateString("th-TH");
       },
     },
+    {
+      name: "ผู้ขาย/ร้านค้า",
+      key: "vendor",
+      render: (item: QuotationListWithRelations) => {
+        return item.product.vendor?.name;
+      },
+    },
   ];
 
   const listLabel = isLocked ? "" : "เพิ่มรายการสินค้า/บริการ";
@@ -248,10 +250,14 @@ export default function QuotationLists(props: Props) {
           onManage={
             // isLocked
             //   ? undefined
-            //   : 
+            //   :
             (item) => {
               return modal.onOpen(item, {
-                quotationRef: { id: item.quotationId, type: quotationType, isLocked },
+                quotationRef: {
+                  id: item.quotationId,
+                  type: quotationType,
+                  isLocked,
+                },
                 productRef: {
                   id: item.productId ?? 0,
                   name: item.product?.name ?? "",
@@ -289,7 +295,7 @@ const BillingSummary = (props: {
   const summary = calculateQuotationItemPrice(data);
 
   const { execute, isLoading } = useAction(updateServiceQuotationSummary, {
-    onSuccess: (data) => { },
+    onSuccess: (data) => {},
     onError: (error) => {
       toast.error(error);
     },
