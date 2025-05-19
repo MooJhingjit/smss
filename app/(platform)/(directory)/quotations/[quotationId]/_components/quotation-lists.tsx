@@ -182,7 +182,7 @@ export default function QuotationLists(props: Props) {
                       <InfoIcon className="w-4 h-4 text-gray-400" />
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>ราคาขายต้องเป็น 0 ถึงจะซ่อนรายการได้่</p>
+                      <p>ราคาขายต้องเป็น 0 ถึงจะซ่อนรายการได้</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
