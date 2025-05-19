@@ -168,7 +168,7 @@ const StandardTable = <T,>({
 };
 
 // Draggable table component, group name is for quotation list
-const DraggableTable = <T extends {groupName?: string}>({
+const DraggableTable = <T extends { groupName?: string, hiddenInPdf?: boolean }>({
   data,
   columns,
   onManage,
@@ -214,7 +214,7 @@ const DraggableTable = <T extends {groupName?: string}>({
                       {...provided.draggableProps}
                       className={cn("hover:bg-gray-50", {
                         "bg-gray-100": snapshot.isDragging,
-                        "border !border-t-black h-[] border-r-0 border-l-0": !!item.groupName 
+                        "border !border-t-black h-[] border-r-0 border-l-0": !!item.groupName,
                       })}
 
                     >
@@ -251,7 +251,12 @@ const DraggableTable = <T extends {groupName?: string}>({
                       {columns.map((column: any, index: number) => (
                         <TableCell
                           key={`${column.key}-${(item as any).id}`}
-                          className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500 capitalize relative"
+                          className={cn(
+                            "whitespace-nowrap px-3 py-2.5 text-sm text-gray-500 capitalize relative", {
+                            "text-gray-300": item.hiddenInPdf && column.key !== "index",
+                          }
+
+                          )}
                         >
                           {
                             showGroupNameAt && item.groupName && (column.key as string === showGroupNameAt) && (

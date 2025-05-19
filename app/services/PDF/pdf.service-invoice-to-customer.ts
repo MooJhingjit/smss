@@ -53,8 +53,11 @@ const getData = async (
   const quotation = await db.quotation.findUnique({
     include: {
       lists: {
+        where: {
+          hiddenInPdf: false, // only include items that are not hidden in PDF
+        },
         orderBy: {
-          id: "asc",
+          order: "asc", // order by the order field
         },
       },
       contact: true,

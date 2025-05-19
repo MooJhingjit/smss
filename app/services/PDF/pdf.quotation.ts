@@ -50,9 +50,12 @@ const getQuotation = async (
         include: {
           product: true,
         },
+        where: {
+          hiddenInPdf: false, // only include items that are not hidden in PDF
+        },
         orderBy: {
-          order: 'asc'
-        }
+          order: "asc", // order by the order field
+        },
       },
       seller: true,
       contact: true,

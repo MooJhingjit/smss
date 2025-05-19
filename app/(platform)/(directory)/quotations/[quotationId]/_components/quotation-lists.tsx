@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { InfoIcon, Plus, ShieldCheckIcon } from "lucide-react";
+import { BadgeInfoIcon, InfoIcon, Plus, ShieldCheckIcon } from "lucide-react";
 import PageComponentWrapper from "@/components/page-component-wrapper";
 import TableLists from "@/components/table-lists";
 import { useQuotationListModal } from "@/hooks/use-quotation-list";
@@ -27,6 +27,13 @@ import { MutationResponseType } from "@/components/providers/query-provider";
 import { customRevalidatePath } from "@/actions/revalidateTag";
 import QUOTATION_LIST_SERVICES from "@/app/services/api.quotation-lists";
 import { reorderQuotationList } from "@/actions/quotation-list/reorder";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+
 
 type Props = {
   quotationId: number;
@@ -155,12 +162,51 @@ export default function QuotationLists(props: Props) {
       render: (item: QuotationListWithRelations) => {
         const percentageSign =
           item.percentage && item.percentage >= 0 ? "+" : "";
-        return `(${percentageSign}${
-          item.percentage
-        }%) ${item.unitPrice?.toLocaleString()}`;
+        return `(${percentageSign}${item.percentage
+          }%) ${item.unitPrice?.toLocaleString()}`;
       },
     },
+    {
+      name: "ซ่อนรายการ",
+      key: "hiddenInPdf",
+      render: (item: QuotationListWithRelations) => {
+        const isDisabled = item.unitPrice !== 0;
+        return (
+          <div className="flex items-center justify-start pl-8 space-x-3">
+            <div className="relative flex items-center">
 
+              {isDisabled ? (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <InfoIcon className="w-4 h-4 text-gray-400" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>ราคาขายต้องเป็น 0 ถึงจะซ่อนรายการได้่</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              ) : (
+                <Checkbox
+                  defaultChecked={!!item.hiddenInPdf}
+                  disabled={isDisabled}
+                  onCheckedChange={(checked) => {
+                    if (!isDisabled) {
+                      mutate({
+                        id: item.id,
+                        payload: {
+                          hiddenInPdf: !!checked,
+                        },
+                      });
+                    }
+                  }}
+                />
+              )}
+            </div>
+          </div>
+        );
+      },
+    },
     {
       name: "รายการหัก ณ ที่จ่าย",
       key: "withholdingTaxEnabled",
@@ -182,27 +228,7 @@ export default function QuotationLists(props: Props) {
         );
       },
     },
-    {
-      name: "ซ่อนรายการ",
-      key: "hiddenInPdf",
-      render: (item: QuotationListWithRelations) => {
-        return (
-          <div className="flex items-center justify-start pl-8 space-x-3">
-            <Checkbox
-              defaultChecked={!!item.hiddenInPdf}
-              onCheckedChange={(checked) => {
-                mutate({
-                  id: item.id,
-                  payload: {
-                    hiddenInPdf: !!checked,
-                  },
-                });
-              }}
-            />
-          </div>
-        );
-      },
-    },
+
     {
       name: "ส่วนลด",
       key: "discount",
@@ -310,7 +336,7 @@ const BillingSummary = (props: {
   const summary = calculateQuotationItemPrice(data);
 
   const { execute, isLoading } = useAction(updateServiceQuotationSummary, {
-    onSuccess: (data) => {},
+    onSuccess: (data) => { },
     onError: (error) => {
       toast.error(error);
     },
