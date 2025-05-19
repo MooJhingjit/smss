@@ -182,6 +182,7 @@ model QuotationList {
   quantity              Int?
   withholdingTax        Float?
   withholdingTaxPercent Float?
+  hiddenInPdf           Boolean?         @default(false)
   allowedWithholdingTax Boolean?         @default(false)
   discount              Float?
   totalPrice            Float?

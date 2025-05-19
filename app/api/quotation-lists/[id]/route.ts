@@ -12,7 +12,7 @@ export async function PUT(
     }
 
     // body whitelist
-    const bodyWhitelist = ["allowedWithholdingTax"];
+    const bodyWhitelist = ["allowedWithholdingTax", "hiddenInPdf"];
 
     const body = await req.json();
     const bodyKeys = Object.keys(body);

@@ -66,7 +66,8 @@ export default function QuotationLists(props: Props) {
     {
       id: number;
       payload: {
-        allowedWithholdingTax: boolean;
+        allowedWithholdingTax?: boolean;
+        hiddenInPdf?: boolean;
       };
     }
   >({
@@ -181,13 +182,27 @@ export default function QuotationLists(props: Props) {
         );
       },
     },
-    // {
-    //   name: "ภาษี",
-    //   key: "withholdingTaxPercent",
-    //   render: (item: QuotationListWithRelations) => {
-    //     return `(+${item.withholdingTaxPercent}%) ${item.withholdingTax?.toLocaleString()}`;
-    //   },
-    // },
+    {
+      name: "ซ่อนรายการ",
+      key: "hiddenInPdf",
+      render: (item: QuotationListWithRelations) => {
+        return (
+          <div className="flex items-center justify-start pl-8 space-x-3">
+            <Checkbox
+              defaultChecked={!!item.hiddenInPdf}
+              onCheckedChange={(checked) => {
+                mutate({
+                  id: item.id,
+                  payload: {
+                    hiddenInPdf: !!checked,
+                  },
+                });
+              }}
+            />
+          </div>
+        );
+      },
+    },
     {
       name: "ส่วนลด",
       key: "discount",
