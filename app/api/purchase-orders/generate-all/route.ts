@@ -10,6 +10,7 @@ import {
   calculateQuotationItemPrice,
 } from "@/app/services/service.quotation";
 import { QuotationListWithRelations } from "@/types";
+import { ProductType } from "@prisma/client";
 
 // PUT /api/quotations/:id
 export async function POST(req: NextRequest) {
@@ -125,13 +126,13 @@ export async function POST(req: NextRequest) {
                   price:
                     (quotationList.cost ?? 0) * (quotationList.quantity ?? 1),
                   unitPrice: quotationList.cost,
-                  type: quotationList.product.type,
+                  type: quotationList.productType as ProductType,
                   status: "pending",
                 },
               });
 
               // generate Items based on purchaseOrder item quantity
-              if (quotationList.product.type === "product") {
+              if (quotationList.productType === "product") {
                 await Promise.all(
                   Array.from({ length: purchaseOrderItem.quantity ?? 1 }).map(
                     async () =>

@@ -61,6 +61,7 @@ export const NewProductModal = () => {
       handleUpdate.execute({
         id: product.id,
         name,
+        type: typeRef.current,
         percentage,
         unit,
         cost,
@@ -101,7 +102,7 @@ export const NewProductModal = () => {
               <Label className="text-xs">ประเภท</Label>
               <TabsList className="w-full flex">
                 <TabsTrigger
-                  disabled={product?.id ? true : false}
+                  // disabled={product?.id ? true : false}
                   className="flex-1 text-xs"
                   value="product"
                   onClick={() => onTypeChange(ProductType.product)}
@@ -109,7 +110,6 @@ export const NewProductModal = () => {
                   สินค้า
                 </TabsTrigger>
                 <TabsTrigger
-                  disabled={product?.id ? true : false}
                   className="flex-1 text-xs"
                   value="service"
                   onClick={() => onTypeChange(ProductType.service)}

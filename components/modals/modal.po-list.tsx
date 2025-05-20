@@ -37,6 +37,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createItem } from "@/actions/item/create";
 import { cn } from "@/lib/utils";
 import { deleteItem } from "@/actions/item/delete";
+import { productTypeMapping } from "@/app/config";
 
 type FormInput = {
   productId: string;
@@ -221,7 +222,7 @@ export const PurchaseOrderListModal = () => {
                         customRender: (data: ProductWithRelations) => {
                           return {
                             value: data.id,
-                            label: `${data.name} (${data.vendor?.name})`,
+                            label: `[${data.type}] : ${data.name} (${data.vendor?.name})`,
                             data: data,
                           };
                         },

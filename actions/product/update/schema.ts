@@ -3,6 +3,7 @@ import { z } from "zod";
 export const ProductSchema = z.object({
   id: z.number(),
   // vendorId: z.number(),
+  type:  z.enum(["product", "service"]),
   name: z
     .string({
       required_error: "Name is required",

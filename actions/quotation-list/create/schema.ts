@@ -5,6 +5,7 @@ export const schema = z.object({
   quotationId: z.number().int().positive(),
   name: z.string(),
   totalPrice: z.number(),
+  productType: z.enum(["product", "service"]),
   unitPrice: z.number(),
   quantity: z.number(),
   quotationType: z.enum(["product", "service"]),

@@ -4,6 +4,7 @@ import { z } from "zod";
 export const schema = z.object({
   id: z.number(),
   quotationId: z.number().int().positive(),
+  productType: z.enum(["product", "service"]),
   productId: z.number().int(),
   name: z.string(),
   quotationType: z.enum(["product", "service"]),

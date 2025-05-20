@@ -16,12 +16,12 @@ import { FormInput } from "../form/form-input";
 import { useQuotationListModal } from "@/hooks/use-quotation-list";
 import { useProductModal } from "@/hooks/use-product-modal";
 import { useEffect, useState } from "react";
-import { QuotationType } from "@prisma/client";
+import { ProductType, QuotationType } from "@prisma/client";
 import { useForm } from "react-hook-form";
 import { FormTextarea } from "../form/form-textarea";
 import { Input } from "@/components/ui/input";
 import { ArrowRight, LockIcon, MinusCircle, PlusCircle, PlusIcon } from "lucide-react";
-import { quotationTypeMapping } from "@/app/config";
+import { productTypeMapping, quotationTypeMapping } from "@/app/config";
 import { classNames } from "@/lib/utils";
 import { ProductWithRelations } from "@/types";
 import { Button } from "../ui/button";
@@ -32,6 +32,7 @@ import { NewProductModal } from "./modal.product";
 
 type FormInput = {
   productId: string;
+  productType: string;
   name: string;
   price: string;
   unitPrice: string;
@@ -161,6 +162,7 @@ export const QuotationListModal = () => {
 
   const onSubmit = async (formData: FormData) => {
     const productId = formData.get("productId") as string;
+    const productType = formData.get("productType") as ProductType;
     const name = formData.get("name") as string;
     // const price = formData.get("price") as string;
     const unitPrice = formData.get("unitPrice") as string;
@@ -191,6 +193,7 @@ export const QuotationListModal = () => {
     const payload = {
       quotationId: refs.quotationRef.id,
       productId: product,
+      productType,
       name,
       price: parseFloat(unitPrice) * parseFloat(quantity),
       unitPrice: parseFloat(unitPrice),
@@ -283,6 +286,11 @@ export const QuotationListModal = () => {
               id="hiddenProductId"
               {...register("productId")}
             />
+             <input
+              type="hidden"
+              id="hiddenProductType"
+              {...register("productType")}
+            />
             <FormSearchAsync
               id="productId"
               label="ค้นหาชื่อสินค้า/บริการ"
@@ -294,7 +302,7 @@ export const QuotationListModal = () => {
                 customRender: (data: ProductWithRelations) => {
                   return {
                     value: data.id,
-                    label: `${data.name} (${data.vendor?.name})`,
+                    label: `[${data.type}] : ${data.name} (${data.vendor?.name})`,
                     data: data,
                   };
                 },
@@ -311,6 +319,7 @@ export const QuotationListModal = () => {
                 setValue("cost", item.data.cost);
                 setValue("description", item.data.description);
                 setValue("unit", item.data.unit);
+                setValue("productType", item.data.type);
               }}
               errors={fieldErrors}
             />
@@ -499,6 +508,9 @@ export const QuotationListModal = () => {
       </form>
     );
   };
+
+  // show errors
+  console.log('fieldErrors', fieldErrors);
 
   return (
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>

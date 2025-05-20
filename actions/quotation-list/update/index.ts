@@ -10,6 +10,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     id,
     quotationId,
     productId,
+    productType,
     name,
     price,
     unitPrice,
@@ -35,6 +36,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       data: {
         quotationId,
         productId,
+        productType,
         name,
         price,
         unitPrice,
