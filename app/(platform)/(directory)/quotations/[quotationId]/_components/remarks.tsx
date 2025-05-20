@@ -60,7 +60,7 @@ const Remarks = ({ id, remark }: { id: number; remark: string | null }) => {
 
 
     return (
-        <form className="relative">
+        <form className="relative h-full">
             <div className="absolute top-2 right-2">
                 {
                     isLoading && <LoaderIcon className="animate-spin text-gray-400" size={20} />
@@ -72,7 +72,7 @@ const Remarks = ({ id, remark }: { id: number; remark: string | null }) => {
             <FormTextarea
                 id="remark"
                 placeholder="หมายเหตุ"
-                className="w-full h-full border p-2 rounded-lg"
+                className="w-full h-full border  rounded-lg"
                 register={register}
                 rows={12}
             />

@@ -119,17 +119,18 @@ export default async function PurchaseOrderDetails(props: Readonly<Props>) {
         <div className="col-span-6">
           <PurchaseOrderItems data={data} />
         </div>
-        <div className="col-span-3">
-          <DocumentItems refType="purchaseOrder" refId={data.id} />
-        </div>
+
         {associateOrders.length > 0 && (
-          <div className="col-span-3">
+          <div className="col-span-6">
             <AssociateOrders
               quotationCode={data.quotation?.code ?? ""}
               data={associateOrders}
             />
           </div>
         )}
+        <div className="col-span-6 md:col-span-3   mb-6">
+          <DocumentItems refType="purchaseOrder" refId={data.id} />
+        </div>
       </div>
     </>
   );

@@ -149,7 +149,7 @@ export default async function QuotationDetails(
       <div className="flex justify-between items-center">
         <Breadcrumbs pages={pages} />
         <Badge className="capitalize" variant="secondary">
-         ประเภท: {data && quotationTypeMapping[data?.type]}
+          ประเภท: {data && quotationTypeMapping[data?.type]}
         </Badge>
 
       </div>
@@ -170,11 +170,9 @@ export default async function QuotationDetails(
             data={lists as QuotationListWithRelations[]}
           />
         </div>
-        <div className="col-span-5 md:col-span-2">
-          <DocumentItems refType="quotation" refId={data.id} />
-        </div>
+
         {isAdmin && (
-          <div className="col-span-5 md:col-span-3 mb-6">
+          <div className="col-span-5">
             {isQT_Approved ? (
               <PurchaseOrders
                 quotationLists={lists as QuotationListWithRelations[]}
@@ -202,6 +200,10 @@ export default async function QuotationDetails(
             )}
           </div>
         )}
+        
+        <div className="col-span-5 md:col-span-3   mb-6">
+          <DocumentItems refType="quotation" refId={data.id} />
+        </div>
       </div>
     </>
   );

@@ -7,14 +7,18 @@ import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 
 export const purchaseOrderColumns = [
-  { name: "Code", key: "code" },
   {
-    name: "ผู้ขาย/ร้านค้า",
-    key: "name",
+    name: "Code", key: "code",
     render: (item: PurchaseOrderWithRelations) => {
-      return item.vendor?.name;
+      return (
+        <Link href={`/purchase-orders/${item.id}`} className="underline flex items-center space-x-1">
+          <ExternalLink className="w-4 h-4" />
+          <span>{item.code}</span>
+        </Link>
+      );
     },
   },
+  
   // { name: "ส่วนลด", key: "discount" },
   {
     name: "ราคาสั่งซื้อ", key: "price",
@@ -57,14 +61,21 @@ export const purchaseOrderColumns = [
     },
   },
   {
-    name: "",
-    key: "id",
+    name: "ผู้ขาย/ร้านค้า",
+    key: "name",
     render: (item: PurchaseOrderWithRelations) => {
-      return (
-        <Link href={`/purchase-orders/${item.id}`}>
-          <ExternalLink className="w-4 h-4" />
-        </Link>
-      );
+      return item.vendor?.name;
     },
   },
+  // {
+  //   name: "",
+  //   key: "id",
+  //   render: (item: PurchaseOrderWithRelations) => {
+  //     return (
+  //       <Link href={`/purchase-orders/${item.id}`}>
+  //         <ExternalLink className="w-4 h-4" />
+  //       </Link>
+  //     );
+  //   },
+  // },
 ];

@@ -48,8 +48,8 @@ export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
     const { pending } = useFormStatus();
 
     return (
-      <div className="space-y-2 w-full">
-        <div className="space-y-1">
+      <div className="space-y-2 w-full h-full">
+        <div className=" h-full">
           <div className="flex justify-between">
             {label ? (
               <Label htmlFor={id} className="text-xs  capitalize">
