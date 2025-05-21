@@ -273,6 +273,7 @@ model PurchaseOrderItem {
   status                   PurchaseOrderItemStatus   @default(pending)
   withholdingTaxEnabled    Boolean                   @default(false)
   withholdingTax           Float?
+  vatExcluded              Boolean                   @default(false)
   receiptId                Int?
   purchaseOrderItemReceipt PurchaseOrderItemReceipt? @relation(fields: [receiptId], references: [id])
   items                    Item[]

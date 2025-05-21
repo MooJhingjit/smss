@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React from "react";
 import PageComponentWrapper from "@/components/page-component-wrapper";
 import {
   PurchaseOrderItemWithRelations,
@@ -7,13 +7,7 @@ import {
 } from "@/types";
 import TableLists from "@/components/table-lists";
 import { usePurchaseOrderListModal } from "@/hooks/use-po-list-modal";
-// import { usePurchaseOrderReceiptModal } from "@/hooks/use-po-receipt-modal";
-import { FormTextarea } from "@/components/form/form-textarea";
-import { FormSubmit } from "@/components/form/form-submit";
-import { useAction } from "@/hooks/use-action";
 import { toast } from "sonner";
-import { useForm } from "react-hook-form";
-import { updatePurchaseOrder } from "@/actions/po/update";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BillingInfo from "./billing-info";
@@ -26,7 +20,8 @@ import PO_ITEM_SERVICES from "@/app/services/api.purchase-order-items";
 import Remarks from "./remarks";
 
 type Payload = {
-  withholdingTaxEnabled: boolean;
+  withholdingTaxEnabled?: boolean;
+  vatExcluded?: boolean;
 };
 
 export default function PurchaseOrderItems({
@@ -36,7 +31,6 @@ export default function PurchaseOrderItems({
 }) {
   const { purchaseOrderItems, vendor } = data;
   const poListModal = usePurchaseOrderListModal();
-  // const poReceiptModal = usePurchaseOrderReceiptModal();
 
   const { mutate } = useMutation<
     MutationResponseType,
@@ -148,31 +142,38 @@ export default function PurchaseOrderItems({
         );
       },
     },
-    // {
-    //   name: "การออกบิล",
-    //   key: "receiptId",
-    //   render: (item: PurchaseOrderItemWithRelations) => {
-    //     if (item.receiptId) {
-    //       return (
-    //         <Button variant="ghost" className="text-xs h-6">
-    //           ออกใบเสร็จแล้ว
-    //         </Button>
-    //       );
-    //     }
-
-    //     return (
-    //       <Button
-    //         variant="default"
-    //         className="text-xs h-6"
-    //         onClick={() => {
-    //           poReceiptModal.onOpen(item, data);
-    //         }}
-    //       >
-    //         ออกใบเสร็จ
-    //       </Button>
-    //     );
-    //   },
-    // },
+    {
+      name: "ยกเว้น vat",
+      key: "vatExcluded",
+      render: (item: PurchaseOrderItemWithRelations) => {
+        return (
+          <div className="flex items-center justify-start pl-8 space-x-3">
+            <Checkbox
+              defaultChecked={item.vatExcluded}
+              disabled={!!item.receiptId}
+              onCheckedChange={(checked) => {
+                mutate({
+                  id: item.id,
+                  payload: {
+                    vatExcluded: !!checked,
+                  },
+                });
+              }}
+            />
+            {item.vatExcluded && (
+              <p className="text-xs">
+                (-
+                {(item.price ? item.price * 0.07 : 0).toLocaleString("th-TH", {
+                  style: "currency",
+                  currency: "THB",
+                })}
+                )
+              </p>
+            )}
+          </div>
+        );
+      },
+    },
   ];
 
   if (!purchaseOrderItems) {
@@ -224,19 +225,6 @@ export default function PurchaseOrderItems({
     </PageComponentWrapper>
   );
 }
-
-// const TaxInfo = () => {
-//   return (
-//     <div className=" grid grid-cols-3 gap-2">
-//       <div>
-//         <label
-//           htmlFor="price"
-//           className="block text-sm font-medium leading-6 text-gray-900"
-//         >
-//           ราคาก่อนหักภาษี
-//         </label>
-//         <div className="relative mt-2 rounded-md shadow-sm">
-//           <Input type="text" name="price" id="price" />
 //           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
 //             <span className="text-gray-500 sm:text-sm" id="price-currency">
 //               บาท
