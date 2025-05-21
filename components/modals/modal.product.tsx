@@ -22,7 +22,9 @@ import { ProductType } from "@prisma/client";
 export const NewProductModal = () => {
   const modal = useProductModal();
   const product = modal.data;
-  const typeRef = useRef<ProductType>(ProductType.product);
+  // Initialize the typeRef with the product type or default to ProductType.product
+  const typeRef = useRef<ProductType>(product?.type ?? ProductType.product);
+  const percentageRef = useRef<HTMLInputElement>(null);
 
   const handleCreate = useAction(createProduct, {
     onSuccess: (data) => {
@@ -82,6 +84,17 @@ export const NewProductModal = () => {
 
   const onTypeChange = (value: ProductType) => {
     typeRef.current = value;
+
+    // Set default percentage based on product type
+    if (value === ProductType.product) {
+      if (percentageRef.current) {
+        percentageRef.current.value = "15";
+      }
+    } else if (value === ProductType.service) {
+      if (percentageRef.current) {
+        percentageRef.current.value = "30";
+      }
+    }
   };
 
   const fieldErrors = (product?.id ? handleUpdate : handleCreate).fieldErrors;
@@ -98,7 +111,7 @@ export const NewProductModal = () => {
         </DialogHeader>
         <form action={onSubmit} className="grid grid-cols-2 gap-3">
           <div className="col-span-2">
-            <Tabs defaultValue={product?.type} className="w-full">
+            <Tabs defaultValue={product?.type ?? "product"} className="w-full">
               <Label className="text-xs">ประเภท</Label>
               <TabsList className="w-full flex">
                 <TabsTrigger
@@ -121,7 +134,7 @@ export const NewProductModal = () => {
           </div>
           <div className="">
             <FormSearchAsync
-              disabled={product?.id ? true : false}
+              disabled={!!product?.id}
               id="vendor"
               label="ผู้ขาย/ร้านค้า"
               config={{
@@ -141,7 +154,7 @@ export const NewProductModal = () => {
           </div>
           <div className="col-span-2">
             <FormInput
-              // disabled={product?.id ? true : false}
+              // disabled={!!product?.id}
               id="name"
               label="ชื่อสินค้า/บริการ"
               type="text"
@@ -163,7 +176,12 @@ export const NewProductModal = () => {
               id="percentage"
               label="กำไร(%)"
               type="number"
-              defaultValue={product?.percentage}
+              ref={percentageRef}
+              defaultValue={
+                product?.percentage ??
+                (!product?.id &&
+                  (product?.type === ProductType.service ? "30" : "15"))
+              }
               errors={fieldErrors}
             />
           </div>
