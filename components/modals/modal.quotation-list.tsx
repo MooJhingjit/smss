@@ -108,6 +108,8 @@ export const QuotationListModal = () => {
       unitPrice: defaultData?.unitPrice ? defaultData.unitPrice.toString() : "0",
       cost: defaultData?.cost ? defaultData.cost.toString() : "0",
       unit: defaultData?.unit ?? "",
+      productId: defaultData?.product.id ? defaultData.product.id.toString() : "",
+      productType: defaultData?.product.type ?? "",
       percentage: p,
       groupName: defaultData?.groupName ?? "",
       quantity: defaultData?.quantity ? defaultData.quantity.toString() : "1",
