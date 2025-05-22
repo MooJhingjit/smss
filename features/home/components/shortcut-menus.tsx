@@ -130,7 +130,7 @@ const Stats = ({ saleTotal, orderAmount, saleTotalWithVat }: StatProps) => {
   );
 
   return (
-    <div className="col-span-3 lg:p-2  relative  border rounded-lg shadow-lg overflow-hidden">
+    <div className="col-span-4 md:col-span-5 xl:col-span-3 p-2  relative  border rounded-lg shadow-lg overflow-hidden">
       {/* <div className="absolute inset-0 bg-gray-100  rounded-lg opacity-10 z-10 h-full"></div> */}
       {/* <div className="">
         <p className=" text-sm">สรุปข้อมูลในช่วง</p>

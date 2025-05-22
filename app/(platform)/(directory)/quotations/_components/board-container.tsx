@@ -33,7 +33,7 @@ import { classNames, cn, getDateFormat } from "@/lib/utils";
 import { Select } from "@/components/ui/select";
 import { FormSelect } from "@/components/form/form-select";
 
-interface Props { }
+interface Props {}
 
 type QuotationWithCounts = QuotationWithRelations & {
   _count: {
@@ -288,9 +288,7 @@ export default function BoardContainer(props: Props) {
                 color="gray"
                 items={queries[10].data ?? ([] as QuotationWithRelations[])}
                 columnKey={QuotationStatus.archived}
-                label={
-                  quotationStatusMapping[QuotationStatus.archived].label
-                }
+                label={quotationStatusMapping[QuotationStatus.archived].label}
                 progress={
                   quotationStatusMapping[QuotationStatus.archived].progress
                 }
@@ -315,9 +313,14 @@ const BoardFilters = (props: BoardFiltersProps) => {
   return (
     <div className="gap-x-2 mb-3 border border-gray-100  p-2  rounded-lg bg-gray-50 flex justify-end">
       <form onSubmit={onSubmit} className="grid grid-cols-7 gap-2 items-center">
-        <Button variant={"default"} onClick={onCreate} className="p-2 h-auto" type="button">
-          <PlusIcon className="w-4 h-4 mr-1 text-white" />
-          Quotation
+        <Button
+          variant={"default"}
+          onClick={onCreate}
+          className="p-2 h-auto"
+          type="button"
+        >
+          <PlusIcon className="w-4 h-4 text-white " />
+          <p className="hidden lg:block  ml-1">Quotation</p>
         </Button>
 
         <div className="w-full ">
@@ -379,7 +382,7 @@ const BoardColumn = ({
             "absolute h-1 right-0 left-0 top-0 bg-primary",
             color === "yellow" && "bg-orange-400",
             color === "green" && "bg-green-600",
-            color === "gray" && "bg-gray-400",
+            color === "gray" && "bg-gray-400"
           )}
         ></div>
         <div className="flex justify-between items-center px-3 py-4 bg-secondary border-b border-dotted">
@@ -387,15 +390,11 @@ const BoardColumn = ({
             <p className="text-sm font-semibold text-[#4a4a4a] whitespace-nowrap">
               {label}
             </p>
-            {
-              label === quotationStatusMapping.archived.label ?
-                <p className="text-xs text-[#4a4a4a]">
-                  ข้อมูลที่เก็บไว้
-                </p>
-                :
-                <p className="text-xs text-[#4a4a4a]">ความคืบหน้า {progress}%</p>
-
-            }
+            {label === quotationStatusMapping.archived.label ? (
+              <p className="text-xs text-[#4a4a4a]">ข้อมูลที่เก็บไว้</p>
+            ) : (
+              <p className="text-xs text-[#4a4a4a]">ความคืบหน้า {progress}%</p>
+            )}
           </div>
           <div className="text-xs font-semibold text-[#4a4a4a]">
             ({items.length})
@@ -419,7 +418,7 @@ const BoardColumn = ({
           </Droppable>
         </div>
       </div>
-    </div >
+    </div>
   );
 };
 
@@ -523,9 +522,15 @@ const BoardCard = ({
             <div className=" flex  items-center gap-1 px-2 py-1 text-orange-700 justify-between">
               <div className="flex space-x-1">
                 <ReceiptIcon className="size-3.5 " />
-                <span className="text-xs font-medium" >ใบแจ้งหนี้</span>
+                <span className="text-xs font-medium">ใบแจ้งหนี้</span>
               </div>
-              <p className="text-xs" title={getDateFormat(item.invoice?.date ?? "")}> {item.invoice?.code}</p>
+              <p
+                className="text-xs"
+                title={getDateFormat(item.invoice?.date ?? "")}
+              >
+                {" "}
+                {item.invoice?.code}
+              </p>
             </div>
           )}
           {item.invoice?.receiptCode && (
@@ -534,7 +539,13 @@ const BoardCard = ({
                 <ClipboardCheckIcon className="size-3.5 " />
                 <span className="text-xs font-medium">ใบเสร็จ</span>
               </div>
-              <p className="text-xs" title={getDateFormat(item.invoice?.receiptDate ?? "")}> {item.invoice?.receiptCode}</p>
+              <p
+                className="text-xs"
+                title={getDateFormat(item.invoice?.receiptDate ?? "")}
+              >
+                {" "}
+                {item.invoice?.receiptCode}
+              </p>
             </div>
           )}
         </li>

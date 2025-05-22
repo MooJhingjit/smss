@@ -146,7 +146,7 @@ export default async function QuotationDetails(
   const isReadonly = ["pending_approval", "offer", "approved"].includes(status);
   return (
     <>
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center overflow-x-auto  ">
         <Breadcrumbs pages={pages} />
         <Badge className="capitalize" variant="secondary">
           ประเภท: {data && quotationTypeMapping[data?.type]}

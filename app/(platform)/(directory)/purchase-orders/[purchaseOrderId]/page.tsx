@@ -97,10 +97,10 @@ export default async function PurchaseOrderDetails(props: Readonly<Props>) {
     <>
       <Breadcrumbs pages={pages} />
       <div className="grid grid-cols-6 gap-8 mt-6">
-        <div className="col-span-3">
+        <div className="col-span-6 md:col-span-3">
           {vendor && <VendorInfo data={vendor} />}
         </div>
-        <div className="col-span-3">
+        <div className="col-span-6 md:col-span-3">
           <PurchaseOrderInfo data={data} />
           {/* <PurchaseOrderTools
             orderId={data.id}
