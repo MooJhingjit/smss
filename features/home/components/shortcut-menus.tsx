@@ -23,58 +23,74 @@ export default function ShortcutMenus({
   return (
     <div className="grid  grid-cols-4 lg:grid-cols-5 gap-4">
       <MenuItem
-        icon={
-          <KanbanSquare
-            className="w-6 h-6 lg:w-12 lg:h-12  "
-            strokeWidth={1.5}
-          />
-        }
-        label="ใบเสนอราคา"
-        link="/quotations"
+      icon={
+        <KanbanSquare
+        className="w-6 h-6 lg:w-12 lg:h-12  "
+        strokeWidth={1.5}
+        />
+      }
+      label="ใบเสนอราคา"
+      link="/quotations"
       />
       <MenuItem
-        icon={
-          <Receipt className="w-6 h-6 lg:w-12 lg:h-12  " strokeWidth={1.5} />
-        }
-        label="ใบสั่งซื้อ"
-        link="/purchase-orders"
+      icon={
+        <Receipt className="w-6 h-6 lg:w-12 lg:h-12  " strokeWidth={1.5} />
+      }
+      label="ใบสั่งซื้อ"
+      link="/purchase-orders"
       />
       <MenuItem
-        icon={<Box className="w-6 h-6 lg:w-12 lg:h-12  " strokeWidth={1.5} />}
-        label="กลุ่มสินค้า"
-        link="/products"
+      icon={<Box className="w-6 h-6 lg:w-12 lg:h-12  " strokeWidth={1.5} />}
+      label="กลุ่มสินค้า"
+      link="/products"
       />
       <MenuItem
-        icon={
-          <PackageOpen
-            className="w-6 h-6 lg:w-12 lg:h-12  "
-            strokeWidth={1.5}
-          />
-        }
-        label="คลังสินค้า"
-        link="/items"
+      icon={
+        <PackageOpen
+        className="w-6 h-6 lg:w-12 lg:h-12  "
+        strokeWidth={1.5}
+        />
+      }
+      label="คลังสินค้า"
+      link="/items"
       />
       <MenuItem
-        icon={<Users className="w-6 h-6 lg:w-12 lg:h-12  " strokeWidth={1.5} />}
-        label="ผู้ใช้งาน"
-        link="/users"
+      icon={<Users className="w-6 h-6 lg:w-12 lg:h-12  " strokeWidth={1.5} />}
+      label="ผู้ใช้งาน"
+      link="/users"
       />
       <MenuItem
-        icon={<Users className="w-6 h-6 lg:w-12 lg:h-12  " strokeWidth={1.5} />}
-        label="ลูกค้า"
-        link="/contacts"
+      icon={<Users className="w-6 h-6 lg:w-12 lg:h-12  " strokeWidth={1.5} />}
+      label="ลูกค้า"
+      link="/contacts"
       />
 
       <MenuItem
-        icon={<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chart-column-increasing-icon lucide-chart-column-increasing"><path d="M13 17V9" /><path d="M18 17V5" /><path d="M3 3v16a2 2 0 0 0 2 2h16" /><path d="M8 17v-3" /></svg>}
-        label="สรุปรายปี"
-        link="/stats"
-        isNewTab
+      icon={
+        <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="w-6 h-6 lg:w-14 lg:h-14"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        >
+        <path d="M13 17V9" />
+        <path d="M18 17V5" />
+        <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+        <path d="M8 17v-3" />
+        </svg>
+      }
+      label="สรุปรายปี"
+      link="/stats"
+      isNewTab
       />
       <Stats
-        saleTotal={saleTotal}
-        saleTotalWithVat={saleTotalWithVat}
-        orderAmount={orderAmount}
+      saleTotal={saleTotal}
+      saleTotalWithVat={saleTotalWithVat}
+      orderAmount={orderAmount}
       />
     </div>
   );
