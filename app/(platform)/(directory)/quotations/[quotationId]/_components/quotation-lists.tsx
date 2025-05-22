@@ -349,7 +349,7 @@ const BillingSummary = (props: {
         " border-green-700 bg-white": grandTotal, // confirmed
       })}
     >
-      {grandTotal && (
+      {!!grandTotal && (
         <div className="flex items-center space-x-2">
           <ShieldCheckIcon className="w-4 h-4 text-green-800" />
           <p className="text-green-800">

@@ -123,7 +123,7 @@ export default async function QuotationDetails(
 
             </p>
 
-            {data && data.grandTotal && data.grandTotal > 0 && (
+            {data && !!data.grandTotal && data.grandTotal > 0 && (
               <Badge
                 variant={"outline"}
                 className="flex items-center border-green-700 text-green-700 border-none"

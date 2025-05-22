@@ -538,6 +538,7 @@ export const QuotationListModal = () => {
             id="percentage"
             label="กำไรโดยประมาณ (%)"
             required
+            readOnly={!!isLocked}
             type="number"
             register={register}
             errors={fieldErrors}
