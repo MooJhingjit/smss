@@ -20,7 +20,13 @@ import { ProductType, QuotationType } from "@prisma/client";
 import { useForm } from "react-hook-form";
 import { FormTextarea } from "../form/form-textarea";
 import { Input } from "@/components/ui/input";
-import { ArrowRight, LockIcon, MinusCircle, PlusCircle, PlusIcon } from "lucide-react";
+import {
+  ArrowRight,
+  LockIcon,
+  MinusCircle,
+  PlusCircle,
+  PlusIcon,
+} from "lucide-react";
 import { productTypeMapping, quotationTypeMapping } from "@/app/config";
 import { classNames } from "@/lib/utils";
 import { ProductWithRelations } from "@/types";
@@ -105,10 +111,14 @@ export const QuotationListModal = () => {
     const formData = {
       name: defaultData?.name ?? "",
       price: defaultData?.price ? defaultData.price.toString() : "0",
-      unitPrice: defaultData?.unitPrice ? defaultData.unitPrice.toString() : "0",
+      unitPrice: defaultData?.unitPrice
+        ? defaultData.unitPrice.toString()
+        : "0",
       cost: defaultData?.cost ? defaultData.cost.toString() : "0",
       unit: defaultData?.unit ?? "",
-      productId: defaultData?.product.id ? defaultData.product.id.toString() : "",
+      productId: defaultData?.product.id
+        ? defaultData.product.id.toString()
+        : "",
       productType: defaultData?.product.type ?? "",
       percentage: p,
       groupName: defaultData?.groupName ?? "",
@@ -213,7 +223,6 @@ export const QuotationListModal = () => {
       quotationType: refs.quotationRef.type,
     };
 
-
     if (defaultData?.id) {
       handleUpdate.execute({
         id: defaultData.id,
@@ -228,50 +237,199 @@ export const QuotationListModal = () => {
   const fieldErrors = (defaultData?.id ? handleUpdate : handleCreate)
     .fieldErrors;
 
+  const summarizeResults = (
+    caseUpdate: "discount" | "quantity" | "interestRate" | "unitPrice" | "cost",
+    {
+      cost,
+      unitPrice,
+      interestRate,
+      quantity,
+      discount,
+    }: {
+      cost: string;
+      unitPrice: string;
+      interestRate: string;
+      quantity: string;
+      discount: string;
+    }
+  ) => {
+    const costValue = parseFloat(cost) || 0;
+    const unitPriceValue = parseFloat(unitPrice) || 0;
+    const interestRateValue = parseFloat(interestRate) || 0;
+    const quantityValue = parseFloat(quantity) || 0;
+    const discountValue = parseFloat(discount) || 0;
+
+    // calculate all data, do not use setValue 
+
+    // case: interestRate => calculate unitPrice, tax, totalPrice
+    if (caseUpdate === "interestRate") {
+      const unitPrice = costValue + (costValue * interestRateValue) / 100;
+      const totalPrice = unitPrice * quantityValue;
+      const tax = (totalPrice * 7) / 100;
+      return {
+        unitPrice: unitPrice,
+        tax: tax,
+        totalPrice: (totalPrice + tax - discountValue),
+        
+      };
+    }
+
+    // case: unitPrice => calculate interestRate, tax, totalPrice
+    if (caseUpdate === "unitPrice") {
+      const interestRate = unitPriceValue > 0
+        ? (((unitPriceValue - costValue) / costValue) * 100)
+        : "";
+      const totalPrice = unitPriceValue * quantityValue;
+      const tax = (totalPrice * 7) / 100;
+      return {
+        interestRate,
+        tax: tax,
+        totalPrice: (totalPrice + tax - discountValue),
+      };
+    }
+
+    // case: cost => calculate  unitPrice, tax, totalPrice
+    if (caseUpdate === "cost") {
+      const unitPrice = costValue + (costValue * interestRateValue) / 100;
+      const totalPrice = unitPrice * quantityValue;
+      const tax = (totalPrice * 7) / 100;
+      return {
+        unitPrice: unitPrice,
+        tax: tax,
+        totalPrice: (totalPrice + tax - discountValue),
+      };
+    }
+
+    // case: quantity => calculate tax, totalPrice
+    if (caseUpdate === "quantity") {
+      const totalPrice = unitPriceValue * quantityValue;
+      const tax = (totalPrice * 7) / 100;
+      return {
+        tax: tax,
+        totalPrice: (totalPrice + tax - discountValue),
+      };
+    }
+
+    // case: discount => calculate tax, totalPrice
+    if (caseUpdate === "discount") {
+      const totalPrice = unitPriceValue * quantityValue;
+      const tax = (totalPrice * 7) / 100;
+      return {
+        tax: tax,
+        totalPrice: (totalPrice + tax - discountValue),
+      };
+    }
+    
+
+  };
+
+  // interestRate update
   useEffect(() => {
-    const cost = watch("cost");
-    const unitPrice = parseFloat(watch("unitPrice") || "0");
-    // if (cost) {
+    const results = summarizeResults("interestRate", {
+      cost: getValues("cost") ?? "0",
+      unitPrice: getValues("unitPrice") || "0",
+      interestRate: getValues("percentage") || "0",
+      quantity: getValues("quantity") ?? "1",
+      discount: getValues("discount") ?? "0",
+    });
+    
+    if (results?.unitPrice) setValue("unitPrice", results.unitPrice.toString());
+    if (results?.tax) setValue("withholdingTax", results.tax.toString());
+    if (results?.totalPrice) setValue("totalPrice", results.totalPrice.toString());
 
-    const percentage =
-      unitPrice > 0
-        ? (((unitPrice - parseFloat(cost)) / parseFloat(cost)) * 100).toFixed(
-          3
-        )
-        : 0;
-    setValue("percentage", percentage.toString());
+  }, [watch("percentage")]);
 
-    // multiply by quantity
-    const quantity = watch("quantity");
-    let totalPrice = unitPrice;
-    if (quantity) {
-      totalPrice = unitPrice * parseFloat(quantity);
-    }
-    // calculate tax 7%
-    const tax = (totalPrice * 7) / 100;
-    setValue("withholdingTax", tax ? tax.toString() : "0");
+  // unitPrice update
+  useEffect(() => {
+    const results = summarizeResults("unitPrice", {
+      cost: getValues("cost") ?? "0",
+      unitPrice: getValues("unitPrice") || "0",
+      interestRate: getValues("percentage") || "0",
+      quantity: getValues("quantity") ?? "1",
+      discount: getValues("discount") ?? "0",
+    });
+    if (results?.interestRate) setValue("percentage", results.interestRate.toString());
+    if (results?.tax) setValue("withholdingTax", results.tax.toString());
+    if (results?.totalPrice) setValue("totalPrice", results.totalPrice.toString());
 
-    // set total price + tax - discount
-    const discount = watch("discount");
-    let total = totalPrice + tax;
-    if (discount) {
-      total = total - parseFloat(discount);
-    }
+  }, [watch("unitPrice")]);
 
-    setValue("totalPrice", total ? total.toString() : "0");
+  // cost update
+  useEffect(() => {
+    const results = summarizeResults("cost", {
+      cost: getValues("cost") ?? "0",
+      unitPrice: getValues("unitPrice") || "0",
+      interestRate: getValues("percentage") || "0",
+      quantity: getValues("quantity") ?? "1",
+      discount: getValues("discount") ?? "0",
+    });
+    if (results?.unitPrice) setValue("unitPrice", results.unitPrice.toString());
+    if (results?.tax) setValue("withholdingTax", results.tax.toString());
+    if (results?.totalPrice) setValue("totalPrice", results.totalPrice.toString());
 
-  }, [
-    watch("cost"),
-    watch("percentage"),
-    watch("quantity"),
-    watch("discount"),
-    watch("unitPrice"),
-  ]);
+  }, [watch("cost")]);
+
+  // quantity update
+  useEffect(() => {
+    const results = summarizeResults("quantity", {
+      cost: getValues("cost") ?? "0",
+      unitPrice: getValues("unitPrice") || "0",
+      interestRate: getValues("percentage") || "0",
+      quantity: getValues("quantity") ?? "1",
+      discount: getValues("discount") ?? "0",
+    });
+    if (results?.tax) setValue("withholdingTax", results.tax.toString());
+    if (results?.totalPrice) setValue("totalPrice", results.totalPrice.toString());
+
+  }, [watch("quantity")]);
+
+  // discount update
+  useEffect(() => {
+    const results = summarizeResults("discount", {
+      cost: getValues("cost") ?? "0",
+      unitPrice: getValues("unitPrice") || "0",
+      interestRate: getValues("percentage") || "0",
+      quantity: getValues("quantity") ?? "1",
+      discount: getValues("discount") ?? "0",
+    });
+    if (results?.tax) setValue("withholdingTax", results.tax.toString());
+    if (results?.totalPrice) setValue("totalPrice", results.totalPrice.toString());
+
+  }, [watch("discount")]);
+
+  // useEffect(() => {
+  //   const cost = watch("cost");
+  //   const unitPrice = parseFloat(watch("unitPrice") || "0");
+ 
+  //   // multiply by quantity
+  //   const quantity = watch("quantity");
+  //   let totalPrice = unitPrice;
+  //   if (quantity) {
+  //     totalPrice = unitPrice * parseFloat(quantity);
+  //   }
+  //   // calculate tax 7%
+  //   const tax = (totalPrice * 7) / 100;
+  //   setValue("withholdingTax", tax ? tax.toString() : "0");
+
+  //   // set total price + tax - discount
+  //   const discount = watch("discount");
+  //   let total = totalPrice + tax;
+  //   if (discount) {
+  //     total = total - parseFloat(discount);
+  //   }
+
+  //   setValue("totalPrice", total ? total.toString() : "0");
+  // }, [
+  //   watch("cost"),
+  //   watch("percentage"),
+  //   watch("quantity"),
+  //   watch("discount"),
+  //   watch("unitPrice"),
+  // ]);
 
   const subItems = getValues("subItems");
 
   if (!modal.isOpen) return;
-
 
   const renderProductForm = () => {
     return (
@@ -288,7 +446,7 @@ export const QuotationListModal = () => {
               id="hiddenProductId"
               {...register("productId")}
             />
-             <input
+            <input
               type="hidden"
               id="hiddenProductType"
               {...register("productType")}
@@ -327,12 +485,15 @@ export const QuotationListModal = () => {
             />
           </div>
           <div className="h-full flex items-end -mb-0.5">
-            <Button variant="secondary" className="h-10" onClick={handleOpenProductModal}>
+            <Button
+              variant="secondary"
+              className="h-10"
+              onClick={handleOpenProductModal}
+            >
               <PlusIcon className="w-4 h-4" />
             </Button>
           </div>
         </div>
-
 
         <div className="md:col-span-3 ">
           <FormInput
@@ -358,7 +519,6 @@ export const QuotationListModal = () => {
           />
         </div>
 
-
         <div className="">
           <FormInput
             key={`cost_${refs?.timestamps}`}
@@ -378,7 +538,6 @@ export const QuotationListModal = () => {
             id="percentage"
             label="กำไรโดยประมาณ (%)"
             required
-            readOnly
             type="number"
             register={register}
             errors={fieldErrors}
@@ -488,7 +647,6 @@ export const QuotationListModal = () => {
 
         <div className="md:col-span-3 col-span-1">
           <SubItems setValue={setValue} defaultSubItems={subItems} />
-
         </div>
 
         <div className="md:col-start-3 col-span-1 flex justify-end space-x-3">
@@ -512,11 +670,15 @@ export const QuotationListModal = () => {
   };
 
   // show errors
-  console.log('fieldErrors', fieldErrors);
+  console.log("fieldErrors", fieldErrors);
 
   return (
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
-      <DialogContent className={`sm:max-w-[425px] md:max-w-[600px] ${isHidden ? 'opacity-0 pointer-events-none' : 'opacity-100'} transition-opacity duration-200`}>
+      <DialogContent
+        className={`sm:max-w-[425px] md:max-w-[600px] ${
+          isHidden ? "opacity-0 pointer-events-none" : "opacity-100"
+        } transition-opacity duration-200`}
+      >
         <DialogHeader>
           <DialogTitle className="space-x-2">
             <span>รายละเอียดสินค้าในใบ QT</span>
@@ -555,9 +717,9 @@ const SubItems = ({
 }) => {
   const [subItems, setSubItems] = useState<
     | {
-      label: string;
-      quantity: string;
-    }[]
+        label: string;
+        quantity: string;
+      }[]
     | null
   >(null);
 
