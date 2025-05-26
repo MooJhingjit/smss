@@ -67,7 +67,7 @@ export async function GET(req: NextRequest) {
       },
       orderBy: [
       // { invoice: { receiptDate: { sort: "desc", nulls: "last" } } },
-      { id: "desc" },
+      { createdAt: "desc" },
       ],
     });
     return NextResponse.json(quotations);
