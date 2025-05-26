@@ -67,6 +67,8 @@ export const QuotationListModal = () => {
   });
   // Add state to track if the modal should be visually hidden
   const [isHidden, setIsHidden] = useState(false);
+  // Track which field triggered the current update to prevent cascading effects
+  const [updatingField, setUpdatingField] = useState<string | null>(null);
 
   const handleOpenProductModal = () => {
     // Hide the quotation list modal visually instead of closing it
@@ -325,6 +327,10 @@ export const QuotationListModal = () => {
 
   // interestRate update
   useEffect(() => {
+    // Skip if this update was triggered by another field
+    if (updatingField && updatingField !== "percentage") return;
+    
+    setUpdatingField("percentage");
     const results = summarizeResults("interestRate", {
       cost: getValues("cost") ?? "0",
       unitPrice: getValues("unitPrice") || "0",
@@ -336,11 +342,18 @@ export const QuotationListModal = () => {
     if (results?.unitPrice) setValue("unitPrice", results.unitPrice.toString());
     if (results?.tax) setValue("withholdingTax", results.tax.toString());
     if (results?.totalPrice) setValue("totalPrice", results.totalPrice.toString());
+    
+    // Reset the updating field after a short delay to allow rendering to complete
+    setTimeout(() => setUpdatingField(null), 0);
 
   }, [watch("percentage")]);
 
   // unitPrice update
   useEffect(() => {
+    // Skip if this update was triggered by another field
+    if (updatingField && updatingField !== "unitPrice") return;
+    
+    setUpdatingField("unitPrice");
     const results = summarizeResults("unitPrice", {
       cost: getValues("cost") ?? "0",
       unitPrice: getValues("unitPrice") || "0",
@@ -351,11 +364,18 @@ export const QuotationListModal = () => {
     if (results?.interestRate) setValue("percentage", results.interestRate.toString());
     if (results?.tax) setValue("withholdingTax", results.tax.toString());
     if (results?.totalPrice) setValue("totalPrice", results.totalPrice.toString());
+    
+    // Reset the updating field after a short delay to allow rendering to complete
+    setTimeout(() => setUpdatingField(null), 0);
 
   }, [watch("unitPrice")]);
 
   // cost update
   useEffect(() => {
+    // Skip if this update was triggered by another field
+    if (updatingField && updatingField !== "cost") return;
+    
+    setUpdatingField("cost");
     const results = summarizeResults("cost", {
       cost: getValues("cost") ?? "0",
       unitPrice: getValues("unitPrice") || "0",
@@ -366,11 +386,18 @@ export const QuotationListModal = () => {
     if (results?.unitPrice) setValue("unitPrice", results.unitPrice.toString());
     if (results?.tax) setValue("withholdingTax", results.tax.toString());
     if (results?.totalPrice) setValue("totalPrice", results.totalPrice.toString());
+    
+    // Reset the updating field after a short delay to allow rendering to complete
+    setTimeout(() => setUpdatingField(null), 0);
 
   }, [watch("cost")]);
 
   // quantity update
   useEffect(() => {
+    // Skip if this update was triggered by another field
+    if (updatingField && updatingField !== "quantity") return;
+    
+    setUpdatingField("quantity");
     const results = summarizeResults("quantity", {
       cost: getValues("cost") ?? "0",
       unitPrice: getValues("unitPrice") || "0",
@@ -380,11 +407,18 @@ export const QuotationListModal = () => {
     });
     if (results?.tax) setValue("withholdingTax", results.tax.toString());
     if (results?.totalPrice) setValue("totalPrice", results.totalPrice.toString());
+    
+    // Reset the updating field after a short delay to allow rendering to complete
+    setTimeout(() => setUpdatingField(null), 0);
 
   }, [watch("quantity")]);
 
   // discount update
   useEffect(() => {
+    // Skip if this update was triggered by another field
+    if (updatingField && updatingField !== "discount") return;
+    
+    setUpdatingField("discount");
     const results = summarizeResults("discount", {
       cost: getValues("cost") ?? "0",
       unitPrice: getValues("unitPrice") || "0",
@@ -394,6 +428,9 @@ export const QuotationListModal = () => {
     });
     if (results?.tax) setValue("withholdingTax", results.tax.toString());
     if (results?.totalPrice) setValue("totalPrice", results.totalPrice.toString());
+    
+    // Reset the updating field after a short delay to allow rendering to complete
+    setTimeout(() => setUpdatingField(null), 0);
 
   }, [watch("discount")]);
 
