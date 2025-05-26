@@ -50,7 +50,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useRouter } from "next/navigation";
 import { useIsAdmin } from "@/hooks/use-is-admin";
-import { updateCodeVersion } from "@/lib/utils";
+import { getCurrentDateTime, updateCodeVersion } from "@/lib/utils";
 import { Input } from "../ui/input";
 
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -893,6 +893,7 @@ const VersionUpdate = ({
   currentVersion: string;
 }) => {
   const router = useRouter();
+  const today = getCurrentDateTime();
 
   const { mutate, isPending } = useMutation<
     MutationResponseType,
@@ -902,6 +903,7 @@ const VersionUpdate = ({
     mutationFn: async (fields) => {
       const res = await QT_SERVICES.put(fields.quotationId, {
         code: fields.code,
+        createdAt: today
       });
       return res;
     },
