@@ -9,7 +9,7 @@ import { InputType, ReturnType } from "./types";
 import { ContactSchema } from "./schema";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-  const { id, taxId, branchId, name, email, phone, contact, fax, address, isProtected } =
+  const { id, taxId, branchId, name, email, phone, contact, fax, address, sellerId } =
     data;
   let buyer;
   try {
@@ -22,7 +22,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       contact,
       fax,
       address,
-      isProtected,
+      sellerId: sellerId ? parseInt(sellerId) : undefined,
     };
 
     buyer = await db.contact.update({

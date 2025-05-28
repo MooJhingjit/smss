@@ -158,7 +158,7 @@ export default async function QuotationDetails(
           {contact && <CustomerInfo data={contact} />}
         </div>
         <div className="col-span-5 md:col-span-3">
-          <QuotationInfo quotationsGroup={quotationsGroup} data={data} />
+          <QuotationInfo quotationsGroup={quotationsGroup} data={data} isAdmin={isAdmin} />
         </div>
         <div className="col-span-5">
           <QuotationLists

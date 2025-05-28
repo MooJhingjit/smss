@@ -16,6 +16,7 @@ import { FormTextarea } from "../form/form-textarea";
 import { Checkbox } from "../ui/checkbox";
 import { classNames } from "@/lib/utils";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import { FormSearchAsync } from "../form/form-search-async";
 
 export const ContactModal = () => {
   const modal = useContactModal();
@@ -54,6 +55,9 @@ export const ContactModal = () => {
     const address = formData.get("address") as string;
     const taxId = formData.get("taxId") as string;
     const isProtected = formData.get("isProtected") as string;
+    const sellerId = formData.get("sellerId") as string;
+
+
     const payload = {
       taxId,
       branchId: formData.get("branchId") as string,
@@ -64,6 +68,7 @@ export const ContactModal = () => {
       contact: contactText,
       address,
       isProtected: isProtected === "on",
+      sellerId: sellerId ?? undefined,
     };
     if (contact?.id) {
       handleUpdate.execute({
@@ -77,6 +82,8 @@ export const ContactModal = () => {
 
   const fieldErrors = (contact?.id ? handleUpdate : handleCreate).fieldErrors;
 
+  const assignedTo = contact?.user ?? null
+
   return (
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
       <DialogContent className="max-w-sm sm:max-w-[625px]">
@@ -84,6 +91,39 @@ export const ContactModal = () => {
           <DialogTitle>{contact ? "แก้ไข" : "เพิ่มลูกค้าใหม่"}</DialogTitle>
         </DialogHeader>
         <form action={onSubmit} className="grid grid-cols-2 gap-3 mt-3">
+          {isAdmin && (
+            // <div className="flex items-center space-x-2">
+            //   <Checkbox
+            //     id="isProtected"
+            //     name="isProtected"
+            //     defaultChecked={contact?.isProtected}
+            //   />
+            //   <label
+            //     htmlFor="isProtected"
+            //     className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            //   >
+            //     ไม่อนุญาตให้เซลล์เข้าถึง
+            //   </label>
+            // </div>
+            <div className="col-span-2">
+              <FormSearchAsync
+                id="sellerId"
+                label="ผู้ดูแล"
+                defaultValue={assignedTo ? {
+                  id: assignedTo.id,
+                  label: assignedTo?.name,
+                } : undefined}
+                config={{
+                  endpoint: "/users",
+                  params: {
+                    role: "seller",
+                  },
+                }}
+                onSelected={(item) => {
+                }}
+              />
+            </div>
+          )}
           <FormInput
             id="taxId"
             label="เลขผู้เสียภาษี"
@@ -143,24 +183,10 @@ export const ContactModal = () => {
             />
           </div>
 
-          {isAdmin && (
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="isProtected"
-                name="isProtected"
-                defaultChecked={contact?.isProtected}
-              />
-              <label
-                htmlFor="isProtected"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                ไม่อนุญาตให้เซลล์เข้าถึง
-              </label>
-            </div>
-          )}
+
 
           <div
-            className={classNames(!isAdmin && "col-span-2", "flex justify-end")}
+            className={"col-span-2 flex justify-end"}
           >
             <FormSubmit>
               {contact ? "บันทึกการเปลี่ยนแปลง" : "สร้างใหม่"}

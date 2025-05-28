@@ -38,6 +38,7 @@ import { Input } from "@/components/ui/input";
 
 type Props = {
   data: QuotationWithRelations;
+  isAdmin: boolean;
   quotationsGroup: {
     code: string;
     id: number;
@@ -47,7 +48,7 @@ type Props = {
 
 export default function QuotationInfo(props: Readonly<Props>) {
   const modal = useQuotationInfoModal();
-  const { data, quotationsGroup } = props;
+  const { data, quotationsGroup, isAdmin } = props;
 
   const paymentConditionLabel =
     data.paymentCondition === "cash"
@@ -60,7 +61,7 @@ export default function QuotationInfo(props: Readonly<Props>) {
     <DataInfo
       variant="gray"
       CustomComponent={
-        <BillController
+        isAdmin && <BillController
           currentQuotation={data}
           quotationsGroup={quotationsGroup}
         />
@@ -200,6 +201,7 @@ const BillController = ({
   );
   const billGroupCode = currentQuotation?.billGroup?.code ?? "";
   const defaultInvoiceDate = currentQuotation?.billGroup?.date
+  
   return (
     <div className="border p-3 relative">
       <div className="absolute bg-gray-50 px-2 -top-2 text-xs ">

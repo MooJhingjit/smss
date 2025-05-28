@@ -16,7 +16,17 @@ import { ShieldCheck } from "lucide-react";
 //   type: "admin" | "user" | "vendor"
 // }
 
-export const columns: ColumnDef<User & { user?: Contact }>[] = [
+export const columns: ColumnDef<User & { user?: User }>[] = [
+  {
+    id: "actions",
+    // cell: ({ row }) => {
+    //   const { id } = row.original
+    //   return (
+    //     <Button className="text-xs h-8" variant="secondary"> Manage</Button>
+    //   )
+
+    // }
+  },
   {
     accessorKey: "id",
     header: "#",
@@ -30,19 +40,10 @@ export const columns: ColumnDef<User & { user?: Contact }>[] = [
     accessorKey: "name",
     header: "ชื่อ",
     cell: ({ row }) => {
-      const { name, isProtected } = row.original;
+      const { name } = row.original;
       return (
         <div className="flex items-center space-x-2">
-          {isProtected && (
-            <div
-              className="flex items-center space-x-2"
-              title="เซลล์ไม่สามารเข้าถึงได้"
-            >
-              <ShieldCheck className="w-5 h-5 text-green-700" />
-            </div>
-          )}
           <p>{name}</p>
-
         </div>
       );
     },
@@ -55,10 +56,10 @@ export const columns: ColumnDef<User & { user?: Contact }>[] = [
     accessorKey: "email",
     header: "อีเมล์",
   },
-  {
-    accessorKey: "address",
-    header: "ที่อยู่",
-  },
+  // {
+  //   accessorKey: "address",
+  //   header: "ที่อยู่",
+  // },
   {
     accessorKey: "userId",
     header: "ผู้ดูแล",
@@ -68,14 +69,18 @@ export const columns: ColumnDef<User & { user?: Contact }>[] = [
         <div className="">
           {seller && (
             <div className="text-sm">
-              <p>{seller.name}</p>
-              <p>{seller.email}</p>
+              <p>{seller.name} ({seller.role})</p>
+              {/* <p>{seller.email}</p> */}
             </div>
           )}
         </div>
       );
     },
   },
+
+];
+export const sellerColumns: ColumnDef<User & { user?: Contact }>[] = [
+
   {
     id: "actions",
     // cell: ({ row }) => {
@@ -86,8 +91,6 @@ export const columns: ColumnDef<User & { user?: Contact }>[] = [
 
     // }
   },
-];
-export const sellerColumns: ColumnDef<User & { user?: Contact }>[] = [
   {
     accessorKey: "id",
     header: "#",
@@ -110,14 +113,4 @@ export const sellerColumns: ColumnDef<User & { user?: Contact }>[] = [
     header: "ที่อยู่",
   },
 
-  {
-    id: "actions",
-    // cell: ({ row }) => {
-    //   const { id } = row.original
-    //   return (
-    //     <Button className="text-xs h-8" variant="secondary"> Manage</Button>
-    //   )
-
-    // }
-  },
 ];

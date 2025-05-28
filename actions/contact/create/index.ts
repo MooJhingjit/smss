@@ -7,7 +7,7 @@ import { ContactSchema } from "./schema";
 import { currentUser } from "@/lib/auth";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-  const { taxId, branchId, name, email, phone, fax, address, isProtected } = data;
+  const { taxId, branchId, name, email, phone, fax, address, sellerId } = data;
 
   const userSession = await currentUser();
   let contact;
@@ -22,8 +22,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         contact: data.contact,
         fax,
         address,
-        isProtected,
-        sellerId: parseInt(userSession?.id ?? ""),
+        sellerId: sellerId ? parseInt(sellerId) : undefined,
       },
     });
   } catch (error) {

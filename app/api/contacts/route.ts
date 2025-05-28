@@ -23,21 +23,25 @@ export async function GET(
     if (isSeller) {
       // seller id is null or seller id is equal to info.id
       contactScope = {
-        isProtected: false,
-        OR: [
-          {
-            sellerId: {
-              equals: null,
-            },
-          },
-          {
-            sellerId: {
-              equals: parseInt(info.id),
-            },
-          },
-        ],
+        sellerId: {
+          equals: parseInt(info.id),
+        },
+        // isProtected: false,
+        // OR: [
+          // {
+          //   sellerId: {
+          //     equals: null,
+          //   },
+          // },
+          // {
+          //   sellerId: {
+          //     equals: parseInt(info.id),
+          //   },
+          // },
+        // ],
       };
     }
+    console.log("🚀 ~ contactScope:", contactScope)
 
     const vendors = await db.contact.findMany({
       where: {

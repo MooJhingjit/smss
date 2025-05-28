@@ -359,32 +359,32 @@ const MainForm = (props: {
           </div>
         </ItemList>
         {!isAdmin && (
-          <>
-            <ItemList label="การชำระเงิน">
-              <div className="flex space-x-3 items-center">
-                <PaymentBadge
-                  paymentType={data.paymentType}
-                  paymentDue={
-                    data.paymentDue
-                      ? new Date(data.paymentDue).toISOString().split("T")[0]
-                      : ""
-                  }
-                />
-              </div>
-            </ItemList>
-            {data.status !== QuotationStatus.open &&
-              data.status !== QuotationStatus.pending_approval && (
-                <ItemList label="พิมพ์ใบเสนอราคา">
-                  <div className="flex space-x-3 items-center">
-                    <PrintQuotation
-                      quotationId={quotationId}
-                      hasList={hasList}
-                    />
-                  </div>
-                </ItemList>
-              )}
-          </>
+          <ItemList label="การชำระเงิน">
+            <div className="flex space-x-3 items-center">
+              <PaymentBadge
+                paymentType={data.paymentType}
+                paymentDue={
+                  data.paymentDue
+                    ? new Date(data.paymentDue).toISOString().split("T")[0]
+                    : ""
+                }
+              />
+            </div>
+          </ItemList>
+
         )}
+        <ItemList label="พิมพ์ใบเสนอราคา">
+          <div className="flex space-x-3 items-center">
+            <PrintQuotation
+              quotationId={quotationId}
+              hasList={hasList}
+            />
+          </div>
+        </ItemList>
+        {/* {data.status !== QuotationStatus.open &&
+          data.status !== QuotationStatus.pending_approval && (
+            
+          )} */}
         {isAdmin && (
           <>
             <ItemList label="การชำระเงิน">

@@ -237,7 +237,7 @@ const generate = async (id: number) => {
     const text = groupName || "";
     // const textWidth = getTextWidth(text, config);
     // const boxWidth = textWidth + (padding * 2);
-    
+
     // Draw border
     // currentPage.drawRectangle({
     //   x: columnPosition.description,
@@ -248,7 +248,7 @@ const generate = async (id: number) => {
     //   borderWidth: 0.5,
     //   color: rgb(245/255, 245/255, 245/255),
     // });
-    
+
     // Draw text
     currentPage.drawText(text, {
       x: columnPosition.description + padding,
@@ -350,6 +350,8 @@ const generate = async (id: number) => {
     sellerSignatureImage,
     sellerPhone: _DATA.seller?.phone ?? ""
   };
+
+  // check qt status, if not open or pending_approval 
 
   // Draw signatures on the first page
   drawSignature(page, signatureData);
@@ -458,7 +460,7 @@ const generate = async (id: number) => {
 
   const total = _DATA.totalPrice
     ? _DATA.totalPrice - (_DATA.discount ?? 0)
-    : 0;  
+    : 0;
   drawPriceInfo(page, {
     discount: _DATA.discount?.toLocaleString("th-TH", currencyFormat) ?? "",
     tax: _DATA.tax?.toLocaleString("th-TH", currencyFormat) ?? "",
@@ -713,33 +715,40 @@ type SignatureData = {
 const drawSignature = (page: PDFPage, signatureData: SignatureData) => {
   if (!_FONT) return;
 
+
   const config = {
     font: _FONT,
     size: PAGE_FONT_SIZE - 1,
     lineHeight: 14,
   };
+  
+  // check qt status, if not open or pending_approval then do not draw signature
+  const isShowApproverSignature = !["open", "pending_approval"].includes(_DATA?.status ?? "");
 
-  // Draw approver signature
-  page.drawImage(signatureData.approverSignatureImage, {
-    x: 460,
-    y: 70,
-    ...signatureData.approverSignatureImage.scale(0.12),
-  });
+  if (isShowApproverSignature) {
+    // Draw approver signature
+    page.drawImage(signatureData.approverSignatureImage, {
+      x: 460,
+      y: 70,
+      ...signatureData.approverSignatureImage.scale(0.12),
+    });
 
-  // Approver phone
-  page.drawText(signatureData.approverPhone, {
-    x: 460,
-    y: 62,
-    ...config,
-  });
+    // Approver phone
+    page.drawText(signatureData.approverPhone, {
+      x: 460,
+      y: 62,
+      ...config,
+    });
 
-  // Approver date
-  page.drawText(_BILL_DATE, {
-    x: 450,
-    y: 45,
-    ...config,
-    size: PAGE_FONT_SIZE,
-  });
+    // Approver date
+    page.drawText(_BILL_DATE, {
+      x: 450,
+      y: 45,
+      ...config,
+      size: PAGE_FONT_SIZE,
+    });
+  }
+
 
   // Draw seller signature if available
   if (signatureData.sellerSignatureImage) {

@@ -16,4 +16,5 @@ export const ContactSchema = z.object({
   fax: z.string().optional(),
   address: z.string().optional(),
   isProtected: z.boolean().optional(),
+  sellerId: z.string().optional(),
 });

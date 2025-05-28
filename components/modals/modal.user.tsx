@@ -95,7 +95,7 @@ export const NewUserModal = () => {
               options={[
                 { id: "buyer", title: "Buyer" },
                 { id: "vendor", title: "Vendor" },
-                { id: "sale", title: "Sale" },
+                { id: "seller", title: "Seller" },
                 { id: "admin", title: "Admin" },
               ]}
             />

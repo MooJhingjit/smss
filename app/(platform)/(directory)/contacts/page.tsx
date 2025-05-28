@@ -3,7 +3,6 @@ import { columns, sellerColumns } from "./_components/columns";
 import ContactTable from "./_components/data-table";
 import { db } from "@/lib/db";
 import { useUser } from "@/hooks/use-user";
-import { User } from "@prisma/client";
 
 const pages = [
   {
@@ -21,7 +20,7 @@ async function getData(isAdmin: boolean, userId: string): Promise<any[]> {
   if (!isAdmin) {
     conditions = {
       where: {
-        isProtected: false,
+        // isProtected: false,
         sellerId: parseInt(userId),
       },
     };
