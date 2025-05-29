@@ -52,8 +52,8 @@ export const ResponsiveDialog = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
+        <DialogHeader className="bg-muted -mx-6 px-6 -my-6 pb-4 pt-5 mb-0 ">
+          <DialogTitle >{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
         {children}
