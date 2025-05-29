@@ -32,8 +32,8 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
-
+} from "@/components/ui/tooltip";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 type Props = {
   quotationId: number;
@@ -50,6 +50,7 @@ export default function QuotationLists(props: Props) {
     QuotationListWithRelations[]
   >(props.data);
   const modal = useQuotationListModal();
+  const isAdmin = useIsAdmin();
 
   // Update local state when props change
   useEffect(() => {
@@ -120,7 +121,8 @@ export default function QuotationLists(props: Props) {
     executeReorder(reorderData);
   };
 
-  const columns = [
+  // Define all columns
+  const allColumns = [
     { name: "#", key: "index" },
     {
       name: "ชื่อสินค้า/บริการ",
@@ -166,6 +168,7 @@ export default function QuotationLists(props: Props) {
           }%) ${item.unitPrice?.toLocaleString()}`;
       },
     },
+    // Admin-only columns that will be conditionally included
     {
       name: "ซ่อนรายการ",
       key: "hiddenInPdf",
@@ -228,7 +231,6 @@ export default function QuotationLists(props: Props) {
         );
       },
     },
-
     {
       name: "ส่วนลด",
       key: "discount",
@@ -240,8 +242,6 @@ export default function QuotationLists(props: Props) {
         return item.totalPrice?.toLocaleString();
       },
     },
-
-    // { name: "Price", key: "price" },
     {
       name: "อัพเดทล่าสุด",
       key: "updatedAt",
@@ -258,6 +258,15 @@ export default function QuotationLists(props: Props) {
       },
     },
   ];
+  
+  // Filter columns based on admin status
+  const columns = allColumns.filter(column => {
+    // Hide these columns for non-admin users
+    if (!isAdmin && (column.key === "hiddenInPdf" || column.key === "withholdingTaxEnabled")) {
+      return false;
+    }
+    return true;
+  });
 
   const listLabel = isLocked ? "" : "เพิ่มรายการสินค้า/บริการ";
   return (
@@ -316,6 +325,7 @@ export default function QuotationLists(props: Props) {
           </div>
           <div className="col-span-5 md:col-span-2">
             <BillingSummary
+              isAdmin={isAdmin}
               quotationType={quotationType}
               grandTotal={grandTotal}
               data={quotationItems}
@@ -328,11 +338,12 @@ export default function QuotationLists(props: Props) {
 }
 
 const BillingSummary = (props: {
+  isAdmin: boolean;
   quotationType: QuotationType;
   grandTotal: number | null;
   data: QuotationListWithRelations[];
 }) => {
-  const { data, quotationType, grandTotal } = props;
+  const { isAdmin, data, quotationType, grandTotal } = props;
   const summary = calculateQuotationItemPrice(data);
 
   const { execute, isLoading } = useAction(updateServiceQuotationSummary, {
@@ -398,7 +409,7 @@ const BillingSummary = (props: {
 
       {
         // this qt haven't been confirmed yet (this is only for service quotation)
-        quotationType === "service" && data.length && !grandTotal && (
+        isAdmin && quotationType === "service" && data.length && !grandTotal && (
           <div className="w-full  flex items-center justify-center">
             <ConfirmActionButton
               onConfirm={() => {

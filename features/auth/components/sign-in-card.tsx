@@ -13,16 +13,16 @@ export default function SignInCard() {
   return (
     <div className="flex min-h-full flex-1 items-center justify-center px-4 py-12 sm:px-6 ">
       <div className="absolute w-full z-10 inset-0  	">
-        <img
+        <Image
           className="h-full w-full object-cover "
-          src="https://smartss9168.com/wp-content/uploads/2018/08/network-2402637_1280.jpg"
+          src="/assets/3409297.jpg"
           alt=""
+          layout="fill"
         />
       </div>
       <div className="w-full max-w-sm space-y-10 relative z-20 backdrop-blur-sm bg-white/40 p-8 rounded">
         <div className="flex items-center space-x-4 justify-center">
           <Image width="100" height="80" src={LOGO.src} alt="Workflow" />
-          <span className="text-2xl font-semibold text-white">เข้าสู่ระบบ</span>
         </div>
         <form action={action} className="space-y-6">
           <div className="relative space-y-2  rounded-md shadow-sm">
@@ -60,7 +60,7 @@ export default function SignInCard() {
               variant={"secondary"}
               className="w-full"
             >
-              ยืนยัน
+              Sign in
             </Button>
           </div>
         </form>
