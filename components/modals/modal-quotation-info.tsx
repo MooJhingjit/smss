@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useQuotationInfoModal } from "@/hooks/use-quotation-info-modal";
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useCallback } from "react";
 import { ChevronsUpDown, ClipboardCheckIcon } from "lucide-react";
 
 import {
@@ -172,89 +172,108 @@ const MainForm = (props: {
     },
   });
 
-  const handleItemChange = (payload: {
-    status?: QuotationStatus;
-    paymentDue?: string;
-    paymentType?: PurchaseOrderPaymentType;
-    purchaseOrderRef?: string;
-    deliveryPeriod?: string;
-    paymentCondition?: string;
-    validPricePeriod?: string;
-    type?: "product" | "service";
-  }) => {
-    console.log("🚀 ~ data:", data);
-    console.log("🚀 ~ payload:", payload);
-    let payloadBody: Record<string, any> = {};
-
-    const updateField = <T,>(
-      key: string,
-      newValue: T | undefined,
-      oldValue: T,
-      transform: (v: T) => any = (v) => v,
-      allowEmpty: boolean = false
+  const handleItemChange = useCallback(
+    (
+      payload: {
+        status?: QuotationStatus;
+        paymentDue?: string;
+        paymentType?: PurchaseOrderPaymentType;
+        purchaseOrderRef?: string;
+        deliveryPeriod?: string;
+        paymentCondition?: string;
+        validPricePeriod?: string;
+        type?: "product" | "service";
+      },
+      fieldKey?: string
     ) => {
-      // console.log("🚀 ~ newValue:", newValue)
-      // console.log("🚀 ~ oldValue:", oldValue)
-      // For fields that allow empty strings, we only check for undefined.
-      // Otherwise, we require a truthy value.
-      console.log("🚀 ~ newValue:", newValue);
-      console.log("🚀 ~ oldValue:", oldValue);
+      let payloadBody: Record<string, any> = {};
 
-      if (
-        newValue !== undefined &&
-        (allowEmpty ? newValue !== oldValue : newValue && newValue !== oldValue)
-      ) {
-        payloadBody[key] = transform(newValue);
+      const updateField = <T,>(
+        key: string,
+        newValue: T | undefined,
+        oldValue: T,
+        transform: (v: T) => any = (v) => v,
+        allowEmpty: boolean = false
+      ) => {
+        // Only update if this is the field being changed or if no specific field is provided
+        if (fieldKey && fieldKey !== key) {
+          return;
+        }
 
-        // Update local state
-        setData((prev) => ({
-          ...prev,
-          [key]: payloadBody[key],
-        }));
+        console.log("🚀 ~ newValue:", key, newValue);
+        console.log("🚀 ~ oldValue:", key, oldValue);
+
+        if (
+          newValue !== undefined &&
+          (allowEmpty
+            ? newValue !== oldValue
+            : newValue && newValue !== oldValue)
+        ) {
+          payloadBody[key] = transform(newValue);
+
+          // Update local state
+          setData((prev) => ({
+            ...prev,
+            [key]: payloadBody[key],
+          }));
+        }
+      };
+
+      updateField("status", payload.status, status);
+      updateField(
+        "paymentDue",
+        payload.paymentDue || "",
+        data.paymentDue?.toISOString()?.split("T")[0] || "",
+        (v) => (v ? new Date(v) : null),
+        true
+      );
+      updateField("paymentType", payload.paymentType, data.paymentType);
+
+      // console.log('v', payload)
+      // console.log('v', payload.purchaseOrderRef ?? "")
+      updateField(
+        "purchaseOrderRef",
+        payload.purchaseOrderRef ?? "",
+        data.purchaseOrderRef ?? "",
+        undefined,
+        true
+      );
+      updateField(
+        "deliveryPeriod",
+        payload.deliveryPeriod || "",
+        data.deliveryPeriod?.toString() || "",
+        (v) => (v ? parseInt(v) : null),
+        true
+      );
+      updateField(
+        "validPricePeriod",
+        payload.validPricePeriod || "",
+        data.validPricePeriod?.toString() || "",
+        (v) => (v ? parseInt(v) : null),
+        true
+      );
+      updateField("type", payload.type, data.type);
+      updateField(
+        "paymentCondition",
+        payload.paymentCondition || "",
+        data.paymentCondition || ""
+      );
+
+      if (Object.keys(payloadBody).length === 0) {
+        return;
       }
-    };
 
-    updateField("status", payload.status, status);
-    updateField(
-      "paymentDue",
-      payload.paymentDue,
-      data.paymentDue?.toISOString()?.split("T")[0],
-      (v) => (v ? new Date(v) : null),
-      true
-    );
-    updateField("paymentType", payload.paymentType, data.paymentType);
-    updateField(
-      "purchaseOrderRef",
-      payload.purchaseOrderRef,
-      data.purchaseOrderRef
-    );
-    updateField(
-      "deliveryPeriod",
-      payload.deliveryPeriod,
-      data.deliveryPeriod?.toString(),
-      (v) => (v ? parseInt(v) : null),
-      true
-    );
-    updateField(
-      "validPricePeriod",
-      payload.validPricePeriod,
-      data.validPricePeriod?.toString(),
-      (v) => (v ? parseInt(v) : null),
-      true
-    );
-    updateField("type", payload.type, data.type);
-    updateField(
-      "paymentCondition",
-      payload.paymentCondition,
-      data.paymentCondition
-    );
+      mutate(payloadBody);
+    },
+    [data, status, mutate]
+  );
 
-    if (Object.keys(payloadBody).length === 0) {
-      return;
-    }
-
-    mutate(payloadBody);
-  };
+  const handlePaymentConditionChange = useCallback(
+    (value: string) => {
+      handleItemChange({ paymentCondition: value }, "paymentCondition");
+    },
+    [handleItemChange]
+  );
 
   return (
     <div className="space-y-2">
@@ -273,7 +292,7 @@ const MainForm = (props: {
                 disabled={hasList}
                 className="flex-1 text-xs"
                 value="product"
-                onClick={() => handleItemChange({ type: "product" })}
+                onClick={() => handleItemChange({ type: "product" }, "type")}
               >
                 สินค้า
               </TabsTrigger>
@@ -281,7 +300,7 @@ const MainForm = (props: {
                 disabled={hasList}
                 className="flex-1 text-xs"
                 value="service"
-                onClick={() => handleItemChange({ type: "service" })}
+                onClick={() => handleItemChange({ type: "service" }, "type")}
               >
                 บริการ
               </TabsTrigger>
@@ -300,7 +319,7 @@ const MainForm = (props: {
                 <QuotationStatusDropdown
                   onStatusChange={(s) => {
                     shouldCloseModal.current = true;
-                    handleItemChange({ status: s });
+                    handleItemChange({ status: s }, "status");
                   }}
                   curStatus={status}
                 />
@@ -311,9 +330,12 @@ const MainForm = (props: {
                 currentStatus={status}
                 onApprove={(s) => {
                   shouldCloseModal.current = true;
-                  handleItemChange({
-                    status: s,
-                  });
+                  handleItemChange(
+                    {
+                      status: s,
+                    },
+                    "status"
+                  );
                 }}
               />
             )}
@@ -330,7 +352,7 @@ const MainForm = (props: {
               defaultValue={deliveryPeriod}
               onBlur={(e) => {
                 const deliveryPeriod = e.target.value ?? "";
-                handleItemChange({ deliveryPeriod });
+                handleItemChange({ deliveryPeriod }, "deliveryPeriod");
               }}
             />
           </div>
@@ -345,7 +367,7 @@ const MainForm = (props: {
               defaultValue={validPricePeriod}
               onBlur={(e) => {
                 const validPricePeriod = e.target.value ?? "";
-                handleItemChange({ validPricePeriod });
+                handleItemChange({ validPricePeriod }, "validPricePeriod");
               }}
             />
           </div>
@@ -354,7 +376,9 @@ const MainForm = (props: {
           <div className="-mt-1 ">
             <PurchaseOrderRefInput
               defaultValue={purchaseOrderRef ?? ""}
-              onUpdate={handleItemChange}
+              onUpdate={(payload) =>
+                handleItemChange(payload, "purchaseOrderRef")
+              }
             />
           </div>
         </ItemList>
@@ -371,20 +395,21 @@ const MainForm = (props: {
               />
             </div>
           </ItemList>
-
         )}
-        <ItemList label="พิมพ์ใบเสนอราคา">
+        {/* <ItemList label="พิมพ์ใบเสนอราคา">
           <div className="flex space-x-3 items-center">
-            <PrintQuotation
-              quotationId={quotationId}
-              hasList={hasList}
-            />
+            <PrintQuotation quotationId={quotationId} hasList={hasList} />
           </div>
-        </ItemList>
+        </ItemList> */}
         {/* {data.status !== QuotationStatus.open &&
           data.status !== QuotationStatus.pending_approval && (
             
           )} */}
+        <ItemList label="พิมพ์ใบเสนอราคา">
+          <div className="flex space-x-3 items-center">
+            <PrintQuotation quotationId={quotationId} hasList={hasList} />
+          </div>
+        </ItemList>
         {isAdmin && (
           <>
             <ItemList label="การชำระเงิน">
@@ -396,7 +421,16 @@ const MainForm = (props: {
                       ? new Date(data.paymentDue).toISOString().split("T")[0]
                       : ""
                   }
-                  onUpdate={handleItemChange}
+                  onUpdate={(payload) => {
+                    handleItemChange(
+                      { paymentType: payload.paymentType },
+                      "paymentType"
+                    );
+                    handleItemChange(
+                      { paymentDue: payload.paymentDue },
+                      "paymentDue"
+                    );
+                  }}
                 />
               </div>
             </ItemList>
@@ -405,18 +439,11 @@ const MainForm = (props: {
               <div className="space-x-8 flex items-center  ">
                 <PaymentCondition
                   defaultValue={data.paymentCondition || "cash"}
-                  onChange={(value) => {
-                    handleItemChange({ paymentCondition: value });
-                  }}
+                  onChange={handlePaymentConditionChange}
                 />
               </div>
             </ItemList>
 
-            <ItemList label="พิมพ์ใบเสนอราคา">
-              <div className="flex space-x-3 items-center">
-                <PrintQuotation quotationId={quotationId} hasList={hasList} />
-              </div>
-            </ItemList>
             {data.type === "service" && (
               <ItemList
                 label="ออกใบกำกับภาษี"
@@ -478,7 +505,7 @@ const PaymentCondition = ({
     }
 
     onChange(selectedCondition);
-  }, [selectedCondition]);
+  }, [selectedCondition, onChange]);
 
   return (
     <div className="flex items-center space-x-3">
@@ -572,6 +599,7 @@ const ApprovalButton = ({
     />
   );
 };
+
 const ReceiptInvoice = ({
   hasList,
   quotation,
@@ -753,8 +781,8 @@ const PurchaseOrderRefInput = ({
         // get current value
         const purchaseOrderRef = e.target?.value || "";
 
-        // check if value is different from default
-        if (purchaseOrderRef === defaultValue) return;
+        // // check if value is different from default
+        // if (purchaseOrderRef === defaultValue) return;
 
         onUpdate({ purchaseOrderRef });
       }}
@@ -903,7 +931,7 @@ const VersionUpdate = ({
     mutationFn: async (fields) => {
       const res = await QT_SERVICES.put(fields.quotationId, {
         code: fields.code,
-        createdAt: today
+        createdAt: today,
       });
       return res;
     },

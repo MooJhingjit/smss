@@ -14,6 +14,7 @@ type Props = {
 
 export default function PaymentOptionControl(props: Props) {
   const { paymentType, paymentDue, onUpdate } = props;
+  console.log("🚀 ~ PaymentOptionControl ~ props:", props)
 
   const [paymentTypeState, setPaymentTypeState] = React.useState(paymentType);
 

@@ -6,7 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import React from "react";
+import React, { useCallback } from "react";
 import { ExternalLinkIcon, InfoIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PurchaseOrderWithRelations } from "@/types";
@@ -145,53 +145,73 @@ const MainForm = ({
     },
   });
 
-  const handleItemChange = (payload: {
-    status?: PurchaseOrderStatus;
-    paymentDue?: string;
-    paymentType?: PurchaseOrderPaymentType;
-    vendorQtCode?: string;
-  }) => {
-    let payloadBody: Record<string, any> = {};
-
-    const updateField = <T,>(
-      key: string,
-      newValue: T | undefined,
-      oldValue: T,
-      allowEmpty: boolean = false,
-      transform: (v: T) => any = (v) => v
+  const handleItemChange = useCallback(
+    (
+      payload: {
+        status?: PurchaseOrderStatus;
+        paymentDue?: string;
+        paymentType?: PurchaseOrderPaymentType;
+        vendorQtCode?: string;
+      },
+      fieldKey?: string
     ) => {
-      console.log("🚀 ~ newValue:", newValue)
-      if (
-        newValue !== undefined &&
-        (allowEmpty ? newValue !== oldValue : newValue && newValue !== oldValue)
-      ) {
-        payloadBody[key] = transform(newValue);
- 
-        // Update local state
-        setData((prev) => ({
-          ...prev,
-          [key]: payloadBody[key],
-        }));
+      let payloadBody: Record<string, any> = {};
+
+      const updateField = <T,>(
+        key: string,
+        newValue: T | undefined,
+        oldValue: T,
+        allowEmpty: boolean = false,
+        transform: (v: T) => any = (v) => v
+      ) => {
+        // Only update if this is the field being changed or if no specific field is provided
+        if (fieldKey && fieldKey !== key) {
+          return;
+        }
+
+        console.log("🚀 ~ newValue:", key, newValue);
+        console.log("🚀 ~ oldValue:", key, oldValue);
+
+        if (
+          newValue !== undefined &&
+          (allowEmpty
+            ? newValue !== oldValue
+            : newValue && newValue !== oldValue)
+        ) {
+          payloadBody[key] = transform(newValue);
+
+          // Update local state
+          setData((prev) => ({
+            ...prev,
+            [key]: payloadBody[key],
+          }));
+        }
+      };
+
+      updateField("status", payload.status, data.status);
+      updateField(
+        "paymentDue",
+        payload.paymentDue,
+        data.paymentDue?.toISOString()?.split("T")[0],
+        true,
+        (v) => (v ? new Date(v) : null)
+      );
+      updateField("paymentType", payload.paymentType, data.paymentType);
+      updateField(
+        "vendorQtCode",
+        payload.vendorQtCode,
+        data.vendorQtCode,
+        true
+      );
+
+      if (Object.keys(payloadBody).length === 0) {
+        return;
       }
-    };
 
-    updateField("status", payload.status, data.status);
-    updateField(
-      "paymentDue",
-      payload.paymentDue,
-      data.paymentDue?.toISOString()?.split("T")[0],
-      true,
-      (v) => (v ? new Date(v) : null)
-    );
-    updateField("paymentType", payload.paymentType, data.paymentType);
-    updateField("vendorQtCode", payload.vendorQtCode, data.vendorQtCode, true);
-
-    if (Object.keys(payloadBody).length === 0) {
-      return;
-    }
-
-    mutate(payloadBody);
-  };
+      mutate(payloadBody);
+    },
+    [data, mutate]
+  );
 
   // quotation mutation
   const { mutate: qtMutate } = useMutation<
@@ -223,7 +243,7 @@ const MainForm = ({
             <div className="">
               <StatusDropdown
                 onStatusChange={(s) => {
-                  handleItemChange({ status: s });
+                  handleItemChange({ status: s }, "status");
 
                   // sync status to quotation
                   let qtStatus: QuotationStatus | undefined;
@@ -261,9 +281,18 @@ const MainForm = ({
 
         <ItemList label="การชำระเงิน">
           <PaymentOptionControl
-            onUpdate={handleItemChange}
+            onUpdate={(payload) => {
+              handleItemChange(
+                { paymentType: payload.paymentType },
+                "paymentType"
+              );
+              handleItemChange(
+                { paymentDue: payload.paymentDue },
+                "paymentDue"
+              );
+            }}
             paymentType={data.paymentType}
-            paymentDue={data.paymentDue?.toDateString() ?? ""}
+            paymentDue={ data.paymentDue ? data.paymentDue.toISOString().split("T")[0] : "" }
           />
         </ItemList>
         <ItemList label="เลขใบเสนอราคา (Vendor)">
@@ -275,7 +304,7 @@ const MainForm = ({
               defaultValue={data.vendorQtCode}
               onBlur={(e) => {
                 const vendorQtCode = e.target.value ?? "";
-                handleItemChange({ vendorQtCode });
+                handleItemChange({ vendorQtCode }, "vendorQtCode");
               }}
             />
           </div>
