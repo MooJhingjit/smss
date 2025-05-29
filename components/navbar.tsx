@@ -17,6 +17,8 @@ export default async function MainNavbar(props: { withNavigation?: boolean }) {
   const { withNavigation = false } = props;
 
   const { info, isAdmin } = await useUser();
+
+  const name = info?.name ?? "";
   // console.log("client get session >>>>>", user);
 
   return (
@@ -60,7 +62,7 @@ export default async function MainNavbar(props: { withNavigation?: boolean }) {
             <PopoverTrigger>
               <div className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-gray-500 cursor-pointer">
                 <span className="text-xs font-medium leading-none text-white">
-                  P
+                  {name ? name.charAt(0).toUpperCase() : "U"}
                 </span>
               </div>
             </PopoverTrigger>
