@@ -2,20 +2,16 @@
 
 import * as React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, useFormContext } from "react-hook-form";
 import { z } from "zod";
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { toast } from "sonner";
-import { useFormContext } from "react-hook-form";
 
 import {
-  Dialog,
-  DialogContent,
   DialogFooter,
-  DialogHeader,
-  DialogTitle,
 } from "@/components/ui/dialog";
+import { ResponsiveDialog } from "@/components/responsive-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -102,9 +98,6 @@ export const NewUserModal = () => {
   });
 
   function onSubmit(data: z.infer<typeof UserFormSchema>) {
-    // console.log("🚀 ~ onSubmit ~ data:", data);
-
-    // return;
     if (user?.id) {
       // update user
       handleUpdate.execute({
@@ -146,24 +139,27 @@ export const NewUserModal = () => {
   }, [user, form]);
 
   return (
-    <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
-      <DialogContent className="max-w-sm sm:max-w-[625px]">
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="grid grid-cols-2 gap-3 mt-3"
-          >
-            <DialogHeader>
-              <DialogTitle>{user ? "แก้ไขข้อมูลผู้ใช้" : "เพิ่มผู้ใช้ใหม่"}</DialogTitle>
-            </DialogHeader>
+    <ResponsiveDialog 
+      open={modal.isOpen} 
+      onOpenChange={modal.onClose}
+      title={user ? "แก้ไขข้อมูลผู้ใช้" : "เพิ่มผู้ใช้ใหม่"}
+      description=""
+    >
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3"
+        >
 
-            <div className="col-span-2">
+            <div className="col-span-1 sm:col-span-2">
               <FormField
                 control={form.control}
                 name="role"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs">ประเภท</FormLabel>
+                    <FormLabel className="text-xs">
+                      ประเภท <span className="text-red-500">*</span>
+                    </FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
@@ -211,7 +207,9 @@ export const NewUserModal = () => {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-xs">ชื่อ</FormLabel>
+                  <FormLabel className="text-xs">
+                    ชื่อ <span className="text-red-500">*</span>
+                  </FormLabel>
                   <FormControl>
                     <Input
                       id="name"
@@ -230,7 +228,9 @@ export const NewUserModal = () => {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-xs">อีเมล์</FormLabel>
+                  <FormLabel className="text-xs">
+                    อีเมล์ <span className="text-red-500">*</span>
+                  </FormLabel>
                   <FormControl>
                     <Input
                       id="email"
@@ -302,7 +302,7 @@ export const NewUserModal = () => {
               )}
             />
 
-            <div className="col-span-2">
+            <div className="col-span-1 sm:col-span-2">
               <FormField
                 control={form.control}
                 name="address"
@@ -326,17 +326,14 @@ export const NewUserModal = () => {
 
             <PasswordForm />
 
-            <div className="col-start-2 col-span-1 flex justify-end"></div>
-
-            <DialogFooter className="col-start-2 col-span-1 flex justify-end">
+            <DialogFooter className="col-span-1 sm:col-span-2 flex justify-end">
               <Button type="submit" size="sm">
                 {user ? "บันทึกการเปลี่ยนแปลง" : "สร้างใหม่"}
               </Button>
             </DialogFooter>
           </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+      </Form>
+    </ResponsiveDialog>
   );
 };
 
@@ -347,7 +344,7 @@ const PasswordForm = () => {
 
   if (!showPassword) {
     return (
-      <div className="col-span-2 flex">
+      <div className="col-span-1 sm:col-span-2 flex">
         <button
           type="button"
           onClick={() => setShowPassword(true)}
@@ -361,7 +358,7 @@ const PasswordForm = () => {
   }
 
   return (
-    <div className="col-span-2 border border-gray-200 bg-gray-50 p-3 rounded">
+    <div className="col-span-1 sm:col-span-2 border border-gray-200 bg-gray-50 p-3 rounded">
       <FormField
         control={form.control}
         name="password"
