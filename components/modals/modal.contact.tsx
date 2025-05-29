@@ -159,7 +159,7 @@ export const ContactModal = () => {
                     },
                   }}
                   onSelected={(item) => {
-                    form.setValue("sellerId", item.id);
+                    form.setValue("sellerId", item.value ? String(item.value) : "");
                   }}
                 />
               </div>

@@ -1,30 +1,63 @@
 "use client";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { useProductModal } from "@/hooks/use-product-modal";
-import { FormInput } from "../form/form-input";
-import { FormSubmit } from "../form/form-submit";
-import { useAction } from "@/hooks/use-action";
-import { createProduct } from "@/actions/product/create";
+
+import * as React from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { toast } from "sonner";
-import { updateProduct } from "@/actions/product/update";
-import { FormSearchAsync } from "../form/form-search-async";
-import { FormTextarea } from "../form/form-textarea";
+import { DialogFooter } from "@/components/ui/dialog";
+import { ResponsiveDialog } from "@/components/responsive-dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@radix-ui/react-label";
-import { useRef } from "react";
-import { ProductType } from "@prisma/client";
+import { useProductModal } from "@/hooks/use-product-modal";
+import { useAction } from "@/hooks/use-action";
+import { createProduct } from "@/actions/product/create";
+import { updateProduct } from "@/actions/product/update";
+import { FormSearchAsync } from "../form/form-search-async";
+
+const ProductFormSchema = z.object({
+  type: z.enum(["product", "service"]),
+  vendorId: z.string().optional(),
+  name: z
+    .string({
+      required_error: "Name is required",
+    })
+    .min(3, {
+      message: "Name is too short.",
+    }),
+  cost: z.string().optional(),
+  percentage: z.string().optional(),
+  unit: z.string().optional(),
+  description: z.string().optional(),
+});
 
 export const NewProductModal = () => {
   const modal = useProductModal();
   const product = modal.data;
-  // Initialize the typeRef with the product type or default to ProductType.product
-  const typeRef = useRef<ProductType>(product?.type ?? ProductType.product);
-  const percentageRef = useRef<HTMLInputElement>(null);
+
+  const form = useForm<z.infer<typeof ProductFormSchema>>({
+    resolver: zodResolver(ProductFormSchema),
+    defaultValues: {
+      type: product?.type ?? "product",
+      vendorId: product?.vendor?.id ? String(product.vendor.id) : "",
+      name: product?.name ?? "",
+      cost: product?.cost ? String(product.cost) : "",
+      percentage: product?.percentage ? String(product.percentage) : "",
+      unit: product?.unit ?? "",
+      description: product?.description ?? "",
+    },
+  });
 
   const handleCreate = useAction(createProduct, {
     onSuccess: (data) => {
@@ -33,6 +66,7 @@ export const NewProductModal = () => {
         modal.onProductCreated(data);
       }
       modal.onClose();
+      form.reset();
     },
     onError: (error) => {
       toast.error(error);
@@ -44,6 +78,7 @@ export const NewProductModal = () => {
     onSuccess: (data) => {
       toast.success("สำเร็จ");
       modal.onClose();
+      form.reset();
     },
     onError: (error) => {
       toast.error(error);
@@ -51,91 +86,102 @@ export const NewProductModal = () => {
     },
   });
 
-  const onSubmit = (formData: FormData) => {
-    const name = formData.get("name") as string;
-    const cost = formData.get("cost") as string;
-    const percentage = formData.get("percentage") as string;
-    const unit = formData.get("unit") as string;
-    const vendor = formData.get("vendor") as string;
-    const description = formData.get("description") as string;
-
+  function onSubmit(data: z.infer<typeof ProductFormSchema>) {
     if (product?.id) {
       handleUpdate.execute({
         id: product.id,
-        name,
-        type: typeRef.current,
-        percentage,
-        unit,
-        cost,
-        description,
+        name: data.name,
+        type: data.type,
+        percentage: data.percentage,
+        unit: data.unit,
+        cost: data.cost,
+        description: data.description,
       });
       return;
     }
     handleCreate.execute({
-      name,
-      type: typeRef.current,
-      vendorId: parseInt(vendor),
-      cost: cost,
-      percentage: percentage,
-      unit: unit,
-      description,
+      name: data.name,
+      type: data.type,
+      vendorId: data.vendorId ? parseInt(data.vendorId) : 0,
+      cost: data.cost,
+      percentage: data.percentage,
+      unit: data.unit,
+      description: data.description,
     });
-  };
+  }
 
-  const onTypeChange = (value: ProductType) => {
-    typeRef.current = value;
-
+  const onTypeChange = (value: "product" | "service") => {
+    form.setValue("type", value);
+    
     // Set default percentage based on product type
-    if (value === ProductType.product) {
-      if (percentageRef.current) {
-        percentageRef.current.value = "15";
-      }
-    } else if (value === ProductType.service) {
-      if (percentageRef.current) {
-        percentageRef.current.value = "30";
-      }
+    if (value === "product") {
+      form.setValue("percentage", "15");
+    } else if (value === "service") {
+      form.setValue("percentage", "30");
     }
   };
 
-  const fieldErrors = (product?.id ? handleUpdate : handleCreate).fieldErrors;
+  // Reset form when product data changes
+  React.useEffect(() => {
+    if (product) {
+      form.reset({
+        type: product.type ?? "product",
+        vendorId: product.vendor?.id ? String(product.vendor.id) : "",
+        name: product.name ?? "",
+        cost: product.cost ? String(product.cost) : "",
+        percentage: product.percentage ? String(product.percentage) : "",
+        unit: product.unit ?? "",
+        description: product.description ?? "",
+      });
+    } else {
+      form.reset({
+        type: "product",
+        vendorId: "",
+        name: "",
+        cost: "",
+        percentage: "",
+        unit: "",
+        description: "",
+      });
+    }
+  }, [product, form]);
 
+  console.log('error', form.formState.errors);
   return (
-    <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>
-            {" "}
-            {product ? "แก้ไขกลุ่มสินค้า" : "กลุ่มสินค้าใหม่"}
-          </DialogTitle>
-          {/* <DialogDescription>Please select the vendor.</DialogDescription> */}
-        </DialogHeader>
-        <form action={onSubmit} className="grid grid-cols-2 gap-3">
-          <div className="col-span-2">
-            <Tabs defaultValue={product?.type ?? "product"} className="w-full">
-              <Label className="text-xs">ประเภท</Label>
+    <ResponsiveDialog 
+      open={modal.isOpen} 
+      onOpenChange={modal.onClose}
+      title={product ? "แก้ไขกลุ่มสินค้า" : "กลุ่มสินค้าใหม่"}
+      description=""
+    >
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+          <div className="col-span-1 sm:col-span-2">
+            <Label className="text-xs">ประเภท</Label>
+            <Tabs value={form.watch("type")} className="w-full">
               <TabsList className="w-full flex">
                 <TabsTrigger
-                  // disabled={product?.id ? true : false}
                   className="flex-1 text-xs"
                   value="product"
-                  onClick={() => onTypeChange(ProductType.product)}
+                  onClick={() => onTypeChange("product")}
                 >
                   สินค้า
                 </TabsTrigger>
                 <TabsTrigger
                   className="flex-1 text-xs"
                   value="service"
-                  onClick={() => onTypeChange(ProductType.service)}
+                  onClick={() => onTypeChange("service")}
                 >
                   บริการ
                 </TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
-          <div className="">
+
+          <div className="col-span-1 sm:col-span-2">
             <FormSearchAsync
               disabled={!!product?.id}
-              id="vendor"
+              id="vendorId"
               label="ผู้ขาย/ร้านค้า"
               config={{
                 endpoint: "/users",
@@ -143,70 +189,126 @@ export const NewProductModal = () => {
                   role: "vendor",
                 },
               }}
-              onSelected={(data) => {}}
+              onSelected={(item) => {
+                form.setValue("vendorId", item.value ? String(item.value) : "");
+              }}
               defaultValue={
                 product?.vendor
-                  ? { value: product.vendor.id, label: product.vendor.name }
-                  : null
+                  ? { id: String(product.vendor.id), label: product.vendor.name }
+                  : undefined
               }
-              errors={fieldErrors}
             />
           </div>
-          <div className="col-span-2">
-            <FormInput
-              // disabled={!!product?.id}
-              id="name"
-              label="ชื่อสินค้า/บริการ"
-              type="text"
-              defaultValue={product?.name}
-              errors={fieldErrors}
+
+          <div className="col-span-1 sm:col-span-2">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-xs">ชื่อสินค้า/บริการ <span className="text-red-500">*</span></FormLabel>
+                  <FormControl>
+                    <Input
+                      id="name"
+                      placeholder="ชื่อสินค้า/บริการ"
+                      className="text-xs"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
           </div>
-          <div className="">
-            <FormInput
-              id="cost"
-              label="ต้นทุน"
-              type="number"
-              defaultValue={product?.cost}
-              errors={fieldErrors}
+
+          <FormField
+            control={form.control}
+            name="cost"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-xs">ต้นทุน</FormLabel>
+                <FormControl>
+                  <Input
+                    id="cost"
+                    type="number"
+                    placeholder="ต้นทุน"
+                    className="text-xs"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="percentage"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-xs">กำไร(%)</FormLabel>
+                <FormControl>
+                  <Input
+                    id="percentage"
+                    type="number"
+                    placeholder="กำไร(%)"
+                    className="text-xs"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="unit"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-xs">หน่วย</FormLabel>
+                <FormControl>
+                  <Input
+                    id="unit"
+                    placeholder="หน่วย"
+                    className="text-xs"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="col-span-1 sm:col-span-2">
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-xs">รายละเอียด</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      id="description"
+                      rows={6}
+                      placeholder="รายละเอียด"
+                      className="resize-none text-xs"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
           </div>
-          <div className="">
-            <FormInput
-              id="percentage"
-              label="กำไร(%)"
-              type="number"
-              ref={percentageRef}
-              defaultValue={
-                product?.percentage ??
-                (!product?.id &&
-                  (product?.type === ProductType.service ? "30" : "15"))
-              }
-              errors={fieldErrors}
-            />
-          </div>
-          <div className="">
-            <FormInput
-              id="unit"
-              label="หน่วย"
-              defaultValue={product?.unit}
-              errors={fieldErrors}
-            />
-          </div>
-          <div className="col-span-2">
-            <FormTextarea
-              id="description"
-              label="รายละเอียด"
-              defaultValue={product?.description ?? ""}
-              errors={fieldErrors}
-              rows={6}
-            />
-          </div>
-          <div className="col-start-2 col-span-1 flex justify-end">
-            <FormSubmit>{product ? "แก้ไข" : "สร้าง"}</FormSubmit>
-          </div>
+
+          <DialogFooter className="col-span-1 sm:col-span-2 flex justify-end">
+            <Button type="submit" size="sm">
+              {product ? "แก้ไข" : "สร้าง"}
+            </Button>
+          </DialogFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+      </Form>
+    </ResponsiveDialog>
   );
 };

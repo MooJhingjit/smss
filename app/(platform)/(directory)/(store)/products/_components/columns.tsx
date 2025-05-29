@@ -18,6 +18,9 @@ export type Product = {
 };
 
 export const columns: ColumnDef<Product>[] = [
+   {
+    id: "actions",
+  },
   {
     accessorKey: "id",
     header: "#",
@@ -58,7 +61,5 @@ export const columns: ColumnDef<Product>[] = [
     accessorKey: "percentage",
     header: "กำไร(%)",
   },
-  {
-    id: "actions",
-  },
+ 
 ];
