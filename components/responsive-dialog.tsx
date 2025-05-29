@@ -41,7 +41,7 @@ export const ResponsiveDialog = ({
             <DrawerTitle>{title}</DrawerTitle>
             <DrawerDescription>{description}</DrawerDescription>
           </DrawerHeader>
-          <div className="p-4 max-h-[calc(100vh-200px)] overflow-y-auto">
+          <div className="p-4 max-h-[calc(100vh-200px)] overflow-y-auto min-h-[300px]">
             {children}
           </div>
         </DrawerContent>

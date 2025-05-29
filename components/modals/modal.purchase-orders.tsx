@@ -1,30 +1,42 @@
 "use client";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { usePurchaseOrderModal } from "@/hooks/use-po-modal";
-import { FormSubmit } from "../form/form-submit";
-import { FormSearchAsync } from "../form/form-search-async";
-import { User } from "@prisma/client";
-import { useState } from "react";
-import { useAction } from "@/hooks/use-action";
+import * as React from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { DialogFooter } from "@/components/ui/dialog";
+import { ResponsiveDialog } from "@/components/responsive-dialog";
+import { Button } from "@/components/ui/button";
+import { Form } from "@/components/ui/form";
+import { usePurchaseOrderModal } from "@/hooks/use-po-modal";
+import { useAction } from "@/hooks/use-action";
 import { createPurchaseOrder } from "@/actions/po/create";
+import { FormSearchAsync } from "../form/form-search-async";
+import { User } from "@prisma/client";
+
+const PurchaseOrderFormSchema = z.object({
+  vendorId: z.string(),
+});
 
 export const NewPurchaseModal = () => {
   const modal = usePurchaseOrderModal();
-  const [details, setDetails] = useState<User | null>(null);
+  const [vendorDetails, setVendorDetails] = React.useState<User | null>(null);
   const router = useRouter();
+
+  const form = useForm<z.infer<typeof PurchaseOrderFormSchema>>({
+    resolver: zodResolver(PurchaseOrderFormSchema),
+    defaultValues: {
+      vendorId: "",
+    },
+  });
 
   const handleCreate = useAction(createPurchaseOrder, {
     onSuccess: (data) => {
       toast.success("สำเร็จ");
       modal.onClose();
+      form.reset();
       router.push(`purchase-orders/${data.id}`);
     },
     onError: (error) => {
@@ -33,27 +45,27 @@ export const NewPurchaseModal = () => {
     },
   });
 
-  const onSubmit = async (formData: FormData) => {
-    const vendor = formData.get("vendor") as string;
+  function onSubmit(data: z.infer<typeof PurchaseOrderFormSchema>) {
+    handleCreate.execute({
+      vendorId: parseInt(data.vendorId),
+    });
+  }
 
-    const payload = {
-      vendorId: parseInt(vendor),
-    };
-
-    handleCreate.execute({ ...payload });
-  };
+  console.log("error", form.getValues());
 
   return (
-    <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>สร้างใบสั่งซื้อใหม่ (PO)</DialogTitle>
-        </DialogHeader>
-        <form action={onSubmit} className="grid grid-cols-2 gap-3">
-          <div className="col-span-2">
+    <ResponsiveDialog 
+      open={modal.isOpen} 
+      onOpenChange={modal.onClose}
+      title="สร้างใบสั่งซื้อใหม่ (PO)"
+      description=""
+    >
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 gap-3 mt-3 ">
+          <div className="col-span-1">
             <FormSearchAsync
-              id="vendor"
-              label="ผุ้ขาย/ร้านค้า"
+              id="vendorId"
+              label="ผุ้ขาย/ร้านค้า *"
               config={{
                 endpoint: "/users",
                 params: {
@@ -61,23 +73,26 @@ export const NewPurchaseModal = () => {
                 },
               }}
               onSelected={(item) => {
-                setDetails(item.data);
+                form.setValue("vendorId", item.value ? String(item.value) : "");
+                setVendorDetails(item.data);
               }}
-              // errors={fieldErrors}
             />
           </div>
 
-          {details && (
-            <div className="col-span-2">
-              <VendorInfo data={details} />
+          {vendorDetails && (
+            <div className="col-span-1">
+              <VendorInfo data={vendorDetails} />
             </div>
           )}
-          <div className="col-start-2 col-span-1 flex justify-end">
-            <FormSubmit>สร้าง</FormSubmit>
-          </div>
+
+          <DialogFooter className="col-span-1 flex justify-end">
+            <Button type="submit" size="sm">
+              สร้าง
+            </Button>
+          </DialogFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+      </Form>
+    </ResponsiveDialog>
   );
 };
 
