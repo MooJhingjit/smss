@@ -19,7 +19,7 @@ import { useEffect, useState } from "react";
 import { ProductType, QuotationType } from "@prisma/client";
 import { useForm } from "react-hook-form";
 import { FormTextarea } from "../form/form-textarea";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/custom-input";
 import {
   ArrowRight,
   LockIcon,

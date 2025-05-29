@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { Input } from "../ui/input";
+import { Input } from "../ui/custom-input";
 import { Button } from "../ui/button";
 import { Plus, Search } from "lucide-react";
 

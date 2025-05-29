@@ -1,6 +1,6 @@
 import { PrinterIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/custom-input";
 import { useRef, useState } from "react";
 import ConfirmActionButton from "@/components/confirm-action";
 import { revalidatePath } from "next/cache";

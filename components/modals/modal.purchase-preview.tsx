@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { usePurchasePreviewModal } from "@/hooks/use-po-preview-modal";
 import { Button } from "../ui/button";
-import { Input } from "../ui/input";
+import { Input } from "../ui/custom-input";
 import { Label } from "../ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMutation, useQuery } from "@tanstack/react-query";

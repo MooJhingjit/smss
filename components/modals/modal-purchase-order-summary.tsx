@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-import { Input } from "../ui/input";
+import { Input } from "../ui/custom-input";
 import { Button } from "@/components/ui/button";
 import { PurchaseOrderWithRelations } from "@/types";
 import React, { useCallback } from "react";

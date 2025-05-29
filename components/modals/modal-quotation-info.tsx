@@ -51,7 +51,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { getCurrentDateTime, updateCodeVersion } from "@/lib/utils";
-import { Input } from "../ui/input";
+import { Input } from "../ui/custom-input";
 
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 

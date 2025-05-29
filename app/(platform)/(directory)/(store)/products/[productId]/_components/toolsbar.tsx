@@ -2,7 +2,7 @@
 import React from "react";
 import { Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/custom-input";
 import { useItemModal } from "@/hooks/use-item-modal";
 import { ProductWithRelations } from "@/types";
 

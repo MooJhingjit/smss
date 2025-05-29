@@ -5,7 +5,7 @@ import { useFormStatus } from "react-dom";
 
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/custom-input";
 
 import { FormErrors } from "./form-errors";
 import { UseFormRegister } from "react-hook-form";

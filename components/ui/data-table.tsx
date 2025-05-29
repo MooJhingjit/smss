@@ -32,7 +32,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
-import { Input } from "./input";
+import { Input } from "./custom-input";
 import {
   Select,
   SelectContent,

@@ -42,7 +42,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { FormInput } from "../form/form-input";
-import { Input } from "../ui/input";
+import { Input } from "../ui/custom-input";
 import { usePurchaseOrderReceiptModal } from "@/hooks/use-po-receipt-modal";
 import Link from "next/link";
 import { ReceiptPrint } from "@/components/print-receipt";

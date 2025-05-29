@@ -34,7 +34,7 @@ import { toast } from "sonner";
 import { ReceiptPrint } from "@/components/print-receipt";
 import { cn, getDateFormat } from "@/lib/utils";
 import { PDFDateFormat } from "@/app/services/PDF/pdf.helpers";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/custom-input";
 
 type Props = {
   data: QuotationWithRelations;
