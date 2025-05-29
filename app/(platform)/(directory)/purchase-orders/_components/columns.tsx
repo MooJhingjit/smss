@@ -21,6 +21,9 @@ export const columns: ColumnDef<
     };
   }
 >[] = [
+   {
+      id: "actions",
+    },
     {
       accessorKey: "code",
       header: "ใบสั่งซื้อ",
@@ -85,7 +88,5 @@ export const columns: ColumnDef<
         return getDateFormat(createdAt);
       },
     },
-    {
-      id: "actions",
-    },
+   
   ];

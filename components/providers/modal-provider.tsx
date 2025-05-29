@@ -12,7 +12,6 @@ import { PurchasePreviewModal } from "../modals/modal.purchase-preview";
 import { PurchaseOrderListModal } from "../modals/modal.po-list";
 import { ContactModal } from "../modals/modal.contact";
 
-import { PurchaseOrderReceiptModal } from "../modals/modal.purchase-order-receipt";
 import { QuotationInfoModal } from "../modals/modal-quotation-info";
 import { PurchaseInfoModal } from "../modals/modal-purchase-info";
 import { PurchaseOrderSummaryModal } from "../modals/modal-purchase-order-summary";
@@ -42,7 +41,7 @@ export const ModalProvider = () => {
       <NewQuotationModal />
       <NewPurchaseModal />
       <PurchaseOrderListModal />
-      <PurchaseOrderReceiptModal />
+      {/* <PurchaseOrderReceiptModal /> */}
       <PurchaseOrderSummaryModal />
     </>
   );

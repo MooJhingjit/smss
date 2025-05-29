@@ -1,34 +1,45 @@
 "use client";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { useQuotationModal } from "@/hooks/use-quotation-modal";
-import { Label } from "../ui/label";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useRef, useState } from "react";
-import { FormSearchAsync } from "../form/form-search-async";
-import { FormSubmit } from "../form/form-submit";
-import { useAction } from "@/hooks/use-action";
+import * as React from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { toast } from "sonner";
-import { createQuotation } from "@/actions/quotation/create";
-import { User } from "@prisma/client";
 import { useRouter } from "next/navigation";
+import { DialogFooter } from "@/components/ui/dialog";
+import { ResponsiveDialog } from "@/components/responsive-dialog";
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQuotationModal } from "@/hooks/use-quotation-modal";
+import { useAction } from "@/hooks/use-action";
+import { createQuotation } from "@/actions/quotation/create";
+import { FormSearchAsync } from "../form/form-search-async";
+import { User } from "@prisma/client";
+
+const QuotationFormSchema = z.object({
+  type: z.enum(["product", "service"]),
+  buyerId: z.string().min(1, { message: "Customer is required" }),
+});
 
 export const NewQuotationModal = () => {
   const router = useRouter();
   const modal = useQuotationModal();
-  const typeRef = useRef<"product" | "service">("product");
-  const [customerDetails, setCustomerDetails] = useState<User | null>(null);
+  const [customerDetails, setCustomerDetails] = React.useState<User | null>(null);
+
+  const form = useForm<z.infer<typeof QuotationFormSchema>>({
+    resolver: zodResolver(QuotationFormSchema),
+    defaultValues: {
+      type: "product",
+      buyerId: "",
+    },
+  });
 
   const handleCreate = useAction(createQuotation, {
     onSuccess: (data) => {
       toast.success("สำเร็จ");
       modal.onClose();
+      form.reset();
       router.push(`quotations/${data.id}`);
     },
     onError: (error) => {
@@ -37,72 +48,90 @@ export const NewQuotationModal = () => {
     },
   });
 
-  const onSubmit = async (formData: FormData) => {
-    const customer = formData.get("customer") as string;
-
-    const payload = {
-      type: typeRef.current,
-      buyerId: parseInt(customer),
-    };
-
-    handleCreate.execute({ ...payload });
-  };
+  function onSubmit(data: z.infer<typeof QuotationFormSchema>) {
+    handleCreate.execute({
+      type: data.type,
+      buyerId: parseInt(data.buyerId),
+    });
+  }
 
   const onTypeChange = (value: "product" | "service") => {
-    typeRef.current = value;
+    form.setValue("type", value);
   };
 
   return (
-    <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>สร้างใบเสนอราคาใหม่</DialogTitle>
-          <DialogDescription>เลือกชื่อลูกค้า และประเภทของ QT</DialogDescription>
-        </DialogHeader>
-        <form action={onSubmit} className="pb-4 space-y-2">
-          <Tabs defaultValue="product" className="w-full">
-            <Label className="text-xs">ประเภท</Label>
-            <TabsList className="w-full flex">
-              <TabsTrigger
-                className="flex-1 text-xs"
-                value="product"
-                onClick={() => onTypeChange("product")}
-              >
-                สินค้า
-              </TabsTrigger>
-              <TabsTrigger
-                className="flex-1 text-xs"
-                value="service"
-                onClick={() => onTypeChange("service")}
-              >
-                บริการ
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-
-          <div className="">
-            <FormSearchAsync
-              id="customer"
-              label="ลูกค้า"
-              config={{
-                endpoint: "/contacts",
-              }}
-              onSelected={(item) => {
-                setCustomerDetails(item.data);
-              }}
+    <ResponsiveDialog 
+      open={modal.isOpen} 
+      onOpenChange={modal.onClose}
+      title="สร้างใบเสนอราคาใหม่"
+      description="เลือกชื่อลูกค้า และประเภทของ QT"
+    >
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <div className="grid grid-cols-1 gap-4">
+            <FormField
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>ประเภท</FormLabel>
+                  <FormControl>
+                    <Tabs value={field.value} onValueChange={(value) => onTypeChange(value as "product" | "service")}>
+                      <TabsList className="w-full flex">
+                        <TabsTrigger className="flex-1 text-xs" value="product">
+                          สินค้า
+                        </TabsTrigger>
+                        <TabsTrigger className="flex-1 text-xs" value="service">
+                          บริการ
+                        </TabsTrigger>
+                      </TabsList>
+                    </Tabs>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
+
+            <FormField
+              control={form.control}
+              name="buyerId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    ลูกค้า <span className="text-red-500">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <FormSearchAsync
+                      id="customer"
+                      config={{
+                        endpoint: "/contacts",
+                      }}
+                      onSelected={(item) => {
+                        field.onChange(item.value ? String(item.value) : "");
+                        setCustomerDetails(item.data);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {customerDetails && (
+              <div className="col-span-1">
+                <CustomerInfo data={customerDetails} />
+              </div>
+            )}
           </div>
-          {customerDetails && (
-            <div className="">
-              <CustomerInfo data={customerDetails} />
-            </div>
-          )}
-          <div className="col-start-2 col-span-1 flex justify-end">
-            <FormSubmit>สร้าง</FormSubmit>
-          </div>
+
+          <DialogFooter>
+            <Button type="submit" disabled={handleCreate.isLoading}>
+              {handleCreate.isLoading ? "กำลังสร้าง..." : "สร้าง"}
+            </Button>
+          </DialogFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+      </Form>
+    </ResponsiveDialog>
   );
 };
 

@@ -17,6 +17,9 @@ import { ColumnDef } from "@tanstack/react-table";
 
 export const columns: ColumnDef<User>[] = [
   {
+    id: "actions",
+  },
+  {
     accessorKey: "id",
     header: "#",
     enableColumnFilter: true,
@@ -45,14 +48,5 @@ export const columns: ColumnDef<User>[] = [
       return <p className="capitalize">{role}</p>;
     },
   },
-  {
-    id: "actions",
-    // cell: ({ row }) => {
-    //   const { id } = row.original
-    //   return (
-    //     <Button className="text-xs h-8" variant="secondary"> Manage</Button>
-    //   )
-
-    // }
-  },
+  
 ];

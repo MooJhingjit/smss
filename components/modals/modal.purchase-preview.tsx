@@ -1,18 +1,10 @@
 "use client";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { DialogFooter } from "@/components/ui/dialog";
+import { ResponsiveDialog } from "@/components/responsive-dialog";
 import { usePurchasePreviewModal } from "@/hooks/use-po-preview-modal";
 import { Button } from "../ui/button";
-import { Input } from "../ui/custom-input";
-import { Label } from "../ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/components/providers/query-provider";
 import PURCHASE_ORDER_SERVICES from "@/app/services/api.purchase-order";
 import { toast } from "sonner";
@@ -40,19 +32,6 @@ export const PurchasePreviewModal = () => {
   const modal = usePurchasePreviewModal();
   const { data, isOpen, onClose, queryKey, quotationId } = modal;
 
-  // const { execute, isLoading } = useAction(createQuotation, {
-  //   onSuccess: (data) => {
-  //     window.location.href = data;
-  //   },
-  //   onError: (error) => {
-  //     toast.error(error);
-  //   }
-  // });
-
-  // const onClick = () => {
-  //   execute({});
-  // };
-
   const mutation = useMutation({
     mutationFn: async () => {
       return await PURCHASE_ORDER_SERVICES.generatePOs({
@@ -77,27 +56,29 @@ export const PurchasePreviewModal = () => {
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>สร้างใบสั่งซื้อ(PO)</DialogTitle>
-          <div className="flex space-x-3 items-center">
-            <LockIcon className="w-10 h-10 text-yellow-500" />
-            <p className="text-xs text-yellow-500">
-              หลังจากการสร้างใบสั่งซื้อ(PO) ใบเสนอราคา(QT)จะไม่สามารถแก้ไขได้
-              โปรดตรวจสอบความถูกต้องในใบเสนอราคา(QT) ก่อนทำรายการ
-            </p>
-          </div>
-        </DialogHeader>
-        <div className="pb-4 space-y-2">
-          <TableLists<PurchaseOrderPreview> columns={columns} data={data} />
-        </div>
-        <DialogFooter>
-          <Button type="button" variant="destructive" onClick={execute}>
-            ยืนยันการทำรายการ
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <ResponsiveDialog 
+      open={isOpen} 
+      onOpenChange={onClose}
+      title="สร้างใบสั่งซื้อ(PO)"
+      description=""
+    >
+      <div className="flex space-x-3 items-center mb-4">
+        <LockIcon className="w-10 h-10 text-yellow-500" />
+        <p className="text-xs text-yellow-500">
+          หลังจากการสร้างใบสั่งซื้อ(PO) ใบเสนอราคา(QT)จะไม่สามารถแก้ไขได้
+          โปรดตรวจสอบความถูกต้องในใบเสนอราคา(QT) ก่อนทำรายการ
+        </p>
+      </div>
+      
+      <div className="pb-4 space-y-2">
+        <TableLists<PurchaseOrderPreview> columns={columns} data={data} />
+      </div>
+      
+      <DialogFooter>
+        <Button type="button" variant="destructive" onClick={execute}>
+          ยืนยันการทำรายการ
+        </Button>
+      </DialogFooter>
+    </ResponsiveDialog>
   );
 };
