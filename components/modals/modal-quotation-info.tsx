@@ -10,7 +10,7 @@ import {
 import { toast } from "sonner";
 import { useQuotationInfoModal } from "@/hooks/use-quotation-info-modal";
 import React, { useRef, useState, useCallback } from "react";
-import { ChevronsUpDown, ClipboardCheckIcon } from "lucide-react";
+import { ArrowRightIcon, ChevronsUpDown, ClipboardCheckIcon } from "lucide-react";
 
 import {
   Collapsible,
@@ -51,8 +51,14 @@ import {
 import { useRouter } from "next/navigation";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { getCurrentDateTime, updateCodeVersion } from "@/lib/utils";
-import { Input } from "../ui/custom-input";
+import { CheckCircle2Icon } from "lucide-react"
 
+import { Input } from "../ui/custom-input";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 export const QuotationInfoModal = () => {
@@ -325,7 +331,7 @@ const MainForm = (props: {
                 />
               </div>
             ) : (
-              <ApprovalButton
+              <QuotationStatusForSeller
                 hasList={hasList}
                 currentStatus={status}
                 onApprove={(s) => {
@@ -536,7 +542,7 @@ const PaymentCondition = ({
   );
 };
 
-const ApprovalButton = ({
+const QuotationStatusForSeller = ({
   hasList,
   onApprove,
   currentStatus,
@@ -571,23 +577,63 @@ const ApprovalButton = ({
     );
   } else if (currentStatus === QuotationStatus.offer) {
     return (
-      <div className="flex items-start space-x-1 h-full">
-        <CheckCircle className="w-4 h-4 mr-1  text-green-700" />
-        <div className="">
-          <p className="text-sm text-green-700 ">
-            ได้รับการอนุมัติ: สามารถนำส่งให้ลูกค้าได้
-          </p>
-          <ConfirmActionButton
-            onConfirm={() => {
-              onApprove(QuotationStatus.approved);
-            }}
-          >
-            <button className="text-xs text-orange-400 hover:text-orange-500 underline mt-1 cursor-pointer ">
-              ยืนยันการอนุมัติจากลูกค้า
-            </button>
-          </ConfirmActionButton>
-        </div>
-      </div>
+      <Alert>
+        <CheckCircle2Icon className="size-4 -mt-1" />
+        <AlertTitle className="">ได้รับการอนุมัติแล้ว</AlertTitle>
+        <AlertDescription >
+          <div className="text-sm">
+            <p>สามารถนำส่งให้ลูกค้าได้</p>
+            <div className=" border-t pt-2 mt-2 space-y-3">
+              <div className="flex items-center">
+                <div className="">
+                  <ArrowRightIcon className="w-4 h-4 mr-1 text-green-700" />
+                </div>
+                <ConfirmActionButton
+                  onConfirm={() => {
+                    onApprove(QuotationStatus.approved);
+                  }}
+                >
+                  <button className="text-xs text-green-700 hover:text-green-800 underline mt-1 cursor-pointer ">
+                    ลูกค้าอนุมัติแล้ว
+                  </button>
+                </ConfirmActionButton>
+              </div>
+              <div className="flex items-center">
+                <div className="">
+                  <ArrowRightIcon className="w-4 h-4 mr-1 text-orange-400" />
+                </div>
+                <ConfirmActionButton
+                  onConfirm={() => {
+                    onApprove(QuotationStatus.open); // reset to open
+                  }}
+                >
+                  <button className="text-xs text-orange-400 hover:text-orange-500 underline mt-1 cursor-pointer ">
+                    แก้ไขใบเสนอราคา
+                  </button>
+                </ConfirmActionButton>
+              </div>
+            </div>
+
+          </div>
+        </AlertDescription>
+      </Alert>
+      // <div className="flex items-start space-x-1 h-full">
+      //   <CheckCircle className="w-4 h-4 mr-1  text-green-700" />
+      //   <div className="">
+      //     <p className="text-sm text-green-700 ">
+      //       ได้รับการอนุมัติ: สามารถนำส่งให้ลูกค้าได้
+      //     </p>
+      //     <ConfirmActionButton
+      //       onConfirm={() => {
+      //         onApprove(QuotationStatus.approved);
+      //       }}
+      //     >
+      //       <button className="text-xs text-orange-400 hover:text-orange-500 underline mt-1 cursor-pointer ">
+      //         ยืนยันการอนุมัติจากลูกค้า
+      //       </button>
+      //     </ConfirmActionButton>
+      //   </div>
+      // </div>
     );
   }
 

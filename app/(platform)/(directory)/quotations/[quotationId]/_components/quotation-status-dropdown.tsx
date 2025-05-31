@@ -51,7 +51,7 @@ export default function QuotationStatusDropdown({
                         variant="destructive"
                         className="inline-flex items-center px-2 py-1 rounded-md  text-xs h-full"
                     >
-                        <span>ยกเลิก</span>
+                        <span>ไม่อนุมัติ</span>
                     </Button>
                 </ConfirmActionButton>
             </div>

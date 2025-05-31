@@ -52,8 +52,8 @@ export default async function MainNavbar(props: { withNavigation?: boolean }) {
         <div className="space-x-2 md:w-auto flex items-center justify-between">
           <div
             className={classNames(
-              "hidden md:flex text-xs text-gray-500 text-right capitalize md:justify-center md:items-center space-x-1 ",
-              withNavigation ? "text-gray-700" : "text-white"
+              "hidden md:flex text-xs text-gray-500 text-right capitalize md:justify-center md:items-center space-x-1 text-white",
+              // withNavigation ? "text-gray-700" : "text-white"
             )}
           >
             <p>{info?.name}</p>
