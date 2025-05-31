@@ -38,7 +38,7 @@ export default function MenuItems({ userRole }: { userRole: UserRole }) {
     return currentPath.startsWith(normalizedPath);
   };
   return (
-    <div className="hidden md:flex items-center space-x-4 text-sm text-slate-700">
+    <div className="hidden lg:flex items-center space-x-4 text-sm text-slate-700">
       {links
         .filter(
           (link) =>
