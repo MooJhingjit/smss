@@ -7,24 +7,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { handleSignOut } from "@/actions/auth";
-
-const links = [
-    { href: "/quotations", label: "Quotations", permission: ["*"] },
-    {
-        href: "/purchase-orders",
-        label: "Purchase Orders",
-        permission: ["admin"],
-    },
-    {
-        href: "/invoices",
-        label: "Invoices",
-        permission: ["admin"],
-    },
-    { href: "/products", label: "Products/Services", permission: ["*"] },
-    { href: "/items", label: "Stock", permission: ["admin"] },
-    { href: "/contacts", label: "Customers", permission: ["*"] },
-    { href: "/users", label: "Users", permission: ["admin"] },
-];
+import { getFilteredLinks } from "@/config/routing";
 
 interface MobileNavbarProps {
     userRole: UserRole;
@@ -48,10 +31,7 @@ export default function MobileNavbar({ userRole, withNavigation }: MobileNavbarP
         return currentPath.startsWith(normalizedPath);
     };
 
-    const filteredLinks = links.filter(
-        (link) =>
-            link.permission.includes(userRole) || link.permission.includes("*")
-    );
+    const filteredLinks = getFilteredLinks(userRole);
 
     if (!withNavigation || filteredLinks.length === 0) {
         return null;

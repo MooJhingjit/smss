@@ -4,24 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { classNames } from "@/lib/utils";
 import { UserRole } from "@prisma/client";
-
-const links = [
-  { href: "/quotations", label: "Quotations", permission: ["*"] },
-  {
-    href: "/purchase-orders",
-    label: "Purchase Orders",
-    permission: ["admin"],
-  },
-  {
-    href: "/invoices",
-    label: "Invoices",
-    permission: ["admin"],
-  },
-  { href: "/products", label: "Products/Services", permission: ["*"] },
-  { href: "/items", label: "Stock", permission: ["admin"] },
-  { href: "/contacts", label: "Customers", permission: ["*"] },
-  { href: "/users", label: "Users", permission: ["admin"] },
-];
+import { getFilteredLinks } from "@/config/routing";
 
 export default function MenuItems({ userRole }: { userRole: UserRole }) {
   const pathname = usePathname();
@@ -39,11 +22,7 @@ export default function MenuItems({ userRole }: { userRole: UserRole }) {
   };
   return (
     <div className="hidden lg:flex items-center space-x-4 text-sm text-slate-700">
-      {links
-        .filter(
-          (link) =>
-            link.permission.includes(userRole) || link.permission.includes("*"),
-        )
+      {getFilteredLinks(userRole)
         .map((link) => (
           <Link
             key={link.href}

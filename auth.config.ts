@@ -1,7 +1,7 @@
 import { UserRole } from "@prisma/client";
 import type { NextAuthConfig } from "next-auth";
 import { db } from "./lib/db";
-import { protectedRoutes } from "./config/protectedRoutes";
+import { protectedRoutes } from "./config/routing";
 // ref. https://nextjs.org/learn/dashboard-app/adding-authentication
 
 const getUserById = async (id: number) => {
