@@ -741,7 +741,8 @@ const drawSignature = (page: PDFPage, signatureData: SignatureData) => {
     });
 
     // Approver date
-    page.drawText(_BILL_DATE, {
+    const approvedDate = _DATA?.approvedAt ? PDFDateFormat(new Date(_DATA.approvedAt)) : ""
+    page.drawText(approvedDate, {
       x: 450,
       y: 45,
       ...config,
@@ -826,7 +827,7 @@ const drawStaticInfo = (page: PDFPage, currentPageNumber: number) => {
   if (!_DATA) return;
   drawHeaderInfo(page, currentPageNumber, {
     code: _DATA.code,
-    date: PDFDateFormat(new Date(_DATA.createdAt)),
+    date: _DATA.approvedAt ? PDFDateFormat(new Date(_DATA.approvedAt)) : "",
   });
   drawCustomerInfo(page, _DATA.contact);
   drawOfferInfo(page, {
