@@ -157,6 +157,7 @@ model Quotation {
   isLocked              Boolean                  @default(false)
   billGroupId           Int?
   billGroup             BillGroup?               @relation(fields: [billGroupId], references: [id])
+  approvedAt            DateTime?
   createdAt             DateTime                 @default(now())
   updatedAt             DateTime                 @updatedAt
   lists                 QuotationList[]

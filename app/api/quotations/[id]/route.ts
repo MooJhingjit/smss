@@ -36,13 +36,21 @@ export async function PUT(
       return new NextResponse("Invalid body", { status: 400 });
     }
 
+    const data: any = {
+      ...body,
+    }
+
+    // if status is offer, set approvedAt to now
+    if (data.status === QuotationStatus.offer) {
+      data.approvedAt = new Date();
+    }
+
+
     const quotation = await db.quotation.update({
       where: {
         id: Number(id),
       },
-      data: {
-        ...body,
-      },
+      data,
     });
     return NextResponse.json(quotation);
   } catch (error) {
