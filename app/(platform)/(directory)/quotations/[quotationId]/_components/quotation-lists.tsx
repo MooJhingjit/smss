@@ -35,6 +35,13 @@ import {
 } from "@/components/ui/tooltip";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 
+import { AlertCircleIcon, CheckCircle2Icon, PopcornIcon } from "lucide-react"
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert"
+
 type Props = {
   quotationId: number;
   quotationType: QuotationType;
@@ -258,7 +265,7 @@ export default function QuotationLists(props: Props) {
       },
     },
   ];
-  
+
   // Filter columns based on admin status
   const columns = allColumns.filter(column => {
     // Hide these columns for non-admin users
@@ -410,29 +417,40 @@ const BillingSummary = (props: {
       {
         // this qt haven't been confirmed yet (this is only for service quotation)
         isAdmin && quotationType === "service" && data.length && !grandTotal && (
-          <div className="w-full  flex items-center justify-center">
-            <ConfirmActionButton
-              onConfirm={() => {
-                execute({
-                  id: data[0].quotationId,
-                  totalPrice: summary.totalPrice,
-                  discount: summary.discount,
-                  tax: summary.vat,
-                  grandTotal: summary.grandTotal,
-                });
-              }}
-            >
-              <Button className="mt-4 w-full space-x-1 flex flex-col  p-3 h-auto">
-                <div className=" flex items-center justify-center space-x-2">
-                  <InfoIcon className="w-4 h-4 text-orange-500" />
-                  <p>รายการนี้ยังไม่ได้รับการยืนยัน กดเพื่อยืนยันยอดรวม</p>
+
+          <div className="mt-4">
+            <Alert className="">
+              <div className="flex justify-center w-full mt-3 space-x-2">
+                <InfoIcon className="w-5 h-5 text-orange-500 -mt-1" />
+                <AlertTitle>เมื่อยืนยันแล้วจะไม่สามารถแก้ไขยอดรวมได้</AlertTitle>
+              </div>
+              <AlertDescription>
+                <div className="flex justify-center w-full mt-3 ">
+                  <ConfirmActionButton
+                    onConfirm={() => {
+                      execute({
+                        id: data[0].quotationId,
+                        totalPrice: summary.totalPrice,
+                        discount: summary.discount,
+                        tax: summary.vat,
+                        grandTotal: summary.grandTotal,
+                      });
+                    }}
+                  >
+
+                    <Button variant={"default"} >
+                      ยืนยันยอดรวม
+                    </Button>
+                  </ConfirmActionButton>
                 </div>
-                <p className="text-xs">
-                  เมื่อยืนยันแล้วจะไม่สามารถแก้ไขยอดรวมได้
-                </p>
-              </Button>
-            </ConfirmActionButton>
+
+              </AlertDescription>
+            </Alert>
           </div>
+
+          // <div className="w-full  flex items-center justify-center border mt-3 rounded-md">
+
+          // </div>
         )
       }
     </div>

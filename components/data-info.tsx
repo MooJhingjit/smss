@@ -1,8 +1,10 @@
 "use client";
 import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
-import React, { ReactNode } from "react";
+import React, { ReactNode, useState, useEffect } from "react";
 import { Button } from "./ui/button";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 
 const variants = cva(
@@ -29,6 +31,7 @@ type DataInfoProps = VariantProps<typeof variants> & {
     className?: string; // optional prop for additional custom styles
     columnClassName?: string; // optional prop for additional custom styles
     CustomComponent?: ReactNode;
+    collapsible?: boolean; // optional prop to enable/disable collapsible feature
 };
 
 export default function DataInfo({
@@ -36,17 +39,59 @@ export default function DataInfo({
     lists,
     onEdit,
     className = "",
-    columnClassName = "grid-cols-1  sm:grid-cols-3 md:grid-cols-4",
+    columnClassName = "grid-cols-1 sm:grid-cols-2  md:grid-cols-3 lg:grid-cols-4",
     variant,
     CustomComponent,
+    collapsible = true,
 }: Readonly<DataInfoProps>) {
+    const isMobile = useIsMobile();
+    const [isCollapsed, setIsCollapsed] = useState(true);
+
+    // Storage key for localStorage
+    const storageKey = `data-info-collapsed-${header || 'default'}`;
+
+    // Initialize state from localStorage or mobile detection
+    useEffect(() => {
+        const savedState = localStorage.getItem(storageKey);
+        if (savedState !== null) {
+            setIsCollapsed(JSON.parse(savedState));
+        } else {
+            setIsCollapsed(isMobile);
+        }
+    }, [isMobile, storageKey]);
+
+    const toggleCollapse = () => {
+        const newState = !isCollapsed;
+        setIsCollapsed(newState);
+        localStorage.setItem(storageKey, JSON.stringify(newState));
+    };
+
     return (
         <div className={cn(variants({ variant }), className)}>
             <div className="flex items-center justify-between">
                 <div className="items-center space-x-3 flex">
+                    {collapsible && (
+                        <Button
+                            onClick={toggleCollapse}
+                            variant="ghost"
+                            size="sm"
+                            className={cn(
+                                "p-1 h-auto hover:bg-transparent",
+                                variant === "yellow" && "text-yellow-800 hover:text-yellow-900",
+                                variant === "gray" && "text-gray-800 hover:text-gray-900",
+                                variant === "blue" && "text-blue-800 hover:text-blue-900"
+                            )}
+                        >
+                            {isCollapsed ? (
+                                <ChevronDown className="h-4 w-4" />
+                            ) : (
+                                <ChevronUp className="h-4 w-4" />
+                            )}
+                        </Button>
+                    )}
                     {
                         header && (
-                            <h3 className="font-medium ">{header}</h3>
+                            <h3 className="font-medium line-clamp-1">{header}</h3>
                         )
                     }
                     {
@@ -62,15 +107,23 @@ export default function DataInfo({
             </div>
             <div className={
                 cn(
-                    "mt-2 text-sm  grid  gap-2",
-                    columnClassName
+                    "mt-2 text-sm  transition-all duration-300 ease-in-out",
+                    columnClassName,
+                    isCollapsed && collapsible ? "hidden" : "block"
                 )
             }>
-                {lists.map((item, index) => (
-                    <Item key={index} label={item.label} value={item.value} />
-                ))}
-            </div>
+                <div className={
+                    cn(
+                        "mt-2 text-sm  grid  gap-2",
+                        columnClassName
+                    )}>
+
+                    {lists.map((item, index) => (
+                        <Item key={index} label={item.label} value={item.value} />
+                    ))}
+                </div>
         </div>
+        </div >
     );
 }
 
