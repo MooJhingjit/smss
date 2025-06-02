@@ -86,7 +86,7 @@ export async function DELETE(
             },
           });
         }
-        
+
         // Delete purchase order item receipts if they exist
         // if (poItem.purchaseOrderItemReceipt) {
         //   await tx.purchaseOrderItemReceipt.delete({
@@ -133,19 +133,42 @@ export async function DELETE(
             },
           });
         } else {
-          // Other POs exist - recalculate quotation totals
-          const { calculateQuotationItemPrice } = require("@/app/services/service.quotation");
-          const quotationSummary = calculateQuotationItemPrice(quotation.lists);
-          
-          await tx.quotation.update({
+          // Other POs exist - delete related quotation lists first, then recalculate
+
+          // Delete quotation lists that are linked to the purchase order items being deleted
+          const quotationListIdsToDelete = purchaseOrder.purchaseOrderItems
+            .map(poItem => poItem.quotationListId)
+            .filter((id): id is number => id !== null); // Filter out null values
+
+          if (quotationListIdsToDelete.length > 0) {
+            await tx.quotationList.deleteMany({
+              where: {
+                id: { in: quotationListIdsToDelete },
+              },
+            });
+          }
+
+          // Recalculate quotation totals with remaining lists
+          const updatedQuotation = await tx.quotation.findUnique({
             where: { id: quotation.id },
-            data: {
-              totalPrice: quotationSummary.totalPrice,
-              discount: quotationSummary.discount,
-              tax: quotationSummary.vat,
-              grandTotal: quotationSummary.grandTotal,
-            },
+            include: { lists: true },
           });
+
+          if (updatedQuotation?.lists && updatedQuotation.lists.length > 0) {
+            const { calculateQuotationItemPrice } = require("@/app/services/service.quotation");
+            const quotationSummary = calculateQuotationItemPrice(updatedQuotation.lists);
+
+            await tx.quotation.update({
+              where: { id: quotation.id },
+              data: {
+                totalPrice: quotationSummary.totalPrice,
+                discount: quotationSummary.discount,
+                tax: quotationSummary.vat,
+                grandTotal: quotationSummary.grandTotal,
+                isLocked: true,
+              },
+            });
+          }
         }
       }
 
@@ -157,8 +180,8 @@ export async function DELETE(
       });
     });
 
-    return NextResponse.json({ 
-      message: "Purchase order and all related data deleted successfully" 
+    return NextResponse.json({
+      message: "Purchase order and all related data deleted successfully"
     });
   } catch (error) {
     console.log("error", error);

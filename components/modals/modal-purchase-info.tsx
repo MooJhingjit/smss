@@ -79,7 +79,7 @@ export const PurchaseInfoModal = () => {
         </DialogHeader>
         <MainForm data={data} />
 
-        <DialogFooter className="border-t pt-6">
+        {/* <DialogFooter className="border-t pt-6">
           <Collapsible
             open={isActionAreaOpen}
             onOpenChange={setIsOpenActionArea}
@@ -108,7 +108,7 @@ export const PurchaseInfoModal = () => {
               </div>
             </CollapsibleContent>
           </Collapsible>
-        </DialogFooter>
+        </DialogFooter> */}
       </DialogContent>
     </Dialog>
   );

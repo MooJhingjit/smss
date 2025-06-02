@@ -192,9 +192,10 @@ model QuotationList {
   subItems              String?
   groupName             String?
   order                 Int?            @default(0)
-  createdAt             DateTime        @default(now())
-  updatedAt             DateTime        @updatedAt
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
   QuotationItems        QuotationItem[]
+  // purchaseOrderItem     PurchaseOrderItem?
 
   @@index([quotationId])
   @@index([productId])
@@ -264,6 +265,8 @@ model PurchaseOrderItem {
   id                       Int                       @id @default(autoincrement())
   purchaseOrderId          Int
   purchaseOrder            PurchaseOrder             @relation(fields: [purchaseOrderId], references: [id])
+  quotationListId          Int?                      
+  // quotationList            QuotationList?            @relation(fields: [quotationListId], references: [id])
   name                     String
   price                    Float?
   unitPrice                Float?

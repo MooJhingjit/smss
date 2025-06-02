@@ -119,6 +119,7 @@ export async function POST(req: NextRequest) {
               const purchaseOrderItem = await db.purchaseOrderItem.create({
                 data: {
                   purchaseOrderId: purchaseOrder.id,
+                  quotationListId: quotationList.id, // Link to quotation list
                   name: quotationList.name, // changed to use from list
                   quantity: quotationList.quantity,
                   description: quotationList.description, // changed to use from list
