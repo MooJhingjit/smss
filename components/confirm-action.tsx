@@ -1,20 +1,21 @@
 import React, { useEffect } from "react";
-import { Loader } from "lucide-react";
+import { AlertCircleIcon, Loader, TriangleIcon } from "lucide-react";
 import { classNames } from "@/lib/utils";
 type Props = {
   disabled?: boolean;
   onConfirm: () => void;
   children: React.ReactNode;
   isDone?: boolean;
+  warningMessage?: string[]
 };
 export default function ConfirmActionButton(props: Props) {
-  const { onConfirm, children, disabled, isDone } = props;
+  const { onConfirm, children, disabled, isDone, warningMessage } = props;
   const [showConfirm, setShowConfirm] = React.useState(false);
   const [isPending, setIsPending] = React.useState(false);
 
   useEffect(() => {
     setShowConfirm(false);
-  } , [disabled]);
+  }, [disabled]);
 
   // reset isPending when isDone is true
   useEffect(() => {
@@ -22,7 +23,7 @@ export default function ConfirmActionButton(props: Props) {
       setIsPending(false);
       setShowConfirm(false);
     }
-  }, [isDone , isPending]);
+  }, [isDone, isPending]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -45,27 +46,46 @@ export default function ConfirmActionButton(props: Props) {
 
   if (showConfirm) {
     return (
-      <span className="isolate inline-flex rounded-md shadow-sm">
-        <button
-          onClick={() => {
-            onConfirm();
-            setIsPending(true);
-          }}
-          type="button"
-          className="relative inline-flex items-center gap-x-1.5 rounded-l-md text-white bg-red-600 px-2 py-1 text-xs  ring-0  focus:z-10"
-        >
-          ยืนยัน
-        </button>
-        {!isPending && (
+      <div className="">
+        <div className="">
+          {
+            warningMessage && (
+              <div className="text-red-600 text-xs mb-2 flex items-center">
+                <div className="">
+                  <AlertCircleIcon className="w-4 h-4 mr-1" />
+                </div>
+                <div className="">
+                  {warningMessage.map((msg, index) => (
+                    <div key={index}>{msg}</div>
+                  ))}
+                </div>
+              </div>
+            )
+          }
+        </div>
+        <span className="isolate flex rounded-md shadow-sm border">
           <button
-            onClick={() => setShowConfirm(false)}
+            onClick={() => {
+              onConfirm();
+              setIsPending(true);
+            }}
             type="button"
-            className="relative -ml-px inline-flex items-center rounded-r-md bg-white px-3 py-1 text-xs  text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10"
+            className="flex-0 relative inline-flex items-center gap-x-1.5 rounded-l-md text-white bg-red-600 px-2 py-1 text-xs  ring-0  focus:z-10"
           >
-            ยกเลิก
+            ยืนยัน
           </button>
-        )}
-      </span>
+          {!isPending && (
+            <button
+              onClick={() => setShowConfirm(false)}
+              type="button"
+              className="flex-1 justify-center flex relative -ml-px items-center rounded-r-md bg-white px-3 py-1 text-xs  text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10"
+            >
+              ยกเลิก
+            </button>
+          )}
+        </span>
+
+      </div>
     );
   }
 

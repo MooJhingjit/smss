@@ -905,7 +905,7 @@ const DeleteComponent = ({
 }) => {
   const router = useRouter();
 
-  const { mutate } = useMutation<
+  const { mutate, isPending } = useMutation<
     MutationResponseType,
     Error,
     { quotationId: number }
@@ -926,32 +926,35 @@ const DeleteComponent = ({
     },
     onError: (error) => {
       console.error(error);
+      // Show specific error message if it's about purchase orders
+      if (error.message?.includes("purchase orders")) {
+        toast.error("ไม่สามารถลบได้ เนื่องจากมีใบสั่งซื้อที่เกี่ยวข้อง");
+      } else {
+        toast.error("เกิดข้อผิดพลาดในการลบ");
+      }
     },
   });
 
   const handleDelete = () => {
-    // router.push("/quotations");
     mutate({ quotationId });
   };
 
-  if (hasList) {
-    return (
-      <span className="text-orange-500 text-xs">
-        ไม่สามารถลบได้ เนื่องจากมีรายการสินค้าแล้ว
-      </span>
-    );
-  }
-
   return (
-    <ConfirmActionButton onConfirm={handleDelete}>
+    <ConfirmActionButton 
+      onConfirm={handleDelete}
+      disabled={isPending}
+      warningMessage={[
+        'ทุกอย่างที่เกี่ยวข้องกับใบเสนอราคานี้จะถูกลบ',
+        'รวมถึงรายการสินค้า, ใบสั่งซื้อ, และใบแจ้งหนี้',
+      ]}
+    >
       <Button
         variant="link"
-        disabled={hasList}
-        className="inline-flex items-center px-2 py-1 rounded-md  text-xs h-full"
+        disabled={isPending}
+        className="inline-flex items-center px-2 py-1 rounded-md text-xs h-full"
         asChild
       >
-        {/* <Delete className="w-4 h-4 mr-1" /> */}
-        <span>ลบใบเสนอราคา</span>
+        <span>{isPending ? "กำลังลบ..." : "ลบใบเสนอราคา"}</span>
       </Button>
     </ConfirmActionButton>
   );

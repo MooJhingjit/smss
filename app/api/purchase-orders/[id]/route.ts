@@ -37,3 +37,131 @@ export async function PUT(
     return new NextResponse("Internal Error", { status: 500 });
   }
 }
+
+// DELETE /api/purchase-orders/:id
+export async function DELETE(
+  req: NextRequest,
+  context: { params: { id: number } }
+) {
+  try {
+    const { id } = context.params;
+    if (!id) {
+      return new NextResponse("Missing id", { status: 400 });
+    }
+
+    const purchaseOrderId = Number(id);
+
+    // First, get the purchase order with its related data
+    const purchaseOrder = await db.purchaseOrder.findUnique({
+      where: { id: purchaseOrderId },
+      include: {
+        purchaseOrderItems: {
+          include: {
+            items: true,
+            purchaseOrderItemReceipt: true,
+          },
+        },
+        medias: true,
+        quotation: {
+          include: {
+            purchaseOrders: true,
+            lists: true,
+          },
+        },
+      },
+    });
+
+    if (!purchaseOrder) {
+      return new NextResponse("Purchase order not found", { status: 404 });
+    }
+
+    // Start transaction to delete all related data
+    await db.$transaction(async (tx) => {
+      // 1. Delete items associated with purchase order items
+      for (const poItem of purchaseOrder.purchaseOrderItems) {
+        if (poItem.items.length > 0) {
+          await tx.item.deleteMany({
+            where: {
+              purchaseOrderItemId: poItem.id,
+            },
+          });
+        }
+        
+        // Delete purchase order item receipts if they exist
+        // if (poItem.purchaseOrderItemReceipt) {
+        //   await tx.purchaseOrderItemReceipt.delete({
+        //     where: {
+        //       id: poItem.purchaseOrderItemReceipt.id,
+        //     },
+        //   });
+        // }
+      }
+
+      // 2. Delete purchase order items
+      if (purchaseOrder.purchaseOrderItems.length > 0) {
+        await tx.purchaseOrderItem.deleteMany({
+          where: {
+            purchaseOrderId: purchaseOrderId,
+          },
+        });
+      }
+
+      // 3. Delete purchase order medias
+      if (purchaseOrder.medias.length > 0) {
+        await tx.media.deleteMany({
+          where: {
+            purchaseOrderId: purchaseOrderId,
+          },
+        });
+      }
+
+      // 4. Handle quotation logic if this PO is related to a quotation
+      if (purchaseOrder.quotation) {
+        const quotation = purchaseOrder.quotation;
+        const remainingPOs = quotation.purchaseOrders.filter(po => po.id !== purchaseOrderId);
+
+        if (remainingPOs.length === 0) {
+          // No other POs exist - reset quotation to unlocked state
+          await tx.quotation.update({
+            where: { id: quotation.id },
+            data: {
+              totalPrice: null,
+              discount: null,
+              tax: null,
+              grandTotal: null,
+              isLocked: false,
+            },
+          });
+        } else {
+          // Other POs exist - recalculate quotation totals
+          const { calculateQuotationItemPrice } = require("@/app/services/service.quotation");
+          const quotationSummary = calculateQuotationItemPrice(quotation.lists);
+          
+          await tx.quotation.update({
+            where: { id: quotation.id },
+            data: {
+              totalPrice: quotationSummary.totalPrice,
+              discount: quotationSummary.discount,
+              tax: quotationSummary.vat,
+              grandTotal: quotationSummary.grandTotal,
+            },
+          });
+        }
+      }
+
+      // 5. Finally, delete the purchase order itself
+      await tx.purchaseOrder.delete({
+        where: {
+          id: purchaseOrderId,
+        },
+      });
+    });
+
+    return NextResponse.json({ 
+      message: "Purchase order and all related data deleted successfully" 
+    });
+  } catch (error) {
+    console.log("error", error);
+    return new NextResponse("Internal Error", { status: 500 });
+  }
+}

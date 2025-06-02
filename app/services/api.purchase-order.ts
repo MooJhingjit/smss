@@ -19,11 +19,17 @@ const put = (id: number, data: Record<string, any>) => {
   });
 };
 
+const deleteItem = (id: number) => {
+  return fetcher(`/api/purchase-orders/${id}`, {
+    method: "DELETE",
+  });
+};
 
 const APIs = {
   get,
   generatePOs,
   put,
+  delete: deleteItem,
 };
 
 export default APIs;

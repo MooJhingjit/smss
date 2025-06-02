@@ -3,6 +3,7 @@
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -34,6 +35,7 @@ import { customRevalidatePath } from "@/actions/revalidateTag";
 import PO_SERVICES from "@/app/services/api.purchase-order";
 import PaymentOptionControl from "@/components/payment-option-control";
 import QT_SERVICES from "@/app/services/api.quotation";
+import ConfirmActionButton from "@/components/confirm-action";
 
 import {
   Tooltip,
@@ -41,16 +43,23 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { FormInput } from "../form/form-input";
 // import { Input } from "../ui/custom-input";
 // import { usePurchaseOrderReceiptModal } from "@/hooks/use-po-receipt-modal";
 import Link from "next/link";
 import { ReceiptPrint } from "@/components/print-receipt";
+import { ChevronsUpDown } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export const PurchaseInfoModal = () => {
   const modal = usePurchaseOrderInfoModal();
   const data = modal.data;
-  // const [isActionAreaOpen, setIsOpenActionArea] = React.useState(false)
+  const [isActionAreaOpen, setIsOpenActionArea] = React.useState(false);
 
   if (!data) {
     return null;
@@ -70,8 +79,7 @@ export const PurchaseInfoModal = () => {
         </DialogHeader>
         <MainForm data={data} />
 
-        {/* <DialogFooter className="border-t pt-6">
-
+        <DialogFooter className="border-t pt-6">
           <Collapsible
             open={isActionAreaOpen}
             onOpenChange={setIsOpenActionArea}
@@ -89,28 +97,18 @@ export const PurchaseInfoModal = () => {
               </div>
             </CollapsibleTrigger>
             <CollapsibleContent className="space-y-2">
-              <div className="w-full grid grid-cols-2 gap-3">
+              <div className="w-full grid grid-cols-1 gap-3">
                 <div className="bg-gray-50 p-2 flex items-center justify-center">
                   <DeleteComponent
+                    purchaseOrderId={data.id}
+                    hasQuotation={!!data.quotationId}
                     onDeleted={modal.onClose}
-                    quotationId={data?.id}
-                    hasList={data?.lists ? data.lists.length > 0 : false}
-                  />
-                </div>
-                <div className="bg-gray-50 p-2 flex items-center justify-center">
-                  <VersionUpdate
-                    hasPo={!!data?.purchaseOrders?.length}
-                    currentVersion={data?.code}
-                    quotationId={data?.id}
                   />
                 </div>
               </div>
             </CollapsibleContent>
           </Collapsible>
-
-
-
-        </DialogFooter> */}
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
@@ -394,6 +392,62 @@ const StatusDropdown = ({
         ))}
       </SelectContent>
     </Select>
+  );
+};
+
+const DeleteComponent = ({
+  purchaseOrderId,
+  hasQuotation,
+  onDeleted,
+}: {
+  purchaseOrderId: number;
+  hasQuotation: boolean;
+  onDeleted: () => void;
+}) => {
+  const router = useRouter();
+
+  const { mutate, isPending } = useMutation<
+    MutationResponseType,
+    Error,
+    { purchaseOrderId: number }
+  >({
+    mutationFn: async (fields) => {
+      console.log("🚀 ~ mutationFn: ~ fields:", fields);
+      const res = await PO_SERVICES.delete(fields.purchaseOrderId);
+      return res;
+    },
+    onSuccess: async (n) => {
+      toast.success("ลบใบสั่งซื้อสำเร็จ");
+      // invalidate query and redirect
+      customRevalidatePath(`/purchase-orders`);
+      router.push("/purchase-orders");
+      
+      onDeleted();
+    },
+    onError: (error) => {
+      console.error(error);
+      toast.error("เกิดข้อผิดพลาดในการลบ");
+    },
+  });
+
+  const handleDelete = () => {
+    mutate({ purchaseOrderId });
+  };
+
+  return (
+    <ConfirmActionButton 
+      onConfirm={handleDelete}
+      disabled={isPending}
+    >
+      <Button
+        variant="link"
+        disabled={isPending}
+        className="inline-flex items-center px-2 py-1 rounded-md text-xs h-full text-red-600 hover:text-red-700"
+        asChild
+      >
+        <span>{isPending ? "กำลังลบ..." : "ลบใบสั่งซื้อ"}</span>
+      </Button>
+    </ConfirmActionButton>
   );
 };
 
