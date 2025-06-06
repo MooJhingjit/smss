@@ -15,7 +15,6 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import { NewStats } from "./stat-chart";
 
 ChartJS.register(
   CategoryScale,

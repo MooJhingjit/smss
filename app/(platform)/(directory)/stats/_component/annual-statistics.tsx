@@ -31,15 +31,15 @@ interface StatsData {
 const chartConfig = {
   salesWithVAT: {
     label: "ยอดขายรวม VAT : ",
-    color: "hsl(var(--chart-1))",
+    color: "#16a34a", // green-600
   },
   salesWithoutVAT: {
     label: "ยอดขายไม่รวม VAT : ",
-    color: "hsl(var(--chart-2))",
+    color: "#2563eb", // blue-600
   },
   purchase: {
     label: "ยอดสั่งซื้อ : ",
-    color: "hsl(var(--chart-3))",
+    color: "#ea580c", // orange-600
   },
 } satisfies ChartConfig
 
@@ -48,10 +48,14 @@ interface NewStatsProps {
   year: number;
 }
 
-export function NewStats({ data, year }: NewStatsProps) {
+export function AnnualStatistics({ data, year }: NewStatsProps) {
+  const thaiMonths = [
+    'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+    'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+  ];
   // Transform data format for recharts
   const chartData = data.labels.map((month, index) => ({
-    month,
+    month: thaiMonths[index] || month,
     salesWithVAT: data.datasets[0].data[index],
     salesWithoutVAT: data.datasets[1].data[index],
     purchase: data.datasets[2].data[index],
@@ -75,7 +79,7 @@ export function NewStats({ data, year }: NewStatsProps) {
         <div className="flex flex-col md:flex-row justify-between md:items-center space-y-4 md:space-y-0">
           <CardTitle className="flex items-start gap-2">
             <div className="space-y-1">
-              <p>{`ยอดขาย และยอดสั่งซื้อทั้งปี`}</p>
+              <p>{`สถิติทั้งปี`}</p>
             </div>
           </CardTitle>
           <div className="flex flex-col sm:flex-row  gap-2 md:gap-x-10">

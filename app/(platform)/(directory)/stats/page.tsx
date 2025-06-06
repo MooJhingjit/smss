@@ -1,8 +1,9 @@
 import React from "react";
 import { db } from "@/lib/db";
-import { NewStats } from "./_component/stat-chart";
-import StatChartB from "./_component/stat-chart-b";
+import { AnnualStatistics } from "./_component/annual-statistics";
+// import StatChartB from "./_component/stat-chart-b";
 import TotalNumber from "./_component/total-number";
+import MonthlyStatistics from "./_component/monthly-statistics";
 
 const labels = [
   "January",
@@ -139,8 +140,6 @@ export default async function StatPage({
     ? parseInt(searchParams.year)
     : new Date().getFullYear();
   const data = await getData(year);
-  // console.log("🚀 ~ data:", JSON.stringify(data))
-  // const data = { "labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], "datasets": [{ "label": "ยอดขายรวม VAT", "data": [769888.54, 1026415.1015, 1268912.6362, 1698659.6573, 144022, 0, 0, 0, 0, 0, 0, 0] }, { "label": "ยอดขายไม่รวม VAT", "data": [719522, 959266.4500000001, 1185899.66, 1587532.39, 134600, 0, 0, 0, 0, 0, 0, 0] }, { "label": "ยอดสั่งซื้อ", "data": [0, 0, 734256, 1692653.41, 656240, 0, 0, 0, 0, 0, 0, 0] }] }
 
   // Get total counts of quotations and purchase orders for the year
   const totals = await getTotalCounts(year);
@@ -152,7 +151,14 @@ export default async function StatPage({
         quotationCount={totals.quotationCount}
         purchaseOrderCount={totals.purchaseOrderCount}
       />
-      <NewStats data={data} year={year} />
+      <div className="grid grid-cols-3 gap-6">
+        <div className="col-span-2">
+          <AnnualStatistics data={data} year={year} />
+        </div>
+        <div className="col-span-1">
+          <MonthlyStatistics data={data} year={year} />
+        </div>
+      </div>
     </div>
   );
 }
