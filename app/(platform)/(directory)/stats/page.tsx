@@ -152,10 +152,10 @@ export default async function StatPage({
         purchaseOrderCount={totals.purchaseOrderCount}
       />
       <div className="grid grid-cols-3 gap-6">
-        <div className="col-span-2">
+        <div className="col-span-3 lg:col-span-2">
           <AnnualStatistics data={data} year={year} />
         </div>
-        <div className="col-span-1">
+        <div className="col-span-3 lg:col-span-1">
           <MonthlyStatistics data={data} year={year} />
         </div>
       </div>
