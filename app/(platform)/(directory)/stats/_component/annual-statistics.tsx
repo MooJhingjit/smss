@@ -37,6 +37,10 @@ const chartConfig = {
     label: "ยอดขายไม่รวม VAT : ",
     color: "#2563eb", // blue-600
   },
+  salesData: {
+    label: "ยอดขายที่ชำระแล้ว : ",
+    color: "#9333ea", // purple-600
+  },
   purchase: {
     label: "ยอดสั่งซื้อ : ",
     color: "#ea580c", // orange-600
@@ -58,49 +62,24 @@ export function AnnualStatistics({ data, year }: NewStatsProps) {
     month: thaiMonths[index] || month,
     salesWithVAT: data.datasets[0].data[index],
     salesWithoutVAT: data.datasets[1].data[index],
-    purchase: data.datasets[2].data[index],
+    salesData: data.datasets[2].data[index],
+    purchase: data.datasets[3].data[index],
   }));
 
-  // Calculate yearly totals for each data series
-  const yearTotals = {
-    salesWithVAT: chartData.reduce((sum, item) => sum + (item.salesWithVAT || 0), 0),
-    salesWithoutVAT: chartData.reduce((sum, item) => sum + (item.salesWithoutVAT || 0), 0),
-    purchase: chartData.reduce((sum, item) => sum + (item.purchase || 0), 0),
-  };
+  // // Calculate yearly totals for each data series
+  // const yearTotals = {
+  //   salesWithVAT: chartData.reduce((sum, item) => sum + (item.salesWithVAT || 0), 0),
+  //   salesWithoutVAT: chartData.reduce((sum, item) => sum + (item.salesWithoutVAT || 0), 0),
+  //   purchase: chartData.reduce((sum, item) => sum + (item.purchase || 0), 0),
+  // };
 
-  // Format numbers for display
-  const formatNumber = (num: number) => {
-    return new Intl.NumberFormat('th-TH').format(num);
-  };
+  // // Format numbers for display
+  // const formatNumber = (num: number) => {
+  //   return new Intl.NumberFormat('th-TH').format(num);
+  // };
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex flex-col md:flex-row justify-between md:items-center space-y-4 md:space-y-0">
-          <CardTitle className="flex items-start gap-2">
-            <div className="space-y-1">
-              <p>{`สถิติทั้งปี`}</p>
-            </div>
-          </CardTitle>
-          <div className="flex flex-col sm:flex-row  gap-2 md:gap-x-10">
-            {Object.entries(chartConfig).map(([key, { label, color }]) => (
-              <>
-                <div key={key} className="">
-                  <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: color }} />
-                    <span className="text-sm text-muted-foreground">{label} </span>
-                  </div>
-                  <span className="text-lg font-medium" style={{ color }}>
-                    {formatNumber(yearTotals[key as keyof typeof yearTotals])}
-                  </span>
-                </div>
-                <Separator orientation="vertical" />
-              </>
-            ))}
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
+ 
         <ChartContainer config={chartConfig} className="min-h-[200px] w-full max-h-[500px]">
           <LineChart
             accessibilityLayer
@@ -134,6 +113,13 @@ export function AnnualStatistics({ data, year }: NewStatsProps) {
               dot={true}
             />
             <Line
+              dataKey="salesData"
+              type="monotone"
+              stroke="var(--color-salesData)"
+              strokeWidth={2}
+              dot={true}
+            />
+            <Line
               dataKey="purchase"
               type="monotone"
               stroke="var(--color-purchase)"
@@ -142,7 +128,5 @@ export function AnnualStatistics({ data, year }: NewStatsProps) {
             />
           </LineChart>
         </ChartContainer>
-      </CardContent>
-    </Card>
   )
 }

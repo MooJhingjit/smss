@@ -69,6 +69,12 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
           name={id}
           id={id}
           register={register}
+          onWheel={(e) => {
+            // Prevent scrolling when using number input with step
+            if (type === "number" && step) {
+              e.currentTarget.blur();
+            }
+          }}
           placeholder={placeholder}
           type={type}
           readOnly={readOnly}

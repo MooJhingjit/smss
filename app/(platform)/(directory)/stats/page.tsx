@@ -20,12 +20,13 @@ const labels = [
   "December",
 ];
 const getData = async (year = new Date().getUTCFullYear()) => {
-  const salesData = await Promise.all(
+  const monthlyData = await Promise.all(
     Array.from({ length: 12 }).map(async (_, month) => {
       const startDate = new Date(Date.UTC(year, month, 1));
       const endDate = new Date(Date.UTC(year, month + 1, 1)); // First day of next month (exclusive)
 
-      const salesWithVAT = await db.quotation.aggregate({
+      // Paid transactions
+      const paidWithVAT = await db.quotation.aggregate({
         _sum: {
           grandTotal: true,
         },
@@ -34,10 +35,11 @@ const getData = async (year = new Date().getUTCFullYear()) => {
             gte: startDate,
             lt: endDate,
           },
+          status: "paid",
         },
       });
 
-      const salesWithoutVAT = await db.quotation.aggregate({
+      const paidWithoutVAT = await db.quotation.aggregate({
         _sum: {
           totalPrice: true,
         },
@@ -46,22 +48,43 @@ const getData = async (year = new Date().getUTCFullYear()) => {
             gte: startDate,
             lt: endDate,
           },
+          status: "paid",
         },
       });
 
-      return {
-        withVAT: Number(salesWithVAT._sum.grandTotal) || 0,
-        withoutVAT: Number(salesWithoutVAT._sum.totalPrice) || 0,
-      };
-    })
-  );
+      // Unpaid transactions
+      const unpaidWithVAT = await db.quotation.aggregate({
+        _sum: {
+          grandTotal: true,
+        },
+        where: {
+          createdAt: {
+            gte: startDate,
+            lt: endDate,
+          },
+          status: {
+            not: "paid",
+          },
+        },
+      });
 
-  const purchaseData = await Promise.all(
-    Array.from({ length: 12 }).map(async (_, month) => {
-      const startDate = new Date(Date.UTC(year, month, 1));
-      const endDate = new Date(Date.UTC(year, month + 1, 1)); // First day of next month
+      const unpaidWithoutVAT = await db.quotation.aggregate({
+        _sum: {
+          totalPrice: true,
+        },
+        where: {
+          createdAt: {
+            gte: startDate,
+            lt: endDate,
+          },
+          status: {
+            not: "paid",
+          },
+        },
+      });
 
-      const purchaseAmount = await db.purchaseOrder.aggregate({
+      // Purchase Order data
+      const purchaseOrder = await db.purchaseOrder.aggregate({
         _sum: {
           totalPrice: true,
         },
@@ -76,31 +99,21 @@ const getData = async (year = new Date().getUTCFullYear()) => {
         },
       });
 
-      return Number(purchaseAmount._sum.totalPrice) || 0;
+      return {
+        paid: {
+          withVAT: Number(paidWithVAT._sum.grandTotal) || 0,
+          withoutVAT: Number(paidWithoutVAT._sum.totalPrice) || 0,
+        },
+        unpaid: {
+          withVAT: Number(unpaidWithVAT._sum.grandTotal) || 0,
+          withoutVAT: Number(unpaidWithoutVAT._sum.totalPrice) || 0,
+        },
+        purchaseOrder: Number(purchaseOrder._sum.totalPrice) || 0,
+      };
     })
   );
 
-  const labels = Array.from({ length: 12 }, (_, i) =>
-    new Date(Date.UTC(year, i)).toLocaleString("default", { month: "short" })
-  );
-
-  return {
-    labels,
-    datasets: [
-      {
-        label: "ยอดขายรวม VAT",
-        data: salesData.map((data) => data.withVAT),
-      },
-      {
-        label: "ยอดขายไม่รวม VAT",
-        data: salesData.map((data) => data.withoutVAT),
-      },
-      {
-        label: "ยอดสั่งซื้อ",
-        data: purchaseData,
-      },
-    ],
-  };
+  return monthlyData;
 };
 
 const getTotalCounts = async (year = new Date().getUTCFullYear()) => {
@@ -152,10 +165,8 @@ export default async function StatPage({
         purchaseOrderCount={totals.purchaseOrderCount}
       />
       <div className="grid grid-cols-3 gap-6">
-        <div className="col-span-3 lg:col-span-2">
-          <AnnualStatistics data={data} year={year} />
-        </div>
-        <div className="col-span-3 lg:col-span-1">
+
+        <div className="col-span-3 ">
           <MonthlyStatistics data={data} year={year} />
         </div>
       </div>
