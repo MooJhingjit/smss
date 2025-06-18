@@ -729,15 +729,16 @@ const drawSignature = (page: PDFPage, signatureData: SignatureData) => {
     // Draw approver signature
     page.drawImage(signatureData.approverSignatureImage, {
       x: 460,
-      y: 68,
+      y: 65,
       ...signatureData.approverSignatureImage.scale(0.12),
     });
 
     // Approver phone
     page.drawText(signatureData.approverPhone, {
       x: 460,
-      y: 60,
+      y: 56,
       ...config,
+      
     });
 
     // Approver date
@@ -746,7 +747,7 @@ const drawSignature = (page: PDFPage, signatureData: SignatureData) => {
       x: 450,
       y: 45,
       ...config,
-      size: PAGE_FONT_SIZE,
+      size: PAGE_FONT_SIZE -1 , 
     });
   }
 
@@ -755,14 +756,14 @@ const drawSignature = (page: PDFPage, signatureData: SignatureData) => {
   if (signatureData.sellerSignatureImage) {
     page.drawImage(signatureData.sellerSignatureImage, {
       x: 290,
-      y: 66,
+      y: 65,
       ...signatureData.approverSignatureImage.scale(0.12),
     });
 
     // Seller phone
     page.drawText(signatureData.sellerPhone, {
       x: 290,
-      y: 60,
+      y: 56,
       ...config,
     });
 
@@ -771,7 +772,7 @@ const drawSignature = (page: PDFPage, signatureData: SignatureData) => {
       x: 280,
       y: 45,
       ...config,
-      size: PAGE_FONT_SIZE,
+      size: PAGE_FONT_SIZE - 1 ,
     });
   }
 };
