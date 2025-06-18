@@ -3,15 +3,18 @@ import Quotations from "./components/overview.quotations";
 import ShortcutMenus from "./components/seller.shortcut-menus";
 import { db } from "@/lib/db";
 import { QuotationWithBuyer } from "@/types";
-import { useUser } from "@/hooks/use-user";
+import { currentUser } from "@/lib/auth";
 import Tasks from "./components/tasks";
+import { SellerStats } from "@/components/stats";
 
-async function GetData(): Promise<[QuotationWithBuyer[], QuotationWithBuyer[], { _sum: { totalPrice: number | null } }]> {
-  const { info } = await useUser();
+async function GetData(): Promise<[QuotationWithBuyer[], QuotationWithBuyer[], { _sum: { totalPrice: number | null } }, number]> {
+  const user = await currentUser();
 
-  if (!info?.id) {
-    return [[], [], { _sum: { totalPrice: 0 } }];
+  if (!user?.id) {
+    return [[], [], { _sum: { totalPrice: 0 } }, 0];
   }
+
+  const sellerId = parseInt(user.id);
 
   const tasks = db.quotation.findMany({
     include: {
@@ -19,7 +22,7 @@ async function GetData(): Promise<[QuotationWithBuyer[], QuotationWithBuyer[], {
     },
     where: {
       status: "offer",
-      sellerId: parseInt(info.id),
+      sellerId: sellerId,
     },
     take: 5,
     orderBy: {
@@ -32,7 +35,7 @@ async function GetData(): Promise<[QuotationWithBuyer[], QuotationWithBuyer[], {
       contact: true,
     },
     where: {
-      sellerId: parseInt(info.id),
+      sellerId: sellerId,
     },
     take: 5,
     orderBy: {
@@ -46,7 +49,7 @@ async function GetData(): Promise<[QuotationWithBuyer[], QuotationWithBuyer[], {
       totalPrice: true,
     },
     where: {
-      sellerId: parseInt(info.id),
+      sellerId: sellerId,
       updatedAt: {
         gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
       },
@@ -54,16 +57,21 @@ async function GetData(): Promise<[QuotationWithBuyer[], QuotationWithBuyer[], {
   });
 
   const res = await Promise.all([tasks, quotations, saleTotal]);
-  return res;
-
+  return [...res, sellerId];
 }
-export default async function SellerHomePage() {
-  const [tasks, quotations, stats] = await GetData();
+export default async function SellerHomePage({
+  searchParams,
+}: {
+  readonly searchParams: { year?: string };
+}) {
+  const year = searchParams.year
+    ? parseInt(searchParams.year)
+    : new Date().getFullYear();
+  
+  const [tasks, quotations, stats, sellerId] = await GetData();
 
   return (
     <div className="h-screen ">
-
-      
       <div className="grid grid-cols-12 gap-6 ">
         <div className="md:col-span-5 col-span-12">
           <div className="relative rounded-xl overflow-hidden ">
@@ -79,9 +87,10 @@ export default async function SellerHomePage() {
         <div className="col-span-12">
           <Quotations data={quotations} />
         </div>
-        {/* <div className="col-span-12 ">
-          <StatisticCard />
-        </div> */}
+
+        <div className="col-span-12">
+          <SellerStats sellerId={sellerId} year={year} />
+        </div>
       </div>
     </div>
   );

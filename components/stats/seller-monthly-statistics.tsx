@@ -17,12 +17,12 @@ import {
 } from "@/components/ui/chart"
 import { MonthlyStatsData } from "@/lib/stats.service"
 
-interface MonthlyStatisticsProps {
+interface SellerMonthlyStatisticsProps {
   readonly data: MonthlyStatsData[];
   readonly year: number;
 }
 
-export default function MonthlyStatistics({ data, year }: MonthlyStatisticsProps) {
+export default function SellerMonthlyStatistics({ data, year }: SellerMonthlyStatisticsProps) {
   const monthNames = [
     'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
     'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'
@@ -66,19 +66,17 @@ export default function MonthlyStatistics({ data, year }: MonthlyStatisticsProps
         withVAT: acc.unpaid.withVAT + monthData.unpaid.withVAT,
         withoutVAT: acc.unpaid.withoutVAT + monthData.unpaid.withoutVAT,
       },
-      purchaseOrder: (acc.purchaseOrder ?? 0) + (monthData.purchaseOrder ?? 0),
     }),
     {
       paid: { withVAT: 0, withoutVAT: 0 },
       unpaid: { withVAT: 0, withoutVAT: 0 },
-      purchaseOrder: 0,
     }
   );
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>สถิติรายเดือน {year}</CardTitle>
+        <CardTitle>สถิติยอดขายรายเดือน {year}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
@@ -86,9 +84,6 @@ export default function MonthlyStatistics({ data, year }: MonthlyStatisticsProps
             <thead>
               <tr className="border-b">
                 <th className="text-left py-3 px-2">เดือน</th>
-                <th className="text-center py-3 px-2 border-l border-r">
-                  ยอดสั่งซื้อ
-                </th>
                 <th className="text-center py-3 px-2 border-l border-r" colSpan={2}>
                   ยอดขายที่ยังไม่ชำระ
                 </th>
@@ -101,7 +96,6 @@ export default function MonthlyStatistics({ data, year }: MonthlyStatisticsProps
               </tr>
               <tr className="border-b bg-gray-50">
                 <th className="text-left py-2 px-2"></th>
-                <th className="text-right py-2 px-2 text-xs border-l border-r">รวม</th>
                 <th className="text-right py-2 px-2 text-xs border-l">รวม VAT</th>
                 <th className="text-right py-2 px-2 text-xs border-r">ไม่รวม VAT</th>
                 <th className="text-right py-2 px-2 text-xs">รวม VAT</th>
@@ -114,9 +108,6 @@ export default function MonthlyStatistics({ data, year }: MonthlyStatisticsProps
               {monthNames.map((month, index) => (
                 <tr key={`${month}-${year}`} className="border-b hover:bg-gray-50">
                   <td className="py-2 px-2 font-medium">{month}</td>
-                  <td className="py-2 px-2 text-right text-blue-600 border-l border-r">
-                    {formatCurrency(data[index]?.purchaseOrder ?? 0)}
-                  </td>
                   <td className="py-2 px-2 text-right text-orange-600 border-l">
                     {formatCurrency(data[index]?.unpaid.withVAT || 0)}
                   </td>
@@ -141,9 +132,6 @@ export default function MonthlyStatistics({ data, year }: MonthlyStatisticsProps
             <tfoot>
               <tr className="border-t-2 font-semibold bg-gray-50">
                 <td className="py-3 px-2">รวม</td>
-                <td className="py-3 px-2 text-right text-blue-600 border-l border-r">
-                  {formatCurrency(totals.purchaseOrder ?? 0)}
-                </td>
                 <td className="py-3 px-2 text-right text-orange-600 border-l">
                   {formatCurrency(totals.unpaid.withVAT)}
                 </td>
@@ -156,10 +144,10 @@ export default function MonthlyStatistics({ data, year }: MonthlyStatisticsProps
                 <td className="py-3 px-2 text-right text-green-600 border-r">
                   {formatCurrency(totals.paid.withoutVAT)}
                 </td>
-                <td className="py-3 px-2 text-right text-purple-700 font-bold">
+                <td className="py-3 px-2 text-right text-blue-700 font-bold">
                   {formatCurrency(totals.unpaid.withVAT + totals.paid.withVAT)}
                 </td>
-                <td className="py-3 px-2 text-right text-purple-600 font-bold">
+                <td className="py-3 px-2 text-right text-blue-600 font-bold">
                   {formatCurrency(totals.unpaid.withoutVAT + totals.paid.withoutVAT)}
                 </td>
               </tr>

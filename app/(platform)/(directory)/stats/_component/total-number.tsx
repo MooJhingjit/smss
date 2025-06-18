@@ -1,6 +1,6 @@
 "use client"
 
-import YearSelector from "./year-selector"
+import { YearSelector } from "@/components/stats"
 
 
 export default function TotalNumber({ 

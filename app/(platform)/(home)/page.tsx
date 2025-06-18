@@ -1,10 +1,15 @@
 import React from "react";
-import { useUser } from "@/hooks/use-user";
+import { currentUser } from "@/lib/auth";
 import AdminHomePage from "@home_features/admin.page";
 import SellerHomePage from "@home_features/seller.page";
 
-export default async function HomePage() {
-  const { isAdmin } = await useUser();
+export default async function HomePage({
+  searchParams,
+}: {
+  readonly searchParams: { year?: string };
+}) {
+  const user = await currentUser();
+  const isAdmin = user?.role === "admin";
 
   if (isAdmin) {
     return (
@@ -16,7 +21,7 @@ export default async function HomePage() {
   
   return (
     <div className="mx-auto max-w-7xl px-2 xl:px-0">
-      <SellerHomePage />
+      <SellerHomePage searchParams={searchParams} />
     </div>
   );
 }
