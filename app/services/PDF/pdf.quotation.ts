@@ -729,14 +729,14 @@ const drawSignature = (page: PDFPage, signatureData: SignatureData) => {
     // Draw approver signature
     page.drawImage(signatureData.approverSignatureImage, {
       x: 460,
-      y: 70,
+      y: 68,
       ...signatureData.approverSignatureImage.scale(0.12),
     });
 
     // Approver phone
     page.drawText(signatureData.approverPhone, {
       x: 460,
-      y: 62,
+      y: 60,
       ...config,
     });
 
@@ -755,14 +755,14 @@ const drawSignature = (page: PDFPage, signatureData: SignatureData) => {
   if (signatureData.sellerSignatureImage) {
     page.drawImage(signatureData.sellerSignatureImage, {
       x: 290,
-      y: 70,
+      y: 66,
       ...signatureData.approverSignatureImage.scale(0.12),
     });
 
     // Seller phone
     page.drawText(signatureData.sellerPhone, {
       x: 290,
-      y: 62,
+      y: 60,
       ...config,
     });
 
