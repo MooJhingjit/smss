@@ -108,7 +108,7 @@ const generate = async (id: number) => {
   if (!_DATA) return;
   // list start position
   const ITEM_Y_Start = 545;
-  const ITEM_X_Start = 60;
+  const ITEM_X_Start = 63;
 
   // Track the current page number as a reference object so it can be updated from validatePageArea
   const pageNumberRef = { currentPageNumber: 1 };
@@ -666,7 +666,7 @@ const drawPriceInfo = (
     lineHeight: 14,
   };
 
-  const columnPosition = 520;
+  const columnPosition = 523;
 
   page.drawText(totalPrice, {
     x: columnPosition + 46 - getTextWidth(totalPrice, config),
