@@ -336,8 +336,9 @@ const generate = async (id: number) => {
   // Load seller signature if available
   const sellerId = _DATA.seller?.id;
   let sellerSignatureImage = null;
+  let sellerSignature = null
   if (sellerId) {
-    const sellerSignature = await loadSignatureImage(sellerId.toString());
+    sellerSignature = await loadSignatureImage(sellerId.toString());
     sellerSignatureImage = await pdfDoc.embedPng(
       sellerSignature.imageBytes as any
     );
@@ -345,10 +346,19 @@ const generate = async (id: number) => {
 
   // Store these values to be used in drawSignature function
   const signatureData = {
+    // approver information
     approverSignatureImage,
+    approverSignatureImageScale: approverSignature.scale,
+    approverName: approver?.name ?? "",
     approverPhone: approver?.phone ?? "",
+
+    // seller information
+    sellerName: _DATA.seller?.name ?? "",
     sellerSignatureImage,
-    sellerPhone: _DATA.seller?.phone ?? ""
+    sellerPhone: _DATA.seller?.phone ?? "",
+    sellerSignatureImageScale: sellerSignature
+      ? sellerSignature.scale
+      : null,
   };
 
   // check qt status, if not open or pending_approval 
@@ -707,9 +717,13 @@ const drawPriceInfo = (
 // Define a type for signature data to pass around
 type SignatureData = {
   approverSignatureImage: PDFImage;
+  approverSignatureImageScale: number;
   approverPhone: string;
   sellerSignatureImage: PDFImage | null;
+  sellerSignatureImageScale: number | null;
   sellerPhone: string;
+  approverName: string;
+  sellerName: string;
 };
 
 const drawSignature = (page: PDFPage, signatureData: SignatureData) => {
@@ -726,17 +740,26 @@ const drawSignature = (page: PDFPage, signatureData: SignatureData) => {
   const isShowApproverSignature = !["open", "pending_approval"].includes(_DATA?.status ?? "");
 
   if (isShowApproverSignature) {
+
+    // Draw approver name
+    page.drawText(signatureData.approverName, {
+      x: 460,
+      y: 72,
+      ...config,
+      
+    });
+
     // Draw approver signature
     page.drawImage(signatureData.approverSignatureImage, {
-      x: 460,
-      y: 65,
-      ...signatureData.approverSignatureImage.scale(0.12),
+      x: 505,
+      y: 55,
+      ...signatureData.approverSignatureImage.scale(signatureData.approverSignatureImageScale),
     });
 
     // Approver phone
     page.drawText(signatureData.approverPhone, {
       x: 460,
-      y: 56,
+      y: 63,
       ...config,
       
     });
@@ -754,16 +777,27 @@ const drawSignature = (page: PDFPage, signatureData: SignatureData) => {
 
   // Draw seller signature if available
   if (signatureData.sellerSignatureImage) {
-    page.drawImage(signatureData.sellerSignatureImage, {
+
+
+    // Draw seller name
+    page.drawText(signatureData.sellerName, {
       x: 290,
-      y: 65,
-      ...signatureData.approverSignatureImage.scale(0.12),
+      y: 72,
+      ...config,
+      
+    });
+
+
+    page.drawImage(signatureData.sellerSignatureImage, {
+      x: 335,
+      y: 55,
+      ...signatureData.sellerSignatureImage.scale(signatureData.sellerSignatureImageScale ?? 0),
     });
 
     // Seller phone
     page.drawText(signatureData.sellerPhone, {
       x: 290,
-      y: 56,
+      y: 63,
       ...config,
     });
 
