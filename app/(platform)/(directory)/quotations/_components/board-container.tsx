@@ -15,6 +15,8 @@ import { FormInput } from "@/components/form/form-input";
 import { useSearchParams } from "next/navigation";
 import { productTypeMapping, quotationStatusMapping } from "@/app/config";
 import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
   ClipboardCheckIcon,
   FileIcon,
   Files,
@@ -32,8 +34,14 @@ import { useQuotationModal } from "@/hooks/use-quotation-modal";
 import { classNames, cn, getDateFormat } from "@/lib/utils";
 import { Select } from "@/components/ui/select";
 import { FormSelect } from "@/components/form/form-select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
-interface Props {}
+interface Props { }
 
 type QuotationWithCounts = QuotationWithRelations & {
   _count: {
@@ -53,6 +61,41 @@ export default function BoardContainer(props: Props) {
     vendor: "",
     type: "all",
   });
+
+  // Collapsed columns state with localStorage persistence
+  const [collapsedColumns, setCollapsedColumns] = useState<Set<QuotationStatus>>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('quotation-board-collapsed-columns');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          return new Set(parsed);
+        } catch (e) {
+          return new Set();
+        }
+      }
+    }
+    return new Set();
+  });
+
+  // Save collapsed state to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('quotation-board-collapsed-columns', JSON.stringify(Array.from(collapsedColumns)));
+    }
+  }, [collapsedColumns]);
+
+  const toggleColumnCollapse = (columnKey: QuotationStatus) => {
+    setCollapsedColumns(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(columnKey)) {
+        newSet.delete(columnKey);
+      } else {
+        newSet.add(columnKey);
+      }
+      return newSet;
+    });
+  };
   const queries = useQueries({
     queries: allQuotationStatus.map((quotationStatus) => {
       // combine quotationStatus and searchParams to create a unique queryKey
@@ -183,122 +226,146 @@ export default function BoardContainer(props: Props) {
         </div> */}
         <BoardFilters onCreate={onOpen} onSubmit={onSearch} />
       </div>
-      <DragDropContext onDragEnd={onDragEnd}>
-        <Droppable droppableId="lists" type="list">
-          {(provided) => (
-            <div
-              {...provided.droppableProps}
-              ref={provided.innerRef}
-              className="flex gap-x-3 h-[calc(100vh-165px)] "
-            >
-              <BoardColumn
-                color="gray"
-                items={queries[0].data ?? ([] as QuotationWithRelations[])}
-                columnKey={QuotationStatus.open}
-                label={quotationStatusMapping[QuotationStatus.open].label}
-                progress={quotationStatusMapping[QuotationStatus.open].progress}
-              />
-              <BoardColumn
-                color="yellow"
-                items={queries[1].data ?? ([] as QuotationWithRelations[])}
-                columnKey={QuotationStatus.pending_approval}
-                label={
-                  quotationStatusMapping[QuotationStatus.pending_approval].label
-                }
-                progress={
-                  quotationStatusMapping[QuotationStatus.pending_approval]
-                    .progress
-                }
-              />
-              <BoardColumn
-                color="gray"
-                items={queries[2].data ?? ([] as QuotationWithRelations[])}
-                columnKey={QuotationStatus.offer}
-                label={quotationStatusMapping[QuotationStatus.offer].label}
-                progress={
-                  quotationStatusMapping[QuotationStatus.offer].progress
-                }
-              />
-              <BoardColumn
-                color="yellow"
-                items={queries[3].data ?? ([] as QuotationWithRelations[])}
-                columnKey={QuotationStatus.approved}
-                label={quotationStatusMapping[QuotationStatus.approved].label}
-                progress={
-                  quotationStatusMapping[QuotationStatus.approved].progress
-                }
-              />
-              <BoardColumn
-                items={queries[4].data ?? ([] as QuotationWithRelations[])}
-                columnKey={QuotationStatus.po_preparing}
-                label={
-                  quotationStatusMapping[QuotationStatus.po_preparing].label
-                }
-                progress={
-                  quotationStatusMapping[QuotationStatus.po_preparing].progress
-                }
-              />
-              <BoardColumn
-                items={queries[5].data ?? ([] as QuotationWithRelations[])}
-                columnKey={QuotationStatus.po_sent}
-                label={quotationStatusMapping[QuotationStatus.po_sent].label}
-                progress={
-                  quotationStatusMapping[QuotationStatus.po_sent].progress
-                }
-              />
-              <BoardColumn
-                items={queries[6].data ?? ([] as QuotationWithRelations[])}
-                columnKey={QuotationStatus.product_received}
-                label={
-                  quotationStatusMapping[QuotationStatus.product_received].label
-                }
-                progress={
-                  quotationStatusMapping[QuotationStatus.product_received]
-                    .progress
-                }
-              />
-              <BoardColumn
-                items={queries[7].data ?? ([] as QuotationWithRelations[])}
-                columnKey={QuotationStatus.order_preparing}
-                label={
-                  quotationStatusMapping[QuotationStatus.order_preparing].label
-                }
-                progress={
-                  quotationStatusMapping[QuotationStatus.order_preparing]
-                    .progress
-                }
-              />
-              <BoardColumn
-                color="yellow"
-                items={queries[8].data ?? ([] as QuotationWithRelations[])}
-                columnKey={QuotationStatus.delivered}
-                label={quotationStatusMapping[QuotationStatus.delivered].label}
-                progress={
-                  quotationStatusMapping[QuotationStatus.delivered].progress
-                }
-              />
-              <BoardColumn
-                color="green"
-                items={queries[9].data ?? ([] as QuotationWithRelations[])}
-                columnKey={QuotationStatus.paid}
-                label={quotationStatusMapping[QuotationStatus.paid].label}
-                progress={quotationStatusMapping[QuotationStatus.paid].progress}
-              />
-              <BoardColumn
-                color="gray"
-                items={queries[10].data ?? ([] as QuotationWithRelations[])}
-                columnKey={QuotationStatus.archived}
-                label={quotationStatusMapping[QuotationStatus.archived].label}
-                progress={
-                  quotationStatusMapping[QuotationStatus.archived].progress
-                }
-              />
-              {provided.placeholder}
-              <div className="flex-shrink-0 w-1" />
-            </div>
-          )}
-        </Droppable>
-      </DragDropContext>
+      <TooltipProvider>
+        <DragDropContext onDragEnd={onDragEnd}>
+          <Droppable droppableId="lists" type="list">
+            {(provided) => (
+              <div
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+                className="flex gap-x-3 h-[calc(100vh-165px)] "
+              >
+                <BoardColumn
+                  color="gray"
+                  items={queries[0].data ?? ([] as QuotationWithRelations[])}
+                  columnKey={QuotationStatus.open}
+                  label={quotationStatusMapping[QuotationStatus.open].label}
+                  progress={quotationStatusMapping[QuotationStatus.open].progress}
+                  isCollapsed={collapsedColumns.has(QuotationStatus.open)}
+                  onToggleCollapse={() => toggleColumnCollapse(QuotationStatus.open)}
+                />
+                <BoardColumn
+                  color="yellow"
+                  items={queries[1].data ?? ([] as QuotationWithRelations[])}
+                  columnKey={QuotationStatus.pending_approval}
+                  label={
+                    quotationStatusMapping[QuotationStatus.pending_approval].label
+                  }
+                  progress={
+                    quotationStatusMapping[QuotationStatus.pending_approval]
+                      .progress
+                  }
+                  isCollapsed={collapsedColumns.has(QuotationStatus.pending_approval)}
+                  onToggleCollapse={() => toggleColumnCollapse(QuotationStatus.pending_approval)}
+                />
+                <BoardColumn
+                  color="gray"
+                  items={queries[2].data ?? ([] as QuotationWithRelations[])}
+                  columnKey={QuotationStatus.offer}
+                  label={quotationStatusMapping[QuotationStatus.offer].label}
+                  progress={
+                    quotationStatusMapping[QuotationStatus.offer].progress
+                  }
+                  isCollapsed={collapsedColumns.has(QuotationStatus.offer)}
+                  onToggleCollapse={() => toggleColumnCollapse(QuotationStatus.offer)}
+                />
+                <BoardColumn
+                  color="yellow"
+                  items={queries[3].data ?? ([] as QuotationWithRelations[])}
+                  columnKey={QuotationStatus.approved}
+                  label={quotationStatusMapping[QuotationStatus.approved].label}
+                  progress={
+                    quotationStatusMapping[QuotationStatus.approved].progress
+                  }
+                  isCollapsed={collapsedColumns.has(QuotationStatus.approved)}
+                  onToggleCollapse={() => toggleColumnCollapse(QuotationStatus.approved)}
+                />
+                <BoardColumn
+                  items={queries[4].data ?? ([] as QuotationWithRelations[])}
+                  columnKey={QuotationStatus.po_preparing}
+                  label={
+                    quotationStatusMapping[QuotationStatus.po_preparing].label
+                  }
+                  progress={
+                    quotationStatusMapping[QuotationStatus.po_preparing].progress
+                  }
+                  isCollapsed={collapsedColumns.has(QuotationStatus.po_preparing)}
+                  onToggleCollapse={() => toggleColumnCollapse(QuotationStatus.po_preparing)}
+                />
+                <BoardColumn
+                  items={queries[5].data ?? ([] as QuotationWithRelations[])}
+                  columnKey={QuotationStatus.po_sent}
+                  label={quotationStatusMapping[QuotationStatus.po_sent].label}
+                  progress={
+                    quotationStatusMapping[QuotationStatus.po_sent].progress
+                  }
+                  isCollapsed={collapsedColumns.has(QuotationStatus.po_sent)}
+                  onToggleCollapse={() => toggleColumnCollapse(QuotationStatus.po_sent)}
+                />
+                <BoardColumn
+                  items={queries[6].data ?? ([] as QuotationWithRelations[])}
+                  columnKey={QuotationStatus.product_received}
+                  label={
+                    quotationStatusMapping[QuotationStatus.product_received].label
+                  }
+                  progress={
+                    quotationStatusMapping[QuotationStatus.product_received]
+                      .progress
+                  }
+                  isCollapsed={collapsedColumns.has(QuotationStatus.product_received)}
+                  onToggleCollapse={() => toggleColumnCollapse(QuotationStatus.product_received)}
+                />
+                <BoardColumn
+                  items={queries[7].data ?? ([] as QuotationWithRelations[])}
+                  columnKey={QuotationStatus.order_preparing}
+                  label={
+                    quotationStatusMapping[QuotationStatus.order_preparing].label
+                  }
+                  progress={
+                    quotationStatusMapping[QuotationStatus.order_preparing]
+                      .progress
+                  }
+                  isCollapsed={collapsedColumns.has(QuotationStatus.order_preparing)}
+                  onToggleCollapse={() => toggleColumnCollapse(QuotationStatus.order_preparing)}
+                />
+                <BoardColumn
+                  color="yellow"
+                  items={queries[8].data ?? ([] as QuotationWithRelations[])}
+                  columnKey={QuotationStatus.delivered}
+                  label={quotationStatusMapping[QuotationStatus.delivered].label}
+                  progress={
+                    quotationStatusMapping[QuotationStatus.delivered].progress
+                  }
+                  isCollapsed={collapsedColumns.has(QuotationStatus.delivered)}
+                  onToggleCollapse={() => toggleColumnCollapse(QuotationStatus.delivered)}
+                />
+                <BoardColumn
+                  color="green"
+                  items={queries[9].data ?? ([] as QuotationWithRelations[])}
+                  columnKey={QuotationStatus.paid}
+                  label={quotationStatusMapping[QuotationStatus.paid].label}
+                  progress={quotationStatusMapping[QuotationStatus.paid].progress}
+                  isCollapsed={collapsedColumns.has(QuotationStatus.paid)}
+                  onToggleCollapse={() => toggleColumnCollapse(QuotationStatus.paid)}
+                />
+                <BoardColumn
+                  color="gray"
+                  items={queries[10].data ?? ([] as QuotationWithRelations[])}
+                  columnKey={QuotationStatus.archived}
+                  label={quotationStatusMapping[QuotationStatus.archived].label}
+                  progress={
+                    quotationStatusMapping[QuotationStatus.archived].progress
+                  }
+                  isCollapsed={collapsedColumns.has(QuotationStatus.archived)}
+                  onToggleCollapse={() => toggleColumnCollapse(QuotationStatus.archived)}
+                />
+                {provided.placeholder}
+                <div className="flex-shrink-0 w-1" />
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
+      </TooltipProvider>
     </div>
   );
 }
@@ -361,13 +428,52 @@ const BoardColumn = ({
   label,
   progress,
   color,
+  isCollapsed,
+  onToggleCollapse,
 }: {
   columnKey: QuotationStatus;
   label: string;
   items: QuotationWithCounts[];
   progress: number;
   color?: "yellow" | "green" | "gray";
+  isCollapsed: boolean;
+  onToggleCollapse: () => void;
 }) => {
+  if (isCollapsed) {
+    return (
+      <div className="h-full min-w-[50px] max-w-[80px] w-[80px] select-none border-primary/10 border">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div
+              className={classNames(
+                "w-full rounded-md shadow-md pb-2 h-full bg-secondary relative cursor-pointer",
+              )}
+              onClick={onToggleCollapse}
+            >
+              <div
+                className={cn(
+                  "absolute h-1 right-0 left-0 top-0 bg-primary",
+                  color === "yellow" && "bg-orange-400",
+                  color === "green" && "bg-green-600",
+                  color === "gray" && "bg-gray-400"
+                )}
+              ></div>
+              <div className="flex flex-col items-center justify-center h-full p-2">
+                <div className="transform -rotate-90 whitespace-nowrap text-sm font-semibold text-[#4a4a4a] mb-4">
+                  {label} ({items.length})
+                </div>
+                <ChevronRightIcon className="w-4 h-4 text-gray-500" />
+              </div>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{label} ({items.length} items)</p>
+          </TooltipContent>
+        </Tooltip>
+      </div>
+    );
+  }
+
   return (
     <div className="h-full min-w-[260px] select-none border-primary/10 border">
       <div
@@ -387,7 +493,7 @@ const BoardColumn = ({
         ></div>
         <div className="flex justify-between items-center px-3 py-4 bg-secondary border-b border-dotted">
           <div className="">
-            <p className="text-sm font-semibold text-[#4a4a4a] whitespace-nowrap">
+            <p className="text-sm font-semibold text-[#4a4a4a] whitespace-nowrap w-[180px] truncate">
               {label}
             </p>
             {label === quotationStatusMapping.archived.label ? (
@@ -396,8 +502,17 @@ const BoardColumn = ({
               <p className="text-xs text-[#4a4a4a]">ความคืบหน้า {progress}%</p>
             )}
           </div>
-          <div className="text-xs font-semibold text-[#4a4a4a]">
-            ({items.length})
+          <div className="flex items-center gap-2">
+            <div className="text-xs font-semibold text-[#4a4a4a]">
+              ({items.length})
+            </div>
+            <button
+              onClick={onToggleCollapse}
+              className="p-1 hover:bg-gray-200 rounded transition-colors"
+              title="Collapse column"
+            >
+              <ChevronLeftIcon className="w-4 h-4 text-gray-500" />
+            </button>
           </div>
         </div>
         <div className=" h-[calc(100%-70px)] p-3 overflow-auto">
