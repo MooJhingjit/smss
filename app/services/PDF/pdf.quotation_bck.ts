@@ -107,8 +107,8 @@ export const generateQuotationPaper = async (id: number, date: string) => {
 const generate = async (id: number) => {
   if (!_DATA) return;
   // list start position
-  const ITEM_Y_Start = 573;
-  const ITEM_X_Start = 40;
+  const ITEM_Y_Start = 545;
+  const ITEM_X_Start = 63;
 
   // Track the current page number as a reference object so it can be updated from validatePageArea
   const pageNumberRef = { currentPageNumber: 1 };
@@ -117,9 +117,9 @@ const generate = async (id: number) => {
   const columnPosition = {
     index: ITEM_X_Start,
     description: ITEM_X_Start + 25,
-    quantity: ITEM_X_Start + 374,
-    unitPrice: ITEM_X_Start + 430,
-    amount: ITEM_X_Start + 490,
+    quantity: ITEM_X_Start + 359,
+    unitPrice: ITEM_X_Start + 410,
+    amount: ITEM_X_Start + 462,
   };
 
   const fontResolvePath = path.resolve("./public", "fonts/Sarabun-Regular.ttf"); // sarabun-new
@@ -127,7 +127,7 @@ const generate = async (id: number) => {
 
   const templateResolvePath = path.resolve(
     "./public",
-    "pdf/quotation-template2.pdf"
+    "pdf/quotation-template.pdf"
   );
 
   const pdfTemplatePath = path.join(templateResolvePath);
@@ -498,12 +498,12 @@ const drawHeaderInfo = (
 ) => {
   if (!_FONT) return;
   const X_Start = 480;
-  const Y_Start = 800;
+  const Y_Start = 750;
 
   const config = {
     font: _FONT,
     size: PAGE_FONT_SIZE,
-    lineHeight: 15,
+    lineHeight: 14,
   };
   page.drawText(date, {
     x: X_Start,
@@ -530,11 +530,11 @@ const drawCustomerInfo = (page: PDFPage, contact: Contact) => {
   const config = {
     font: _FONT,
     size: PAGE_FONT_SIZE,
-    lineHeight: 14,
+    lineHeight: 13,
   };
 
-  const Y_Start = 713;
-  const X_Start = 70;
+  const Y_Start = 670;
+  const X_Start = 80;
   // name + branchId
 
   page.drawText(getCustomerNameWithBranch(contact.name, contact.branchId), {
@@ -601,7 +601,7 @@ const drawOfferInfo = (
     lineHeight: 14,
   };
 
-  const Y_Start = 630;
+  const Y_Start = 594;
   page.drawText(sellerName, {
     x: 65,
     y: Y_Start,
@@ -623,7 +623,7 @@ const drawOfferInfo = (
     ...config,
   });
   page.drawText(deliveryPeriod, {
-    x: 420,
+    x: 430,
     y: Y_Start,
     maxWidth: 100,
     ...config,
@@ -646,8 +646,8 @@ const drawRemarkInfo = (page: PDFPage, text: string) => {
   };
 
   page.drawText(text, {
-    x: 65,
-    y: 175,
+    x: 60,
+    y: 160,
     maxWidth: 350,
     ...config,
   });
@@ -679,36 +679,36 @@ const drawPriceInfo = (
   const columnPosition = 523;
 
   page.drawText(totalPrice, {
-    x: columnPosition + 48 - getTextWidth(totalPrice, config),
-    y: 174,
+    x: columnPosition + 46 - getTextWidth(totalPrice, config),
+    y: 161,
     maxWidth: 100,
     ...config,
   });
 
   page.drawText(discount, {
-    x: columnPosition + 48 - getTextWidth(discount, config),
-    y: 159, // updated y position
+    x: columnPosition + 46 - getTextWidth(discount, config),
+    y: 148,
     maxWidth: 100,
     ...config,
   });
 
   page.drawText(total, {
-    x: columnPosition + 48 - getTextWidth(total, config),
-    y: 144,
+    x: columnPosition + 46 - getTextWidth(total, config),
+    y: 133,
     maxWidth: 100,
     ...config,
   });
 
   page.drawText(tax, {
-    x: columnPosition + 48 - getTextWidth(tax, config),
-    y: 130,
+    x: columnPosition + 46 - getTextWidth(tax, config),
+    y: 121,
     maxWidth: 100,
     ...config,
   });
 
   page.drawText(grandTotal, {
-    x: columnPosition + 48 - getTextWidth(grandTotal, config),
-    y: 109,
+    x: columnPosition + 46 - getTextWidth(grandTotal, config),
+    y: 106,
     maxWidth: 100,
     ...config,
   });
@@ -742,33 +742,33 @@ const drawSignature = (page: PDFPage, signatureData: SignatureData) => {
   if (isShowApproverSignature) {
 
     // Draw approver name
-    page.drawText(signatureData.approverName + " " + signatureData.approverPhone, {
-      x: 450,
-      y: 74,
+    page.drawText(signatureData.approverName, {
+      x: 460,
+      y: 72,
       ...config,
       
     });
 
     // Draw approver signature
     page.drawImage(signatureData.approverSignatureImage, {
-      x: 460,
-      y: 53,
+      x: 505,
+      y: 55,
       ...signatureData.approverSignatureImage.scale(signatureData.approverSignatureImageScale),
     });
 
     // Approver phone
-    // page.drawText(signatureData.approverPhone, {
-    //   x: 460,
-    //   y: 63,
-    //   ...config,
+    page.drawText(signatureData.approverPhone, {
+      x: 460,
+      y: 63,
+      ...config,
       
-    // });
+    });
 
     // Approver date
     const approvedDate = _DATA?.approvedAt ? PDFDateFormat(new Date(_DATA.approvedAt)) : ""
     page.drawText(approvedDate, {
-      x: 470,
-      y: 40,
+      x: 450,
+      y: 45,
       ...config,
       size: PAGE_FONT_SIZE -1 , 
     });
@@ -780,31 +780,31 @@ const drawSignature = (page: PDFPage, signatureData: SignatureData) => {
 
 
     // Draw seller name
-    page.drawText(signatureData.sellerName + " " + signatureData.sellerPhone, {
-      x: 270,
-      y: 74,
+    page.drawText(signatureData.sellerName, {
+      x: 290,
+      y: 72,
       ...config,
       
     });
 
 
     page.drawImage(signatureData.sellerSignatureImage, {
-      x: 280,
-      y: 53,
+      x: 335,
+      y: 55,
       ...signatureData.sellerSignatureImage.scale(signatureData.sellerSignatureImageScale ?? 0),
     });
 
     // Seller phone
-    // page.drawText(signatureData.sellerPhone, {
-    //   x: 290,
-    //   y: 63,
-    //   ...config,
-    // });
+    page.drawText(signatureData.sellerPhone, {
+      x: 290,
+      y: 63,
+      ...config,
+    });
 
     // Seller date
     page.drawText(_BILL_DATE, {
       x: 280,
-      y: 40,
+      y: 45,
       ...config,
       size: PAGE_FONT_SIZE - 1 ,
     });
