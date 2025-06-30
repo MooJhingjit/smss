@@ -287,7 +287,7 @@ export const getCustomerNameWithBranch = (companyName: string, branchId: string 
   // if company is included mainBranchLabel, return it
   if (companyName.includes(mainBranchLabel)) return companyName;
 
-  if (branchId === "00000") return `${companyName} "${mainBranchLabel}"`;
+  if (branchId === "00000") return `${companyName} (${mainBranchLabel})`;
 
   return `${companyName}`;
 }
