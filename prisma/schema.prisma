@@ -228,8 +228,8 @@ model QuotationInstallment {
   quotationId Int
   quotation   Quotation         @relation(fields: [quotationId], references: [id])
   period      String            // e.g., "1/12", "2/12"
-  amount      Float             // Amount for this installment (without tax)
-  amountWithTax Float           // Amount for this installment (with tax)
+  amount      Float             // Amount for this installment (without VAT)
+  amountWithVat Float           // Amount for this installment (with VAT)
   dueDate     DateTime          // Due date for this installment
   paidDate    DateTime?         // When it was paid (null if not paid)
   status      InstallmentStatus @default(pending)

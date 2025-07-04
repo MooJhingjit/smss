@@ -41,6 +41,7 @@ interface InstallmentRow {
   id: number;
   period: string;
   amount: number;
+  amountWithVat: number;
   dueDate: string;
   isPaid: boolean;
 }
@@ -51,6 +52,7 @@ const [installments, setInstallments] = useState<InstallmentRow[]>([
         id: 1,
         period: "1/12",
         amount: 181008.33,
+        amountWithVat: 194849.50, // amount + 7% VAT
         dueDate: "31/01/2025",
         isPaid: true,
     },
@@ -58,6 +60,7 @@ const [installments, setInstallments] = useState<InstallmentRow[]>([
         id: 2,
         period: "2/12",
         amount: 181008.33,
+        amountWithVat: 194849.50,
         dueDate: "28/02/2025",
         isPaid: true,
     },
@@ -65,6 +68,7 @@ const [installments, setInstallments] = useState<InstallmentRow[]>([
         id: 3,
         period: "3/12",
         amount: 181008.33,
+        amountWithVat: 194849.50,
         dueDate: "31/03/2025",
         isPaid: false,
     },
@@ -72,6 +76,7 @@ const [installments, setInstallments] = useState<InstallmentRow[]>([
         id: 4,
         period: "4/12",
         amount: 181008.33,
+        amountWithVat: 194849.50,
         dueDate: "30/04/2025",
         isPaid: false,
     },
@@ -79,6 +84,7 @@ const [installments, setInstallments] = useState<InstallmentRow[]>([
         id: 5,
         period: "5/12",
         amount: 181008.33,
+        amountWithVat: 194849.50,
         dueDate: "31/05/2025",
         isPaid: false,
     },
@@ -86,6 +92,7 @@ const [installments, setInstallments] = useState<InstallmentRow[]>([
         id: 6,
         period: "6/12",
         amount: 181008.33,
+        amountWithVat: 194849.50,
         dueDate: "30/06/2025",
         isPaid: false,
     },
@@ -93,6 +100,7 @@ const [installments, setInstallments] = useState<InstallmentRow[]>([
         id: 7,
         period: "7/12",
         amount: 181008.33,
+        amountWithVat: 194849.50,
         dueDate: "31/07/2025",
         isPaid: false,
     },
@@ -100,6 +108,7 @@ const [installments, setInstallments] = useState<InstallmentRow[]>([
         id: 8,
         period: "8/12",
         amount: 181008.33,
+        amountWithVat: 194849.50,
         dueDate: "31/08/2025",
         isPaid: false,
     },
@@ -107,6 +116,7 @@ const [installments, setInstallments] = useState<InstallmentRow[]>([
         id: 9,
         period: "9/12",
         amount: 181008.33,
+        amountWithVat: 194849.50,
         dueDate: "30/09/2025",
         isPaid: false,
     },
@@ -114,6 +124,7 @@ const [installments, setInstallments] = useState<InstallmentRow[]>([
         id: 10,
         period: "10/12",
         amount: 181008.33,
+        amountWithVat: 194849.50,
         dueDate: "31/10/2025",
         isPaid: false,
     },
@@ -121,6 +132,7 @@ const [installments, setInstallments] = useState<InstallmentRow[]>([
         id: 11,
         period: "11/12",
         amount: 181008.33,
+        amountWithVat: 194849.50,
         dueDate: "30/11/2025",
         isPaid: false,
     },
@@ -128,6 +140,7 @@ const [installments, setInstallments] = useState<InstallmentRow[]>([
         id: 12,
         period: "12/12",
         amount: 181008.37,
+        amountWithVat: 194849.54, // slightly higher for the last installment to balance
         dueDate: "31/12/2025",
         isPaid: false,
     },

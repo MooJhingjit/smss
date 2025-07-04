@@ -10,7 +10,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
 }
 
-export default function InvoiceTable<TData, TValue>(
+export default function InstallmentTable<TData, TValue>(
   props: DataTableProps<TData, TValue>,
 ) {
   const { columns, data } = props;
@@ -23,7 +23,7 @@ export default function InvoiceTable<TData, TValue>(
         cell: ({ row }: any) => {
           return (
             <div className="flex space-x-2 items-center">
-              <Link href={`/invoices/${row.original.id}`} passHref>
+              <Link href={`/installments/${row.original.id}`} passHref>
                 <Button className="text-xs h-8" variant="secondary">
                   จัดการ
                 </Button>
