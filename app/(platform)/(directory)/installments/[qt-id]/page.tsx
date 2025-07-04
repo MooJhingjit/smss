@@ -23,6 +23,7 @@ import {
   RadialBarChart,
 } from "recharts";
 import { ChartConfig, ChartContainer } from "@/components/ui/chart";
+import { ReceiptPrint } from "@/components/print-receipt";
 
 // Mock data based on the screenshot
 const mockQuotationData = {
@@ -47,104 +48,104 @@ interface InstallmentRow {
 }
 
 export default function InstallmentDetailPage() {
-const [installments, setInstallments] = useState<InstallmentRow[]>([
+  const [installments, setInstallments] = useState<InstallmentRow[]>([
     {
-        id: 1,
-        period: "1/12",
-        amount: 181008.33,
-        amountWithVat: 194849.50, // amount + 7% VAT
-        dueDate: "31/01/2025",
-        isPaid: true,
+      id: 1,
+      period: "1/12",
+      amount: 181008.33,
+      amountWithVat: 194849.5, // amount + 7% VAT
+      dueDate: "31/01/2025",
+      isPaid: true,
     },
     {
-        id: 2,
-        period: "2/12",
-        amount: 181008.33,
-        amountWithVat: 194849.50,
-        dueDate: "28/02/2025",
-        isPaid: true,
+      id: 2,
+      period: "2/12",
+      amount: 181008.33,
+      amountWithVat: 194849.5,
+      dueDate: "28/02/2025",
+      isPaid: true,
     },
     {
-        id: 3,
-        period: "3/12",
-        amount: 181008.33,
-        amountWithVat: 194849.50,
-        dueDate: "31/03/2025",
-        isPaid: false,
+      id: 3,
+      period: "3/12",
+      amount: 181008.33,
+      amountWithVat: 194849.5,
+      dueDate: "31/03/2025",
+      isPaid: false,
     },
     {
-        id: 4,
-        period: "4/12",
-        amount: 181008.33,
-        amountWithVat: 194849.50,
-        dueDate: "30/04/2025",
-        isPaid: false,
+      id: 4,
+      period: "4/12",
+      amount: 181008.33,
+      amountWithVat: 194849.5,
+      dueDate: "30/04/2025",
+      isPaid: false,
     },
     {
-        id: 5,
-        period: "5/12",
-        amount: 181008.33,
-        amountWithVat: 194849.50,
-        dueDate: "31/05/2025",
-        isPaid: false,
+      id: 5,
+      period: "5/12",
+      amount: 181008.33,
+      amountWithVat: 194849.5,
+      dueDate: "31/05/2025",
+      isPaid: false,
     },
     {
-        id: 6,
-        period: "6/12",
-        amount: 181008.33,
-        amountWithVat: 194849.50,
-        dueDate: "30/06/2025",
-        isPaid: false,
+      id: 6,
+      period: "6/12",
+      amount: 181008.33,
+      amountWithVat: 194849.5,
+      dueDate: "30/06/2025",
+      isPaid: false,
     },
     {
-        id: 7,
-        period: "7/12",
-        amount: 181008.33,
-        amountWithVat: 194849.50,
-        dueDate: "31/07/2025",
-        isPaid: false,
+      id: 7,
+      period: "7/12",
+      amount: 181008.33,
+      amountWithVat: 194849.5,
+      dueDate: "31/07/2025",
+      isPaid: false,
     },
     {
-        id: 8,
-        period: "8/12",
-        amount: 181008.33,
-        amountWithVat: 194849.50,
-        dueDate: "31/08/2025",
-        isPaid: false,
+      id: 8,
+      period: "8/12",
+      amount: 181008.33,
+      amountWithVat: 194849.5,
+      dueDate: "31/08/2025",
+      isPaid: false,
     },
     {
-        id: 9,
-        period: "9/12",
-        amount: 181008.33,
-        amountWithVat: 194849.50,
-        dueDate: "30/09/2025",
-        isPaid: false,
+      id: 9,
+      period: "9/12",
+      amount: 181008.33,
+      amountWithVat: 194849.5,
+      dueDate: "30/09/2025",
+      isPaid: false,
     },
     {
-        id: 10,
-        period: "10/12",
-        amount: 181008.33,
-        amountWithVat: 194849.50,
-        dueDate: "31/10/2025",
-        isPaid: false,
+      id: 10,
+      period: "10/12",
+      amount: 181008.33,
+      amountWithVat: 194849.5,
+      dueDate: "31/10/2025",
+      isPaid: false,
     },
     {
-        id: 11,
-        period: "11/12",
-        amount: 181008.33,
-        amountWithVat: 194849.50,
-        dueDate: "30/11/2025",
-        isPaid: false,
+      id: 11,
+      period: "11/12",
+      amount: 181008.33,
+      amountWithVat: 194849.5,
+      dueDate: "30/11/2025",
+      isPaid: false,
     },
     {
-        id: 12,
-        period: "12/12",
-        amount: 181008.37,
-        amountWithVat: 194849.54, // slightly higher for the last installment to balance
-        dueDate: "31/12/2025",
-        isPaid: false,
+      id: 12,
+      period: "12/12",
+      amount: 181008.37,
+      amountWithVat: 194849.54, // slightly higher for the last installment to balance
+      dueDate: "31/12/2025",
+      isPaid: false,
     },
-]);
+  ]);
 
   const pages = [
     {
@@ -365,18 +366,18 @@ const [installments, setInstallments] = useState<InstallmentRow[]>([
                       จำนวนเงิน (บาท)
                     </TableHead>
                     <TableHead className="font-semibold text-gray-700">
-                      วันครบกำหนด
+                      วันครบกำหนด / พิมพ์ใบวางบิล
                     </TableHead>
                     <TableHead className="font-semibold text-gray-700 text-center">
                       สถานะการชำระ
                     </TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
+                <TableBody className=" ">
                   {installments.map((installment) => (
                     <TableRow
                       key={installment.id}
-                      className={installment.isPaid ? "bg-green-50" : ""}
+                      className={installment.isPaid ? "bg-green-50" : "border-b "}
                     >
                       <TableCell className="font-medium text-gray-700 text-center">
                         <Badge variant="outline">{installment.period}</Badge>
@@ -392,10 +393,16 @@ const [installments, setInstallments] = useState<InstallmentRow[]>([
                           step="0.01"
                         />
                       </TableCell>
-                      <TableCell className="text-center">
-                        <span className="text-gray-600 ">
+                      <TableCell className="text-center flex items-center justify-center py-1">
+                        {/* <span className="text-sm text-gray-600">
                           {installment.dueDate}
-                        </span>
+                        </span> */}
+                        <div className="">
+                          <ReceiptPrint
+                            defaultBillDate={new Date()}
+                            endpoint={`/`}
+                          />
+                        </div>
                       </TableCell>
                       <TableCell className="text-center">
                         <div className="flex items-center justify-center space-x-2">
