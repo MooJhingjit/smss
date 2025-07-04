@@ -164,6 +164,9 @@ model Quotation {
   purchaseOrders        PurchaseOrder[]
   medias                Media[]
   invoice               Invoice?
+  installments          QuotationInstallment[]
+  outstandingBalance    Float?                   @default(0)  // Outstanding balance without tax
+  outstandingGrandTotal Float?                   @default(0)  // Outstanding balance with tax
   @@index([contactId])
   @@index([sellerId])
 }
@@ -212,6 +215,31 @@ model QuotationItem {
 
   @@index([quotationListId])
   @@index([itemId])
+}
+
+enum InstallmentStatus {
+  pending
+  paid
+  overdue
+}
+
+model QuotationInstallment {
+  id          Int               @id @default(autoincrement())
+  quotationId Int
+  quotation   Quotation         @relation(fields: [quotationId], references: [id])
+  period      String            // e.g., "1/12", "2/12"
+  amount      Float             // Amount for this installment (without tax)
+  amountWithTax Float           // Amount for this installment (with tax)
+  dueDate     DateTime          // Due date for this installment
+  paidDate    DateTime?         // When it was paid (null if not paid)
+  status      InstallmentStatus @default(pending)
+  remarks     String?           @db.Text
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([quotationId])
+  @@index([dueDate])
+  @@index([status])
 }
 
 enum PurchaseOrderStatus {
