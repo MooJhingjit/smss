@@ -6,6 +6,7 @@ export const protectedRoutes = [
     "/items",
     "/users",
     "/invoices",
+    "/installments",
     "/stats"
 ]
 
@@ -27,6 +28,7 @@ export const navigationLinks: NavigationLink[] = [
         label: "Purchase Orders",
         permission: ["admin"],
     },
+    { href: "/installments", label: "Installments", permission: ["admin"] },
     {
         href: "/invoices",
         label: "Invoices",

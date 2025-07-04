@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { KanbanSquare, Receipt, Box, Users, PackageOpen, ExternalLink } from "lucide-react";
+import { KanbanSquare, Receipt, Box, Users, PackageOpen, ExternalLink, FileClock } from "lucide-react";
 import Link from "next/link";
 import { getDateFormat, getPriceFormat } from "@/lib/utils";
 // import { create } from '@/actions/create-user'
@@ -63,6 +63,12 @@ export default function ShortcutMenus({
       icon={<Users className="w-6 h-6 lg:w-12 lg:h-12  " strokeWidth={1.5} />}
       label="ลูกค้า"
       link="/contacts"
+      />
+
+      <MenuItem
+      icon={<FileClock className="w-6 h-6 lg:w-12 lg:h-12  " strokeWidth={1.5} />}
+      label="ผ่อนชำระ"
+      link="/installments"
       />
 
       <MenuItem
