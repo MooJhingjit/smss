@@ -8,7 +8,7 @@ import CodeBadge from "@/components/badges/code-badge";
 import PaymentBadge from "@/components/badges/payment-badge";
 import StatusBadge from "@/components/badges/status-badge";
 import { Button } from "@/components/ui/button";
-import { classNames, getDateFormat } from "@/lib/utils";
+import { classNames, getDateFormat, getDateFormat2 } from "@/lib/utils";
 import { Contact, Quotation } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
@@ -117,8 +117,9 @@ export const columns: ColumnDef<Quotation & { contact?: Contact }>[] = [
     accessorKey: "createdAt",
     header: "วันที่สร้าง",
     cell: ({ row }) => {
-      const { createdAt } = row.original;
-      return <p>{getDateFormat(createdAt)}</p>;
+      const { id, createdAt } = row.original;
+      console.log("🚀 ~ createdAt:",id, createdAt)
+      return <p>{getDateFormat2(createdAt)}</p>;
     },
   },
   {
