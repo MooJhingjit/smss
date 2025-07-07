@@ -39,7 +39,7 @@ async function GetData(): Promise<[QuotationWithBuyer[], QuotationWithBuyer[], {
     },
     take: 5,
     orderBy: {
-      updatedAt: "desc",
+      createdAt: "desc",
     },
   });
 

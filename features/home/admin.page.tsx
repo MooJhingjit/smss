@@ -174,20 +174,20 @@ export default async function AdminHomePage() {
           label={`รออนุมัติ สถานะ: ${quotationStatusMapping["offer"].label}`}
         />
       </div>
-      <div className="lg:col-span-6 col-span-12">
+      {/* <div className="lg:col-span-6 col-span-12">
         <PaymentDue
           type="quotations"
           data={quotationsDueDate}
           label={`ถึงกำหนดชำระ (QT Credit)`}
         />
-      </div>
-      <div className="lg:col-span-6 col-span-12">
+      </div> */}
+      {/* <div className="lg:col-span-6 col-span-12">
         <PaymentDue
           type="purchase-orders"
           data={purchaseOrdersDueDate}
           label={`ถึงกำหนดชำระ (PO Credit)`}
         />
-      </div>
+      </div> */}
       <div className="lg:col-span-6 col-span-12">
         <Quotations data={quotations} />
       </div>

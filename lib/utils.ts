@@ -121,6 +121,19 @@ export function getDateFormat(date: Date | string, format?: string) {
   // return `${year}-${month}-${day}`;
 }
 
+export function getDateFormat2(date: Date | string, format?: string) {
+  if (typeof date === "string") {
+    date = new Date(date);
+  }
+  
+  // Use UTC methods to get the date as stored in database (without timezone conversion)
+  const day = date.getUTCDate().toString().padStart(2, "0");
+  const month = (date.getUTCMonth() + 1).toString().padStart(2, "0");
+  const year = date.getUTCFullYear();
+  
+  return `${day}/${month}/${year}`;
+}
+
 export const debounce = <T extends unknown[]>(
   func: (...args: T) => any,
   delay: number

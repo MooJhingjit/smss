@@ -29,7 +29,7 @@ async function GetData(): Promise<any[]> {
     // take: 10,
     // skip: 0,
     orderBy: {
-      id: "asc",
+      id: "desc",
     },
   });
   return contacts;
