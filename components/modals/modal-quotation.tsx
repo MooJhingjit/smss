@@ -10,16 +10,26 @@ import { DialogFooter } from "@/components/ui/dialog";
 import { ResponsiveDialog } from "@/components/responsive-dialog";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuotationModal } from "@/hooks/use-quotation-modal";
 import { useAction } from "@/hooks/use-action";
 import { createQuotation } from "@/actions/quotation/create";
 import { FormSearchAsync } from "../form/form-search-async";
 import { User } from "@prisma/client";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
+import { ArrowDown, ChevronsUpDown, UserRoundCog } from "lucide-react";
 
 const QuotationFormSchema = z.object({
   type: z.enum(["product", "service"]),
   buyerId: z.string().min(1, { message: "Customer is required" }),
+  overrideContactName: z.string().optional(),
+  overrideContactEmail: z.string().optional(),
+  overrideContactPhone: z.string().optional(),
 });
 
 export const NewQuotationModal = () => {
@@ -32,6 +42,9 @@ export const NewQuotationModal = () => {
     defaultValues: {
       type: "product",
       buyerId: "",
+      overrideContactName: "",
+      overrideContactEmail: "",
+      overrideContactPhone: "",
     },
   });
 
@@ -52,6 +65,9 @@ export const NewQuotationModal = () => {
     handleCreate.execute({
       type: data.type,
       buyerId: parseInt(data.buyerId),
+      overrideContactName: data.overrideContactName || undefined,
+      overrideContactEmail: data.overrideContactEmail || undefined,
+      overrideContactPhone: data.overrideContactPhone || undefined,
     });
   }
 
@@ -60,8 +76,8 @@ export const NewQuotationModal = () => {
   };
 
   return (
-    <ResponsiveDialog 
-      open={modal.isOpen} 
+    <ResponsiveDialog
+      open={modal.isOpen}
       onOpenChange={modal.onClose}
       title="สร้างใบเสนอราคาใหม่"
       description="เลือกชื่อลูกค้า และประเภทของ QT"
@@ -98,7 +114,7 @@ export const NewQuotationModal = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    ลูกค้า <span className="text-red-500">*</span>
+                    ลูกค้า (บริษัท) <span className="text-red-500">*</span>
                   </FormLabel>
                   <FormControl>
                     <FormSearchAsync
@@ -118,9 +134,17 @@ export const NewQuotationModal = () => {
             />
 
             {customerDetails && (
-              <div className="col-span-1">
-                <CustomerInfo data={customerDetails} />
-              </div>
+              <>
+                <div className="col-span-1">
+                  <CustomerInfo
+                    data={customerDetails}
+                    form={form}
+                  />
+                </div>
+
+
+
+              </>
             )}
           </div>
 
@@ -135,37 +159,114 @@ export const NewQuotationModal = () => {
   );
 };
 
-const CustomerInfo = (props: { data: User }) => {
-  const { data } = props;
+const CustomerInfo = (props: {
+  data: User, form: ReturnType<typeof useForm<z.infer<typeof QuotationFormSchema>>>
+
+}) => {
+  const { data, form } = props;
+  const [isOpen, setIsOpen] = React.useState(false)
 
   return (
     <div className="rounded-md bg-yellow-50 border border-yellow-300 p-2 mt-3">
       <dl className=" space-y-1 text-xs leading-6 text-gray-600">
         <div className="flex space-x-2">
-          <dt>Tax Number:</dt>
+          <dt>เลขประจำตัวผู้เสียภาษี:</dt>
           <dd className="font-semibold">{data.taxId}</dd>
         </div>
         <div className="flex space-x-2">
-          <dt>Email:</dt>
+          <dt>ผู้ติดต่อ:</dt>
+          <dd className="font-semibold">{data.contact}</dd>
+        </div>
+        <div className="flex space-x-2">
+          <dt>อีเมล:</dt>
           <dd className="font-semibold">{data.email}</dd>
         </div>
         <div className="flex space-x-2">
-          <dt>Phone number:</dt>
+          <dt>เบอร์โทรศัพท์:</dt>
           <dd className="font-semibold">{data.phone}</dd>
         </div>
         <div className="flex space-x-2">
-          <dt>Fax:</dt>
+          <dt>แฟกซ์:</dt>
           <dd className="font-semibold">
             <span className="block">{data.fax}</span>
           </dd>
         </div>
         <div className="flex space-x-2">
-          <dt>Address:</dt>
+          <dt>ที่อยู่:</dt>
           <dd className="font-semibold">
             <span className="block">{data.address}</span>
           </dd>
         </div>
       </dl>
+
+      <Collapsible
+        open={isOpen}
+        onOpenChange={setIsOpen}
+        className="flex  flex-col gap-2 mt-4"
+      >
+
+        <CollapsibleTrigger asChild>
+          <Button
+            variant={"outline"}
+            className="flex items-center justify-center gap-3  " type="button">
+            <p>แก้ไขข้อมูลผู้ติดต่อ</p>
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-4  bg-white p-3 ">
+
+          <FormField
+            control={form.control}
+            name="overrideContactName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>ชื่อ</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="overrideContactEmail"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>อีเมล</FormLabel>
+                <FormControl>
+                  <Input
+                    type="email"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="overrideContactPhone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>เบอร์โทรศัพท์</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </CollapsibleContent>
+      </Collapsible>
+
+
+
     </div>
   );
 };

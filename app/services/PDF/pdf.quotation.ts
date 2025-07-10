@@ -879,7 +879,12 @@ const drawStaticInfo = (page: PDFPage, currentPageNumber: number) => {
     code: _DATA.code,
     date: _DATA.approvedAt ? PDFDateFormat(new Date(_DATA.approvedAt)) : "",
   });
-  drawCustomerInfo(page, _DATA.contact);
+  drawCustomerInfo(page, {
+    ..._DATA.contact,
+    contact: _DATA.overrideContactName ?? _DATA.contact.contact,
+    email: _DATA.overrideContactEmail ?? _DATA.contact.email,
+    phone: _DATA.overrideContactPhone ?? _DATA.contact.phone,
+  });
   drawOfferInfo(page, {
     sellerName: _DATA.seller?.name ?? "",
     paymentDue:

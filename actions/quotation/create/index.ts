@@ -10,7 +10,7 @@ import { QuotationType } from "@prisma/client";
 const handler = async (data: InputType): Promise<ReturnType> => {
   const userSession = await currentUser();
 
-  const { buyerId, type } = data;
+  const { buyerId, type, overrideContactName, overrideContactEmail, overrideContactPhone } = data;
   let quotation;
   try {
     if (!buyerId || !type) {
@@ -28,6 +28,9 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         code: "",
         sellerId: parseInt(userSession?.id ?? ""),
         contactId: buyerId,
+        overrideContactName: overrideContactName || null,
+        overrideContactEmail: overrideContactEmail || null,
+        overrideContactPhone: overrideContactPhone || null,
         createdAt: today,
         updatedAt: today,
       },

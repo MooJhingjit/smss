@@ -139,6 +139,9 @@ model Quotation {
   type                  QuotationType            @default(product)
   contactId             Int
   contact               Contact                  @relation(fields: [contactId], references: [id])
+  overrideContactName   String?                  // Override contact name for display
+  overrideContactEmail  String?                  // Override contact email for display
+  overrideContactPhone          String?                  // Override contact phone for display
   sellerId              Int?
   seller                User?                    @relation(fields: [sellerId], references: [id], name: "seller")
   discount              Float?

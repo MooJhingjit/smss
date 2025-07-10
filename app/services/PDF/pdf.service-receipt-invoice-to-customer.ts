@@ -335,8 +335,15 @@ const drawCustomerInfo = (page: PDFPage) => {
     lineHeight: 14,
   };
 
-  const customer = _DATA?.contact;
-  if (!customer) {
+  const customer = {
+    ..._DATA?.contact,
+    name: _DATA?.contact?.name ?? "",
+    branchId: _DATA?.contact?.branchId ?? "",
+    contact: _DATA?.overrideContactName ?? _DATA?.contact?.contact,
+    email: _DATA?.overrideContactEmail ?? _DATA?.contact?.email,
+    phone: _DATA?.overrideContactPhone ?? _DATA?.contact?.phone,
+  }
+    if (!customer) {
     return
   }
 

@@ -28,7 +28,7 @@ export const navigationLinks: NavigationLink[] = [
         label: "Purchase Orders",
         permission: ["admin"],
     },
-    { href: "/installments", label: "Installments", permission: ["admin"] },
+    // { href: "/installments", label: "Installments", permission: ["admin"] },
     {
         href: "/invoices",
         label: "Invoices",

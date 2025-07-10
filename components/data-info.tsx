@@ -32,6 +32,7 @@ type DataInfoProps = VariantProps<typeof variants> & {
     columnClassName?: string; // optional prop for additional custom styles
     CustomComponent?: ReactNode;
     collapsible?: boolean; // optional prop to enable/disable collapsible feature
+    actionLabel?: string; // optional prop for action button label
 };
 
 export default function DataInfo({
@@ -43,6 +44,7 @@ export default function DataInfo({
     variant,
     CustomComponent,
     collapsible = true,
+    actionLabel = "จัดการ", // added actionLabel prop
 }: Readonly<DataInfoProps>) {
     const isMobile = useIsMobile();
     const [isCollapsed, setIsCollapsed] = useState(true);
@@ -102,7 +104,7 @@ export default function DataInfo({
                     onClick={onEdit}
                     variant={"link"}
                 >
-                    จัดการ
+                    {actionLabel}
                 </Button>
             </div>
             <div className={
