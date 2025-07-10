@@ -265,13 +265,28 @@ const generate = async (id: number) => {
     description: string,
     lineStart: number
   ) => {
-    currentPage.drawText(description, {
-      x: columnPosition.description + 12, // indent
-      y: lineStart,
-      maxWidth: 300,
-      ...config,
-      opacity: 0.5,
-    });
+    const endUserRegex = /End user/gi;
+    
+    if (endUserRegex.test(description)) {
+      // Apply red color to the entire line if "End user" is detected
+      currentPage.drawText(description, {
+        x: columnPosition.description + 12, // indent
+        y: lineStart,
+        maxWidth: 300,
+        ...config,
+        opacity: 1,
+        color: rgb(1, 0, 0), // Red color for entire line
+      });
+    } else {
+      // No "End user" found, draw normally
+      currentPage.drawText(description, {
+        x: columnPosition.description + 12, // indent
+        y: lineStart,
+        maxWidth: 300,
+        ...config,
+        opacity: 0.5,
+      });
+    }
 
     const bounding = getBoundingBox(
       description,
