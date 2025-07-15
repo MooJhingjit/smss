@@ -592,6 +592,8 @@ const BoardCard = ({
   idx: string;
   item: QuotationWithCounts;
 }) => {
+
+  const firstList = item.lists?.[0];
   return (
     <Draggable draggableId={idx.toString()} index={item.id}>
       {(provided) => (
@@ -623,9 +625,24 @@ const BoardCard = ({
             </div>
             {/* <p className=" text-slate-700 capitalize">{item.paymentType}</p> */}
 
-            <div className="font-medium text-slate-900 my-2">
+            <div className="font-medium text-slate-900 my-2 line-clamp-1" title={item.contact?.name}>
               {item.contact?.name || ""}
             </div>
+            {
+              firstList && (
+                <div className="text-xs text-gray-600 border-dashed p-1 border border-gray-400 ">
+                  {
+                    firstList.groupName && (
+                      <p className="line-clamp-1 text-orange-400" title={firstList.groupName}
+                      >{firstList.groupName}</p>
+                    )
+                  }
+                  <p className="text-xs text-gray-500 line-clamp-1" title={firstList.name}>
+                    {firstList.name || ""}
+                  </p>
+                </div>
+              )
+            }
             {/* <div className="font-medium text-slate-900 mt-2 flex items-center space-x-2">
               <p>สร้างโดย</p>
               <p className="font-medium text-slate-900 ">

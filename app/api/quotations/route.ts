@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
       return new NextResponse("Missing status", { status: 400 });
     }
 
-  
+
 
     let conditions = {};
     // check if filter provided
@@ -50,24 +50,28 @@ export async function GET(req: NextRequest) {
 
     const quotations = await db.quotation.findMany({
       include: {
-      contact: true,
-      invoice: {
-        select: { code: true, date: true, receiptCode: true, receiptDate: true },
-      },
-      seller: {
-        select: { name: true },
-      },
-      _count: {
-        select: { purchaseOrders: true, lists: true, medias: true },
-      },
+        contact: true,
+        invoice: {
+          select: { code: true, date: true, receiptCode: true, receiptDate: true },
+        },
+        seller: {
+          select: { name: true },
+        },
+        lists: {
+          orderBy: { order: "asc" },
+          take: 1,
+        },
+        _count: {
+          select: { purchaseOrders: true, lists: true, medias: true },
+        },
       },
       where: {
-      // or where
-      ...conditions,
+        // or where
+        ...conditions,
       },
       orderBy: [
-      // { invoice: { receiptDate: { sort: "desc", nulls: "last" } } },
-      { createdAt: "desc" },
+        // { invoice: { receiptDate: { sort: "desc", nulls: "last" } } },
+        { createdAt: "desc" },
       ],
     });
     return NextResponse.json(quotations);
