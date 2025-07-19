@@ -38,7 +38,7 @@ const getData = async (
       invoice: true,
       installments: {
         orderBy: {
-          period: 'asc',
+          id: 'asc',
         },
       },
     },

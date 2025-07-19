@@ -55,7 +55,14 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     const remainder = totalAmount - (baseAmount * (periodCount - 1));
 
     // Create installments
-    const installments = [];
+    const installments: {
+      quotationId: number;
+      period: string;
+      amount: number;
+      amountWithVat: number;
+      dueDate: Date;
+      status: "pending";
+    }[] = [];
     for (let i = 1; i <= periodCount; i++) {
       const amount = i === periodCount ? remainder : baseAmount; // Last installment gets the remainder
       const vatAmount = amount * 0.07; // 7% VAT
@@ -76,18 +83,32 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     }
 
     // Create all installments in a transaction
-    const createdInstallments = await db.$transaction(
-      installments.map((installment) =>
-        db.quotationInstallment.create({
-          data: installment,
-        })
-      )
-    );
+    const result = await db.$transaction(async (tx) => {
+      // Create installments
+      const createdInstallments = await Promise.all(
+        installments.map((installment) =>
+          tx.quotationInstallment.create({
+            data: installment,
+          })
+        )
+      );
+
+      // Update quotation outstanding balances (initially equals the original totals since nothing is paid)
+      await tx.quotation.update({
+        where: { id: quotationId },
+        data: {
+          outstandingBalance: quotation.totalPrice,
+          outstandingGrandTotal: quotation.grandTotal,
+        },
+      });
+
+      return createdInstallments;
+    });
 
     revalidateTag(`quotation-${quotationId}`);
 
     return {
-      data: createdInstallments,
+      data: result,
     };
   } catch (error) {
     console.error("Error creating installments:", error);

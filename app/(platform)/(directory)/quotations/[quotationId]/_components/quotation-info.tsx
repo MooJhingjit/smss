@@ -171,20 +171,36 @@ const BillController = ({
   };
 
   const hasInstallments = currentQuotation?.installments && currentQuotation.installments.length > 0;
-  console.log(hasInstallments)
   const hasGroup = currentQuotation?.billGroupId
 
   // Show installment link if installments exist
   if (hasInstallments) {
+    // lastPayment is latest paid installment status, need to find status is paid and the last installment
+    const lastPayment = currentQuotation.installments?.slice().reverse().find(installment => installment.status === 'paid')
+
     return (
       <div className="flex items-center space-x-4">
-        <Badge variant="default">{currentQuotation.code}</Badge>
-        <Link 
+
+        <Alert className="">
+          <AlertTitle className="flex items-center space-x-2">
+            <Badge variant="default">{currentQuotation.code}</Badge>
+          </AlertTitle>
+          <AlertDescription>
+            <Link
+              href={`/installments/${currentQuotation.id}`}
+              className=" text-sm underline"
+            >
+              ดูแผนการผ่อนชำระ: งวด {lastPayment?.period}, คงเหลือ {currentQuotation.outstandingGrandTotal?.toLocaleString() ?? 0} บาท
+            </Link>
+          </AlertDescription>
+        </Alert>
+
+        {/* <Link 
           href={`/installments/${currentQuotation.id}`}
-          className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+          className="text-orange-400 hover:text-orange-800 text-sm font-medium underline"
         >
-          ดูแผนการผ่อนชำระ
-        </Link>
+          ดูแผนการผ่อนชำระ <span className=""></span>
+        </Link> */}
       </div>
     );
   }
@@ -216,10 +232,10 @@ const BillController = ({
                   <CardContent className="grid gap-6">
                     <div className="grid gap-3">
                       <Label htmlFor="period">จำนวนงวด</Label>
-                      <Input 
-                        id="period" 
-                        type="number" 
-                        placeholder="กรอกจำนวนงวด" 
+                      <Input
+                        id="period"
+                        type="number"
+                        placeholder="กรอกจำนวนงวด"
                         value={installmentPeriods}
                         onChange={(e) => setInstallmentPeriods(parseInt(e.target.value) || 12)}
                         min={1}
