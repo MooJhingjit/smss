@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import React from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   Popover,
   PopoverContent,
@@ -35,6 +36,21 @@ import { ReceiptPrint } from "@/components/print-receipt";
 import { cn, getDateFormat } from "@/lib/utils";
 import { PDFDateFormat } from "@/app/services/PDF/pdf.helpers";
 import { Input } from "@/components/ui/custom-input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Label } from "@/components/ui/label"
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs"
 
 type Props = {
   data: QuotationWithRelations;
@@ -83,7 +99,7 @@ export default function QuotationInfo(props: Readonly<Props>) {
           value: `${data.validPricePeriod ?? "-"} วัน`,
         },
         { label: "อ้างอิงใบสั่งซื้อ", value: data.purchaseOrderRef ?? "" },
-        { label: "INV (ใบกำกับ/ใบเสร็จ)", value: data.invoice?.receiptDate ?  `${data.invoice?.receiptCode ?? ""} (${getDateFormat(data.invoice?.receiptDate ?? "")})` : "-" },
+        { label: "INV (ใบกำกับ/ใบเสร็จ)", value: data.invoice?.receiptDate ? `${data.invoice?.receiptCode ?? ""} (${getDateFormat(data.invoice?.receiptDate ?? "")})` : "-" },
 
       ]}
       onEdit={() => modal.onOpen(data)}
@@ -136,7 +152,10 @@ const BillController = ({
     await handleBillGroup.execute(payload);
   };
 
-  if (!currentQuotation.billGroupId) {
+  const hasInstallments = currentQuotation?.installments && currentQuotation.installments.length > 0;
+  const hasGroup = currentQuotation?.billGroupId
+
+  if (!hasGroup) {
     return (
       <div className="flex items-center space-x-4">
         <Badge variant="default">{currentQuotation.code} </Badge>
@@ -144,41 +163,113 @@ const BillController = ({
           <PopoverTrigger asChild>
             <CircleEllipsisIcon size={16} className="cursor-pointer" />
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-2">
-            <div className="flex space-x-2 items-center justify-end">
-              <div className="">
-                <div className="flex space-x-1 items-start gap-2 px-2">
-                  <LayersIcon size={20} className="mt-1" />
-                  <div className="w-full text-sm text-left">
-                    <p>สร้างกลุ่มบิลใหม่</p>
-                    <p className="text-xs text-orange-500 whitespace-nowrap">
-                      - เมื่อสร้างแล้วไม่สามรถลบออกได้
-                    </p>
-                  </div>
-                </div>
+          <PopoverContent className="p-2 ">
+            <Tabs defaultValue="normal" className="w-full ">
+              <TabsList className="mt-1 w-full">
+                <TabsTrigger className="w-full" value="normal">ชำระเต็มจำนวน</TabsTrigger>
+                <TabsTrigger className="w-full" value="installment">ผ่อนชำระ</TabsTrigger>
+              </TabsList>
+              <TabsContent value="installment" className="">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>สร้างตารางผ่อน</CardTitle>
+                    <CardDescription className="text-orange-500">
+                      จำนวนงวดเมื่อสร้างแล้วไม่สามารถแก้ไขได้
+                    </CardDescription>
 
-                <div className="flex justify-center space-x-2 mt-2">
-                  <Input
-                    id="bill_group_date"
-                    name="bill_group_date"
-                    type="date"
-                    placeholder="วันที่ออกบิล"
-                    onChange={(e) => setBillGroupDate(e.target.value)}
-                    defaultValue={billGroupDate}
-                  />
-                  <ConfirmActionButton
-                    onConfirm={() => {
-                      attachBillGroup(currentQuotation.id);
-                    }}
-                  >
-                    <Button className="flex justify-center items-center space-x-1 h-9">
-                      <PlusIcon size={12} className="mr-1" />
-                      <p>สร้าง</p>
-                    </Button>
-                  </ConfirmActionButton>
-                </div>
-              </div>
-            </div>
+
+                  </CardHeader>
+                  <CardContent className="grid gap-6">
+                    <div className="grid gap-3">
+                      <Label htmlFor="period">จำนวนงวด</Label>
+                      <Input id="period" type="number" placeholder="กรอกจำนวนงวด" defaultValue={10} />
+                    </div>
+                  </CardContent>
+                  <CardFooter>
+                    <ConfirmActionButton
+                      onConfirm={() => {
+                        //
+                      }}
+                    >
+                      <Button className="flex justify-center items-center space-x-1 h-9 w-full">
+                        <p>ยืนยันยอดรวม {currentQuotation.grandTotal?.toLocaleString() ?? 0} บาท</p>
+                      </Button>
+                    </ConfirmActionButton>
+                  </CardFooter>
+                </Card>
+              </TabsContent>
+              <TabsContent value="normal" className="">
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle> สร้างกลุ่มบิลใหม่</CardTitle>
+                    <CardDescription className="text-orange-500">
+                      เมื่อสร้างแล้วไม่สามรถลบออกได้
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="grid gap-6">
+                    <div className="grid gap-3">
+                      <Input
+                        id="bill_group_date"
+                        name="bill_group_date"
+                        type="date"
+                        placeholder="วันที่ออกบิล"
+                        onChange={(e) => setBillGroupDate(e.target.value)}
+                        defaultValue={billGroupDate}
+                      />
+                    </div>
+                  </CardContent>
+                  <CardFooter>
+                    <ConfirmActionButton
+                      onConfirm={() => {
+                        attachBillGroup(currentQuotation.id);
+                      }}
+                    >
+                      <Button className="flex justify-center items-center space-x-1 h-9">
+                        <PlusIcon size={12} className="mr-1" />
+                        <p>สร้าง</p>
+                      </Button>
+                    </ConfirmActionButton>
+                  </CardFooter>
+                </Card>
+
+                {/* 
+                <div className="flex space-x-2 items-center justify-end">
+                  <div className="">
+                    <div className="flex space-x-1 items-start gap-2 px-2">
+                      <LayersIcon size={20} className="mt-1" />
+                      <div className="w-full text-sm text-left">
+                        <p>สร้างกลุ่มบิลใหม่</p>
+                        <p className="text-xs text-orange-500 whitespace-nowrap">
+                          - เมื่อสร้างแล้วไม่สามรถลบออกได้
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-center space-x-2 mt-2">
+                      <Input
+                        id="bill_group_date"
+                        name="bill_group_date"
+                        type="date"
+                        placeholder="วันที่ออกบิล"
+                        onChange={(e) => setBillGroupDate(e.target.value)}
+                        defaultValue={billGroupDate}
+                      />
+                      <ConfirmActionButton
+                        onConfirm={() => {
+                          attachBillGroup(currentQuotation.id);
+                        }}
+                      >
+                        <Button className="flex justify-center items-center space-x-1 h-9">
+                          <PlusIcon size={12} className="mr-1" />
+                          <p>สร้าง</p>
+                        </Button>
+                      </ConfirmActionButton>
+                    </div>
+                  </div>
+                </div> */}
+              </TabsContent>
+            </Tabs>
           </PopoverContent>
         </Popover>
       </div>
@@ -201,37 +292,28 @@ const BillController = ({
   );
   const billGroupCode = currentQuotation?.billGroup?.code ?? "";
   const defaultInvoiceDate = currentQuotation?.billGroup?.date
-  
+
   return (
     <div className="border p-3 relative">
       <div className="absolute bg-gray-50 px-2 -top-2 text-xs ">
         <div className="flex space-x-2 items-center justify-center">
           <p> กลุ่มบิล</p>
           {billGroupCode && <p className="font-semibold">{billGroupCode}</p>}
-          {/* <p> ({quotationsGroup.length + 1})</p> */}
         </div>
       </div>
       <div className="flex items-center gap-2 flex-wrap">
-        {/* <Badge variant="default">
-          {!currentQuotation.grandTotal && (
-            <InfoIcon size={12} className="mr-1 text-red-300" />
-          )}
-          <span> {currentQuotation.code}</span>
-        </Badge> */}
 
         {allQuotations.map((qt) => (
           <Link key={qt.id} href={"/quotations/" + qt.id}>
             <Badge
               variant={qt.id === currentQuotation.id ? "default" : "secondary"}
               className={cn("relative flex items-center", {
-                // "text-destructive": !qt.grandTotal,
               })}
             >
               {!qt.grandTotal && (
                 <InfoIcon size={12} className="mr-1 text-destructive" />
               )}
               <span>{qt.code}</span>
-              {/* <span className="absolute top-1 right-0 text-red-600"><MinusCircleIcon size={12} /></span> */}
             </Badge>
           </Link>
         ))}

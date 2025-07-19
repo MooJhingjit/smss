@@ -10,6 +10,7 @@ import {
   Contact,
   Invoice,
   BillGroup,
+  QuotationInstallment,
 } from "@prisma/client";
 import { JWT } from "next-auth/jwt";
 
@@ -35,6 +36,7 @@ export type QuotationWithRelations = Quotation & {
   lists?: QuotationList[];
   invoice?: Invoice;
   billGroup?: BillGroup;
+  installments?: QuotationInstallment[];
 };
 
 export type ContactWithRelations = Contact & {

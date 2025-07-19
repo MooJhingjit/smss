@@ -168,8 +168,8 @@ model Quotation {
   medias                Media[]
   invoice               Invoice?
   installments          QuotationInstallment[]
-  outstandingBalance    Float?                   @default(0)  // Outstanding balance without tax
-  outstandingGrandTotal Float?                   @default(0)  // Outstanding balance with tax
+  outstandingBalance    Float?                   @default(0)  // Outstanding balance without vat
+  outstandingGrandTotal Float?                   @default(0)  // Outstanding balance with vat
   @@index([contactId])
   @@index([sellerId])
 }

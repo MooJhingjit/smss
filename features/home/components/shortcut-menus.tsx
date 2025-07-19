@@ -64,12 +64,12 @@ export default function ShortcutMenus({
       label="ลูกค้า"
       link="/contacts"
       />
-{/* 
+
       <MenuItem
       icon={<FileClock className="w-6 h-6 lg:w-12 lg:h-12  " strokeWidth={1.5} />}
       label="ผ่อนชำระ"
       link="/installments"
-      /> */}
+      />
 
       <MenuItem
       icon={
