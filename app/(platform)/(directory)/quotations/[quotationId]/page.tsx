@@ -40,6 +40,11 @@ const getData = async (
       contact: true,
       seller: true,
       invoice: true,
+      installments: {
+        orderBy: {
+          period: 'asc',
+        },
+      },
       purchaseOrders: {
         include: {
           vendor: true,
@@ -156,13 +161,13 @@ export default async function QuotationDetails(
       <div className="grid  grid-cols-5 gap-8 mt-6">
         <div className="col-span-5 md:col-span-2">
           {contact && <CustomerInfo
-          quotationId={data.id}
-          data={{
-            ...contact,
-            contact: data.overrideContactName ?? contact.contact,
-            email: data.overrideContactEmail ?? contact.email,
-            phone: data.overrideContactPhone ?? contact.phone,
-          }} />}
+            quotationId={data.id}
+            data={{
+              ...contact,
+              contact: data.overrideContactName ?? contact.contact,
+              email: data.overrideContactEmail ?? contact.email,
+              phone: data.overrideContactPhone ?? contact.phone,
+            }} />}
         </div>
         <div className="col-span-5 md:col-span-3">
           <QuotationInfo quotationsGroup={quotationsGroup} data={data} isAdmin={isAdmin} />
@@ -207,7 +212,7 @@ export default async function QuotationDetails(
             )}
           </div>
         )}
-        
+
         <div className="col-span-5 md:col-span-3   mb-6">
           <DocumentItems refType="quotation" refId={data.id} />
         </div>

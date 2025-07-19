@@ -29,6 +29,7 @@ import { Separator } from "@/components/ui/separator";
 import { FormSearchAsync } from "@/components/form/form-search-async";
 import { QuotationWithRelations } from "@/types";
 import { attachQuotationToBillGroup } from "@/actions/bill-group/create";
+import { createInstallments } from "@/actions/quotation/create-installments";
 import ConfirmActionButton from "@/components/confirm-action";
 import { useAction } from "@/hooks/use-action";
 import { toast } from "sonner";
@@ -44,13 +45,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Label } from "@/components/ui/label"
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs"
 
 type Props = {
   data: QuotationWithRelations;
@@ -124,6 +120,7 @@ const BillController = ({
   const [billGroupDate, setBillGroupDate] = React.useState(
     new Date().toISOString().split("T")[0]
   );
+  const [installmentPeriods, setInstallmentPeriods] = React.useState(10);
 
   const handleBillGroup = useAction(attachQuotationToBillGroup, {
     onSuccess: () => {
@@ -134,8 +131,17 @@ const BillController = ({
     },
   });
 
-  const attachBillGroup = async (quotationId: number) => {
+  const handleCreateInstallments = useAction(createInstallments, {
+    onSuccess: () => {
+      toast.success("สร้างตารางผ่อนสำเร็จ");
+      window.location.reload(); // Refresh to show the installment link
+    },
+    onError: (error) => {
+      toast.error(error);
+    },
+  });
 
+  const attachBillGroup = async (quotationId: number) => {
     if (billGroupDate === "") {
       toast.error("กรุณาเลือกวันที่ออกกลุ่มบิล");
       return;
@@ -152,8 +158,36 @@ const BillController = ({
     await handleBillGroup.execute(payload);
   };
 
+  const createInstallmentPlan = async () => {
+    if (!currentQuotation.grandTotal) {
+      toast.error("ไม่สามารถสร้างตารางผ่อนได้ กรุณายืนยันยอดรวมก่อน");
+      return;
+    }
+
+    await handleCreateInstallments.execute({
+      quotationId: currentQuotation.id,
+      periodCount: installmentPeriods,
+    });
+  };
+
   const hasInstallments = currentQuotation?.installments && currentQuotation.installments.length > 0;
+  console.log(hasInstallments)
   const hasGroup = currentQuotation?.billGroupId
+
+  // Show installment link if installments exist
+  if (hasInstallments) {
+    return (
+      <div className="flex items-center space-x-4">
+        <Badge variant="default">{currentQuotation.code}</Badge>
+        <Link 
+          href={`/installments/${currentQuotation.id}`}
+          className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+        >
+          ดูแผนการผ่อนชำระ
+        </Link>
+      </div>
+    );
+  }
 
   if (!hasGroup) {
     return (
@@ -182,14 +216,20 @@ const BillController = ({
                   <CardContent className="grid gap-6">
                     <div className="grid gap-3">
                       <Label htmlFor="period">จำนวนงวด</Label>
-                      <Input id="period" type="number" placeholder="กรอกจำนวนงวด" defaultValue={10} />
+                      <Input 
+                        id="period" 
+                        type="number" 
+                        placeholder="กรอกจำนวนงวด" 
+                        value={installmentPeriods}
+                        onChange={(e) => setInstallmentPeriods(parseInt(e.target.value) || 12)}
+                        min={1}
+                        max={60}
+                      />
                     </div>
                   </CardContent>
                   <CardFooter>
                     <ConfirmActionButton
-                      onConfirm={() => {
-                        //
-                      }}
+                      onConfirm={createInstallmentPlan}
                     >
                       <Button className="flex justify-center items-center space-x-1 h-9 w-full">
                         <p>ยืนยันยอดรวม {currentQuotation.grandTotal?.toLocaleString() ?? 0} บาท</p>
