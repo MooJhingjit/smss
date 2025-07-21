@@ -5,7 +5,7 @@ import { InputType, ReturnType } from "./types";
 import { schema } from "./schema";
 import { currentUser } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
-import { generateCode } from "@/lib/utils";
+import { generateBillGroupCode } from "@/lib/generate-code.service";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
   try {
@@ -36,38 +36,12 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         data: { billGroupId: billGroupIdToUse },
       });
 
-      // update bill group code
-
-      const year = BILL_GROUP_DATE.getFullYear();
-      const month = (BILL_GROUP_DATE.getMonth() + 1).toString().padStart(2, "0");
-
-      const datePrefix = `${year}-${month}`;
-      const lastBillGroup = await db.billGroup.findFirst({
-        where: {
-          code: {
-            startsWith: datePrefix,
-          },
-        },
-        orderBy: {
-          code: "desc",
-        },
-      });
-
-      // 2) Parse the last 3 digits to figure out the sequence number
-      let nextSequence = 1;
-      if (lastBillGroup?.code) {
-        nextSequence = parseInt(lastBillGroup.code.slice(-3), 10) + 1;
-      }
-
-      // update code based on quotation ID
-      // format: YYYY-MM001
-      const code = `${datePrefix}${nextSequence.toString().padStart(3, "0")}`;
+     const code = await generateBillGroupCode(BILL_GROUP_DATE);
 
       await db.billGroup.update({
         where: { id: billGroupIdToUse },
         data: { code },
       });
-
     }
 
     // attach new quotation to the same bill group

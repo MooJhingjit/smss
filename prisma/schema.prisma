@@ -221,6 +221,7 @@ model QuotationItem {
 }
 
 enum InstallmentStatus {
+  draft
   pending
   paid
   overdue
@@ -235,8 +236,9 @@ model QuotationInstallment {
   amountWithVat Float           // Amount for this installment (with VAT)
   dueDate     DateTime          // Due date for this installment
   paidDate    DateTime?         // When it was paid (null if not paid)
-  status      InstallmentStatus @default(pending)
+  status      InstallmentStatus @default(draft)
   remarks     String?           @db.Text
+  invoice     Invoice?          // Relation to invoice for this installment
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
 
@@ -360,6 +362,8 @@ model Invoice {
   billGroupId Int
   billGroup   BillGroup @relation(fields: [billGroupId], references: [id])
   quotationId Int @unique
+  quotationInstallmentId Int? @unique
+  quotationInstallment QuotationInstallment? @relation(fields: [quotationInstallmentId], references: [id])
   quotation   Quotation @relation(fields: [quotationId], references: [id])
   grandTotal Float
   createdAt       DateTime       @default(now())
@@ -367,6 +371,7 @@ model Invoice {
 
   @@index([billGroupId])
   @@index([quotationId])
+  @@index([quotationInstallmentId])
 }
 
 // npx prisma db push
