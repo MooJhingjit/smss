@@ -190,7 +190,7 @@ const BillController = ({
               href={`/installments/${currentQuotation.id}`}
               className=" text-sm underline"
             >
-              ดูแผนการผ่อนชำระ: งวด {lastPayment?.period}, คงเหลือ {currentQuotation.outstandingGrandTotal?.toLocaleString() ?? 0} บาท
+              ดูแผนการผ่อนชำระ: ชำระแล้ว {lastPayment?.period ?? 0} งวด, คงเหลือ {currentQuotation.outstandingGrandTotal?.toLocaleString() ?? 0} บาท
             </Link>
           </AlertDescription>
         </Alert>
