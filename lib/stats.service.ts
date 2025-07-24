@@ -18,11 +18,13 @@ export interface StatsFilters {
   includePurchaseOrders?: boolean;
 }
 
-export const getMonthlyStats = async (filters: StatsFilters = {}): Promise<MonthlyStatsData[]> => {
-  const { 
-    year = new Date().getUTCFullYear(), 
+export const getMonthlyStats = async (
+  filters: StatsFilters = {}
+): Promise<MonthlyStatsData[]> => {
+  const {
+    year = new Date().getUTCFullYear(),
     sellerId,
-    includePurchaseOrders = true 
+    includePurchaseOrders = true,
   } = filters;
 
   const monthlyData = await Promise.all(
@@ -68,7 +70,14 @@ export const getMonthlyStats = async (filters: StatsFilters = {}): Promise<Month
         where: {
           ...quotationWhere,
           status: {
-            not: "paid",
+            in: [
+              "approved",
+              "po_preparing",
+              "po_sent",
+              "product_received",
+              "order_preparing",
+              "delivered",
+            ],
           },
         },
       });
@@ -80,7 +89,14 @@ export const getMonthlyStats = async (filters: StatsFilters = {}): Promise<Month
         where: {
           ...quotationWhere,
           status: {
-            not: "paid",
+            in: [
+              "approved",
+              "po_preparing",
+              "po_sent",
+              "product_received",
+              "order_preparing",
+              "delivered",
+            ],
           },
         },
       });
@@ -134,10 +150,10 @@ export const getMonthlyStats = async (filters: StatsFilters = {}): Promise<Month
 };
 
 export const getTotalCounts = async (filters: StatsFilters = {}) => {
-  const { 
-    year = new Date().getUTCFullYear(), 
+  const {
+    year = new Date().getUTCFullYear(),
     sellerId,
-    includePurchaseOrders = true 
+    includePurchaseOrders = true,
   } = filters;
 
   const startDate = new Date(Date.UTC(year, 0, 1)); // January 1st of the year
