@@ -28,3 +28,31 @@ export const generateBillGroupCode = async (BILL_GROUP_DATE: Date) => {
 
   return code;
 };
+
+export const generateInvoiceCode = async (invoiceDate: Date, isProduct: boolean) => {
+  const prefix = isProduct ? "" : "S";
+  const year = invoiceDate.getFullYear();
+  const month = (invoiceDate.getMonth() + 1).toString().padStart(2, "0");
+
+  const lastInvoice = await db.invoice.findFirst({
+    where: {
+      code: {
+        startsWith: `${prefix}${year}-${month}`,
+      },
+    },
+    orderBy: {
+      code: "desc",
+    },
+  });
+
+  // Parse the last 3 digits to figure out the sequence number
+  let nextSequence = 1;
+  if (lastInvoice?.code) {
+    nextSequence = parseInt(lastInvoice.code.slice(-3), 10) + 1;
+  }
+
+  // format: [S]YYYY-MMDDD
+  const code = `${prefix}${year}-${month}${nextSequence.toString().padStart(3, "0")}`;
+
+  return code;
+};

@@ -4,6 +4,7 @@ import { generateInvoice as generateBillToCustomer } from "@/app/services/PDF/pd
 import { generateInvoice as generateServiceInvoiceToCustomer } from "@/app/services/PDF/pdf.service-invoice-to-customer";
 import { generateInstallmentBillCover } from "@/app/services/PDF/pdf.installment-bill-cover";
 import { addQuotationToMergedPdf } from "@/app/services/service.bills";
+import { generateInvoiceCode } from "@/lib/generate-code.service";
 import { PDFDocument } from "pdf-lib";
 
 export async function generateInstallmentInvoice(billGroupId: number, customDate: string) {
@@ -117,29 +118,9 @@ async function createInstallmentInvoice(
     });
 
     const isProduct = installment.quotation.type === "product";
-    const prefix = isProduct ? "" : "S";
 
-    // Generate invoice code (same logic as regular invoices)
-    const year = invoiceDate.getFullYear();
-    const month = (invoiceDate.getMonth() + 1).toString().padStart(2, "0");
-
-    const lastInvoice = await db.invoice.findFirst({
-        where: {
-            code: {
-                startsWith: `${prefix}${year}-${month}`,
-            },
-        },
-        orderBy: {
-            code: "desc",
-        },
-    });
-
-    let nextSequence = 1;
-    if (lastInvoice?.code) {
-        nextSequence = parseInt(lastInvoice.code.slice(-3), 10) + 1;
-    }
-
-    const code = `${prefix}${year}-${month}${nextSequence.toString().padStart(3, "0")}`;
+    // Generate invoice code using centralized service
+    const code = await generateInvoiceCode(invoiceDate, isProduct);
 
     const data = {
         code,

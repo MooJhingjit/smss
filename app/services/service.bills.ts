@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { QT_TYPE } from "@/types";
 import { Invoice, QuotationType } from "@prisma/client";
 import { PDFDocument } from "pdf-lib";
+import { generateInvoiceCode } from "@/lib/generate-code.service";
 
 // create group bills (product and service) and merge them into a single PDF
 export async function generateGroupInvoices(groupId: string, customDate: string) {
@@ -138,40 +139,11 @@ async function createNewInvoice(
       quotationId: quotation.id,
     },
   });
+  
   const isProduct = quotation.type === QuotationType.product;
 
-  // Generate the invoice code
-  const prefix = isProduct ? "" : "S";
-
-  // 1) Find the most recently created quotation (descending by code)
-  // that starts with prefix + year + month.
-  const year = invoiceDate.getFullYear();
-  const month = (invoiceDate.getMonth() + 1).toString().padStart(2, "0");
-  const datePrefix = `${year}-${month}`;
-
-  const lastInvoice = await db.invoice.findFirst({
-    where: {
-      code: {
-        startsWith: `${prefix}${year}-${month}`,
-      },
-    },
-    orderBy: {
-      code: "desc",
-    },
-  });
-
-  // 2) Parse the last 3 digits to figure out the sequence number
-  let nextSequence = 1;
-  if (lastInvoice?.code) {
-    nextSequence = parseInt(lastInvoice.code.slice(-3), 10) + 1;
-  }
-
-  // format:  [S]YYYY-MMDDD
-  const code = `${prefix}${datePrefix}${nextSequence
-    .toString()
-    .padStart(3, "0")}`;
-
-  // for product, the code and data are the same for code and receiptCode
+  // Generate the invoice code using centralized service
+  const code = await generateInvoiceCode(invoiceDate, isProduct);
 
   const data = {
     code,
