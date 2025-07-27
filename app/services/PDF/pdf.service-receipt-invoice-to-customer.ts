@@ -5,6 +5,7 @@ import {
   PurchaseOrder,
   Quotation,
   QuotationList,
+  QuotationInstallment,
   User,
 } from "@prisma/client";
 import { PDFDocument, PDFEmbeddedPage, PDFFont, PDFPage } from "pdf-lib";
@@ -15,6 +16,7 @@ type QuotationWithRelations = Quotation & {
   contact?: Contact | null;
   seller?: User | null;
   invoice?: Invoice | null;
+  installmentData?: QuotationInstallment | null;
 };
 // type PurchaseOrderWithRelations = PurchaseOrder & {
 //   quotation?: QuotationWithRelations | null;
@@ -22,6 +24,7 @@ type QuotationWithRelations = Quotation & {
 
 let _BILL_DATE = ""
 let _DATA: QuotationWithRelations | null = null
+let _INSTALLMENT_DATA: QuotationInstallment | null = null;
 let _FONT: PDFFont | null = null;
 
 // item list config
@@ -48,7 +51,8 @@ const CURRENCY_FORMAT = {
 
 
 const getData = async (
-  id: number
+  id: number,
+  installmentId?: number
 ): Promise<QuotationWithRelations | null> => {
   const quotation = await db.quotation.findUnique({
     include: {
@@ -69,17 +73,31 @@ const getData = async (
     },
   });
 
+  // Fetch installment data if installmentId is provided
+  if (installmentId && quotation) {
+    const installment = await db.quotationInstallment.findUnique({
+      where: { id: installmentId },
+    });
+    
+    if (installment) {
+      // Type-safe assignment using spread operator
+      return {
+        ...quotation,
+        installmentData: installment
+      } as QuotationWithRelations;
+    }
+  }
+
   return quotation;
 };
 
-export const generateInvoice = async (id: number, defaultDate: string) => {
+export const generateInvoice = async (id: number, defaultDate: string, installmentId?: number) => {
   try {
     if (!id) {
       throw new Error("Invalid quotation ID");
     }
 
-
-    const quotation = await getData(id);
+    const quotation = await getData(id, installmentId);
 
     const invoiceDate = quotation?.invoice?.receiptDate ?? defaultDate
     _BILL_DATE = PDFDateFormat(new Date(invoiceDate))
@@ -89,6 +107,7 @@ export const generateInvoice = async (id: number, defaultDate: string) => {
     }
 
     _DATA = quotation
+    _INSTALLMENT_DATA = quotation.installmentData || null;
     return main();
   } catch (error) {
     console.log(error);
@@ -241,20 +260,21 @@ const writeMainItem = (
   });
 
 
-  const unitPrice = data.unitPrice
-    ? data.unitPrice.toLocaleString("th-TH", CURRENCY_FORMAT)
-    : "0.00";
+  // Use installment amounts if available, otherwise use original list data
+  const unitPrice = _INSTALLMENT_DATA ? 
+    _INSTALLMENT_DATA.amount.toLocaleString("th-TH", CURRENCY_FORMAT) :
+    (data.unitPrice ? data.unitPrice.toLocaleString("th-TH", CURRENCY_FORMAT) : "0.00");
 
-  currentPage.drawText(data.unitPrice?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "", {
+  currentPage.drawText(unitPrice, {
     x: columnPosition.unitPrice + 44 - getTextWidth(unitPrice, config),
     y: lineStart,
     maxWidth: 20,
     ...config,
   });
 
-  const amountText = data.price
-    ? data.price.toLocaleString("th-TH", CURRENCY_FORMAT)
-    : "0.00";
+  const amountText = _INSTALLMENT_DATA ?
+    _INSTALLMENT_DATA.amount.toLocaleString("th-TH", CURRENCY_FORMAT) :
+    (data.price ? data.price.toLocaleString("th-TH", CURRENCY_FORMAT) : "0.00");
     
   currentPage.drawText(amountText, {
     x: columnPosition.amount + 44 - getTextWidth(amountText, config),
@@ -294,6 +314,7 @@ const writeMainDescription = (
     opacity: 0.5,
   });
 
+  let totalHeight = 0;
   const bounding = getBoundingBox(
     description,
     pdfDoc,
@@ -302,8 +323,31 @@ const writeMainDescription = (
     config.lineHeight + 4,
     300
   );
+  totalHeight += bounding.height / 10;
 
-  return bounding.height / 10;
+  // Add installment period info if installment data exists
+  if (_INSTALLMENT_DATA) {
+    const installmentText = `งวดที่ ${_INSTALLMENT_DATA.period}`;
+    currentPage.drawText(installmentText, {
+      x: columnPosition.description + 12, // same indent as description
+      y: lineStart - totalHeight,
+      maxWidth: 300,
+      ...config,
+      opacity: 0.7, // slightly more visible than description
+    });
+
+    const installmentBounding = getBoundingBox(
+      installmentText,
+      pdfDoc,
+      _FONT,
+      PAGE_FONT_SIZE,
+      config.lineHeight + 4,
+      300
+    );
+    totalHeight += config.lineHeight + installmentBounding.height / 10;
+  }
+
+  return totalHeight;
 };
 
 const drawHeaderInfo = (
@@ -504,9 +548,12 @@ const drawPriceInfo = (
     ...config,
   });
 
-  // Price text
-
-  const thaiBahtText = convertToThaiBahtText(parseFloat(grandTotal.replace(/,/g, "")));
+  // Price text - use installment amount if available, otherwise use grandTotal
+  const amountForThaiBaht = _INSTALLMENT_DATA ? 
+    _INSTALLMENT_DATA.amountWithVat : 
+    parseFloat(grandTotal.replace(/,/g, ""));
+    
+  const thaiBahtText = convertToThaiBahtText(amountForThaiBaht);
   page.drawText(thaiBahtText, {
     x: ITEM_X_Start + 30,
     y: Start_Y - config.lineHeight * 2,
@@ -527,9 +574,15 @@ const drawStaticInfo = (
 
   drawPriceInfo(page, {
     discount: _DATA?.discount?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
-    tax: _DATA?.tax?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
-    totalPrice: _DATA?.totalPrice?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
-    grandTotal: _DATA?.grandTotal?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
+    tax: _INSTALLMENT_DATA ? 
+      (_INSTALLMENT_DATA.amountWithVat - _INSTALLMENT_DATA.amount).toLocaleString("th-TH", CURRENCY_FORMAT) :
+      (_DATA?.tax?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? ""),
+    totalPrice: _INSTALLMENT_DATA ?
+      _INSTALLMENT_DATA.amount.toLocaleString("th-TH", CURRENCY_FORMAT) :
+      (_DATA?.totalPrice?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? ""),
+    grandTotal: _INSTALLMENT_DATA ?
+      _INSTALLMENT_DATA.amountWithVat.toLocaleString("th-TH", CURRENCY_FORMAT) :
+      (_DATA?.grandTotal?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? ""),
   });
 
 };

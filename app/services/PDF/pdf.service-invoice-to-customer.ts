@@ -15,6 +15,13 @@ type QuotationWithRelations = Quotation & {
   contact?: Contact | null;
   seller?: User | null;
   invoice?: Invoice | null;
+  installmentData?: {
+    period: string;
+    amount: number;
+    amountWithVat: number;
+    dueDate: Date;
+    status: string;
+  };
 };
 // type PurchaseOrderWithRelations = PurchaseOrder & {
 //   quotation?: QuotationWithRelations | null;
@@ -23,6 +30,13 @@ type QuotationWithRelations = Quotation & {
 let _BILL_DATE = ""
 let _DATA: QuotationWithRelations | null = null
 let _FONT: PDFFont | null = null;
+let _INSTALLMENT_DATA: {
+  period: string;
+  amount: number;
+  amountWithVat: number;
+  dueDate: Date;
+  status: string;
+} | null = null;
 
 // item list config
 const PAGE_FONT_SIZE = 8;
@@ -48,7 +62,8 @@ const CURRENCY_FORMAT = {
 
 
 const getData = async (
-  id: number
+  id: number,
+  installmentId?: number
 ): Promise<QuotationWithRelations | null> => {
   const quotation = await db.quotation.findUnique({
     include: {
@@ -69,17 +84,37 @@ const getData = async (
     },
   });
 
+  // If installment ID is provided, fetch installment data
+  if (installmentId && quotation) {
+    const installment = await db.quotationInstallment.findUnique({
+      where: { id: installmentId },
+      select: {
+        period: true,
+        amount: true,
+        amountWithVat: true,
+        dueDate: true,
+        status: true,
+      }
+    });
+
+    if (installment) {
+      _INSTALLMENT_DATA = installment;
+    }
+  }
+
   return quotation;
 };
 
-export const generateInvoice = async (id: number, defaultDate: string) => {
+export const generateInvoice = async (id: number, defaultDate: string, installmentId?: number) => {
   try {
     if (!id) {
       throw new Error("Invalid quotation ID");
     }
 
+    // Reset installment data
+    _INSTALLMENT_DATA = null;
 
-    const quotation = await getData(id);
+    const quotation = await getData(id, installmentId);
 
     const invoiceDate = quotation?.invoice?.date ?? defaultDate
     _BILL_DATE = PDFDateFormat(new Date(invoiceDate))
@@ -231,21 +266,28 @@ const writeMainItem = (
     ...config,
   });
 
+  // Use installment amount if available, otherwise use quotation list data
+  let unitPrice, amount;
+  if (_INSTALLMENT_DATA) {
+    // For installments: use installment amount as unitPrice and installment amountWithVat as price
+    unitPrice = _INSTALLMENT_DATA.amount;
+    amount = _INSTALLMENT_DATA.amount 
+  } else {
+    // For regular quotations: use original data
+    unitPrice = data.unitPrice ?? 0;
+    amount = data.price ?? 0;
+  }
 
-  const unitPrice = data.unitPrice
-    ? data.unitPrice.toLocaleString("th-TH", CURRENCY_FORMAT)
-    : "0.00";
+  const unitPriceText = unitPrice.toLocaleString("th-TH", CURRENCY_FORMAT);
 
-  currentPage.drawText(data.unitPrice?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "", {
-    x: columnPosition.unitPrice + 44 - getTextWidth(unitPrice, config),
+  currentPage.drawText(unitPriceText, {
+    x: columnPosition.unitPrice + 44 - getTextWidth(unitPriceText, config),
     y: lineStart,
     maxWidth: 20,
     ...config,
   });
 
-  const amountText = data.price
-    ? data.price.toLocaleString("th-TH", CURRENCY_FORMAT)
-    : "0.00";
+  const amountText = amount.toLocaleString("th-TH", CURRENCY_FORMAT);
   currentPage.drawText(amountText, {
     x: columnPosition.amount + 44 - getTextWidth(amountText, config),
     y: lineStart,
@@ -276,15 +318,19 @@ const writeMainDescription = (
   },
   pdfDoc: PDFDocument
 ) => {
+  let currentY = lineStart;
+  let totalHeight = 0;
+
+  // Draw the original description
   currentPage.drawText(description, {
     x: columnPosition.description + 12, // indent
-    y: lineStart,
+    y: currentY,
     maxWidth: 300,
     ...config,
     opacity: 0.5,
   });
 
-  const bounding = getBoundingBox(
+  const descriptionBounding = getBoundingBox(
     description,
     pdfDoc,
     _FONT,
@@ -292,8 +338,34 @@ const writeMainDescription = (
     config.lineHeight + 4,
     300
   );
+  totalHeight += descriptionBounding.height / 10;
+  currentY -= descriptionBounding.height / 10;
 
-  return bounding.height / 10;
+  // Add installment period if installment data exists
+  if (_INSTALLMENT_DATA) {
+    const installmentText = `งวดที่ ${_INSTALLMENT_DATA.period}`;
+    currentY -= config.lineHeight; // Add some spacing
+    
+    currentPage.drawText(installmentText, {
+      x: columnPosition.description + 12, // indent same as description
+      y: currentY,
+      maxWidth: 300,
+      ...config,
+      opacity: 0.7,
+    });
+
+    const installmentBounding = getBoundingBox(
+      installmentText,
+      pdfDoc,
+      _FONT,
+      PAGE_FONT_SIZE,
+      config.lineHeight + 4,
+      300
+    );
+    totalHeight += config.lineHeight + installmentBounding.height / 10;
+  }
+
+  return totalHeight;
 };
 
 const drawHeaderInfo = (
@@ -486,9 +558,12 @@ const drawPriceInfo = (
     ...config,
   });
 
-  // Price text
-
-  const thaiBahtText = convertToThaiBahtText(parseFloat(grandTotal.replace(/,/g, "")));
+  // Price text - use installment amount if available
+  const grandTotalNumber = _INSTALLMENT_DATA 
+    ? _INSTALLMENT_DATA.amountWithVat 
+    : parseFloat(grandTotal.replace(/,/g, ""));
+    
+  const thaiBahtText = convertToThaiBahtText(grandTotalNumber);
   page.drawText(thaiBahtText, {
     x: ITEM_X_Start + 30,
     y: Start_Y - config.lineHeight * 2,
@@ -507,11 +582,18 @@ const drawStaticInfo = (
 
   drawCustomerInfo(page);
 
-  drawPriceInfo(page, {
+  // Use installment amounts if available, otherwise use quotation amounts
+  const priceData = _INSTALLMENT_DATA ? {
+    discount: "0.00", // Installments typically don't have separate discount
+    tax: ((_INSTALLMENT_DATA.amountWithVat - _INSTALLMENT_DATA.amount)).toLocaleString("th-TH", CURRENCY_FORMAT),
+    totalPrice: _INSTALLMENT_DATA.amount.toLocaleString("th-TH", CURRENCY_FORMAT),
+    grandTotal: _INSTALLMENT_DATA.amountWithVat.toLocaleString("th-TH", CURRENCY_FORMAT),
+  } : {
     discount: _DATA?.discount?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
     tax: _DATA?.tax?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
     totalPrice: _DATA?.totalPrice?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
     grandTotal: _DATA?.grandTotal?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
-  });
+  };
 
+  drawPriceInfo(page, priceData);
 };

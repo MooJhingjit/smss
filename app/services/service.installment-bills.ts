@@ -27,9 +27,11 @@ export async function generateInstallmentInvoice(billGroupId: number, customDate
         // Generate PDF based on quotation type using existing functions
         let pdfResult;
         if (quotation.type === "product") {
-            pdfResult = await generateBillToCustomer(quotation.id, customDate);
+            // Pass installment ID for product invoices to include installment-specific data
+            pdfResult = await generateBillToCustomer(quotation.id, customDate, installment.id);
         } else if (quotation.type === "service") {
-            pdfResult = await generateServiceInvoiceToCustomer(quotation.id, customDate);
+            // Pass installment ID for service invoices to include installment-specific data
+            pdfResult = await generateServiceInvoiceToCustomer(quotation.id, customDate, installment.id);
         } else {
             throw new Error(`Unsupported quotation type: ${quotation.type}`);
         }
