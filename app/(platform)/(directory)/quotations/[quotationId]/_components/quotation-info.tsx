@@ -10,6 +10,7 @@ import { useQuotationInfoModal } from "@/hooks/use-quotation-info-modal";
 import { Quotation } from "@prisma/client";
 import {
   CircleEllipsisIcon,
+  ExternalLink,
   InfoIcon,
   LayersIcon,
   PlusIcon,
@@ -121,6 +122,7 @@ const BillController = ({
     new Date().toISOString().split("T")[0]
   );
   const [installmentPeriods, setInstallmentPeriods] = React.useState(10);
+  const [installmentContractNumber, setInstallmentContractNumber] = React.useState("");
 
   const handleBillGroup = useAction(attachQuotationToBillGroup, {
     onSuccess: () => {
@@ -167,6 +169,7 @@ const BillController = ({
     await handleCreateInstallments.execute({
       quotationId: currentQuotation.id,
       periodCount: installmentPeriods,
+      installmentContractNumber: installmentContractNumber.trim() || undefined,
     });
   };
 
@@ -183,14 +186,33 @@ const BillController = ({
 
         <Alert className="">
           <AlertTitle className="flex items-center space-x-2">
-            <Badge variant="default">{currentQuotation.code}</Badge>
+            {
+              currentQuotation.installmentContractNumber && (
+
+                <Badge variant="secondary" className="text-xs">
+                  สัญญาเลขที่ {currentQuotation.installmentContractNumber}
+
+                </Badge>
+
+
+              )
+            }
+            <Badge variant="secondary">{currentQuotation.code}</Badge>
           </AlertTitle>
           <AlertDescription>
             <Link
               href={`/installments/${currentQuotation.id}`}
               className=" text-sm underline"
+
             >
-              ดูแผนการผ่อนชำระ: ชำระแล้ว {lastPayment?.period ?? 0} งวด, คงเหลือ {currentQuotation.outstandingGrandTotal?.toLocaleString() ?? 0} บาท
+              <Badge
+                variant="outline"
+                className="underline border-none"
+              >
+                ชำระแล้ว {lastPayment?.period ?? 0} งวด, คงเหลือ {currentQuotation.outstandingGrandTotal?.toLocaleString() ?? 0} บาท
+                <ExternalLink size={12} className="ml-1" />
+
+              </Badge>
             </Link>
           </AlertDescription>
         </Alert>
@@ -230,6 +252,19 @@ const BillController = ({
 
                   </CardHeader>
                   <CardContent className="grid gap-6">
+
+                    {/* Contract Number field */}
+                    <div className="grid gap-3">
+                      <Label htmlFor="contractNumber">เลขที่สัญญา</Label>
+                      <Input
+                        id="contractNumber"
+                        type="text"
+                        placeholder="กรอกเลขที่สัญญา (ไม่บังคับ)"
+                        value={installmentContractNumber}
+                        onChange={(e) => setInstallmentContractNumber(e.target.value)}
+                      />
+                    </div>
+
                     <div className="grid gap-3">
                       <Label htmlFor="period">จำนวนงวด</Label>
                       <Input

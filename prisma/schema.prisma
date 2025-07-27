@@ -168,6 +168,7 @@ model Quotation {
   medias                Media[]
   invoice               Invoice?
   installments          QuotationInstallment[]
+  installmentContractNumber String?              // Contract number for installment payments
   outstandingBalance    Float?                   @default(0) // Outstanding balance without vat
   outstandingGrandTotal Float?                   @default(0) // Outstanding balance with vat
 

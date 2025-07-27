@@ -278,7 +278,6 @@ export const convertToThaiBahtText = (price: number): string => {
   return bahtText + satangText;
 };
 
-
 export const getCustomerNameWithBranch = (companyName: string, branchId: string | null) => {
   const mainBranchLabel = "สำนักงานใหญ่"
 
@@ -291,3 +290,28 @@ export const getCustomerNameWithBranch = (companyName: string, branchId: string 
 
   return `${companyName}`;
 }
+
+export const formatInstallmentText = (
+  installmentData: {
+    period: string;
+    dueDate: Date;
+  },
+  contractNumber?: string | null
+): string => {
+  const thaiMonths = [
+    "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+    "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+  ];
+  
+  const dueDate = new Date(installmentData.dueDate);
+  const dueDateMonth = thaiMonths[dueDate.getMonth()];
+  const dueDateYear = (dueDate.getFullYear() + 543).toString(); // Convert to Buddhist year
+  
+  const installmentLine = `- งวดที่ ${installmentData.period} ${dueDateMonth} ${dueDateYear}`;
+  
+  if (contractNumber) {
+    return `- สัญญาเลขที่ ${contractNumber}\n${installmentLine}`;
+  }
+  
+  return installmentLine;
+};

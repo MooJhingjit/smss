@@ -15,7 +15,7 @@ import { updateInstallmentStatus } from "@/actions/quotation/update-installment-
 import { useAction } from "@/hooks/use-action";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { PrinterIcon } from "lucide-react";
+import { InfoIcon, PrinterIcon } from "lucide-react";
 import ConfirmActionButton from "@/components/confirm-action";
 import { useState } from "react";
 
@@ -27,13 +27,14 @@ const FormSchema = z.object({
         dueDate: z.string(),
         status: z.enum(["draft", "pending", "paid", "overdue"]),
         paidDate: z.date().nullable().optional(),
+        billGroupId: z.number().nullable().optional(),
     })),
 });
 
 type FormData = z.infer<typeof FormSchema>;
 
 interface InstallmentTableProps {
-    installments: QuotationInstallment[];
+    installments: (QuotationInstallment & { billGroupId?: number | null })[];
     quotationId: number;
 }
 
@@ -51,6 +52,7 @@ export default function InstallmentTable({ installments: initialInstallments, qu
                 dueDate: new Date(installment.dueDate).toISOString().split('T')[0],
                 status: installment.status,
                 paidDate: installment.paidDate,
+                billGroupId: installment.billGroupId,
             })),
         },
     });
@@ -74,19 +76,19 @@ export default function InstallmentTable({ installments: initialInstallments, qu
     const handleGenerateBill = async (installmentId: number, dueDate: string) => {
         try {
             setGeneratingBillFor(installmentId);
-            
+
             // Check if installment already has a bill group using existing data
             const installment = initialInstallments.find(inst => inst.id === installmentId);
             const hasBillGroup = installment?.billGroupId;
-            
+
             let requestBody: any = {};
-            
+
             if (!hasBillGroup) {
                 // Send billGroupDate only for new bill groups
                 requestBody.billGroupDate = dueDate;
-            } 
+            }
             // For existing bill groups, send empty body
-            
+
             const response = await fetch(`/api/installments/${installmentId}`, {
                 method: 'POST',
                 headers: {
@@ -111,10 +113,10 @@ export default function InstallmentTable({ installments: initialInstallments, qu
             a.click();
             window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
-            
+
             toast.success("สร้างและดาวน์โหลดใบวางบิลสำเร็จ");
             router.refresh();
-            
+
         } catch (error) {
             console.error('Error generating bill:', error);
             toast.error(error instanceof Error ? error.message : "เกิดข้อผิดพลาดในการสร้างใบวางบิล");
@@ -216,6 +218,7 @@ export default function InstallmentTable({ installments: initialInstallments, qu
                                                                     className="w-[150px] text-right"
                                                                     {...formField}
                                                                     onChange={(e) => formField.onChange(parseFloat(e.target.value) || 0)}
+                                                                    disabled={!!field.billGroupId}
                                                                 />
                                                             </FormControl>
                                                             <FormMessage />
@@ -236,6 +239,7 @@ export default function InstallmentTable({ installments: initialInstallments, qu
                                                                         type="date"
                                                                         className="w-auto"
                                                                         {...formField}
+                                                                        disabled={!!field.billGroupId}
                                                                     />
                                                                 </FormControl>
                                                                 <FormMessage />
@@ -247,14 +251,15 @@ export default function InstallmentTable({ installments: initialInstallments, qu
                                                             const installment = form.getValues(`installments.${index}`);
                                                             handleGenerateBill(installment.id, installment.dueDate);
                                                         }}
-                                                        warningMessage={[`สร้างใบวางบิลสำหรับงวดที่ ${field.period}`]}
+                                                        warningMessage={!field.billGroupId ? [`สร้างใบวางบิลสำหรับงวดที่ ${field.period}`] : [`พิมพ์ใบวางบิลงวดที่ ${field.period}`]}
+                                                        disabled={form.formState.isDirty}
                                                     >
                                                         <Button
                                                             type="button"
                                                             variant="ghost"
                                                             size="sm"
                                                             className="h-8 w-8 p-0"
-                                                            disabled={generatingBillFor === field.id}
+                                                            disabled={generatingBillFor === field.id || form.formState.isDirty}
                                                         >
                                                             {generatingBillFor === field.id ? (
                                                                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600" />
@@ -266,35 +271,7 @@ export default function InstallmentTable({ installments: initialInstallments, qu
                                                 </div>
                                             </TableCell>
 
-                                            <TableCell className="text-center">
-                                                <div className="flex items-center justify-center space-x-2">
-                                                    <FormField
-                                                        control={form.control}
-                                                        name={`installments.${index}.status`}
-                                                        render={({ field: formField }) => (
-                                                            <FormItem>
-                                                                <FormControl>
-                                                                    <Checkbox
-                                                                        checked={formField.value === "paid"}
-                                                                        onCheckedChange={(checked) => {
-                                                                            formField.onChange(checked ? "paid" : "pending");
-                                                                        }}
-                                                                    />
-                                                                </FormControl>
-                                                                <FormMessage />
-                                                            </FormItem>
-                                                        )}
-                                                    />
-                                                    <span
-                                                        className={`text-sm ${form.watch(`installments.${index}.status`) === "paid"
-                                                            ? "text-green-600 font-medium"
-                                                            : "text-gray-500"
-                                                            }`}
-                                                    >
-                                                        {form.watch(`installments.${index}.status`) === "paid" ? "ชำระแล้ว" : "ยังไม่ชำระ"}
-                                                    </span>
-                                                </div>
-                                            </TableCell>
+                                            <InstallmentStatusCell field={field} index={index} form={form} initialInstallment={initialInstallments[index]} />
                                         </TableRow>
                                     ))}
                                 </TableBody>
@@ -335,6 +312,7 @@ export default function InstallmentTable({ installments: initialInstallments, qu
                                             dueDate: new Date(installment.dueDate).toISOString().split('T')[0],
                                             status: installment.status,
                                             paidDate: installment.paidDate,
+                                            billGroupId: installment.billGroupId,
                                         })),
                                     });
                                 }}
@@ -349,3 +327,88 @@ export default function InstallmentTable({ installments: initialInstallments, qu
         </Card>
     );
 }
+
+
+const InstallmentStatusBadge = ({ status, hasBillGroupId }: { status: string, hasBillGroupId: boolean }) => {
+    if (status === "pending" && hasBillGroupId) {
+        return (
+            <Badge variant={"secondary"}>
+                <InfoIcon className="h-4 w-4 text-orange-500" />
+                <span className="ml-1">
+                    ออกบิลแล้ว รอการยืนยัน
+                </span>
+            </Badge>
+        )
+    }
+
+    return null
+
+}
+
+const InstallmentStatusCell = ({
+    field,
+    index,
+    form,
+    initialInstallment
+}: {
+    field: any,
+    index: number,
+    form: any,
+    initialInstallment: QuotationInstallment & { billGroupId?: number | null }
+}) => {
+
+    const paid = initialInstallment.status === "paid";
+    if (paid) {
+        return (
+            <TableCell className="text-center">
+                <span className="text-green-600 font-medium">ชำระแล้ว</span>
+                <InstallmentStatusBadge status="paid" hasBillGroupId={!!field.billGroupId} />
+            </TableCell>
+        )
+    }
+
+    if (!field.billGroupId) {
+        return (
+            <TableCell className="text-center">
+
+            </TableCell>
+        );
+    }
+
+    return (
+        <TableCell className="text-center">
+            <div className="flex items-center justify-center space-x-2">
+                <FormField
+                    control={form.control}
+                    name={`installments.${index}.status`}
+                    render={({ field: formField }) => (
+                        <FormItem>
+                            <FormControl>
+                                <Checkbox
+                                    checked={formField.value === "paid"}
+                                    onCheckedChange={(checked) => {
+                                        formField.onChange(checked ? "paid" : "pending");
+                                    }}
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <span
+                    className={`text-sm ${form.watch(`installments.${index}.status`) === "paid"
+                        ? "text-green-600 font-medium"
+                        : "text-gray-500"
+                        }`}
+                >
+                    {form.watch(`installments.${index}.status`) === "paid" ? "ชำระแล้ว" : "ยังไม่ชำระ"}
+                </span>
+
+                <InstallmentStatusBadge
+                    status={form.watch(`installments.${index}.status`)}
+                    hasBillGroupId={!!field.billGroupId}
+                />
+            </div>
+        </TableCell>
+    );
+};

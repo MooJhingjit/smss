@@ -9,6 +9,7 @@ import { useUser } from "@/hooks/use-user";
 import DataNotfound from "@/components/data-notfound";
 import InstallmentTable from "./_components/installment-table";
 import PaymentSummary from "./_components/payment-summary";
+import { quotationTypeMapping } from "@/app/config";
 
 const getData = async (
   quotationId: string,
@@ -62,7 +63,7 @@ export default async function InstallmentDetailPage(
   const { params } = props;
   const { isAdmin, info } = await useUser();
   const quotationId = params["qt-id"];
-  
+
   const result = await getData(quotationId, isAdmin, info?.id);
 
   if (!result || !result.quotation) {
@@ -107,9 +108,14 @@ export default async function InstallmentDetailPage(
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               <span>รายละเอียดใบเสนอราคา</span>
-              <Badge variant="outline" className="text-green-600 border-green-600">
-                {quotation.code}
-              </Badge>
+              <div className="flex items-center justify-center gap-2">
+                <Badge variant="outline" className="text-green-600 border-green-600">
+                  {quotation.code}
+                </Badge>
+                <Badge className="capitalize" variant="secondary">
+                  ประเภท: {quotationTypeMapping[quotation?.type]}
+                </Badge>
+              </div>
             </CardTitle>
           </CardHeader>
           <CardContent>

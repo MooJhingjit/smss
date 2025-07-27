@@ -9,7 +9,7 @@ import {
   User,
 } from "@prisma/client";
 import { PDFDocument, PDFEmbeddedPage, PDFFont, PDFPage } from "pdf-lib";
-import { getBoundingBox, PDFDateFormat, loadPdfAssets, validatePageArea, getTextWidth, getPaymentCondition, getBillDueDate, convertToThaiBahtText, getCustomerNameWithBranch } from "./pdf.helpers";
+import { getBoundingBox, PDFDateFormat, loadPdfAssets, validatePageArea, getTextWidth, getPaymentCondition, getBillDueDate, convertToThaiBahtText, getCustomerNameWithBranch, formatInstallmentText } from "./pdf.helpers";
 
 type QuotationWithRelations = Quotation & {
   lists?: QuotationList[];
@@ -327,7 +327,11 @@ const writeMainDescription = (
 
   // Add installment period info if installment data exists
   if (_INSTALLMENT_DATA) {
-    const installmentText = `งวดที่ ${_INSTALLMENT_DATA.period}`;
+    const installmentText = formatInstallmentText(
+      _INSTALLMENT_DATA,
+      _DATA?.installmentContractNumber
+    );
+    
     currentPage.drawText(installmentText, {
       x: columnPosition.description + 12, // same indent as description
       y: lineStart - totalHeight,

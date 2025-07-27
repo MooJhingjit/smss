@@ -16,7 +16,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     };
   }
 
-  const { quotationId, periodCount } = data;
+  const { quotationId, periodCount, installmentContractNumber } = data;
 
   try {
     // First, check if the quotation exists and belongs to the user
@@ -99,6 +99,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         data: {
           outstandingBalance: quotation.totalPrice,
           outstandingGrandTotal: quotation.grandTotal,
+          installmentContractNumber: installmentContractNumber,
         },
       });
 
