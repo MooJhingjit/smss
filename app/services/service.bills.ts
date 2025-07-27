@@ -7,32 +7,41 @@ import { Invoice, QuotationType } from "@prisma/client";
 import { PDFDocument } from "pdf-lib";
 
 // create group bills (product and service) and merge them into a single PDF
-export async function generateGroupInvoices(id: string, customDate: string) {
-  const billGroupId = parseInt(id);
+export async function generateGroupInvoices(groupId: string, customDate: string) {
+  const billGroupId = parseInt(groupId);
   const quotations = await getQuotationsByGroup(billGroupId);
   // console.log("🚀 ~ generateGroupInvoices ~ quotations:", quotations.map((q) => q.id));
   // return
 
   const mergedPdf = await PDFDocument.create();
   for (const quotation of quotations) {
-    await validateQuotationInvoice(quotation, billGroupId, customDate);
-
-    if (quotation.type === "product") {
-      // for service will be created separately later
-      const result = await generateBillToCustomer(quotation.id, customDate);
-      await addQuotationToMergedPdf(result, quotation.id, mergedPdf);
-    } else if (quotation.type === "service") {
-      const result = await generateServiceInvoiceToCustomer(
-        quotation.id,
-        customDate
-      );
-      await addQuotationToMergedPdf(result, quotation.id, mergedPdf);
-    }
+    await processQuotation(quotation, billGroupId, customDate, mergedPdf);
   }
 
   await addBillCoverToMergedPdf(billGroupId, mergedPdf);
 
   return await mergedPdf.save();
+}
+
+async function processQuotation(
+  quotation: { grandTotal: number | null; id: number; type: QT_TYPE },
+  billGroupId: number,
+  customDate: string,
+  mergedPdf: PDFDocument
+) {
+  await validateQuotationInvoice(quotation, billGroupId, customDate);
+
+  if (quotation.type === "product") {
+    // for service will be created separately later
+    const result = await generateBillToCustomer(quotation.id, customDate);
+    await addQuotationToMergedPdf(result, quotation.id, mergedPdf);
+  } else if (quotation.type === "service") {
+    const result = await generateServiceInvoiceToCustomer(
+      quotation.id,
+      customDate
+    );
+    await addQuotationToMergedPdf(result, quotation.id, mergedPdf);
+  }
 }
 
 async function getQuotationsByGroup(billGroupId: number) {
@@ -74,11 +83,14 @@ async function validateQuotationInvoice(
   }
 }
 
+// Export functions for reuse in other services
+export { validateQuotationInvoice, createNewInvoice, updateInvoiceDateIfNeeded, addBillCoverToMergedPdf, addQuotationToMergedPdf};
+
 async function addQuotationToMergedPdf(
   pdfResult:
     | {
-        pdfBytes: Uint8Array;
-      }
+      pdfBytes: Uint8Array;
+    }
     | undefined,
   quotationId: number,
   mergedPdf: PDFDocument

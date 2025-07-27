@@ -25,8 +25,8 @@ enum UserRole {
 model User {
   id               Int             @id @default(autoincrement())
   name             String
-  email            String?          @unique
-  taxId            String?         
+  email            String?         @unique
+  taxId            String?
   phone            String?
   address          String?         @db.Text
   contact          String?         @db.Text
@@ -47,9 +47,9 @@ model Contact {
   sellerId    Int?
   user        User?       @relation(fields: [sellerId], references: [id], name: "seller")
   name        String
-  email       String?     
+  email       String?
   taxId       String?     @unique
-  branchId    String?     
+  branchId    String?
   phone       String?
   address     String?     @db.Text
   contact     String?     @db.Text
@@ -139,9 +139,9 @@ model Quotation {
   type                  QuotationType            @default(product)
   contactId             Int
   contact               Contact                  @relation(fields: [contactId], references: [id])
-  overrideContactName   String?                  // Override contact name for display
-  overrideContactEmail  String?                  // Override contact email for display
-  overrideContactPhone          String?                  // Override contact phone for display
+  overrideContactName   String? // Override contact name for display
+  overrideContactEmail  String? // Override contact email for display
+  overrideContactPhone  String? // Override contact phone for display
   sellerId              Int?
   seller                User?                    @relation(fields: [sellerId], references: [id], name: "seller")
   discount              Float?
@@ -168,8 +168,9 @@ model Quotation {
   medias                Media[]
   invoice               Invoice?
   installments          QuotationInstallment[]
-  outstandingBalance    Float?                   @default(0)  // Outstanding balance without vat
-  outstandingGrandTotal Float?                   @default(0)  // Outstanding balance with vat
+  outstandingBalance    Float?                   @default(0) // Outstanding balance without vat
+  outstandingGrandTotal Float?                   @default(0) // Outstanding balance with vat
+
   @@index([contactId])
   @@index([sellerId])
 }
@@ -182,7 +183,7 @@ model QuotationList {
   product               Product?        @relation(fields: [productId], references: [id])
   name                  String
   price                 Float?
-  productType           ProductType?     @default(product)
+  productType           ProductType?    @default(product)
   unitPrice             Float?
   unit                  String?
   cost                  Float?
@@ -190,16 +191,16 @@ model QuotationList {
   quantity              Int?
   withholdingTax        Float?
   withholdingTaxPercent Float?
-  hiddenInPdf           Boolean?         @default(false)
-  allowedWithholdingTax Boolean?         @default(false)
+  hiddenInPdf           Boolean?        @default(false)
+  allowedWithholdingTax Boolean?        @default(false)
   discount              Float?
   totalPrice            Float?
   description           String?         @db.Text
   subItems              String?
   groupName             String?
   order                 Int?            @default(0)
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
   QuotationItems        QuotationItem[]
   // purchaseOrderItem     PurchaseOrderItem?
 
@@ -228,19 +229,21 @@ enum InstallmentStatus {
 }
 
 model QuotationInstallment {
-  id          Int               @id @default(autoincrement())
-  quotationId Int
-  quotation   Quotation         @relation(fields: [quotationId], references: [id])
-  period      String            // e.g., "1/12", "2/12"
-  amount      Float             // Amount for this installment (without VAT)
-  amountWithVat Float           // Amount for this installment (with VAT)
-  dueDate     DateTime          // Due date for this installment
-  paidDate    DateTime?         // When it was paid (null if not paid)
-  status      InstallmentStatus @default(draft)
-  remarks     String?           @db.Text
-  invoice     Invoice?          // Relation to invoice for this installment
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
+  id            Int               @id @default(autoincrement())
+  quotationId   Int
+  quotation     Quotation         @relation(fields: [quotationId], references: [id])
+  period        String // e.g., "1/12", "2/12"
+  amount        Float // Amount for this installment (without VAT)
+  amountWithVat Float // Amount for this installment (with VAT)
+  dueDate       DateTime // Due date for this installment
+  paidDate      DateTime? // When it was paid (null if not paid)
+  status        InstallmentStatus @default(draft)
+  remarks       String?           @db.Text
+  invoice       Invoice? // Relation to invoice for this installment
+  billGroupId   Int?
+  billGroup     BillGroup?        @relation(fields: [billGroupId], references: [id])
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
 
   @@index([quotationId])
   @@index([dueDate])
@@ -298,7 +301,7 @@ model PurchaseOrderItem {
   id                       Int                       @id @default(autoincrement())
   purchaseOrderId          Int
   purchaseOrder            PurchaseOrder             @relation(fields: [purchaseOrderId], references: [id])
-  quotationListId          Int?                      
+  quotationListId          Int?
   // quotationList            QuotationList?            @relation(fields: [quotationListId], references: [id])
   name                     String
   price                    Float?
@@ -344,30 +347,31 @@ model Media {
 }
 
 model BillGroup {
-  id    Int      @id @default(autoincrement())
-  code  String?
-  date  DateTime?
-  invoices Invoice[]
-  quotations Quotation[]
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @default(now())
+  id                    Int                    @id @default(autoincrement())
+  code                  String?
+  date                  DateTime?
+  invoices              Invoice[]
+  quotations            Quotation[]
+  quotationInstallments QuotationInstallment[]
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @default(now())
 }
 
 model Invoice {
-  id          Int       @id @default(autoincrement())
-  code        String?
-  date  DateTime
-  receiptCode        String?
-  receiptDate  DateTime?
-  billGroupId Int
-  billGroup   BillGroup @relation(fields: [billGroupId], references: [id])
-  quotationId Int @unique
-  quotationInstallmentId Int? @unique
-  quotationInstallment QuotationInstallment? @relation(fields: [quotationInstallmentId], references: [id])
-  quotation   Quotation @relation(fields: [quotationId], references: [id])
-  grandTotal Float
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @default(now())
+  id                     Int                   @id @default(autoincrement())
+  code                   String?
+  date                   DateTime
+  receiptCode            String?
+  receiptDate            DateTime?
+  billGroupId            Int
+  billGroup              BillGroup             @relation(fields: [billGroupId], references: [id])
+  quotationId            Int                   @unique
+  quotationInstallmentId Int?                  @unique
+  quotationInstallment   QuotationInstallment? @relation(fields: [quotationInstallmentId], references: [id])
+  quotation              Quotation             @relation(fields: [quotationId], references: [id])
+  grandTotal             Float
+  createdAt              DateTime              @default(now())
+  updatedAt              DateTime              @default(now())
 
   @@index([billGroupId])
   @@index([quotationId])

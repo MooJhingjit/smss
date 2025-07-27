@@ -16,6 +16,8 @@ import { useAction } from "@/hooks/use-action";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { PrinterIcon } from "lucide-react";
+import ConfirmActionButton from "@/components/confirm-action";
+import { useState } from "react";
 
 const FormSchema = z.object({
     installments: z.array(z.object({
@@ -23,7 +25,7 @@ const FormSchema = z.object({
         period: z.string(),
         amountWithVat: z.number().min(0, "จำนวนเงินต้องมากกว่า 0"),
         dueDate: z.string(),
-        status: z.enum(["pending", "paid", "overdue"]),
+        status: z.enum(["draft", "pending", "paid", "overdue"]),
         paidDate: z.date().nullable().optional(),
     })),
 });
@@ -37,6 +39,7 @@ interface InstallmentTableProps {
 
 export default function InstallmentTable({ installments: initialInstallments, quotationId }: InstallmentTableProps) {
     const router = useRouter();
+    const [generatingBillFor, setGeneratingBillFor] = useState<number | null>(null);
 
     const form = useForm<FormData>({
         resolver: zodResolver(FormSchema),
@@ -67,6 +70,58 @@ export default function InstallmentTable({ installments: initialInstallments, qu
             toast.error(error);
         },
     });
+
+    const handleGenerateBill = async (installmentId: number, dueDate: string) => {
+        try {
+            setGeneratingBillFor(installmentId);
+            
+            // Check if installment already has a bill group using existing data
+            const installment = initialInstallments.find(inst => inst.id === installmentId);
+            const hasBillGroup = installment?.billGroupId;
+            
+            let requestBody: any = {};
+            
+            if (!hasBillGroup) {
+                // Send billGroupDate only for new bill groups
+                requestBody.billGroupDate = dueDate;
+            } 
+            // For existing bill groups, send empty body
+            
+            const response = await fetch(`/api/installments/${installmentId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestBody),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to generate bill');
+            }
+
+            // Handle PDF response
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `installment-invoice-${installmentId}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            
+            toast.success("สร้างและดาวน์โหลดใบวางบิลสำเร็จ");
+            router.refresh();
+            
+        } catch (error) {
+            console.error('Error generating bill:', error);
+            toast.error(error instanceof Error ? error.message : "เกิดข้อผิดพลาดในการสร้างใบวางบิล");
+        } finally {
+            setGeneratingBillFor(null);
+        }
+    };
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat("th-TH", {
@@ -187,17 +242,27 @@ export default function InstallmentTable({ installments: initialInstallments, qu
                                                             </FormItem>
                                                         )}
                                                     />
-                                                    <Button
-                                                        type="button"
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        className="h-8 w-8 p-0"
-                                                        onClick={() => {
-                                                            console.log('Print installment:', field.id);
+                                                    <ConfirmActionButton
+                                                        onConfirm={() => {
+                                                            const installment = form.getValues(`installments.${index}`);
+                                                            handleGenerateBill(installment.id, installment.dueDate);
                                                         }}
+                                                        warningMessage={[`สร้างใบวางบิลสำหรับงวดที่ ${field.period}`]}
                                                     >
-                                                        <PrinterIcon className="h-4 w-4" />
-                                                    </Button>
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="h-8 w-8 p-0"
+                                                            disabled={generatingBillFor === field.id}
+                                                        >
+                                                            {generatingBillFor === field.id ? (
+                                                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600" />
+                                                            ) : (
+                                                                <PrinterIcon className="h-4 w-4" />
+                                                            )}
+                                                        </Button>
+                                                    </ConfirmActionButton>
                                                 </div>
                                             </TableCell>
 

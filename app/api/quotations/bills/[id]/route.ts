@@ -1,5 +1,5 @@
+import { generateGroupInvoices } from "@/app/services/service.bills";
 import { NextResponse, NextRequest } from "next/server";
-import { generateGroupInvoices } from "./bill-service";
 
 // Generate all bills for a group of QTs
 
