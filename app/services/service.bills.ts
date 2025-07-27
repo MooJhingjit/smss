@@ -84,7 +84,7 @@ async function validateQuotationInvoice(
 }
 
 // Export functions for reuse in other services
-export { validateQuotationInvoice, createNewInvoice, updateInvoiceDateIfNeeded, addBillCoverToMergedPdf, addQuotationToMergedPdf};
+export { createNewInvoice, updateInvoiceDateIfNeeded, addBillCoverToMergedPdf, addQuotationToMergedPdf};
 
 async function addQuotationToMergedPdf(
   pdfResult:
