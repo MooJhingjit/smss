@@ -265,7 +265,7 @@ const generate = async (id: number) => {
     description: string,
     lineStart: number
   ) => {
-    const endUserRegex = /End user/gi;
+    const endUserRegex = /End user|หมายเหตุ/gi;
     
     if (endUserRegex.test(description)) {
       // Apply red color to the entire line if "End user" is detected
@@ -415,8 +415,8 @@ const generate = async (id: number) => {
       ITEM_Y_Start,
       (currentPage: PDFPage, currentLineStart: number) =>
         writeMainItem(currentPage, index, list, currentLineStart),
-      pageNumberRef,
-      signatureData
+        pageNumberRef,
+        signatureData
     );
     lineStart = mainItemRes.lineStart;
     page = mainItemRes.page;
