@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
     const quotations = await db.quotation.findMany({
       include: {
         contact: true,
-        invoice: {
+        invoices: {
           select: { code: true, date: true, receiptCode: true, receiptDate: true },
         },
         seller: {

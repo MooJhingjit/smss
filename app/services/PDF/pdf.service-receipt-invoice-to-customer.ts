@@ -15,7 +15,7 @@ type QuotationWithRelations = Quotation & {
   lists?: QuotationList[];
   contact?: Contact | null;
   seller?: User | null;
-  invoice?: Invoice | null;
+  invoices?: Invoice[]; // Changed from invoice to invoices array
   installmentData?: QuotationInstallment | null;
 };
 // type PurchaseOrderWithRelations = PurchaseOrder & {
@@ -66,7 +66,7 @@ const getData = async (
       },
       contact: true,
       seller: true,
-      invoice: true,
+      invoices: true, // Changed from invoice to invoices
     },
     where: {
       id: parseInt(id.toString()),
@@ -99,7 +99,9 @@ export const generateInvoice = async (id: number, defaultDate: string, installme
 
     const quotation = await getData(id, installmentId);
 
-    const invoiceDate = quotation?.invoice?.receiptDate ?? defaultDate
+    // Get the most recent invoice for this quotation (for regular invoices)
+    const invoice = quotation?.invoices?.[0] || null;
+    const invoiceDate = invoice?.receiptDate ?? defaultDate;
     _BILL_DATE = PDFDateFormat(new Date(invoiceDate))
 
     if (!quotation) {
@@ -457,7 +459,7 @@ const drawCustomerInfo = (page: PDFPage) => {
 
   const rightXStart = 500;
   // code
-  page.drawText(quotation?.invoice?.receiptCode ?? "", {
+  page.drawText(quotation?.invoices?.[0]?.receiptCode ?? "", {
     x: rightXStart,
     y: Y_Start,
     maxWidth: 100,

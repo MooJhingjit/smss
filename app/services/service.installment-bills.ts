@@ -114,7 +114,7 @@ async function createInstallmentInvoice(
             date: invoiceDate,
             grandTotal: installment.amountWithVat, // Use installment amount, not full quotation
             billGroupId: billGroupId,
-            quotationId: null, // Set to null for installment-only invoices
+            quotationId: installment.quotationId, // Parent quotation
             quotationInstallmentId: installment.id, // Specific installment
         },
     });

@@ -21,7 +21,7 @@ type QuotationWithRelations = Quotation & {
   lists?: QuotationList[];
   contact?: Contact | null;
   seller?: User | null;
-  invoice?: Invoice | null;
+  invoices?: Invoice[]; // Changed from invoice to invoices array
   billGroup?: BillGroup | null;
 };
 
@@ -38,15 +38,15 @@ const getData = async (id: number): Promise<QuotationWithRelations[]> => {
   const quotations = await db.quotation.findMany({
     include: {
       contact: true,
-      invoice: true,
+      invoices: true, // Changed from invoice to invoices
       billGroup: true,
     },
     where: {
       billGroupId: id,
     },
     orderBy: {
-      invoice: {
-        code: "asc",
+      invoices: {
+        _count: "desc", // Order by invoices count instead of single invoice code
       },
     },
   });
@@ -58,7 +58,9 @@ export const generateBillCover = async (billGroupId: number) => {
   try {
     const quotationWithInvoices = await getData(billGroupId);
 
-    const billDate = quotationWithInvoices?.[0]?.invoice?.date ?? Date.now();
+    // Get the first invoice from the first quotation that has invoices
+    const firstQuotationWithInvoice = quotationWithInvoices.find(q => q.invoices && q.invoices.length > 0);
+    const billDate = firstQuotationWithInvoice?.invoices?.[0]?.date ?? Date.now();
     _BILL_DATE = PDFDateFormat(new Date(billDate));
 
     if (!quotationWithInvoices.length) {
@@ -138,7 +140,7 @@ const drawItemLists = (page: PDFPage) => {
 
   let grandTotal = 0;
   _DATA.forEach((quotation, index) => {
-    const invoice = quotation.invoice;
+    const invoice = quotation.invoices?.[0]; // Get the first invoice from the invoices array
     grandTotal += invoice?.grandTotal ?? 0;
 
     if (!invoice) return;

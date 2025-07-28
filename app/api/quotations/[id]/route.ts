@@ -93,7 +93,7 @@ export async function DELETE(
           },
         },
         medias: true,
-        invoice: {
+        invoices: {
           include: {
             billGroup: true,
           },
@@ -185,13 +185,14 @@ export async function DELETE(
       }
 
       // 5. Delete invoice and handle bill group
-      if (quotation.invoice) {
-        const billGroupId = quotation.invoice.billGroupId;
+      if (quotation.invoices && quotation.invoices.length > 0) {
+        const invoice = quotation.invoices[0]; // Get the first invoice
+        const billGroupId = invoice.billGroupId;
         
         // Delete the invoice first
         await tx.invoice.delete({
           where: {
-            quotationId: quotationId,
+            id: invoice.id,
           },
         });
 

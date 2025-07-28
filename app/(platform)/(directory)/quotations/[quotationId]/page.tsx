@@ -39,7 +39,7 @@ const getData = async (
     include: {
       contact: true,
       seller: true,
-      invoice: true,
+      // invoice: true,
       installments: {
         orderBy: {
           period: 'asc',

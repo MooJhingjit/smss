@@ -166,7 +166,7 @@ model Quotation {
   lists                 QuotationList[]
   purchaseOrders        PurchaseOrder[]
   medias                Media[]
-  invoice               Invoice?
+  invoices              Invoice[]             // Changed from invoice to invoices
   installments          QuotationInstallment[]
   installmentContractNumber String?              // Contract number for installment payments
   outstandingBalance    Float?                   @default(0) // Outstanding balance without vat
@@ -366,7 +366,7 @@ model Invoice {
   receiptDate            DateTime?
   billGroupId            Int
   billGroup              BillGroup             @relation(fields: [billGroupId], references: [id])
-  quotationId            Int                   @unique
+  quotationId            Int                   // Removed @unique constraint
   quotationInstallmentId Int?                  @unique
   quotationInstallment   QuotationInstallment? @relation(fields: [quotationInstallmentId], references: [id])
   quotation              Quotation             @relation(fields: [quotationId], references: [id])

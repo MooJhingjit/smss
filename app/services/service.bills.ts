@@ -170,7 +170,7 @@ async function updateInvoiceDateIfNeeded(
   if (invoice.date.toISOString() !== new Date(customDate).toISOString()) {
     await db.invoice.update({
       where: {
-        quotationId: quotationId,
+        id: invoice.id, // Use invoice id instead of quotationId since it's no longer unique
       },
       data: {
         date: new Date(customDate),
