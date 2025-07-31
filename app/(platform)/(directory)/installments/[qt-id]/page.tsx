@@ -10,6 +10,8 @@ import DataNotfound from "@/components/data-notfound";
 import InstallmentTable from "./_components/installment-table";
 import PaymentSummary from "./_components/payment-summary";
 import { quotationTypeMapping } from "@/app/config";
+import { ExternalLink, ExternalLinkIcon } from "lucide-react";
+import Link from "next/link";
 
 const getData = async (
   quotationId: string,
@@ -38,7 +40,7 @@ const getData = async (
       billGroup: true,
       installments: {
         orderBy: {
-          id: 'asc',
+          id: "asc",
         },
       },
     },
@@ -105,16 +107,26 @@ export default async function InstallmentDetailPage(
         {/* Quotation Details */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>รายละเอียดใบเสนอราคา</span>
-              <div className="flex items-center justify-center gap-2">
-                <Badge variant="outline" className="text-green-600 border-green-600">
+            <CardTitle className="flex items-center  gap-2">
+              <p>รายละเอียดใบเสนอราคา</p>
+              <Link
+                href={`/quotations/${quotation.id}`}
+                className="flex items-center underline"
+              >
+                <span> {quotation.code}</span>
+                <ExternalLinkIcon className="ml-1 h-3.5 w-3.5" />
+              </Link>
+              {/* <div className="flex items-center justify-center gap-2">
+                <Badge
+                  variant="outline"
+                  className="text-green-600 border-green-600"
+                >
                   {quotation.code}
+
+                  <ExternalLinkIcon className="ml-1 h-3.5 w-3.5" />
                 </Badge>
-                <Badge className="capitalize" variant="secondary">
-                  ประเภท: {quotationTypeMapping[quotation?.type]}
-                </Badge>
-              </div>
+               
+              </div> */}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -124,16 +136,24 @@ export default async function InstallmentDetailPage(
                 <p>{quotation.contact?.name || "ไม่ระบุ"}</p>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-500">ระยะเวลายืนราคา</p>
-                <p>{quotation.validPricePeriod || "-"} วัน</p>
+                <p className="text-sm font-medium text-gray-500">ประเภท</p>
+                <Badge className="capitalize" variant="secondary">
+                  {quotationTypeMapping[quotation?.type]}
+                </Badge>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-500">เงื่อนไขการชำระ</p>
+                <p className="text-sm font-medium text-gray-500">
+                  เงื่อนไขการชำระ
+                </p>
                 <p>{quotation.paymentCondition || "-"} วัน</p>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-500">ยอดรวมทั้งสิ้น</p>
-                <p className="font-semibold">{formatCurrency(quotation.grandTotal || 0)}</p>
+                <p className="text-sm font-medium text-gray-500">
+                  ยอดรวมทั้งสิ้น
+                </p>
+                <p className="font-semibold">
+                  {formatCurrency(quotation.grandTotal || 0)}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -144,7 +164,10 @@ export default async function InstallmentDetailPage(
 
         {/* Installment Table */}
         <div className="col-span-1 md:col-span-2">
-          <InstallmentTable installments={installments} quotationId={quotation.id} />
+          <InstallmentTable
+            installments={installments}
+            quotationId={quotation.id}
+          />
         </div>
       </div>
     </div>
