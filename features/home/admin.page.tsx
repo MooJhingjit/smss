@@ -4,10 +4,16 @@ import ShortcutMenus from "./components/shortcut-menus";
 import PurchaseOrders from "./components/overview.purchase-orders";
 import { db } from "@/lib/db";
 import { QuotationWithBuyer } from "@/types";
-import { PurchaseOrder, PurchaseOrderStatus, QuotationStatus, User } from "@prisma/client";
+import {
+  PurchaseOrder,
+  PurchaseOrderStatus,
+  QuotationStatus,
+  User,
+} from "@prisma/client";
 import Tasks from "./components/tasks";
 import { quotationStatusMapping } from "@/app/config";
 import PaymentDue from "./components/paymentDue";
+import AdminStats from "./components/admin.stats";
 
 export type PurchaseOrderWithVendor = PurchaseOrder & { vendor: User };
 
@@ -69,7 +75,7 @@ async function getData(): Promise<
       },
       status: {
         notIn: [QuotationStatus.paid],
-      }
+      },
     },
     orderBy: {
       paymentDue: "desc",
@@ -86,7 +92,7 @@ async function getData(): Promise<
       },
       status: {
         notIn: [PurchaseOrderStatus.paid],
-      }
+      },
     },
     orderBy: {
       paymentDue: "desc",
@@ -100,7 +106,7 @@ async function getData(): Promise<
     },
     where: {
       createdAt: {
-        gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1), 
+        gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
       },
     },
   });
@@ -111,7 +117,7 @@ async function getData(): Promise<
     },
     where: {
       createdAt: {
-        gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1), 
+        gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
       },
     },
   });
@@ -138,7 +144,7 @@ async function getData(): Promise<
     purchaseOrdersDueDate,
     saleTotal,
     orderAmount,
-    saleTotalWithVat
+    saleTotalWithVat,
   ]);
   return data;
 }
@@ -152,23 +158,26 @@ export default async function AdminHomePage() {
     purchaseOrdersDueDate,
     saleTotal,
     orderAmount,
-    saleTotalWithVat
+    saleTotalWithVat,
   ] = await getData();
 
   return (
     <div className="grid grid-cols-12 gap-6">
-      <div className="md:col-span-6 col-span-12">
+      <div className="lg:col-span-6 col-span-12">
         <div className="relative h-full rounded-xl overflow-hidden ">
           <div className="h-full w-full">
-            <ShortcutMenus
-              saleTotal={saleTotal._sum.totalPrice ?? 0}
-              saleTotalWithVat={saleTotalWithVat._sum.grandTotal ?? 0}
-              orderAmount={orderAmount._sum.totalPrice ?? 0}
-            />
+            <ShortcutMenus />
           </div>
         </div>
       </div>
-      <div className="md:col-span-6 col-span-12">
+      <div className="lg:col-span-6 col-span-12">
+        <AdminStats
+          saleTotal={saleTotal._sum.totalPrice ?? 0}
+          saleTotalWithVat={saleTotalWithVat._sum.grandTotal ?? 0}
+          orderAmount={orderAmount._sum.totalPrice ?? 0}
+        />
+      </div>
+      <div className="lg:col-span-6 col-span-12">
         <Tasks
           data={tasks}
           label={`รออนุมัติ สถานะ: ${quotationStatusMapping["offer"].label}`}

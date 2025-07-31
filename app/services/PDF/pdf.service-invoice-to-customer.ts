@@ -8,7 +8,19 @@ import {
   User,
 } from "@prisma/client";
 import { PDFDocument, PDFEmbeddedPage, PDFFont, PDFPage } from "pdf-lib";
-import { getBoundingBox, PDFDateFormat, loadPdfAssets, validatePageArea, getTextWidth, getPaymentCondition, getBillDueDate, convertToThaiBahtText, getCustomerNameWithBranch, formatInstallmentText } from "./pdf.helpers";
+import {
+  getBoundingBox,
+  PDFDateFormat,
+  loadPdfAssets,
+  validatePageArea,
+  getTextWidth,
+  getPaymentCondition,
+  getBillDueDate,
+  convertToThaiBahtText,
+  getCustomerNameWithBranch,
+  formatInstallmentText,
+} from "./pdf.helpers";
+import { QuotationInstallmentWithRelations } from "@/types";
 
 type QuotationWithRelations = Quotation & {
   lists?: QuotationList[];
@@ -27,16 +39,10 @@ type QuotationWithRelations = Quotation & {
 //   quotation?: QuotationWithRelations | null;
 // };
 
-let _BILL_DATE = ""
-let _DATA: QuotationWithRelations | null = null
+let _BILL_DATE = "";
+let _DATA: QuotationWithRelations | null = null;
 let _FONT: PDFFont | null = null;
-let _INSTALLMENT_DATA: {
-  period: string;
-  amount: number;
-  amountWithVat: number;
-  dueDate: Date;
-  status: string;
-} | null = null;
+let _INSTALLMENT_DATA: QuotationInstallmentWithRelations | null = null;
 
 // item list config
 const PAGE_FONT_SIZE = 8;
@@ -54,15 +60,14 @@ const columnPosition = {
   amount: ITEM_X_Start + 465,
 };
 
-
 const CURRENCY_FORMAT = {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 };
 
-
 const getData = async (
   id: number,
+  defaultDate: string,
   installmentId?: number
 ): Promise<QuotationWithRelations | null> => {
   const quotation = await db.quotation.findUnique({
@@ -84,28 +89,37 @@ const getData = async (
     },
   });
 
+  // Get the most recent invoice for this quotation (for regular invoices)
+  const invoice = quotation?.invoices?.[0] || null;
+  const invoiceDate = invoice?.date ?? defaultDate;
+  _BILL_DATE = PDFDateFormat(new Date(invoiceDate));
+
   // If installment ID is provided, fetch installment data
   if (installmentId && quotation) {
     const installment = await db.quotationInstallment.findUnique({
       where: { id: installmentId },
-      select: {
-        period: true,
-        amount: true,
-        amountWithVat: true,
-        dueDate: true,
-        status: true,
-      }
+      include: {
+        invoice: true,
+      },
     });
 
     if (installment) {
       _INSTALLMENT_DATA = installment;
+
+      if (installment.invoice?.date) {
+        _BILL_DATE = PDFDateFormat(new Date(installment.invoice?.date));
+      }
     }
   }
 
   return quotation;
 };
 
-export const generateInvoice = async (id: number, defaultDate: string, installmentId?: number) => {
+export const generateInvoice = async (
+  id: number,
+  defaultDate: string,
+  installmentId?: number
+) => {
   try {
     if (!id) {
       throw new Error("Invalid quotation ID");
@@ -114,18 +128,13 @@ export const generateInvoice = async (id: number, defaultDate: string, installme
     // Reset installment data
     _INSTALLMENT_DATA = null;
 
-    const quotation = await getData(id, installmentId);
-
-    // Get the most recent invoice for this quotation (for regular invoices)
-    const invoice = quotation?.invoices?.[0] || null;
-    const invoiceDate = invoice?.date ?? defaultDate;
-    _BILL_DATE = PDFDateFormat(new Date(invoiceDate))
+    const quotation = await getData(id, defaultDate, installmentId);
 
     if (!quotation) {
       throw new Error("PurchaseOrder not found");
     }
 
-    _DATA = quotation
+    _DATA = quotation;
     return main();
   } catch (error) {
     console.log(error);
@@ -149,7 +158,6 @@ const main = async () => {
     font: _FONT,
   };
 
-
   // loop through all pages
   for (let i = 0; i < totalPages; i++) {
     const templatePage = await pdfDoc.embedPage(template.getPages()[i]);
@@ -158,12 +166,7 @@ const main = async () => {
 
     drawStaticInfo(page, i + 1);
 
-    drawItemLists(
-      page,
-      pdfDoc,
-      templatePage,
-      config
-    );
+    drawItemLists(page, pdfDoc, templatePage, config);
   }
 
   const modifiedPdfBytes = await pdfDoc.save();
@@ -201,7 +204,14 @@ const drawItemLists = (
       LIST_END_AT,
       ITEM_Y_Start,
       (currentPage: PDFPage, currentLineStart: number) =>
-        writeMainItem(currentPage, index, list, currentLineStart, config, pdfDoc)
+        writeMainItem(
+          currentPage,
+          index,
+          list,
+          currentLineStart,
+          config,
+          pdfDoc
+        )
     );
     lineStart = mainItemRes.lineStart;
     page = mainItemRes.page;
@@ -228,8 +238,7 @@ const drawItemLists = (
       page = mainDescriptionRes.page;
     }
   });
-
-}
+};
 
 const writeMainItem = (
   currentPage: PDFPage,
@@ -273,7 +282,7 @@ const writeMainItem = (
   if (_INSTALLMENT_DATA) {
     // For installments: use installment amount as unitPrice and installment amountWithVat as price
     unitPrice = _INSTALLMENT_DATA.amount;
-    amount = _INSTALLMENT_DATA.amount 
+    amount = _INSTALLMENT_DATA.amount;
   } else {
     // For regular quotations: use original data
     unitPrice = data.unitPrice ?? 0;
@@ -349,9 +358,9 @@ const writeMainDescription = (
       _INSTALLMENT_DATA,
       _DATA?.installmentContractNumber
     );
-    
+
     currentY -= config.lineHeight; // Add some spacing
-    
+
     currentPage.drawText(installmentText, {
       x: columnPosition.description + 12, // indent same as description
       y: currentY,
@@ -374,9 +383,7 @@ const writeMainDescription = (
   return totalHeight;
 };
 
-const drawHeaderInfo = (
-  page: PDFPage,
-) => {
+const drawHeaderInfo = (page: PDFPage) => {
   if (!_FONT) return;
   const X_Start = 480;
   const Y_Start = 790;
@@ -385,7 +392,6 @@ const drawHeaderInfo = (
     size: PAGE_FONT_SIZE,
     lineHeight: 16,
   };
-
 
   page.drawText("1", {
     x: 530,
@@ -410,9 +416,9 @@ const drawCustomerInfo = (page: PDFPage) => {
     contact: _DATA?.overrideContactName ?? _DATA?.contact?.contact,
     email: _DATA?.overrideContactEmail ?? _DATA?.contact?.email,
     phone: _DATA?.overrideContactPhone ?? _DATA?.contact?.phone,
-  }
+  };
   if (!customer) {
-    return
+    return;
   }
 
   const Y_Start = 702;
@@ -438,7 +444,6 @@ const drawCustomerInfo = (page: PDFPage) => {
     ...config,
   });
 
-
   page.drawText(customer.taxId ?? "", {
     x: X_Start,
     y: Y_Start - config.lineHeight * 4,
@@ -463,9 +468,8 @@ const drawCustomerInfo = (page: PDFPage) => {
     ...config,
   });
 
-
   // right side
-  const quotation = _DATA
+  const quotation = _DATA;
 
   const rightXStart = 500;
   // code
@@ -484,7 +488,6 @@ const drawCustomerInfo = (page: PDFPage) => {
     ...config,
   });
 
-
   const seller = quotation?.seller;
   page.drawText(seller?.name ?? "", {
     x: rightXStart,
@@ -500,7 +503,9 @@ const drawCustomerInfo = (page: PDFPage) => {
     ...config,
   });
 
-  const paymentCondition = getPaymentCondition(quotation?.paymentCondition ?? "");
+  const paymentCondition = getPaymentCondition(
+    quotation?.paymentCondition ?? ""
+  );
   page.drawText(paymentCondition, {
     x: rightXStart,
     y: Y_Start - config.lineHeight * 3,
@@ -508,15 +513,16 @@ const drawCustomerInfo = (page: PDFPage) => {
     ...config,
   });
 
-  const dueDate = getBillDueDate(new Date(_BILL_DATE), quotation?.paymentCondition ?? "");
+  const dueDate = getBillDueDate(
+    new Date(_BILL_DATE),
+    quotation?.paymentCondition ?? ""
+  );
   page.drawText(PDFDateFormat(dueDate), {
     x: rightXStart,
     y: Y_Start - config.lineHeight * 4,
     maxWidth: 100,
     ...config,
   });
-
-
 };
 
 const drawPriceInfo = (
@@ -565,10 +571,10 @@ const drawPriceInfo = (
   });
 
   // Price text - use installment amount if available
-  const grandTotalNumber = _INSTALLMENT_DATA 
-    ? _INSTALLMENT_DATA.amountWithVat 
+  const grandTotalNumber = _INSTALLMENT_DATA
+    ? _INSTALLMENT_DATA.amountWithVat
     : parseFloat(grandTotal.replace(/,/g, ""));
-    
+
   const thaiBahtText = convertToThaiBahtText(grandTotalNumber);
   page.drawText(thaiBahtText, {
     x: ITEM_X_Start + 30,
@@ -578,10 +584,7 @@ const drawPriceInfo = (
   });
 };
 
-const drawStaticInfo = (
-  page: PDFPage,
-  currentPageNumber: number
-) => {
+const drawStaticInfo = (page: PDFPage, currentPageNumber: number) => {
   if (!_DATA) return;
 
   drawHeaderInfo(page);
@@ -589,17 +592,30 @@ const drawStaticInfo = (
   drawCustomerInfo(page);
 
   // Use installment amounts if available, otherwise use quotation amounts
-  const priceData = _INSTALLMENT_DATA ? {
-    discount: "0.00", // Installments typically don't have separate discount
-    tax: ((_INSTALLMENT_DATA.amountWithVat - _INSTALLMENT_DATA.amount)).toLocaleString("th-TH", CURRENCY_FORMAT),
-    totalPrice: _INSTALLMENT_DATA.amount.toLocaleString("th-TH", CURRENCY_FORMAT),
-    grandTotal: _INSTALLMENT_DATA.amountWithVat.toLocaleString("th-TH", CURRENCY_FORMAT),
-  } : {
-    discount: _DATA?.discount?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
-    tax: _DATA?.tax?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
-    totalPrice: _DATA?.totalPrice?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
-    grandTotal: _DATA?.grandTotal?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
-  };
+  const priceData = _INSTALLMENT_DATA
+    ? {
+        discount: "0.00", // Installments typically don't have separate discount
+        tax: (
+          _INSTALLMENT_DATA.amountWithVat - _INSTALLMENT_DATA.amount
+        ).toLocaleString("th-TH", CURRENCY_FORMAT),
+        totalPrice: _INSTALLMENT_DATA.amount.toLocaleString(
+          "th-TH",
+          CURRENCY_FORMAT
+        ),
+        grandTotal: _INSTALLMENT_DATA.amountWithVat.toLocaleString(
+          "th-TH",
+          CURRENCY_FORMAT
+        ),
+      }
+    : {
+        discount:
+          _DATA?.discount?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
+        tax: _DATA?.tax?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
+        totalPrice:
+          _DATA?.totalPrice?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
+        grandTotal:
+          _DATA?.grandTotal?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
+      };
 
   drawPriceInfo(page, priceData);
 };
