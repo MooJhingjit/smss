@@ -60,7 +60,6 @@ const getData = async (billGroupId: number): Promise<QuotationWithRelations[]> =
     if (!installment) {
         return [];
     }
-    console.log("🚀 ~ getData ~ installment:", installment)
 
     // Return quotation with installment's invoice and installment data
     const quotationData = {

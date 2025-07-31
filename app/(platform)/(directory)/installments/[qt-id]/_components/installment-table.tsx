@@ -109,6 +109,7 @@ export default function InstallmentTable({
         // Send billGroupDate only for new bill groups
         requestBody.billGroupDate = dueDate;
       }
+      
       // For existing bill groups, send empty body
 
       const response = await fetch(`/api/installments/${installmentId}`, {

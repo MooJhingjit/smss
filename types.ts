@@ -75,3 +75,8 @@ export type PurchaseOrderPreview = {
 export type PurchaseOrderItemWithRelations = PurchaseOrderItem & {
   items: Item[];
 };
+
+export type QuotationInstallmentWithRelations = QuotationInstallment & {
+  quotation?: Quotation;
+  invoice?: Invoice | null;
+};
