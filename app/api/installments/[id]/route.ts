@@ -51,7 +51,7 @@ export async function POST(
     headers.set('Content-Type', 'application/pdf');
     headers.set('Content-Disposition', 'attachment; filename="installment-invoice.pdf"');
 
-    return new NextResponse(pdfBytes, { status: 200, statusText: "OK", headers });
+    return new NextResponse(pdfBytes as BodyInit, { status: 200, statusText: "OK", headers });
 
   } catch (error) {
     console.error("API Error:", error);

@@ -2,8 +2,7 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Breadcrumbs from "@/components/breadcrumbs";
-import { QuotationWithRelations } from "@/types";
-import { QuotationInstallment } from "@prisma/client";
+import { QuotationWithRelations, QuotationInstallmentWithRelations } from "@/types";
 import { db } from "@/lib/db";
 import { useUser } from "@/hooks/use-user";
 import DataNotfound from "@/components/data-notfound";
@@ -39,6 +38,9 @@ const getData = async (
       seller: true,
       billGroup: true,
       installments: {
+        include: {
+          invoice: true, // Include invoice data to get receiptDate
+        },
         orderBy: {
           id: "asc",
         },
@@ -167,6 +169,7 @@ export default async function InstallmentDetailPage(
           <InstallmentTable
             installments={installments}
             quotationId={quotation.id}
+            quotationType={quotation.type}
           />
         </div>
       </div>

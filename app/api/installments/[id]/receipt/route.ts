@@ -1,6 +1,8 @@
 import { NextResponse, NextRequest } from "next/server";
 import { generateReceiptBill } from "@/app/services/service.receipt-bill";
 
+// Generate receipt bill for a specific installment (service quotations only)
+
 export async function POST(
   req: NextRequest,
   context: { params: { id: string } }
@@ -8,22 +10,21 @@ export async function POST(
   const { id } = context.params;
   try {
     const data = await req.json() as {
-      date: string;
+      receiptDate: string;
     };
 
-    // Generate the merged PDF using consolidated service
-    const mergedPdfBytes = await generateReceiptBill({
-      quotationId: parseInt(id),
-      receiptDate: data.date,
+    // Generate the installment receipt PDF using consolidated service
+    const receiptPdfBytes = await generateReceiptBill({
+      installmentId: parseInt(id),
+      receiptDate: data.receiptDate,
     });
 
-    
-    // Set response headers and return the merged PDF
+    // Set response headers and return the PDF
     const headers = new Headers();
     headers.set('Content-Type', 'application/pdf');
-    headers.set('Content-Disposition', 'attachment; filename="receipt-invoice.pdf"');
+    headers.set('Content-Disposition', 'attachment; filename="installment-receipt.pdf"');
 
-    return new NextResponse(mergedPdfBytes as BodyInit, { status: 200, statusText: "OK", headers });
+    return new NextResponse(receiptPdfBytes as BodyInit, { status: 200, statusText: "OK", headers });
 
   } catch (err: unknown) {
     if (err instanceof Error) {

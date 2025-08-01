@@ -2,29 +2,25 @@ import { db } from "@/lib/db";
 import {
   Contact,
   Invoice,
-  PurchaseOrder,
   Quotation,
   QuotationList,
-  QuotationInstallment,
   User,
 } from "@prisma/client";
 import { PDFDocument, PDFEmbeddedPage, PDFFont, PDFPage } from "pdf-lib";
 import { getBoundingBox, PDFDateFormat, loadPdfAssets, validatePageArea, getTextWidth, getPaymentCondition, getBillDueDate, convertToThaiBahtText, getCustomerNameWithBranch, formatInstallmentText } from "./pdf.helpers";
+import { QuotationInstallmentWithRelations } from "@/types";
 
 type QuotationWithRelations = Quotation & {
   lists?: QuotationList[];
   contact?: Contact | null;
   seller?: User | null;
   invoices?: Invoice[]; // Changed from invoice to invoices array
-  installmentData?: QuotationInstallment | null;
+  installmentData?: QuotationInstallmentWithRelations | null;
 };
-// type PurchaseOrderWithRelations = PurchaseOrder & {
-//   quotation?: QuotationWithRelations | null;
-// };
 
 let _BILL_DATE = ""
 let _DATA: QuotationWithRelations | null = null
-let _INSTALLMENT_DATA: QuotationInstallment | null = null;
+let _INSTALLMENT_DATA: QuotationInstallmentWithRelations | null = null;
 let _FONT: PDFFont | null = null;
 
 // item list config
@@ -52,6 +48,7 @@ const CURRENCY_FORMAT = {
 
 const getData = async (
   id: number,
+  defaultDate: string,
   installmentId?: number
 ): Promise<QuotationWithRelations | null> => {
   const quotation = await db.quotation.findUnique({
@@ -73,18 +70,27 @@ const getData = async (
     },
   });
 
-  // Fetch installment data if installmentId is provided
+  // Get the most recent invoice for this quotation (for regular invoices)
+  const invoice = quotation?.invoices?.[0] || null;
+  const invoiceDate = invoice?.receiptDate ?? defaultDate;
+  _BILL_DATE = PDFDateFormat(new Date(invoiceDate));
+
+  // If installment ID is provided, fetch installment data
   if (installmentId && quotation) {
     const installment = await db.quotationInstallment.findUnique({
       where: { id: installmentId },
+      include: {
+        invoice: true,
+      },
     });
-    
+
     if (installment) {
-      // Type-safe assignment using spread operator
-      return {
-        ...quotation,
-        installmentData: installment
-      } as QuotationWithRelations;
+      _INSTALLMENT_DATA = installment;
+
+      // Use installment invoice receipt date if available
+      if (installment.invoice?.receiptDate) {
+        _BILL_DATE = PDFDateFormat(new Date(installment.invoice?.receiptDate));
+      }
     }
   }
 
@@ -97,19 +103,16 @@ export const generateInvoice = async (id: number, defaultDate: string, installme
       throw new Error("Invalid quotation ID");
     }
 
-    const quotation = await getData(id, installmentId);
+    // Reset installment data
+    _INSTALLMENT_DATA = null;
 
-    // Get the most recent invoice for this quotation (for regular invoices)
-    const invoice = quotation?.invoices?.[0] || null;
-    const invoiceDate = invoice?.receiptDate ?? defaultDate;
-    _BILL_DATE = PDFDateFormat(new Date(invoiceDate))
+    const quotation = await getData(id, defaultDate, installmentId);
 
     if (!quotation) {
       throw new Error("PurchaseOrder not found");
     }
 
-    _DATA = quotation
-    _INSTALLMENT_DATA = quotation.installmentData || null;
+    _DATA = quotation;
     return main();
   } catch (error) {
     console.log(error);
@@ -243,7 +246,7 @@ const writeMainItem = (
     ...config,
   });
 
-  const itemName = `${!!data.allowedWithholdingTax ? "(**)" : ""} ${data.name}` ;
+  const itemName = `${data.allowedWithholdingTax ? "(**)" : ""} ${data.name}`;
 
   currentPage.drawText(itemName, {
     x: columnPosition.description,
@@ -263,9 +266,10 @@ const writeMainItem = (
 
 
   // Use installment amounts if available, otherwise use original list data
-  const unitPrice = _INSTALLMENT_DATA ? 
-    _INSTALLMENT_DATA.amount.toLocaleString("th-TH", CURRENCY_FORMAT) :
-    (data.unitPrice ? data.unitPrice.toLocaleString("th-TH", CURRENCY_FORMAT) : "0.00");
+  const unitPriceValue = _INSTALLMENT_DATA ? 
+    _INSTALLMENT_DATA.amount :
+    (data.unitPrice || 0);
+  const unitPrice = unitPriceValue.toLocaleString("th-TH", CURRENCY_FORMAT);
 
   currentPage.drawText(unitPrice, {
     x: columnPosition.unitPrice + 44 - getTextWidth(unitPrice, config),
@@ -274,9 +278,10 @@ const writeMainItem = (
     ...config,
   });
 
-  const amountText = _INSTALLMENT_DATA ?
-    _INSTALLMENT_DATA.amount.toLocaleString("th-TH", CURRENCY_FORMAT) :
-    (data.price ? data.price.toLocaleString("th-TH", CURRENCY_FORMAT) : "0.00");
+  const amountValue = _INSTALLMENT_DATA ?
+    _INSTALLMENT_DATA.amount :
+    (data.price || 0);
+  const amountText = amountValue.toLocaleString("th-TH", CURRENCY_FORMAT);
     
   currentPage.drawText(amountText, {
     x: columnPosition.amount + 44 - getTextWidth(amountText, config),
@@ -308,16 +313,19 @@ const writeMainDescription = (
   },
   pdfDoc: PDFDocument
 ) => {
+  let currentY = lineStart;
+  let totalHeight = 0;
+
+  // Draw the original description
   currentPage.drawText(description, {
     x: columnPosition.description + 12, // indent
-    y: lineStart,
+    y: currentY,
     maxWidth: 300,
     ...config,
     opacity: 0.5,
   });
 
-  let totalHeight = 0;
-  const bounding = getBoundingBox(
+  const descriptionBounding = getBoundingBox(
     description,
     pdfDoc,
     _FONT,
@@ -325,21 +333,24 @@ const writeMainDescription = (
     config.lineHeight + 4,
     300
   );
-  totalHeight += bounding.height / 10;
+  totalHeight += descriptionBounding.height / 10;
+  currentY -= descriptionBounding.height / 10;
 
-  // Add installment period info if installment data exists
+  // Add installment period if installment data exists
   if (_INSTALLMENT_DATA) {
     const installmentText = formatInstallmentText(
       _INSTALLMENT_DATA,
       _DATA?.installmentContractNumber
     );
-    
+
+    currentY -= config.lineHeight; // Add some spacing
+
     currentPage.drawText(installmentText, {
-      x: columnPosition.description + 12, // same indent as description
-      y: lineStart - totalHeight,
+      x: columnPosition.description + 12, // indent same as description
+      y: currentY,
       maxWidth: 300,
       ...config,
-      opacity: 0.7, // slightly more visible than description
+      opacity: 0.7,
     });
 
     const installmentBounding = getBoundingBox(
@@ -360,14 +371,11 @@ const drawHeaderInfo = (
   page: PDFPage,
 ) => {
   if (!_FONT) return;
-  const X_Start = 480;
-  const Y_Start = 790;
   const config = {
     font: _FONT,
     size: PAGE_FONT_SIZE,
     lineHeight: 16,
   };
-
 
   page.drawText("1", {
     x: 530,
@@ -458,8 +466,15 @@ const drawCustomerInfo = (page: PDFPage) => {
   const quotation = _DATA
 
   const rightXStart = 500;
+
+  let receiptCode = quotation?.invoices?.[0]?.receiptCode ?? "";
+
+  if (_INSTALLMENT_DATA) {
+    // Use installment receipt code if available
+    receiptCode = _INSTALLMENT_DATA.invoice?.receiptCode ?? receiptCode;
+  }
   // code
-  page.drawText(quotation?.invoices?.[0]?.receiptCode ?? "", {
+  page.drawText(receiptCode, {
     x: rightXStart,
     y: Y_Start,
     maxWidth: 100,

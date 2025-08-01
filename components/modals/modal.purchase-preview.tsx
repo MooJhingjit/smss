@@ -61,6 +61,7 @@ export const PurchasePreviewModal = () => {
       onOpenChange={onClose}
       title="สร้างใบสั่งซื้อ(PO)"
       description=""
+      
     >
       <div className="flex space-x-3 items-center mb-4">
         <LockIcon className="w-10 h-10 text-yellow-500" />
@@ -75,8 +76,13 @@ export const PurchasePreviewModal = () => {
       </div>
       
       <DialogFooter>
-        <Button type="button" variant="destructive" onClick={execute}>
-          ยืนยันการทำรายการ
+        <Button 
+          type="button" 
+          variant="destructive" 
+          onClick={execute}
+          disabled={mutation.isPending}
+        >
+          {mutation.isPending ? "กำลังสร้าง..." : "ยืนยันการทำรายการ"}
         </Button>
       </DialogFooter>
     </ResponsiveDialog>

@@ -23,8 +23,10 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { QuotationInstallment } from "@prisma/client";
+import { QuotationType } from "@prisma/client";
+import { QuotationInstallmentWithRelations } from "@/types";
 import { updateInstallmentStatus } from "@/actions/quotation/update-installment-status";
+import { revalidateInstallmentsPage } from "@/actions/revalidateInstallments";
 import { useAction } from "@/hooks/use-action";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -49,16 +51,21 @@ const FormSchema = z.object({
 type FormData = z.infer<typeof FormSchema>;
 
 interface InstallmentTableProps {
-  installments: (QuotationInstallment & { billGroupId?: number | null })[];
+  installments: QuotationInstallmentWithRelations[];
   quotationId: number;
+  quotationType: QuotationType
 }
 
 export default function InstallmentTable({
   installments: initialInstallments,
   quotationId,
+  quotationType,
 }: InstallmentTableProps) {
   const router = useRouter();
   const [generatingBillFor, setGeneratingBillFor] = useState<number | null>(
+    null
+  );
+  const [generatingReceiptFor, setGeneratingReceiptFor] = useState<number | null>(
     null
   );
 
@@ -138,6 +145,9 @@ export default function InstallmentTable({
       document.body.removeChild(a);
 
       toast.success("สร้างและดาวน์โหลดใบวางบิลสำเร็จ");
+      
+      // Revalidate the current page to reflect updated installment status
+      await revalidateInstallmentsPage(quotationId);
       router.refresh();
     } catch (error) {
       console.error("Error generating bill:", error);
@@ -148,6 +158,53 @@ export default function InstallmentTable({
       );
     } finally {
       setGeneratingBillFor(null);
+    }
+  };
+
+  const handleGenerateReceipt = async (installmentId: number, receiptDate: string) => {
+
+    try {
+      setGeneratingReceiptFor(installmentId);
+
+      const response = await fetch(`/api/installments/${installmentId}/receipt`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ receiptDate }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to generate receipt");
+      }
+
+      // Handle PDF response
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.style.display = "none";
+      a.href = url;
+      a.download = `installment-receipt-${installmentId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast.success("สร้างและดาวน์โหลดใบเสร็จสำเร็จ");
+      
+      // Revalidate the current page to reflect any changes
+      await revalidateInstallmentsPage(quotationId);
+      router.refresh();
+    } catch (error) {
+      console.error("Error generating receipt:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "เกิดข้อผิดพลาดในการสร้างใบเสร็จ"
+      );
+    } finally {
+      setGeneratingReceiptFor(null);
     }
   };
 
@@ -226,6 +283,11 @@ export default function InstallmentTable({
                     <TableHead className="font-semibold text-gray-700">
                       วันครบกำหนด / พิมพ์ใบวางบิล
                     </TableHead>
+                    {quotationType === "service" && (
+                      <TableHead className="font-semibold text-gray-700">
+                        พิมพ์ใบเสร็จ
+                      </TableHead>
+                    )}
                     <TableHead className="font-semibold text-gray-700 text-center">
                       สถานะการชำระ
                     </TableHead>
@@ -262,7 +324,9 @@ export default function InstallmentTable({
                                       parseFloat(e.target.value) || 0
                                     )
                                   }
-                                  disabled={!!field.billGroupId}
+                                  disabled={
+                                    !!field.billGroupId
+                                  }
                                 />
                               </FormControl>
                               <FormMessage />
@@ -283,7 +347,9 @@ export default function InstallmentTable({
                                     type="date"
                                     className="w-auto"
                                     {...formField}
-                                    disabled={!!field.billGroupId}
+                                    disabled={
+                                      !!field.billGroupId
+                                    }
                                   />
                                 </FormControl>
                                 <FormMessage />
@@ -313,11 +379,11 @@ export default function InstallmentTable({
                               size="sm"
                               className="h-8 w-8 p-0"
                               disabled={
-                                generatingBillFor === field.id ||
+                                generatingBillFor === form.getValues(`installments.${index}.id`) ||
                                 form.formState.isDirty
                               }
                             >
-                              {generatingBillFor === field.id ? (
+                              {generatingBillFor === form.getValues(`installments.${index}.id`) ? (
                                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600" />
                               ) : (
                                 <PrinterIcon className="h-4 w-4" />
@@ -326,6 +392,23 @@ export default function InstallmentTable({
                           </ConfirmActionButton>
                         </div>
                       </TableCell>
+
+                      {quotationType === "service" && (
+                        <TableCell className="text-center">
+                          {field.billGroupId ? (
+                            <ReceiptPrintCell
+                              field={field}
+                              index={index}
+                              form={form}
+                              generatingReceiptFor={generatingReceiptFor}
+                              handleGenerateReceipt={handleGenerateReceipt}
+                              initialInstallment={initialInstallments[index]}
+                            />
+                          ) : (
+                            <span className="text-gray-400 text-sm">-</span>
+                          )}
+                        </TableCell>
+                      )}
 
                       <InstallmentStatusCell
                         field={field}
@@ -431,7 +514,7 @@ const InstallmentStatusCell = ({
   field: any;
   index: number;
   form: any;
-  initialInstallment: QuotationInstallment & { billGroupId?: number | null };
+  initialInstallment: QuotationInstallmentWithRelations;
 }) => {
   const paid = initialInstallment.status === "paid";
   const noInvoice = !field.billGroupId;
@@ -448,7 +531,7 @@ const InstallmentStatusCell = ({
   }
 
   if (noInvoice) {
-    return <TableCell className="text-center"></TableCell>;
+    return <TableCell className="text-center"><span className="text-gray-400 text-sm">-</span></TableCell>;
   }
 
   return (
@@ -489,5 +572,65 @@ const InstallmentStatusCell = ({
         />
       </div>
     </TableCell>
+  );
+};
+
+const ReceiptPrintCell = ({
+  field,
+  index,
+  form,
+  generatingReceiptFor,
+  handleGenerateReceipt,
+  initialInstallment,
+}: {
+  field: any;
+  index: number;
+  form: any;
+  generatingReceiptFor: number | null;
+  handleGenerateReceipt: (installmentId: number, receiptDate: string) => Promise<void>;
+  initialInstallment: QuotationInstallmentWithRelations;
+}) => {
+  // Initialize with existing receiptDate from invoice, or current date
+  const [receiptDate, setReceiptDate] = useState(() => {
+    if (initialInstallment.invoice?.receiptDate) {
+      return new Date(initialInstallment.invoice.receiptDate).toISOString().split("T")[0];
+    }
+    return new Date().toISOString().split("T")[0];
+  });
+
+  return (
+    <div className="flex items-center justify-center space-x-2">
+      <Input
+        type="date"
+        className="w-auto"
+        value={receiptDate}
+        onChange={(e) => setReceiptDate(e.target.value)}
+        disabled={generatingReceiptFor === initialInstallment.id}
+      />
+      <ConfirmActionButton
+        onConfirm={() => {
+          handleGenerateReceipt(initialInstallment.id, receiptDate);
+        }}
+        warningMessage={[`พิมพ์ใบเสร็จสำหรับงวดที่ ${field.period}`]}
+        disabled={form.formState.isDirty}
+      >
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="h-8 w-8 p-0"
+          disabled={
+            generatingReceiptFor === initialInstallment.id ||
+            form.formState.isDirty
+          }
+        >
+          {generatingReceiptFor === initialInstallment.id ? (
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600" />
+          ) : (
+            <PrinterIcon className="h-4 w-4" />
+          )}
+        </Button>
+      </ConfirmActionButton>
+    </div>
   );
 };
