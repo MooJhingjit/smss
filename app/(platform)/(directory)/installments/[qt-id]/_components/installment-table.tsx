@@ -26,7 +26,6 @@ import {
 import { QuotationType } from "@prisma/client";
 import { QuotationInstallmentWithRelations } from "@/types";
 import { updateInstallmentStatus } from "@/actions/quotation/update-installment-status";
-import { revalidateInstallmentsPage } from "@/actions/revalidateInstallments";
 import { useAction } from "@/hooks/use-action";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -146,8 +145,8 @@ export default function InstallmentTable({
 
       toast.success("สร้างและดาวน์โหลดใบวางบิลสำเร็จ");
       
-      // Revalidate the current page to reflect updated installment status
-      await revalidateInstallmentsPage(quotationId);
+      // // Revalidate the current page to reflect updated installment status
+      // await revalidateInstallmentsPage(quotationId);
       router.refresh();
     } catch (error) {
       console.error("Error generating bill:", error);
@@ -193,9 +192,6 @@ export default function InstallmentTable({
 
       toast.success("สร้างและดาวน์โหลดใบเสร็จสำเร็จ");
       
-      // Revalidate the current page to reflect any changes
-      await revalidateInstallmentsPage(quotationId);
-      router.refresh();
     } catch (error) {
       console.error("Error generating receipt:", error);
       toast.error(
