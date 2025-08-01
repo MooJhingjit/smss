@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import React from "react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Popover,
   PopoverContent,
@@ -45,9 +45,17 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Label } from "@/components/ui/label"
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Label as FormLabel } from "@/components/ui/label";
+import {
+  Label,
+  PolarGrid,
+  PolarRadiusAxis,
+  RadialBar,
+  RadialBarChart,
+} from "recharts";
+import { ChartConfig, ChartContainer } from "@/components/ui/chart";
 
 type Props = {
   data: QuotationWithRelations;
@@ -67,17 +75,19 @@ export default function QuotationInfo(props: Readonly<Props>) {
     data.paymentCondition === "cash"
       ? paymentTypeMapping[data.paymentCondition]
       : data.paymentCondition
-        ? `${data.paymentCondition} วัน`
-        : "-";
+      ? `${data.paymentCondition} วัน`
+      : "-";
 
   return (
     <DataInfo
       variant="gray"
       CustomComponent={
-        isAdmin && <BillController
-          currentQuotation={data}
-          quotationsGroup={quotationsGroup}
-        />
+        isAdmin && (
+          <BillController
+            currentQuotation={data}
+            quotationsGroup={quotationsGroup}
+          />
+        )
       }
       lists={[
         { label: "ประเภท", value: quotationTypeMapping[data.type] },
@@ -96,13 +106,105 @@ export default function QuotationInfo(props: Readonly<Props>) {
           value: `${data.validPricePeriod ?? "-"} วัน`,
         },
         { label: "อ้างอิงใบสั่งซื้อ", value: data.purchaseOrderRef ?? "" },
-        { label: "INV (ใบกำกับ/ใบเสร็จ)", value: data.invoice?.receiptDate ? `${data.invoice?.receiptCode ?? ""} (${getDateFormat(data.invoice?.receiptDate ?? "")})` : "-" },
-
+        {
+          label: "INV (ใบกำกับ/ใบเสร็จ)",
+          value: data.invoice?.receiptDate
+            ? `${data.invoice?.receiptCode ?? ""} (${getDateFormat(
+                data.invoice?.receiptDate ?? ""
+              )})`
+            : "-",
+        },
       ]}
       onEdit={() => modal.onOpen(data)}
     />
   );
 }
+
+// Installment Progress Chart Component
+const InstallmentProgressChart = ({
+  installments,
+}: {
+  installments: QuotationWithRelations["installments"];
+}) => {
+  // Calculate payment progress for chart
+  const totalInstallments = installments?.length || 0;
+  const paidInstallments =
+    installments?.filter((installment) => installment.status === "paid")
+      .length || 0;
+  const paymentPercentage =
+    totalInstallments > 0
+      ? Math.round((paidInstallments / totalInstallments) * 100)
+      : 0;
+
+  // Chart data for payment progress
+  const chartData = [
+    {
+      name: "paid",
+      value: paymentPercentage,
+      fill: "var(--color-paid)",
+    },
+  ];
+
+  const chartConfig = {
+    value: {
+      label: "Payment Progress",
+    },
+    paid: {
+      label: "ชำระแล้ว",
+      color: "hsl(142 76% 36%)", // green color
+    },
+  } satisfies ChartConfig;
+
+  return (
+    <div className="mr-3 flex flex-col items-center">
+      <ChartContainer
+        config={chartConfig}
+        className="mx-auto aspect-square w-full max-w-[80px]"
+      >
+        <RadialBarChart
+          data={chartData}
+          startAngle={0}
+          endAngle={paymentPercentage * 3.6} // Convert percentage to degrees
+          innerRadius={25}
+          outerRadius={35}
+        >
+          <PolarGrid
+            gridType="circle"
+            radialLines={false}
+            stroke="none"
+            className="first:fill-muted last:fill-background"
+            polarRadius={[30, 20]}
+          />
+          <RadialBar dataKey="value" background cornerRadius={5} />
+          <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
+            <Label
+              content={({ viewBox }) => {
+                if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                  return (
+                    <text
+                      x={viewBox.cx}
+                      y={viewBox.cy}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                    >
+                      <tspan
+                        x={viewBox.cx}
+                        y={viewBox.cy}
+                        className="fill-foreground text-xs font-bold"
+                      >
+                        {paymentPercentage}%
+                      </tspan>
+                    </text>
+                  );
+                }
+              }}
+            />
+          </PolarRadiusAxis>
+        </RadialBarChart>
+      </ChartContainer>
+    </div>
+  );
+};
 
 type BillControllerProps = {
   currentQuotation: QuotationWithRelations;
@@ -122,7 +224,8 @@ const BillController = ({
     new Date().toISOString().split("T")[0]
   );
   const [installmentPeriods, setInstallmentPeriods] = React.useState(10);
-  const [installmentContractNumber, setInstallmentContractNumber] = React.useState("");
+  const [installmentContractNumber, setInstallmentContractNumber] =
+    React.useState("");
 
   const handleBillGroup = useAction(attachQuotationToBillGroup, {
     onSuccess: () => {
@@ -155,7 +258,7 @@ const BillController = ({
       currentQuotationId: currentQuotation.id,
       newQuotationId: quotationId,
       billGroupDate: billGroupDate,
-    }
+    };
 
     await handleBillGroup.execute(payload);
   };
@@ -173,56 +276,52 @@ const BillController = ({
     });
   };
 
-  const hasInstallments = currentQuotation?.installments && currentQuotation.installments.length > 0;
-  const hasGroup = currentQuotation?.billGroupId
+  const hasInstallments =
+    currentQuotation?.installments && currentQuotation.installments.length > 0;
+  const hasGroup = currentQuotation?.billGroupId;
 
   // Show installment link if installments exist
   if (hasInstallments) {
     // lastPayment is latest paid installment status, need to find status is paid and the last installment
-    const lastPayment = currentQuotation.installments?.slice().reverse().find(installment => installment.status === 'paid')
+    const lastPayment = currentQuotation.installments
+      ?.slice()
+      .sort((a, b) => a.id - b.id)
+      .reverse()
+      .find((installment) => installment.status === "paid");
 
     return (
       <div className="flex items-center space-x-4">
-
-        <Alert className="">
-          <AlertTitle className="flex items-center space-x-2">
-            {
-              currentQuotation.installmentContractNumber && (
-
+        <Alert className="flex items-center">
+          <div className="w-[80px] md:block hidden">
+            <InstallmentProgressChart
+              installments={currentQuotation.installments}
+            />
+          </div>
+          <div className="">
+            <AlertTitle className="flex items-center space-x-2">
+              {currentQuotation.installmentContractNumber && (
                 <Badge variant="secondary" className="text-xs">
-                  สัญญาเลขที่ {currentQuotation.installmentContractNumber}
-
+                  เลขที่สัญญา {currentQuotation.installmentContractNumber}
                 </Badge>
-
-
-              )
-            }
-            <Badge variant="secondary">{currentQuotation.code}</Badge>
-          </AlertTitle>
-          <AlertDescription>
-            <Link
-              href={`/installments/${currentQuotation.id}`}
-              className=" text-sm underline"
-
-            >
-              <Badge
-                variant="outline"
-                className="underline border-none"
+              )}
+              <Badge variant="secondary">{currentQuotation.code}</Badge>
+            </AlertTitle>
+            <AlertDescription>
+              <Link
+                href={`/installments/${currentQuotation.id}`}
+                className=" underline"
               >
-                ชำระแล้ว {lastPayment?.period ?? 0} งวด, คงเหลือ {currentQuotation.outstandingGrandTotal?.toLocaleString() ?? 0} บาท
-                <ExternalLink size={12} className="ml-1" />
-
-              </Badge>
-            </Link>
-          </AlertDescription>
+                <Badge variant="outline" className="underline border-none text-md">
+                  ชำระแล้ว {lastPayment?.period ?? 0} งวด, คงเหลือ{" "}
+                  {currentQuotation.outstandingGrandTotal?.toLocaleString() ??
+                    0}{" "}
+                  บาท
+                  <ExternalLink size={12} className="ml-1" />
+                </Badge>
+              </Link>
+            </AlertDescription>
+          </div>
         </Alert>
-
-        {/* <Link 
-          href={`/installments/${currentQuotation.id}`}
-          className="text-orange-400 hover:text-orange-800 text-sm font-medium underline"
-        >
-          ดูแผนการผ่อนชำระ <span className=""></span>
-        </Link> */}
       </div>
     );
   }
@@ -238,8 +337,12 @@ const BillController = ({
           <PopoverContent className="p-2 ">
             <Tabs defaultValue="normal" className="w-full ">
               <TabsList className="mt-1 w-full">
-                <TabsTrigger className="w-full" value="normal">ชำระเต็มจำนวน</TabsTrigger>
-                <TabsTrigger className="w-full" value="installment">ผ่อนชำระ</TabsTrigger>
+                <TabsTrigger className="w-full" value="normal">
+                  ชำระเต็มจำนวน
+                </TabsTrigger>
+                <TabsTrigger className="w-full" value="installment">
+                  ผ่อนชำระ
+                </TabsTrigger>
               </TabsList>
               <TabsContent value="installment" className="">
                 <Card>
@@ -248,49 +351,53 @@ const BillController = ({
                     <CardDescription className="text-orange-500">
                       จำนวนงวดเมื่อสร้างแล้วไม่สามารถแก้ไขได้
                     </CardDescription>
-
-
                   </CardHeader>
                   <CardContent className="grid gap-6">
-
                     {/* Contract Number field */}
                     <div className="grid gap-3">
-                      <Label htmlFor="contractNumber">เลขที่สัญญา</Label>
+                      <FormLabel htmlFor="contractNumber">
+                        เลขที่สัญญา
+                      </FormLabel>
                       <Input
                         id="contractNumber"
                         type="text"
                         placeholder="กรอกเลขที่สัญญา (ไม่บังคับ)"
                         value={installmentContractNumber}
-                        onChange={(e) => setInstallmentContractNumber(e.target.value)}
+                        onChange={(e) =>
+                          setInstallmentContractNumber(e.target.value)
+                        }
                       />
                     </div>
 
                     <div className="grid gap-3">
-                      <Label htmlFor="period">จำนวนงวด</Label>
+                      <FormLabel htmlFor="period">จำนวนงวด</FormLabel>
                       <Input
                         id="period"
                         type="number"
                         placeholder="กรอกจำนวนงวด"
                         value={installmentPeriods}
-                        onChange={(e) => setInstallmentPeriods(parseInt(e.target.value) || 12)}
+                        onChange={(e) =>
+                          setInstallmentPeriods(parseInt(e.target.value) || 12)
+                        }
                         min={1}
                         max={60}
                       />
                     </div>
                   </CardContent>
                   <CardFooter>
-                    <ConfirmActionButton
-                      onConfirm={createInstallmentPlan}
-                    >
+                    <ConfirmActionButton onConfirm={createInstallmentPlan}>
                       <Button className="flex justify-center items-center space-x-1 h-9 w-full">
-                        <p>ยืนยันยอดรวม {currentQuotation.grandTotal?.toLocaleString() ?? 0} บาท</p>
+                        <p>
+                          ยืนยันยอดรวม{" "}
+                          {currentQuotation.grandTotal?.toLocaleString() ?? 0}{" "}
+                          บาท
+                        </p>
                       </Button>
                     </ConfirmActionButton>
                   </CardFooter>
                 </Card>
               </TabsContent>
               <TabsContent value="normal" className="">
-
                 <Card>
                   <CardHeader>
                     <CardTitle> สร้างกลุ่มบิลใหม่</CardTitle>
@@ -372,17 +479,17 @@ const BillController = ({
   const contactName = currentQuotation.contact?.name ?? "ลูกค้า";
   const invDate = currentQuotation?.invoice?.date
     ? new Intl.DateTimeFormat("th-TH", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    }).format(currentQuotation?.invoice?.date)
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      }).format(currentQuotation?.invoice?.date)
     : null;
 
   const allQuotations = [currentQuotation, ...quotationsGroup].sort(
     (a, b) => a.id - b.id
   );
   const billGroupCode = currentQuotation?.billGroup?.code ?? "";
-  const defaultInvoiceDate = currentQuotation?.billGroup?.date
+  const defaultInvoiceDate = currentQuotation?.billGroup?.date;
 
   return (
     <div className="border p-3 relative">
@@ -393,13 +500,11 @@ const BillController = ({
         </div>
       </div>
       <div className="flex items-center gap-2 flex-wrap">
-
         {allQuotations.map((qt) => (
           <Link key={qt.id} href={"/quotations/" + qt.id}>
             <Badge
               variant={qt.id === currentQuotation.id ? "default" : "secondary"}
-              className={cn("relative flex items-center", {
-              })}
+              className={cn("relative flex items-center", {})}
             >
               {!qt.grandTotal && (
                 <InfoIcon size={12} className="mr-1 text-destructive" />
@@ -486,10 +591,10 @@ const BillController = ({
                           <>
                             <p className="text-xs text-orange-500">
                               - ออกใบแจ้งหนี้/ใบวางบิล ทั้งหมดในกลุ่ม *ครั้งแรก
-
                             </p>
                             <p className="text-xs text-orange-500">
-                              - เลข INV จะไม่เปลี่ยน หากมีการแก้ไขวันที่ในการออกครั้งถัดไป
+                              - เลข INV จะไม่เปลี่ยน
+                              หากมีการแก้ไขวันที่ในการออกครั้งถัดไป
                             </p>
                           </>
                         )}
@@ -498,7 +603,9 @@ const BillController = ({
                     <div className="flex items-center gap-2 mt-2">
                       <ReceiptPrint
                         defaultBillDate={
-                          currentQuotation?.invoice?.date ?? defaultInvoiceDate ?? undefined
+                          currentQuotation?.invoice?.date ??
+                          defaultInvoiceDate ??
+                          undefined
                         }
                         endpoint={`/api/quotations/bills/${currentQuotation.billGroupId}`}
                       />

@@ -43,18 +43,18 @@ const AdminStats = ({ saleTotal, orderAmount, saleTotalWithVat }: Props) => {
       </div> */}
 
       <div className="flex items-center  space-x-2 ">
-        <p className=" ">สรุปข้อมูลเดือนนี้</p>
+        <p className=" ">สรุปข้อมูลทั้งเดือน</p>
 
-        <Badge variant="secondary">{getDateFormat(firstDay)}</Badge>
+        <Badge variant="secondary" className="text-md">{getDateFormat(firstDay)}</Badge>
         {" - "}
-        <Badge variant="secondary">{getDateFormat(lastDay)}</Badge>
+        <Badge variant="secondary" className="text-md">{getDateFormat(lastDay)}</Badge>
       </div>
 
-      <div className="flex  w-full  justify-between    flex-1 ">
+      <div className="flex  w-full  justify-between    flex-1 mt-4 ">
         <div className=" lg:border-gray-900/5 lg:border-t-0 lg:mb-0 z-20 flex-1">
           <dt className="text font-medium leading-6 flex space-x-1 text-slate-700 ">
             {/* <CircleDollarSign className='w-5 h-5' strokeWidth={1.5} /> */}
-            <p className="text-xs underline">ยอดขาย</p>
+            <p className=" underline">ยอดขาย</p>
           </dt>
           <dd className="mt-1 w-full flex-none font-medium  text-slate-800 ">
             {getPriceFormat(saleTotal)}
@@ -67,7 +67,7 @@ const AdminStats = ({ saleTotal, orderAmount, saleTotalWithVat }: Props) => {
         <div className="justify-center border-gray-900/5 lg:border-t-0 flex-1 ">
           <dt className="text font-medium leading-6  flex space-x-1 text-slate-800">
             {/* <CircleDollarSign className='w-5 h-5 ' strokeWidth={1.5} /> */}
-            <p className="text-xs underline">ยอดสั่งซื้อ</p>
+            <p className=" underline">ยอดสั่งซื้อ</p>
           </dt>
           <dd className="mt-1 w-full flex-none font-medium text-slate-800 ">
             {getPriceFormat(orderAmount)}

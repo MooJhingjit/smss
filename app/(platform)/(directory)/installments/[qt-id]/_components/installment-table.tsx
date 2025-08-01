@@ -145,8 +145,6 @@ export default function InstallmentTable({
 
       toast.success("สร้างและดาวน์โหลดใบวางบิลสำเร็จ");
       
-      // // Revalidate the current page to reflect updated installment status
-      // await revalidateInstallmentsPage(quotationId);
       router.refresh();
     } catch (error) {
       console.error("Error generating bill:", error);
@@ -321,7 +319,7 @@ export default function InstallmentTable({
                                     )
                                   }
                                   disabled={
-                                    !!field.billGroupId
+                                    !!initialInstallments[index]?.billGroupId
                                   }
                                 />
                               </FormControl>
@@ -344,7 +342,7 @@ export default function InstallmentTable({
                                     className="w-auto"
                                     {...formField}
                                     disabled={
-                                      !!field.billGroupId
+                                      !!initialInstallments[index]?.billGroupId
                                     }
                                   />
                                 </FormControl>
@@ -363,7 +361,7 @@ export default function InstallmentTable({
                               );
                             }}
                             warningMessage={
-                              !field.billGroupId
+                              !initialInstallments[index]?.billGroupId
                                 ? [`สร้างใบวางบิลสำหรับงวดที่ ${field.period}`]
                                 : [`พิมพ์ใบวางบิลงวดที่ ${field.period}`]
                             }
@@ -391,7 +389,7 @@ export default function InstallmentTable({
 
                       {quotationType === "service" && (
                         <TableCell className="text-center">
-                          {field.billGroupId ? (
+                          {initialInstallments[index]?.billGroupId ? (
                             <ReceiptPrintCell
                               field={field}
                               index={index}
@@ -513,7 +511,7 @@ const InstallmentStatusCell = ({
   initialInstallment: QuotationInstallmentWithRelations;
 }) => {
   const paid = initialInstallment.status === "paid";
-  const noInvoice = !field.billGroupId;
+  const noInvoice = !initialInstallment.billGroupId;
   if (paid) {
     return (
       <TableCell className="text-center">
@@ -521,7 +519,7 @@ const InstallmentStatusCell = ({
           <CheckIcon className="h-4 w-4 text-green-600" />
           <span className="text-green-600 ">ชำระแล้ว</span>
         </div>
-        {/* <InstallmentStatusBadge status="paid" hasBillGroupId={!!field.billGroupId} /> */}
+        {/* <InstallmentStatusBadge status="paid" hasBillGroupId={!!initialInstallments[index]?.billGroupId} /> */}
       </TableCell>
     );
   }
@@ -564,7 +562,7 @@ const InstallmentStatusCell = ({
 
         <InstallmentStatusBadge
           status={form.watch(`installments.${index}.status`)}
-          hasBillGroupId={!!field.billGroupId}
+          hasBillGroupId={!!initialInstallment.billGroupId}
         />
       </div>
     </TableCell>
