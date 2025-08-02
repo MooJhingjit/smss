@@ -43,7 +43,7 @@ const AdminStats = ({ saleTotal, orderAmount, saleTotalWithVat }: Props) => {
       </div> */}
 
       <div className="flex items-center  space-x-2 ">
-        <p className=" ">สรุปข้อมูลทั้งเดือน</p>
+        <p className=" ">สรุปข้อมูล</p>
 
         <Badge variant="secondary" className="text-md">{getDateFormat(firstDay)}</Badge>
         {" - "}

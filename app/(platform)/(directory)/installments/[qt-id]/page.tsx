@@ -143,15 +143,23 @@ export default async function InstallmentDetailPage(
                   {quotationTypeMapping[quotation?.type]}
                 </Badge>
               </div>
-              <div>
+              {/* <div>
                 <p className="text-sm font-medium text-gray-500">
                   เงื่อนไขการชำระ
                 </p>
                 <p>{quotation.paymentCondition || "-"} วัน</p>
+              </div> */}
+              <div>
+                <p className="text-sm font-medium text-gray-500">
+                  ยอดรวม
+                </p>
+                <p className="font-semibold">
+                  {formatCurrency(quotation.totalPrice || 0)}
+                </p>
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-500">
-                  ยอดรวมทั้งสิ้น
+                  ยอดรวม (+VAT)
                 </p>
                 <p className="font-semibold">
                   {formatCurrency(quotation.grandTotal || 0)}

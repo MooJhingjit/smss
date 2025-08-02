@@ -137,7 +137,7 @@ export default function InstallmentTable({
       const a = document.createElement("a");
       a.style.display = "none";
       a.href = url;
-      a.download = `installment-invoice-${installmentId}.pdf`;
+      a.download = `invoice-${installmentId}.pdf`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -182,7 +182,7 @@ export default function InstallmentTable({
       const a = document.createElement("a");
       a.style.display = "none";
       a.href = url;
-      a.download = `installment-receipt-${installmentId}.pdf`;
+      a.download = `receipt-${installmentId}.pdf`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -329,7 +329,7 @@ export default function InstallmentTable({
                         />
                       </TableCell>
 
-                      <TableCell className="text-center">
+                      <TableCell className="text-center py-2">
                         <div className="flex items-center justify-center space-x-2">
                           <FormField
                             control={form.control}
