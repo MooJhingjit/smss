@@ -9,6 +9,10 @@ export interface MonthlyStatsData {
     withVAT: number;
     withoutVAT: number;
   };
+  installment: {
+    withVAT: number;
+    withoutVAT: number;
+  };
   purchaseOrder?: number;
 }
 
@@ -101,6 +105,27 @@ export const getMonthlyStats = async (
         },
       });
 
+      // Installment transactions
+      const installmentWithVAT = await db.quotation.aggregate({
+        _sum: {
+          grandTotal: true,
+        },
+        where: {
+          ...quotationWhere,
+          status: "installment",
+        },
+      });
+
+      const installmentWithoutVAT = await db.quotation.aggregate({
+        _sum: {
+          totalPrice: true,
+        },
+        where: {
+          ...quotationWhere,
+          status: "installment",
+        },
+      });
+
       // Purchase Order data (only if includePurchaseOrders is true)
       let purchaseOrder = 0;
       if (includePurchaseOrders) {
@@ -135,6 +160,10 @@ export const getMonthlyStats = async (
         unpaid: {
           withVAT: Number(unpaidWithVAT._sum.grandTotal) || 0,
           withoutVAT: Number(unpaidWithoutVAT._sum.totalPrice) || 0,
+        },
+        installment: {
+          withVAT: Number(installmentWithVAT._sum.grandTotal) || 0,
+          withoutVAT: Number(installmentWithoutVAT._sum.totalPrice) || 0,
         },
       };
 

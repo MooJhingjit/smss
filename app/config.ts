@@ -50,6 +50,10 @@ export const quotationStatusMapping = {
     label: "Archived",
     progress: 0,
   },
+  installment: {
+    label: "อยู่ระหว่างการผ่อนชำระ",
+    progress: 90,
+  },
 };
 
 export const paymentTypeMapping = {

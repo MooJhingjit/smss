@@ -130,6 +130,7 @@ enum QuotationStatus {
   delivered
   paid
   archived
+  installment
 }
 
 model Quotation {

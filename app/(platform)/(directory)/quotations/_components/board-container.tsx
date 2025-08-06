@@ -375,6 +375,16 @@ export default function BoardContainer(props: Props) {
                   isCollapsed={collapsedColumns.has(QuotationStatus.delivered)}
                   onToggleCollapse={() => toggleColumnCollapse(QuotationStatus.delivered)}
                 />
+
+                 <BoardColumn
+                  color="yellow"
+                  items={getItemsForColumn(QuotationStatus.installment, queries[11].data ?? [])}
+                  columnKey={QuotationStatus.installment}
+                  label={quotationStatusMapping[QuotationStatus.installment].label}
+                  progress={quotationStatusMapping[QuotationStatus.installment].progress}
+                  isCollapsed={collapsedColumns.has(QuotationStatus.installment)}
+                  onToggleCollapse={() => toggleColumnCollapse(QuotationStatus.installment)}
+                />
                 <BoardColumn
                   color="green"
                   items={getItemsForColumn(QuotationStatus.paid, queries[9].data ?? [])}
