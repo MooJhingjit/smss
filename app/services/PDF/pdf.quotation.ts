@@ -705,6 +705,7 @@ const drawPriceInfo = (
     y: 159, // updated y position
     maxWidth: 100,
     ...config,
+    color: rgb(255, 165, 0)    ,
   });
 
   page.drawText(total, {
