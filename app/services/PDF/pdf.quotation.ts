@@ -780,7 +780,7 @@ const drawSignature = (page: PDFPage, signatureData: SignatureData) => {
     // });
 
     // Approver date
-    const approvedDate = _DATA?.approvedAt ? PDFDateFormat(new Date(_DATA.approvedAt)) : ""
+    const approvedDate = _DATA?.approvedAt ? PDFDateFormat(new Date(_DATA.approvedAt)) : PDFDateFormat(new Date());
     page.drawText(approvedDate, {
       x: 470,
       y: 40,
@@ -877,7 +877,7 @@ const drawStaticInfo = (page: PDFPage, currentPageNumber: number) => {
   if (!_DATA) return;
   drawHeaderInfo(page, currentPageNumber, {
     code: _DATA.code,
-    date: _DATA.approvedAt ? PDFDateFormat(new Date(_DATA.approvedAt)) : "",
+    date: _DATA.approvedAt ? PDFDateFormat(new Date(_DATA.approvedAt)) : PDFDateFormat(new Date()), // use approvedAt if available, otherwise use current date
   });
   drawCustomerInfo(page, {
     ..._DATA.contact,
