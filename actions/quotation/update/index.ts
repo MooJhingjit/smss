@@ -46,6 +46,7 @@ const handlerServiceQuotationSummary = async (data: ServiceQuotationInputType): 
         tax,
         grandTotal,
         isLocked: true,
+        approvedAt: new Date(),
       },
     });
 

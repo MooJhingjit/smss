@@ -105,6 +105,7 @@ export async function POST(req: NextRequest) {
         discount: quotationSummary.discount,
         tax: quotationSummary.vat,
         grandTotal: quotationSummary.grandTotal,
+        approvedAt: today,
       },
     });
 
