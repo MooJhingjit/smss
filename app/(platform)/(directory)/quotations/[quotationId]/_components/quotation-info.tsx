@@ -313,7 +313,7 @@ const BillController = ({
               >
                 <Badge variant="outline" className="underline border-none text-md">
                   ชำระแล้ว {lastPayment?.period ?? 0} งวด, คงเหลือ{" "}
-                  {currentQuotation.outstandingGrandTotal?.toLocaleString() ??
+                  {currentQuotation.outstandingBalance?.toLocaleString() ??
                     0}{" "}
                   บาท
                   <ExternalLink size={12} className="ml-1" />

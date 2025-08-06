@@ -2,7 +2,10 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Breadcrumbs from "@/components/breadcrumbs";
-import { QuotationWithRelations, QuotationInstallmentWithRelations } from "@/types";
+import {
+  QuotationWithRelations,
+  QuotationInstallmentWithRelations,
+} from "@/types";
 import { db } from "@/lib/db";
 import { useUser } from "@/hooks/use-user";
 import DataNotfound from "@/components/data-notfound";
@@ -146,6 +149,10 @@ export default async function InstallmentDetailPage(
               {/* <div>
                 <p className="text-sm font-medium text-gray-500">
                   เงื่อนไขการชำระ
+              <div>
+                <p className="text-sm font-medium text-gray-500">ยอดรวม</p>
+                <p className="font-semibold">
+                  {formatCurrency(quotation.totalPrice || 0)}
                 </p>
                 <p>{quotation.paymentCondition || "-"} วัน</p>
               </div> */}

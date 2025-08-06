@@ -24,10 +24,10 @@ export default function PaymentSummary({ installments }: PaymentSummaryProps) {
     }).format(amount);
   };
 
-  const totalInstallmentAmount = installments.reduce((sum, item) => sum + item.amountWithVat, 0);
+  const totalInstallmentAmount = installments.reduce((sum, item) => sum + item.amount, 0);
   const paidAmount = installments
     .filter((item) => item.status === "paid")
-    .reduce((sum, item) => sum + item.amountWithVat, 0);
+    .reduce((sum, item) => sum + item.amount, 0);
   const remainingAmount = totalInstallmentAmount - paidAmount;
   const paymentPercentage = totalInstallmentAmount > 0 
     ? Math.round((paidAmount / totalInstallmentAmount) * 100) 

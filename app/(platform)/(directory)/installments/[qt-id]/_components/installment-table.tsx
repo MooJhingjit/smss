@@ -38,7 +38,7 @@ const FormSchema = z.object({
     z.object({
       id: z.number(),
       period: z.string(),
-      amountWithVat: z.number().min(0, "จำนวนเงินต้องมากกว่า 0"),
+      amount: z.number().min(0, "จำนวนเงินต้องมากกว่า 0"),
       dueDate: z.string(),
       status: z.enum(["draft", "pending", "paid", "overdue"]),
       paidDate: z.date().nullable().optional(),
@@ -74,7 +74,7 @@ export default function InstallmentTable({
       installments: initialInstallments.map((installment) => ({
         id: installment.id,
         period: installment.period,
-        amountWithVat: installment.amountWithVat,
+        amount: installment.amount,
         dueDate: new Date(installment.dueDate).toISOString().split("T")[0],
         status: installment.status,
         paidDate: installment.paidDate,
@@ -218,7 +218,7 @@ export default function InstallmentTable({
         return (
           original &&
           (original.status !== current.status ||
-            original.amountWithVat !== current.amountWithVat ||
+            original.amount !== current.amount ||
             new Date(original.dueDate).toISOString().split("T")[0] !==
               current.dueDate)
         );
@@ -226,7 +226,7 @@ export default function InstallmentTable({
       .map((installment) => ({
         id: installment.id,
         status: installment.status,
-        amountWithVat: installment.amountWithVat,
+        amount: installment.amount,
         dueDate: new Date(installment.dueDate),
         paidDate:
           installment.status === "paid"
@@ -248,9 +248,9 @@ export default function InstallmentTable({
   // Calculate totals for warning
   const currentTotal = form
     .watch("installments")
-    .reduce((sum, item) => sum + item.amountWithVat, 0);
+    .reduce((sum, item) => sum + item.amount, 0);
   const originalTotal = initialInstallments.reduce(
-    (sum, item) => sum + item.amountWithVat,
+    (sum, item) => sum + item.amount,
     0
   );
   const totalDifference = currentTotal - originalTotal;
@@ -304,7 +304,7 @@ export default function InstallmentTable({
                       <TableCell className="text-right">
                         <FormField
                           control={form.control}
-                          name={`installments.${index}.amountWithVat`}
+                          name={`installments.${index}.amount`}
                           render={({ field: formField }) => (
                             <FormItem>
                               <FormControl>
@@ -458,7 +458,7 @@ export default function InstallmentTable({
                     installments: initialInstallments.map((installment) => ({
                       id: installment.id,
                       period: installment.period,
-                      amountWithVat: installment.amountWithVat,
+                      amount: installment.amount,
                       dueDate: new Date(installment.dueDate)
                         .toISOString()
                         .split("T")[0],

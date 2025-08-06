@@ -52,10 +52,10 @@ const handler = async (data: InputType): Promise<ReturnType> => {
           paidDate: update.status === "paid" ? (update.paidDate || new Date()) : null,
         };
 
-        // If amountWithVat is provided, update it and recalculate amount (without VAT)
-        if (update.amountWithVat !== undefined) {
-          updateData.amountWithVat = update.amountWithVat;
-          updateData.amount = update.amountWithVat / 1.07; // Calculate amount without VAT
+        // If amount is provided, update it and recalculate amountWithVat (with VAT)
+        if (update.amount !== undefined) {
+          updateData.amount = update.amount;
+          updateData.amountWithVat = update.amount * 1.07; // Calculate amount with VAT
         }
 
         // If dueDate is provided, update it

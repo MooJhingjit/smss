@@ -5,7 +5,7 @@ export const schema = z.object({
   installmentUpdates: z.array(z.object({
     id: z.number(),
     status: z.enum(["draft", "pending", "paid", "overdue"]),
-    amountWithVat: z.number().optional(),
+    amount: z.number().optional(),
     dueDate: z.date().optional(),
     paidDate: z.date().optional().nullable(),
   })),
