@@ -41,9 +41,9 @@ export async function PUT(
     }
 
     // if status is offer, set approvedAt to now
-    if (data.status === QuotationStatus.offer) {
-      data.approvedAt = new Date();
-    }
+    // if (data.status === QuotationStatus.offer) {
+    //   data.approvedAt = new Date();
+    // }
 
 
     const quotation = await db.quotation.update({
