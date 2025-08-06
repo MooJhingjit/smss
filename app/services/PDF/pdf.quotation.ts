@@ -705,7 +705,7 @@ const drawPriceInfo = (
     y: 159, // updated y position
     maxWidth: 100,
     ...config,
-    color: rgb(255 / 255, 165 / 255, 0 / 255),
+    color: discount !== "0.00" ? rgb(1, 0.549, 0) : rgb(0, 0, 0), // orange color for discount if not zero
   });
 
   page.drawText(total, {
