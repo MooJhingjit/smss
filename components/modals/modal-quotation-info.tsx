@@ -413,7 +413,7 @@ const MainForm = (props: {
           )} */}
         <ItemList label="พิมพ์ใบเสนอราคา">
           <div className="flex space-x-3 items-center">
-            <PrintQuotation quotationId={quotationId} hasList={hasList} />
+            <PrintQuotation quotationId={quotationId} hasList={hasList} defaultDate={data.approvedAt ?? new Date()} />
           </div>
         </ItemList>
         {isAdmin && (
@@ -745,9 +745,11 @@ const ReceiptInvoice = ({
 const PrintQuotation = ({
   quotationId,
   hasList,
+  defaultDate = new Date(),
 }: {
   quotationId: number;
   hasList: boolean;
+  defaultDate?: Date;
 }) => {
   const onPrintClick = (date: Date) => {
     try {
@@ -800,7 +802,7 @@ const PrintQuotation = ({
         name="date"
         type="date"
         placeholder="วันที่"
-        defaultValue={new Date().toISOString().split("T")[0]}
+        defaultValue={defaultDate.toISOString().split("T")[0]}
       />
       <Button size={"sm"} variant={"secondary"} type="submit">
         <PrinterIcon className="w-4 h-4" />

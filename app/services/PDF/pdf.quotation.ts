@@ -754,6 +754,7 @@ const drawSignature = (page: PDFPage, signatureData: SignatureData) => {
   
   // check qt status, if not open or pending_approval then do not draw signature
   const isShowApproverSignature = !["open", "pending_approval"].includes(_DATA?.status ?? "");
+  const approvedDate = _DATA?.approvedAt ? PDFDateFormat(new Date(_DATA.approvedAt)) : _BILL_DATE
 
   if (isShowApproverSignature) {
 
@@ -781,7 +782,7 @@ const drawSignature = (page: PDFPage, signatureData: SignatureData) => {
     // });
 
     // Approver date
-    const approvedDate = _DATA?.approvedAt ? PDFDateFormat(new Date(_DATA.approvedAt)) : PDFDateFormat(new Date());
+    // const approvedDate = _DATA?.approvedAt ? PDFDateFormat(new Date(_DATA.approvedAt)) : _BILL_DATE
     page.drawText(approvedDate, {
       x: 470,
       y: 40,
@@ -818,7 +819,7 @@ const drawSignature = (page: PDFPage, signatureData: SignatureData) => {
     // });
 
     // Seller date
-    page.drawText(_BILL_DATE, {
+    page.drawText(approvedDate, {
       x: 280,
       y: 40,
       ...config,
@@ -878,7 +879,7 @@ const drawStaticInfo = (page: PDFPage, currentPageNumber: number) => {
   if (!_DATA) return;
   drawHeaderInfo(page, currentPageNumber, {
     code: _DATA.code,
-    date: _DATA.approvedAt ? PDFDateFormat(new Date(_DATA.approvedAt)) : PDFDateFormat(new Date()), // use approvedAt if available, otherwise use current date
+    date: _BILL_DATE, // _DATA.approvedAt ? PDFDateFormat(new Date(_DATA.approvedAt)) : PDFDateFormat(new Date()),
   });
   drawCustomerInfo(page, {
     ..._DATA.contact,
