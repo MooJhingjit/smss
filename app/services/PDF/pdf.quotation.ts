@@ -43,7 +43,6 @@ type QuotationWithRelations = Quotation & {
 const getQuotation = async (
   id: number
 ): Promise<QuotationWithRelations | null> => {
-
   const quotation = await db.quotation.findUnique({
     include: {
       lists: {
@@ -266,7 +265,7 @@ const generate = async (id: number) => {
     lineStart: number
   ) => {
     const endUserRegex = /End user|หมายเหตุ/gi;
-    
+
     if (endUserRegex.test(description)) {
       // Apply red color to the entire line if "End user" is detected
       currentPage.drawText(description, {
@@ -336,10 +335,10 @@ const generate = async (id: number) => {
   page.drawPage(templatePage);
 
   // Load signature images once at the beginning - this is more efficient
-  const APPROVER_ID = 2
+  const APPROVER_ID = 2;
   const approver = await db.user.findFirst({
     where: {
-      id: APPROVER_ID
+      id: APPROVER_ID,
     },
   });
 
@@ -351,7 +350,7 @@ const generate = async (id: number) => {
   // Load seller signature if available
   const sellerId = _DATA.seller?.id;
   let sellerSignatureImage = null;
-  let sellerSignature = null
+  let sellerSignature = null;
   if (sellerId) {
     sellerSignature = await loadSignatureImage(sellerId.toString());
     sellerSignatureImage = await pdfDoc.embedPng(
@@ -371,12 +370,10 @@ const generate = async (id: number) => {
     sellerName: _DATA.seller?.name ?? "",
     sellerSignatureImage,
     sellerPhone: _DATA.seller?.phone ?? "",
-    sellerSignatureImageScale: sellerSignature
-      ? sellerSignature.scale
-      : null,
+    sellerSignatureImageScale: sellerSignature ? sellerSignature.scale : null,
   };
 
-  // check qt status, if not open or pending_approval 
+  // check qt status, if not open or pending_approval
 
   // Draw signatures on the first page
   drawSignature(page, signatureData);
@@ -399,7 +396,11 @@ const generate = async (id: number) => {
         lineStart,
         ITEM_Y_Start,
         (currentPage: PDFPage, currentLineStart: number) =>
-          writeGroupName(currentPage, list.groupName as string, currentLineStart),
+          writeGroupName(
+            currentPage,
+            list.groupName as string,
+            currentLineStart
+          ),
         pageNumberRef,
         signatureData
       );
@@ -415,19 +416,18 @@ const generate = async (id: number) => {
       ITEM_Y_Start,
       (currentPage: PDFPage, currentLineStart: number) =>
         writeMainItem(currentPage, index, list, currentLineStart),
-        pageNumberRef,
-        signatureData
+      pageNumberRef,
+      signatureData
     );
     lineStart = mainItemRes.lineStart;
     page = mainItemRes.page;
 
     if (list.description) {
-
       const descriptionLines = list.description.split("\n");
 
       descriptionLines.forEach((descriptionLine, idx) => {
-
-        const text = typeof descriptionLine === "string" ? descriptionLine : " ";
+        const text =
+          typeof descriptionLine === "string" ? descriptionLine : " ";
 
         const mainDescriptionRes = validatePageArea(
           page,
@@ -436,11 +436,7 @@ const generate = async (id: number) => {
           lineStart,
           ITEM_Y_Start,
           (currentPage: PDFPage, currentLineStart: number) =>
-            writeMainDescription(
-              currentPage,
-              text || " ",
-              currentLineStart
-            ),
+            writeMainDescription(currentPage, text || " ", currentLineStart),
           pageNumberRef,
           signatureData
         );
@@ -448,7 +444,6 @@ const generate = async (id: number) => {
         lineStart = mainDescriptionRes.lineStart;
         page = mainDescriptionRes.page;
       });
-
     }
 
     // write subItems
@@ -475,7 +470,6 @@ const generate = async (id: number) => {
     }
   });
 
-
   // show price on the last page
   const currencyFormat = {
     minimumFractionDigits: 2,
@@ -483,9 +477,7 @@ const generate = async (id: number) => {
   };
   // total = sub total - discount
 
-  const total = _DATA.totalPrice
-    ? _DATA.totalPrice - (_DATA.discount ?? 0)
-    : 0;
+  const total = _DATA.totalPrice ? _DATA.totalPrice - (_DATA.discount ?? 0) : 0;
   drawPriceInfo(page, {
     discount: _DATA.discount?.toLocaleString("th-TH", currencyFormat) ?? "",
     tax: _DATA.tax?.toLocaleString("th-TH", currencyFormat) ?? "",
@@ -745,32 +737,35 @@ type SignatureData = {
 const drawSignature = (page: PDFPage, signatureData: SignatureData) => {
   if (!_FONT) return;
 
-
   const config = {
     font: _FONT,
     size: PAGE_FONT_SIZE - 1,
     lineHeight: 14,
   };
-  
+
   // check qt status, if not open or pending_approval then do not draw signature
-  const isShowApproverSignature = !["open", "pending_approval"].includes(_DATA?.status ?? "");
-  const approvedDate = _DATA?.approvedAt ? PDFDateFormat(new Date(_DATA.approvedAt)) : _BILL_DATE
+  const isShowApproverSignature = !["open", "pending_approval"].includes(
+    _DATA?.status ?? ""
+  );
 
   if (isShowApproverSignature) {
-
     // Draw approver name
-    page.drawText(signatureData.approverName + " " + signatureData.approverPhone, {
-      x: 450,
-      y: 74,
-      ...config,
-      
-    });
+    page.drawText(
+      signatureData.approverName + " " + signatureData.approverPhone,
+      {
+        x: 450,
+        y: 74,
+        ...config,
+      }
+    );
 
     // Draw approver signature
     page.drawImage(signatureData.approverSignatureImage, {
       x: 460,
       y: 53,
-      ...signatureData.approverSignatureImage.scale(signatureData.approverSignatureImageScale),
+      ...signatureData.approverSignatureImage.scale(
+        signatureData.approverSignatureImageScale
+      ),
     });
 
     // Approver phone
@@ -778,37 +773,36 @@ const drawSignature = (page: PDFPage, signatureData: SignatureData) => {
     //   x: 460,
     //   y: 63,
     //   ...config,
-      
+
     // });
 
     // Approver date
-    // const approvedDate = _DATA?.approvedAt ? PDFDateFormat(new Date(_DATA.approvedAt)) : _BILL_DATE
+    const approvedDate = _DATA?.approvedAt
+      ? PDFDateFormat(new Date(_DATA.approvedAt))
+      : _BILL_DATE;
     page.drawText(approvedDate, {
       x: 470,
       y: 40,
       ...config,
-      size: PAGE_FONT_SIZE -1 , 
+      size: PAGE_FONT_SIZE - 1,
     });
   }
 
-
   // Draw seller signature if available
   if (signatureData.sellerSignatureImage) {
-
-
     // Draw seller name
     page.drawText(signatureData.sellerName + " " + signatureData.sellerPhone, {
       x: 270,
       y: 74,
       ...config,
-      
     });
-
 
     page.drawImage(signatureData.sellerSignatureImage, {
       x: 280,
       y: 53,
-      ...signatureData.sellerSignatureImage.scale(signatureData.sellerSignatureImageScale ?? 0),
+      ...signatureData.sellerSignatureImage.scale(
+        signatureData.sellerSignatureImageScale ?? 0
+      ),
     });
 
     // Seller phone
@@ -819,11 +813,14 @@ const drawSignature = (page: PDFPage, signatureData: SignatureData) => {
     // });
 
     // Seller date
-    page.drawText(approvedDate, {
+    const offeredDate = _DATA?.offeredAt
+      ? PDFDateFormat(new Date(_DATA.offeredAt))
+      : _BILL_DATE;
+    page.drawText(offeredDate, {
       x: 280,
       y: 40,
       ...config,
-      size: PAGE_FONT_SIZE - 1 ,
+      size: PAGE_FONT_SIZE - 1,
     });
   }
 };
