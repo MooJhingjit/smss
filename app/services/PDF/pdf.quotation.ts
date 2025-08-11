@@ -254,6 +254,7 @@ const generate = async (id: number) => {
       y: lineStart,
       maxWidth: 300,
       ...config,
+      color: rgb(1, 0.549, 0), 
     });
 
     return config.lineHeight + 5; // Return height used including some spacing
