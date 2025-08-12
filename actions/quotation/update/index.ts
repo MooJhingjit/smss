@@ -4,6 +4,7 @@ import { createSafeAction } from "@/lib/create-safe-action";
 import { InputType, ReturnServiceQuotationType, ReturnType, ServiceQuotationInputType } from "./types";
 import { schema, serviceQuotationSummarySchema } from "./schema";
 import { revalidatePath } from "next/cache";
+import { getCurrentDateTime } from "@/lib/utils";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
   const { id, remark } = data;
@@ -38,6 +39,7 @@ const handlerServiceQuotationSummary = async (data: ServiceQuotationInputType): 
   const { id, totalPrice, discount, tax, grandTotal } = data;
   let quotation;
   try {
+    const today = getCurrentDateTime();
     quotation = await db.quotation.update({
       where: { id },
       data: {
@@ -46,7 +48,7 @@ const handlerServiceQuotationSummary = async (data: ServiceQuotationInputType): 
         tax,
         grandTotal,
         isLocked: true,
-        approvedAt: new Date(),
+        approvedAt: today,
       },
     });
 
