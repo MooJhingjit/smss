@@ -1,6 +1,6 @@
 import Breadcrumbs from "@/components/breadcrumbs";
 import { columns } from "./_components/columns";
-import ContactTable from "./_components/data-table";
+import QuotationTable from "./_components/data-table";
 import { db } from "@/lib/db";
 import { useUser } from "@/hooks/use-user";
 
@@ -22,6 +22,7 @@ async function GetData(): Promise<any[]> {
   const contacts = await db.quotation.findMany({
     include: {
       contact: true,
+      lists: true,  
     },
     where: {
       sellerId: parseInt(info.id),
@@ -41,7 +42,7 @@ export default async function QuotationTablePage() {
   return (
     <>
       <Breadcrumbs pages={pages} />
-      <ContactTable columns={columns} data={data} />
+      <QuotationTable columns={columns} data={data} />
     </>
   );
 }

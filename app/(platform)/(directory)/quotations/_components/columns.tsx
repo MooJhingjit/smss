@@ -1,19 +1,17 @@
 "use client";
 
-import {
-  quotationStatusMapping,
-  quotationTypeMapping,
-} from "@/app/config";
+import { quotationStatusMapping, quotationTypeMapping } from "@/app/config";
 import CodeBadge from "@/components/badges/code-badge";
 import PaymentBadge from "@/components/badges/payment-badge";
 import StatusBadge from "@/components/badges/status-badge";
 import { Button } from "@/components/ui/button";
 import { classNames, getDateFormat, getDateFormat2 } from "@/lib/utils";
+import { QuotationWithRelations } from "@/types";
 import { Contact, Quotation } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
 
-export const columns: ColumnDef<Quotation & { contact?: Contact }>[] = [
+export const columns: ColumnDef<QuotationWithRelations>[] = [
   {
     accessorKey: "code",
     header: "รหัส",
@@ -29,7 +27,7 @@ export const columns: ColumnDef<Quotation & { contact?: Contact }>[] = [
                 row.original.type === "service"
                   ? "bg-green-100 text-green-800"
                   : "bg-blue-100 text-blue-800",
-                "inline-flex items-center rounded-md  px-1 py-1 text-xs font-medium ing-1 ring-inset ring-red-600/10",
+                "inline-flex items-center rounded-md  px-1 py-1 text-xs font-medium ing-1 ring-inset ring-red-600/10"
               )}
             >
               {quotationTypeMapping[row.original.type]}
@@ -44,17 +42,40 @@ export const columns: ColumnDef<Quotation & { contact?: Contact }>[] = [
     accessorKey: "contact.name",
     header: "ลูกค้า",
     cell: ({ row }) => {
-      const { contact } = row.original;
+      const { contact, lists } = row.original;
+      const firstList = lists?.[0];
+
       return (
-        <div>
-          <h3 className="text-sm font-semibold">{contact?.name}</h3>
-          <div className="flex space-x-2">
-            <p className="text-xs text-gray-500">{contact?.email}</p>
-            <p className="text-xs text-gray-500">{contact?.phone}</p>
+        <div className="space-y-1">
+          <div>
+            <h3 className="text-sm font-semibold">{contact?.name}</h3>
+            <div className="flex space-x-2">
+              <p className="text-xs text-gray-500">{contact?.email}</p>
+              <p className="text-xs text-gray-500">{contact?.phone}</p>
+            </div>
+            {/* <div className="flex space-x-2">
+              <p className="text-xs text-gray-500">{contact?.address}</p>
+            </div> */}
           </div>
-          <div className="flex space-x-2">
-            <p className="text-xs text-gray-500">{contact?.address}</p>
-          </div>
+
+          {firstList && (
+            <div className="text-xs text-gray-600 border-dashed p-1 border border-gray-400 ">
+              {firstList.groupName && (
+                <p
+                  className="line-clamp-1 text-orange-400"
+                  title={firstList.groupName}
+                >
+                  {firstList.groupName}
+                </p>
+              )}
+              <p
+                className="text-xs text-gray-500 line-clamp-1"
+                title={firstList.name}
+              >
+                {firstList.name || ""}
+              </p>
+            </div>
+          )}
         </div>
       );
     },
@@ -94,7 +115,9 @@ export const columns: ColumnDef<Quotation & { contact?: Contact }>[] = [
     header: "การชำระเงิน",
     cell: ({ row }) => {
       const { paymentType, paymentDue } = row.original;
-      return <PaymentBadge paymentType={paymentType} paymentDue={paymentDue ?? ""} />;
+      return (
+        <PaymentBadge paymentType={paymentType} paymentDue={paymentDue ?? ""} />
+      );
     },
   },
   {
@@ -118,7 +141,7 @@ export const columns: ColumnDef<Quotation & { contact?: Contact }>[] = [
     header: "วันที่สร้าง",
     cell: ({ row }) => {
       const { id, createdAt } = row.original;
-      console.log("🚀 ~ createdAt:",id, createdAt)
+      console.log("🚀 ~ createdAt:", id, createdAt);
       return <p>{getDateFormat2(createdAt)}</p>;
     },
   },
@@ -128,14 +151,11 @@ export const columns: ColumnDef<Quotation & { contact?: Contact }>[] = [
     cell: ({ row }) => {
       return (
         <Link href={`/quotations/${row.original.id}`} className="">
-          <Button
-            className="text-xs h-8"
-            variant="secondary"
-          >
+          <Button className="text-xs h-8" variant="secondary">
             จัดการ
           </Button>
         </Link>
-      )
+      );
     },
   },
 ];
