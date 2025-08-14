@@ -22,7 +22,11 @@ async function GetData(): Promise<any[]> {
   const contacts = await db.quotation.findMany({
     include: {
       contact: true,
-      lists: true,  
+      lists: {
+        orderBy: {
+          order: "asc",
+        }
+      }
     },
     where: {
       sellerId: parseInt(info.id),

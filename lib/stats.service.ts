@@ -38,7 +38,7 @@ export const getMonthlyStats = async (
 
       // Base where condition for quotations
       const quotationWhere = {
-        createdAt: {
+        approvedAt: {
           gte: startDate,
           lt: endDate,
         },
