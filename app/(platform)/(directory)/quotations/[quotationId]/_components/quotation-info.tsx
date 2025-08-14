@@ -79,6 +79,7 @@ export default function QuotationInfo(props: Readonly<Props>) {
       : "-";
 
       const quotationInvoice = data?.invoices ? data.invoices[0] : null
+      console.log('quotationInvoice', quotationInvoice)
   return (
     <DataInfo
       variant="gray"
@@ -109,7 +110,7 @@ export default function QuotationInfo(props: Readonly<Props>) {
         { label: "อ้างอิงใบสั่งซื้อ", value: data.purchaseOrderRef ?? "" },
         {
           label: "INV (ใบกำกับ/ใบเสร็จ)",
-          value: quotationInvoice
+          value: quotationInvoice?.receiptCode
             ? `${quotationInvoice.receiptCode ?? ""} (${getDateFormat(
                 quotationInvoice.receiptDate ?? ""
               )})`
