@@ -78,6 +78,7 @@ export default function QuotationInfo(props: Readonly<Props>) {
       ? `${data.paymentCondition} วัน`
       : "-";
 
+      const quotationInvoice = data?.invoices ? data.invoices[0] : null
   return (
     <DataInfo
       variant="gray"
@@ -108,9 +109,9 @@ export default function QuotationInfo(props: Readonly<Props>) {
         { label: "อ้างอิงใบสั่งซื้อ", value: data.purchaseOrderRef ?? "" },
         {
           label: "INV (ใบกำกับ/ใบเสร็จ)",
-          value: data.invoice?.receiptDate
-            ? `${data.invoice?.receiptCode ?? ""} (${getDateFormat(
-                data.invoice?.receiptDate ?? ""
+          value: quotationInvoice
+            ? `${quotationInvoice.receiptCode ?? ""} (${getDateFormat(
+                quotationInvoice.receiptDate ?? ""
               )})`
             : "-",
         },
@@ -477,12 +478,13 @@ const BillController = ({
     quotationsGroup.every((qt) => qt.grandTotal) && currentQuotation.grandTotal;
 
   const contactName = currentQuotation.contact?.name ?? "ลูกค้า";
-  const invDate = currentQuotation?.invoice?.date
+  const currentQuotationInvoiceDate = currentQuotation.invoices?.length ? currentQuotation.invoices[0].date : null;
+  const invDate = currentQuotationInvoiceDate
     ? new Intl.DateTimeFormat("th-TH", {
         year: "numeric",
         month: "long",
         day: "numeric",
-      }).format(currentQuotation?.invoice?.date)
+      }).format(currentQuotationInvoiceDate)
     : null;
 
   const allQuotations = [currentQuotation, ...quotationsGroup].sort(
@@ -603,7 +605,7 @@ const BillController = ({
                     <div className="flex items-center gap-2 mt-2">
                       <ReceiptPrint
                         defaultBillDate={
-                          currentQuotation?.invoice?.date ??
+                          currentQuotationInvoiceDate ??
                           defaultInvoiceDate ??
                           undefined
                         }

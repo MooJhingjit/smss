@@ -34,7 +34,7 @@ export type QuotationWithRelations = Quotation & {
   seller?: User;
   purchaseOrders?: PurchaseOrder[];
   lists?: QuotationList[];
-  invoice?: Invoice;
+  invoices?: Invoice[];
   billGroup?: BillGroup;
   installments?: QuotationInstallment[];
 };

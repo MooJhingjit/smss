@@ -604,6 +604,7 @@ const BoardCard = ({
 }) => {
 
   const firstList = item.lists?.[0];
+  const quotationInvoice = item.invoices?.length ? item.invoices[0] : null;
   return (
     <Draggable draggableId={idx.toString()} index={item.id}>
       {(provided) => (
@@ -708,7 +709,7 @@ const BoardCard = ({
               )}
             </div>
           </div>
-          {item.invoice?.code && (
+          {quotationInvoice?.code && (
             <div className=" flex  items-center gap-1 px-2 py-1 text-orange-700 justify-between">
               <div className="flex space-x-1">
                 <ReceiptIcon className="size-3.5 " />
@@ -716,14 +717,14 @@ const BoardCard = ({
               </div>
               <p
                 className="text-xs"
-                title={getDateFormat(item.invoice?.date ?? "")}
+                title={getDateFormat(quotationInvoice?.date ?? "")}
               >
                 {" "}
-                {item.invoice?.code}
+                {quotationInvoice?.code}
               </p>
             </div>
           )}
-          {item.invoice?.receiptCode && (
+          {quotationInvoice?.receiptCode && (
             <div className=" flex  items-center gap-1 px-2 py-1 text-green-700 justify-between">
               <div className="flex space-x-1">
                 <ClipboardCheckIcon className="size-3.5 " />
@@ -731,10 +732,10 @@ const BoardCard = ({
               </div>
               <p
                 className="text-xs"
-                title={getDateFormat(item.invoice?.receiptDate ?? "")}
+                title={getDateFormat(quotationInvoice?.receiptDate ?? "")}
               >
                 {" "}
-                {item.invoice?.receiptCode}
+                {quotationInvoice?.receiptCode}
               </p>
             </div>
           )}

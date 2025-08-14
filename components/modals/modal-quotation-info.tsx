@@ -281,6 +281,9 @@ const MainForm = (props: {
     [handleItemChange]
   );
 
+  const quotationInvoice = data?.invoices ? data.invoices[0] : null
+
+
   return (
     <div className="space-y-2">
       <div className="grid grid-cols-12   gap-6 ">
@@ -454,17 +457,17 @@ const MainForm = (props: {
               <ItemList
                 label="ออกใบกำกับภาษี"
                 successInfo={
-                  data.invoice?.receiptCode
-                    ? "ออกใบกำกับภาษีแล้ว " + data.invoice.receiptCode
+                  quotationInvoice?.receiptCode
+                    ? "ออกใบกำกับภาษีแล้ว " + quotationInvoice.receiptCode
                     : undefined
                 }
                 info={
-                  !data.invoice?.receiptCode
+                  !quotationInvoice?.receiptCode
                     ? "ออกครั้งถัดไป เลข INV จะไม่เปลี่ยน"
                     : undefined
                 }
               >
-                {data.invoice ? (
+                {quotationInvoice ? (
                   <div className="flex space-x-3 items-center">
                     <ReceiptInvoice hasList={hasList} quotation={data} />
                   </div>
@@ -653,12 +656,12 @@ const ReceiptInvoice = ({
   hasList: boolean;
   quotation: QuotationWithRelations;
 }) => {
-  const { invoice } = quotation;
+  const { invoices } = quotation;
 
-  const alreadyHasInvoice = !!invoice?.receiptDate;
+  const quotationInvoice = invoices ? invoices[0] : null;
 
-  const firstInvoiceDate = invoice?.receiptDate
-    ? new Date(invoice.receiptDate)
+  const firstInvoiceDate = quotationInvoice?.receiptDate
+    ? new Date(quotationInvoice.receiptDate)
     : new Date();
 
   const [isDone, setIsDone] = React.useState(false);
@@ -942,7 +945,7 @@ const DeleteComponent = ({
   };
 
   return (
-    <ConfirmActionButton 
+    <ConfirmActionButton
       onConfirm={handleDelete}
       disabled={isPending}
       warningMessage={[
