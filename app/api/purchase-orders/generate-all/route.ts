@@ -1,10 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { db } from "@/lib/db";
-import {
-  generateCode,
-  getCurrentDateTime,
-  parseSequenceNumber,
-} from "@/lib/utils";
+import { getCurrentDateTime } from "@/lib/utils";
+import { getNextPurchaseOrderSequence, generateCode } from "@/lib/generate-code.service";
 import {
   groupQuotationByVendor,
   calculateQuotationItemPrice,
@@ -36,23 +33,8 @@ export async function POST(req: NextRequest) {
     // const today = new Date();
     const today = getCurrentDateTime();
 
-    // 1) Find the most recently created PO (descending by code)
-    // that starts with prefix + year + month.
-    const year = today.getFullYear();
-    const month = (today.getMonth() + 1).toString().padStart(2, "0");
-    const lastPO = await db.purchaseOrder.findFirst({
-      where: {
-        code: {
-          startsWith: `PO${year}${month}`,
-        },
-      },
-      orderBy: {
-        code: "desc",
-      },
-    });
-
-    // 2) Parse the last 4 digits to figure out the sequence number
-    let nextSequence = parseSequenceNumber(lastPO?.code ?? "");
+    // Get the next sequence number for PO code generation
+    let nextSequence = await getNextPurchaseOrderSequence(today);
 
     // create purchase orders for each vendor
     const purchaseOrders = await Promise.all(
