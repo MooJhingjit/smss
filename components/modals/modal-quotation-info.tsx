@@ -26,6 +26,7 @@ import {
   PenBoxIcon,
   InfoIcon,
   Delete,
+  Copy,
 } from "lucide-react";
 import { PurchaseOrderPaymentType, QuotationStatus } from "@prisma/client";
 import { quotationStatusMapping } from "@/app/config";
@@ -49,6 +50,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useRouter } from "next/navigation";
+import { useCloneQuotationModal } from "@/hooks/use-clone-quotation-modal";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { getCurrentDateTime, updateCodeVersion } from "@/lib/utils";
 import { CheckCircle2Icon } from "lucide-react"
@@ -104,7 +106,7 @@ export const QuotationInfoModal = () => {
               </div>
             </CollapsibleTrigger>
             <CollapsibleContent className="space-y-2">
-              <div className="w-full grid grid-cols-2 gap-3">
+              <div className="w-full grid grid-cols-3 gap-3">
                 <div className="bg-gray-50 p-2 flex items-center justify-center">
                   <DeleteComponent
                     onDeleted={modal.onClose}
@@ -117,6 +119,12 @@ export const QuotationInfoModal = () => {
                     hasPo={!!data?.purchaseOrders?.length}
                     currentVersion={data?.code}
                     quotationId={data?.id}
+                  />
+                </div>
+                <div className="bg-gray-50 p-2 flex items-center justify-center">
+                  <CloneComponent
+                    quotation={data}
+                    onCloned={modal.onClose}
                   />
                 </div>
               </div>
@@ -1019,5 +1027,31 @@ const VersionUpdate = ({
         <span>อัพเดทเวอร์ชั่น (R+1)</span>
       </Button>
     </ConfirmActionButton>
+  );
+};
+
+const CloneComponent = ({
+  quotation,
+  onCloned,
+}: {
+  quotation: QuotationWithRelations;
+  onCloned: () => void;
+}) => {
+  const cloneModal = useCloneQuotationModal();
+
+  const handleClone = () => {
+    cloneModal.onOpen(quotation);
+    onCloned(); // Close the info modal
+  };
+
+  return (
+    <Button
+      variant="link"
+      onClick={handleClone}
+      className="inline-flex items-center px-2 py-1 rounded-md text-xs h-full"
+    >
+      <Copy className="w-4 h-4 mr-1" />
+      คัดลอก QT
+    </Button>
   );
 };

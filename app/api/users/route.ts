@@ -20,7 +20,9 @@ export async function GET(
     if (!search || !role) {
       return new NextResponse("Bad Request", { status: 400 });
     }
-    console.log("role", role);
+
+    // role can be value,value
+    const roles = role.split(",");
 
     const vendors = await db.user.findMany({
       where: {
@@ -37,7 +39,7 @@ export async function GET(
           },
         ],
         role: {
-          equals: role,
+          in: roles as UserRole[],
         },
       },
     });
