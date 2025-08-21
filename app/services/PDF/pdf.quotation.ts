@@ -778,10 +778,10 @@ const drawSignature = (page: PDFPage, signatureData: SignatureData) => {
     // });
 
     // Approver date
-    const approvedDate = _DATA?.approvedAt
-      ? PDFDateFormat(new Date(_DATA.approvedAt))
-      : _BILL_DATE;
-    page.drawText(approvedDate, {
+    // const approvedDate = _DATA?.approvedAt
+    //   ? PDFDateFormat(new Date(_DATA.approvedAt))
+    //   : _BILL_DATE;
+    page.drawText(_BILL_DATE, {
       x: 470,
       y: 40,
       ...config,
@@ -814,10 +814,10 @@ const drawSignature = (page: PDFPage, signatureData: SignatureData) => {
     // });
 
     // Seller date
-    const offeredDate = _DATA?.offeredAt
-      ? PDFDateFormat(new Date(_DATA.offeredAt))
-      : _BILL_DATE;
-    page.drawText(offeredDate, {
+    // const offeredDate = _DATA?.offeredAt
+    //   ? PDFDateFormat(new Date(_DATA.offeredAt))
+    //   : _BILL_DATE;
+    page.drawText(_BILL_DATE, {
       x: 280,
       y: 40,
       ...config,
