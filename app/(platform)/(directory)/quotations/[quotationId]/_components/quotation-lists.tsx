@@ -35,12 +35,8 @@ import {
 } from "@/components/ui/tooltip";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 
-import { AlertCircleIcon, CheckCircle2Icon, PopcornIcon } from "lucide-react"
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/components/ui/alert"
+import { AlertCircleIcon, CheckCircle2Icon, PopcornIcon } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 type Props = {
   quotationId: number;
@@ -171,8 +167,9 @@ export default function QuotationLists(props: Props) {
       render: (item: QuotationListWithRelations) => {
         const percentageSign =
           item.percentage && item.percentage >= 0 ? "+" : "";
-        return `(${percentageSign}${item.percentage
-          }%) ${item.unitPrice?.toLocaleString()}`;
+        return `(${percentageSign}${
+          item.percentage
+        }%) ${item.unitPrice?.toLocaleString()}`;
       },
     },
     // Admin-only columns that will be conditionally included
@@ -184,7 +181,6 @@ export default function QuotationLists(props: Props) {
         return (
           <div className="flex items-center justify-start pl-8 space-x-3">
             <div className="relative flex items-center">
-
               {isDisabled ? (
                 <TooltipProvider>
                   <Tooltip>
@@ -267,9 +263,12 @@ export default function QuotationLists(props: Props) {
   ];
 
   // Filter columns based on admin status
-  const columns = allColumns.filter(column => {
+  const columns = allColumns.filter((column) => {
     // Hide these columns for non-admin users
-    if (!isAdmin && (column.key === "hiddenInPdf" || column.key === "withholdingTaxEnabled")) {
+    if (
+      !isAdmin &&
+      (column.key === "hiddenInPdf" || column.key === "withholdingTaxEnabled")
+    ) {
       return false;
     }
     return true;
@@ -354,7 +353,7 @@ const BillingSummary = (props: {
   const summary = calculateQuotationItemPrice(data);
 
   const { execute, isLoading } = useAction(updateServiceQuotationSummary, {
-    onSuccess: (data) => { },
+    onSuccess: (data) => {},
     onError: (error) => {
       toast.error(error);
     },
@@ -376,6 +375,15 @@ const BillingSummary = (props: {
         </div>
       )}
       <dl className="divide-y divide-gray-200 text-sm">
+        <div className="flex items-center justify-between py-4">
+          <dt className="text-gray-600">Cost</dt>
+          <dd className="font-medium text-gray-900">
+            {summary.totalCost.toLocaleString("th-TH", {
+              style: "currency",
+              currency: "THB",
+            })}
+          </dd>
+        </div>
         <div className="flex items-center justify-between py-4">
           <dt className="text-gray-600">Subtotal</dt>
           <dd className="font-medium text-gray-900">
@@ -416,42 +424,42 @@ const BillingSummary = (props: {
 
       {
         // this qt haven't been confirmed yet (this is only for service quotation)
-        isAdmin && quotationType === "service" && data.length && !grandTotal && (
-
-          <div className="mt-4">
-            <Alert className="">
-              <div className="flex justify-center w-full mt-3 space-x-2">
-                <InfoIcon className="w-5 h-5 text-orange-500 -mt-1" />
-                <AlertTitle>เมื่อยืนยันแล้วจะไม่สามารถแก้ไขยอดรวมได้</AlertTitle>
-              </div>
-              <AlertDescription>
-                <div className="flex justify-center w-full mt-3 ">
-                  <ConfirmActionButton
-                    onConfirm={() => {
-                      execute({
-                        id: data[0].quotationId,
-                        totalPrice: summary.totalPrice,
-                        discount: summary.discount,
-                        tax: summary.vat,
-                        grandTotal: summary.grandTotal,
-                      });
-                    }}
-                  >
-
-                    <Button variant={"default"} >
-                      ยืนยันยอดรวม
-                    </Button>
-                  </ConfirmActionButton>
+        isAdmin &&
+          quotationType === "service" &&
+          data.length &&
+          !grandTotal && (
+            <div className="mt-4">
+              <Alert className="">
+                <div className="flex justify-center w-full mt-3 space-x-2">
+                  <InfoIcon className="w-5 h-5 text-orange-500 -mt-1" />
+                  <AlertTitle>
+                    เมื่อยืนยันแล้วจะไม่สามารถแก้ไขยอดรวมได้
+                  </AlertTitle>
                 </div>
+                <AlertDescription>
+                  <div className="flex justify-center w-full mt-3 ">
+                    <ConfirmActionButton
+                      onConfirm={() => {
+                        execute({
+                          id: data[0].quotationId,
+                          totalPrice: summary.totalPrice,
+                          discount: summary.discount,
+                          tax: summary.vat,
+                          grandTotal: summary.grandTotal,
+                        });
+                      }}
+                    >
+                      <Button variant={"default"}>ยืนยันยอดรวม</Button>
+                    </ConfirmActionButton>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            </div>
 
-              </AlertDescription>
-            </Alert>
-          </div>
+            // <div className="w-full  flex items-center justify-center border mt-3 rounded-md">
 
-          // <div className="w-full  flex items-center justify-center border mt-3 rounded-md">
-
-          // </div>
-        )
+            // </div>
+          )
       }
     </div>
   );
