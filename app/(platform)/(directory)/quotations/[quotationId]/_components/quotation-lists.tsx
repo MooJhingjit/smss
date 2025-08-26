@@ -359,6 +359,12 @@ const BillingSummary = (props: {
     },
   });
 
+  // Calculate profit percentage based on cost
+  // Calculate profit percentage based on cost (percentage gain from cost)
+  const profitPercentage = summary.totalCost
+    ? ((summary.totalPrice - summary.totalCost) / summary.totalCost) * 100
+    : 0;
+
   return (
     <div
       className={cn(" p-4 w-full sm:rounded-lg sm:px-6", {
@@ -390,7 +396,8 @@ const BillingSummary = (props: {
             {summary.totalPrice.toLocaleString("th-TH", {
               style: "currency",
               currency: "THB",
-            })}
+            })}{" "}
+            <span className="text-green-700"> (+{profitPercentage.toFixed(2)}%)</span>
           </dd>
         </div>
         <div className="flex items-center justify-between py-4">
