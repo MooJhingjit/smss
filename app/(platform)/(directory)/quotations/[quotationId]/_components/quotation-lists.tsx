@@ -382,8 +382,8 @@ const BillingSummary = (props: {
       )}
       <dl className="divide-y divide-gray-200 text-sm">
         <div className="flex items-center justify-between py-4">
-          <dt className="text-gray-600">Cost</dt>
-          <dd className="font-medium text-gray-900">
+          <dt className="text-orange-600">Cost</dt>
+          <dd className="font-medium text-orange-600">
             {summary.totalCost.toLocaleString("th-TH", {
               style: "currency",
               currency: "THB",
