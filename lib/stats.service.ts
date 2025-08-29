@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { Prisma, QuotationStatus } from "@prisma/client";
 
 export interface MonthlyStatsData {
   paid: {
@@ -22,6 +23,39 @@ export interface StatsFilters {
   includePurchaseOrders?: boolean;
 }
 
+// Shared: unpaid status set used across stats views
+export const UNPAID_STATUSES: QuotationStatus[] = [
+  "approved",
+  "po_preparing",
+  "po_sent",
+  "product_received",
+  "order_preparing",
+  "delivered",
+];
+
+// Shared: month range helper (UTC boundaries)
+export function getMonthRangeUTC(year: number, month: number) {
+  const startDate = new Date(Date.UTC(year, month, 1));
+  const endDate = new Date(Date.UTC(year, month + 1, 1));
+  return { startDate, endDate };
+}
+
+// Shared: base where for quotations grouped by approvedAt month
+export function getApprovedAtMonthlyWhere(
+  year: number,
+  month: number,
+  sellerId?: number
+): Prisma.QuotationWhereInput {
+  const { startDate, endDate } = getMonthRangeUTC(year, month);
+  const where: Prisma.QuotationWhereInput = {
+    approvedAt: { gte: startDate, lt: endDate },
+  };
+  if (sellerId) {
+    where.sellerId = sellerId;
+  }
+  return where;
+}
+
 export const getMonthlyStats = async (
   filters: StatsFilters = {}
 ): Promise<MonthlyStatsData[]> => {
@@ -33,17 +67,7 @@ export const getMonthlyStats = async (
 
   const monthlyData = await Promise.all(
     Array.from({ length: 12 }).map(async (_, month) => {
-      const startDate = new Date(Date.UTC(year, month, 1));
-      const endDate = new Date(Date.UTC(year, month + 1, 1)); // First day of next month (exclusive)
-
-      // Base where condition for quotations
-      const quotationWhere = {
-        approvedAt: {
-          gte: startDate,
-          lt: endDate,
-        },
-        ...(sellerId && { sellerId }),
-      };
+      const quotationWhere = getApprovedAtMonthlyWhere(year, month, sellerId);
 
       // Paid transactions
       const paidWithVAT = await db.quotation.aggregate({
@@ -71,38 +95,14 @@ export const getMonthlyStats = async (
         _sum: {
           grandTotal: true,
         },
-        where: {
-          ...quotationWhere,
-          status: {
-            in: [
-              "approved",
-              "po_preparing",
-              "po_sent",
-              "product_received",
-              "order_preparing",
-              "delivered",
-            ],
-          },
-        },
+        where: { ...quotationWhere, status: { in: UNPAID_STATUSES } },
       });
 
       const unpaidWithoutVAT = await db.quotation.aggregate({
         _sum: {
           totalPrice: true,
         },
-        where: {
-          ...quotationWhere,
-          status: {
-            in: [
-              "approved",
-              "po_preparing",
-              "po_sent",
-              "product_received",
-              "order_preparing",
-              "delivered",
-            ],
-          },
-        },
+        where: { ...quotationWhere, status: { in: UNPAID_STATUSES } },
       });
 
       // Installment transactions
@@ -129,6 +129,7 @@ export const getMonthlyStats = async (
       // Purchase Order data (only if includePurchaseOrders is true)
       let purchaseOrder = 0;
       if (includePurchaseOrders) {
+        const { startDate, endDate } = getMonthRangeUTC(year, month);
         const purchaseOrderWhere: any = {
           quotation: {
             isNot: null,
