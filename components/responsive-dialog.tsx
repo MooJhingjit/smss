@@ -15,6 +15,7 @@ import {
   DrawerTitle,
   DrawerDescription,
 } from "@/components/ui/drawer";
+import { cn } from "@/lib/utils";
 
 interface ResponsiveDialogProps {
   title: string;
@@ -22,6 +23,7 @@ interface ResponsiveDialogProps {
   children: React.ReactNode;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  classNames?: string;
 };
 
 export const ResponsiveDialog = ({
@@ -30,6 +32,7 @@ export const ResponsiveDialog = ({
   children,
   open,
   onOpenChange,
+  classNames
 }: ResponsiveDialogProps) => {
   const isMobile = useIsMobile();
 
@@ -51,8 +54,8 @@ export const ResponsiveDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader className="bg-muted -mx-6 px-6 -my-6 pb-4 pt-5 mb-0 ">
+      <DialogContent className={classNames}>
+        <DialogHeader className={ "bg-muted -mx-6 px-6 -my-6 pb-4 pt-5 mb-0 min-w-[500px]"}>
           <DialogTitle >{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>

@@ -17,6 +17,7 @@ import { PurchaseInfoModal } from "../modals/modal-purchase-info";
 import { PurchaseOrderSummaryModal } from "../modals/modal-purchase-order-summary";
 import { QuotationContactModal } from "../modals/modal-quotation-contact";
 import { CloneQuotationModal } from "../modals/modal-clone-quotation";
+import { StatsDetailsModal } from "../modals/modal-stats-details";
 
 
 export const ModalProvider = () => {
@@ -45,6 +46,7 @@ export const ModalProvider = () => {
       <NewQuotationModal />
       <NewPurchaseModal />
       <PurchaseOrderListModal />
+  <StatsDetailsModal />
       {/* <PurchaseOrderReceiptModal /> */}
       <PurchaseOrderSummaryModal />
     </>
