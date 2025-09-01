@@ -45,9 +45,10 @@ const getData = async (id: number): Promise<QuotationWithRelations[]> => {
       billGroupId: id,
     },
     orderBy: {
-      invoices: {
-        _count: "desc", // Order by invoices count instead of single invoice code
-      },
+      code: "asc"
+      // invoices: {
+      //   _count: "desc", // Order by invoices count instead of single invoice code
+      // },
     },
   });
 
