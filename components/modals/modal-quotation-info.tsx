@@ -10,7 +10,7 @@ import {
 import { toast } from "sonner";
 import { useQuotationInfoModal } from "@/hooks/use-quotation-info-modal";
 import React, { useRef, useState, useCallback } from "react";
-import { ArrowRightIcon, ChevronsUpDown, ClipboardCheckIcon } from "lucide-react";
+import { ArrowLeftRight, ArrowRightIcon, ChevronsUpDown, ClipboardCheckIcon, User } from "lucide-react";
 
 import {
   Collapsible,
@@ -62,11 +62,13 @@ import {
   AlertTitle,
 } from "@/components/ui/alert"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { useAssignSellerModal } from "@/hooks/use-assign-seller-modal";
 
 export const QuotationInfoModal = () => {
   const modal = useQuotationInfoModal();
   const data = modal.data;
   const [isActionAreaOpen, setIsOpenActionArea] = React.useState(false);
+  const isAdmin = useIsAdmin();
 
   if (!data) {
     return null;
@@ -90,47 +92,59 @@ export const QuotationInfoModal = () => {
           originalData={data}
           hasList={data.lists ? data.lists.length > 0 : false}
         />
-        <DialogFooter className="border-t pt-6">
-          <Collapsible
-            open={isActionAreaOpen}
-            onOpenChange={setIsOpenActionArea}
-            className="w-full space-y-2"
-          >
-            <CollapsibleTrigger asChild>
-              <div className="flex items-center space-x-1 justify-center cursor-pointer">
-                <h4 className="text-sm font-semibold">ดำเนินการเพิ่มเติม</h4>
-                <Button variant="ghost" size="sm" className="w-9 p-0">
-                  <ChevronsUpDown className="h-4 w-4" />
-                  <span className="sr-only">Toggle</span>
-                </Button>
-              </div>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-2">
-              <div className="w-full grid grid-cols-3 gap-3">
-                <div className="bg-gray-50 p-2 flex items-center justify-center">
-                  <DeleteComponent
-                    onDeleted={modal.onClose}
-                    quotationId={data?.id}
-                    hasList={data?.lists ? data.lists.length > 0 : false}
-                  />
-                </div>
-                <div className="bg-gray-50 p-2 flex items-center justify-center">
-                  <VersionUpdate
-                    hasPo={!!data?.purchaseOrders?.length}
-                    currentVersion={data?.code}
-                    quotationId={data?.id}
-                  />
-                </div>
-                <div className="bg-gray-50 p-2 flex items-center justify-center">
-                  <CloneComponent
-                    quotation={data}
-                    onCloned={modal.onClose}
-                  />
-                </div>
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
-        </DialogFooter>
+        {
+          isAdmin && (
+            <DialogFooter className="border-t pt-6">
+              <Collapsible
+                open={isActionAreaOpen}
+                onOpenChange={setIsOpenActionArea}
+                className="w-full space-y-2"
+              >
+                <CollapsibleTrigger asChild>
+                  <div className="flex items-center space-x-1 justify-center cursor-pointer">
+                    <h4 className="text-sm font-semibold">ดำเนินการเพิ่มเติม</h4>
+                    <Button variant="ghost" size="sm" className="w-9 p-0">
+                      <ChevronsUpDown className="h-4 w-4" />
+                      <span className="sr-only">Toggle</span>
+                    </Button>
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-2">
+                  <div className="w-full grid grid-cols-2 gap-3">
+                    <div className="bg-gray-50 p-2 flex items-center justify-center">
+                      <DeleteComponent
+                        onDeleted={modal.onClose}
+                        quotationId={data?.id}
+                        hasList={data?.lists ? data.lists.length > 0 : false}
+                      />
+                    </div>
+                    <div className="bg-gray-50 p-2 flex items-center justify-center">
+                      <VersionUpdate
+                        hasPo={!!data?.purchaseOrders?.length}
+                        currentVersion={data?.code}
+                        quotationId={data?.id}
+                      />
+                    </div>
+                    <div className="bg-gray-50 p-2 flex items-center justify-center">
+                      <CloneComponent
+                        quotation={data}
+                        onCloned={modal.onClose}
+                      />
+                    </div>
+                    <div className="bg-gray-50 p-2 flex items-center justify-center">
+                      <AssignedSeller
+                        quotation={data}
+                        onCloseINfoModal={modal.onClose}
+                      />
+                    </div>
+
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            </DialogFooter>
+          )
+        }
+
       </DialogContent>
     </Dialog>
   );
@@ -1051,7 +1065,31 @@ const CloneComponent = ({
       className="inline-flex items-center px-2 py-1 rounded-md text-xs h-full"
     >
       <Copy className="w-4 h-4 mr-1" />
-      คัดลอก QT
+      คัดลอก
     </Button>
   );
 };
+
+const AssignedSeller = ({
+  quotation,
+  onCloseINfoModal,
+}: {
+  quotation: QuotationWithRelations;
+  onCloseINfoModal: () => void;
+}) => {
+  const assignModal = useAssignSellerModal();
+  return (
+    <Button
+      variant="link"
+      onClick={() => {
+        assignModal.onOpen(quotation);
+        onCloseINfoModal(); // close info modal
+
+      }}
+      className="inline-flex items-center px-2 py-1 rounded-md text-xs h-full"
+    >
+      <ArrowLeftRight className="w-4 h-4 mr-1" />
+      เปลี่ยนผู้ขาย
+    </Button>
+  );
+}

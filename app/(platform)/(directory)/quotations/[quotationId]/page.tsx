@@ -153,9 +153,14 @@ export default async function QuotationDetails(
     <>
       <div className="flex justify-between items-center overflow-x-auto  ">
         <Breadcrumbs pages={pages} />
-        <Badge className="capitalize" variant="secondary">
-          ประเภท: {data && quotationTypeMapping[data?.type]}
-        </Badge>
+        <div className="flex gap-2 items-center">
+          <Badge className="capitalize whitespace-nowrap" variant="secondary">
+            ประเภท: {data && quotationTypeMapping[data?.type]}
+          </Badge>
+          <Badge className="capitalize whitespace-nowrap" variant="secondary">
+            <p>ผู้ขาย: {data && data.seller ? data.seller.name : "ไม่ระบุ"}</p>
+          </Badge>
+        </div>
 
       </div>
       <div className="grid  grid-cols-5 gap-8 mt-6">

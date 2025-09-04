@@ -25,7 +25,8 @@ export async function PUT(
       "type",
       "code",
       "paymentCondition",
-      "createdAt" // updage version
+      "createdAt", // updage version
+      "sellerId" // allow changing assigned seller
     ];
 
     // check if body has any keys that are not in the whitelist

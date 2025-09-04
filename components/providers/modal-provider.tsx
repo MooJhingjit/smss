@@ -18,7 +18,7 @@ import { PurchaseOrderSummaryModal } from "../modals/modal-purchase-order-summar
 import { QuotationContactModal } from "../modals/modal-quotation-contact";
 import { CloneQuotationModal } from "../modals/modal-clone-quotation";
 import { StatsDetailsModal } from "../modals/modal-stats-details";
-
+import { AssignSellerModal } from "../modals/modal-assign-seller";
 
 export const ModalProvider = () => {
   const [isMounted, setIsMounted] = useState(false);
@@ -40,13 +40,14 @@ export const ModalProvider = () => {
       <QuotationInfoModal />
       <QuotationContactModal />
       <CloneQuotationModal />
+      <AssignSellerModal />
       <PurchasePreviewModal />
       <PurchaseInfoModal />
       <NewProductModal />
       <NewQuotationModal />
       <NewPurchaseModal />
       <PurchaseOrderListModal />
-  <StatsDetailsModal />
+      <StatsDetailsModal />
       {/* <PurchaseOrderReceiptModal /> */}
       <PurchaseOrderSummaryModal />
     </>
