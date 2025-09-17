@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { db } from "@/lib/db";
 import { QuotationStatus } from "@prisma/client";
+import { updateAndLog } from "@/lib/log-service";
 
 // PUT /api/quotations/:id
 export async function PUT(
@@ -26,7 +27,7 @@ export async function PUT(
       "code",
       "paymentCondition",
       "createdAt", // updage version
-      "sellerId" // allow changing assigned seller
+      "sellerId", // allow changing assigned seller
     ];
 
     // check if body has any keys that are not in the whitelist
@@ -39,15 +40,16 @@ export async function PUT(
 
     const data: any = {
       ...body,
-    }
+    };
 
     // if status is offer, set approvedAt to now
     if (data.status === QuotationStatus.offer) {
       data.offeredAt = new Date();
     }
 
-
-    const quotation = await db.quotation.update({
+    // const quotation = await db.quotation.update({
+    const quotation = await updateAndLog({
+      model: "quotation",
       where: {
         id: Number(id),
       },
@@ -60,7 +62,7 @@ export async function PUT(
   }
 }
 
-// delete 
+// delete
 export async function DELETE(
   req: NextRequest,
   context: { params: { id: number } }
@@ -119,7 +121,7 @@ export async function DELETE(
               },
             });
           }
-          
+
           // 1b. Delete purchase order item receipts
           // if (poItem.purchaseOrderItemReceipt) {
           //   await tx.purchaseOrderItemReceipt.delete({
@@ -189,7 +191,7 @@ export async function DELETE(
       if (quotation.invoices && quotation.invoices.length > 0) {
         const invoice = quotation.invoices[0]; // Get the first invoice
         const billGroupId = invoice.billGroupId;
-        
+
         // Delete the invoice first
         await tx.invoice.delete({
           where: {
@@ -207,10 +209,12 @@ export async function DELETE(
         });
 
         // If the bill group is empty, delete it
-        if (billGroupUsage && 
-            billGroupUsage.invoices.length === 0 && 
-            billGroupUsage.quotations.length === 1 && // This quotation will be deleted next
-            billGroupUsage.quotations[0].id === quotationId) {
+        if (
+          billGroupUsage &&
+          billGroupUsage.invoices.length === 0 &&
+          billGroupUsage.quotations.length === 1 && // This quotation will be deleted next
+          billGroupUsage.quotations[0].id === quotationId
+        ) {
           await tx.billGroup.delete({
             where: {
               id: billGroupId,
@@ -227,8 +231,8 @@ export async function DELETE(
       });
     });
 
-    return NextResponse.json({ 
-      message: "Quotation and all related data deleted successfully" 
+    return NextResponse.json({
+      message: "Quotation and all related data deleted successfully",
     });
   } catch (error) {
     console.log("error", error);

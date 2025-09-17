@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { getCurrentDateTime } from "@/lib/utils";
 import { generateQuotationCode } from "@/lib/generate-code.service";
 import { QuotationStatus } from "@prisma/client";
+import { updateAndLog } from "@/lib/log-service";
 
 export async function POST(
   request: NextRequest,
@@ -71,7 +72,9 @@ export async function POST(
     );
 
     // Update the quotation with the generated code
-    const updatedQuotation = await db.quotation.update({
+    // const updatedQuotation = await db.quotation.update({
+    const updatedQuotation = await updateAndLog({
+      model: "quotation",
       where: { id: newQuotation.id },
       data: { code },
     });

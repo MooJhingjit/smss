@@ -1,5 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import { db } from "@/lib/db";
+import { updateAndLog } from "@/lib/log-service";
 
 export async function PUT(
   req: NextRequest,
@@ -21,7 +22,8 @@ export async function PUT(
       return new NextResponse("Invalid body", { status: 400 });
     }
 
-    const res = await db.quotationList.update({
+    const res = await updateAndLog({
+      model: "quotationList",
       where: {
         id: Number(id),
       },
