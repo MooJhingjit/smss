@@ -5,6 +5,7 @@ import { InputType, ReturnServiceQuotationType, ReturnType, ServiceQuotationInpu
 import { schema, serviceQuotationSummarySchema } from "./schema";
 import { revalidatePath } from "next/cache";
 import { getCurrentDateTime } from "@/lib/utils";
+import { updateAndLog } from "@/lib/log-service";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
   const { id, remark } = data;
@@ -16,7 +17,8 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       };
     }
 
-    quotation = await db.quotation.update({
+    quotation = await updateAndLog({
+      model: "quotation",
       where: { id },
       data: { remark },
     });
@@ -34,13 +36,13 @@ const handler = async (data: InputType): Promise<ReturnType> => {
 
 export const updateQuotation = createSafeAction(schema, handler);
 
-
 const handlerServiceQuotationSummary = async (data: ServiceQuotationInputType): Promise<ReturnServiceQuotationType> => {
   const { id, totalPrice, discount, tax, grandTotal } = data;
   let quotation;
   try {
     const today = getCurrentDateTime();
-    quotation = await db.quotation.update({
+    quotation = await updateAndLog({
+      model: "quotation",
       where: { id },
       data: {
         totalPrice,
@@ -51,7 +53,6 @@ const handlerServiceQuotationSummary = async (data: ServiceQuotationInputType): 
         approvedAt: today,
       },
     });
-
   } catch (error) {
     console.log("error", error);
     return {

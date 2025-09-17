@@ -5,6 +5,7 @@ import { createSafeAction } from "@/lib/create-safe-action";
 import { InputType, ReturnType } from "./types";
 import { schema } from "./schema";
 import { revalidateTag } from "next/cache";
+import { updateAndLog } from "@/lib/log-service";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
   const { id, overrideContactName, overrideContactEmail, overrideContactPhone } = data;
@@ -12,7 +13,8 @@ const handler = async (data: InputType): Promise<ReturnType> => {
   let quotation;
 
   try {
-    quotation = await db.quotation.update({
+    quotation = await updateAndLog({
+      model: "quotation",
       where: {
         id,
       },
