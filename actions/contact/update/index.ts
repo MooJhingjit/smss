@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { createSafeAction } from "@/lib/create-safe-action";
 import { InputType, ReturnType } from "./types";
 import { ContactSchema } from "./schema";
+import { updateAndLog } from "@/lib/log-service";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
   const { id, taxId, branchId, name, email, phone, contact, fax, address, sellerId } =
@@ -25,7 +26,9 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       sellerId: sellerId ? parseInt(sellerId) : undefined,
     };
 
-    buyer = await db.contact.update({
+    // buyer = await db.contact.update({
+    buyer = await updateAndLog({
+      model: "contact",
       where: {
         id,
       },

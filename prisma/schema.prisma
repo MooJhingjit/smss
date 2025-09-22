@@ -40,6 +40,7 @@ model User {
   purchaseOrders   PurchaseOrder[] @relation("vendor")
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
+  auditLogs        AuditLog[]      // <— inverse relation
 }
 
 model Contact {
@@ -321,7 +322,7 @@ model PurchaseOrderItem {
   purchaseOrderItemReceipt PurchaseOrderItemReceipt? @relation(fields: [receiptId], references: [id])
   items                    Item[]
   createdAt                DateTime                  @default(now())
-  updatedAt                DateTime                  @updatedAt
+  updatedAt                DateTime                  @default(now())
 
   @@index([purchaseOrderId])
 }
@@ -379,6 +380,24 @@ model Invoice {
   @@index([billGroupId])
   @@index([quotationId])
   @@index([quotationInstallmentId])
+}
+
+// NEW: Audit log table
+model AuditLog {
+  id         Int       @id @default(autoincrement())
+  model      String
+  action     String            // create | update | delete | upsert | createMany | updateMany | deleteMany
+  recordId   String?           // primary key (or concatenated) when available
+  userId     Int?
+  user       User?     @relation(fields: [userId], references: [id])
+  diff       Json?             // changed fields only
+  ip         String?
+  userAgent  String?
+  createdAt  DateTime  @default(now())
+
+  @@index([model, recordId])
+  @@index([userId])
+  @@index([createdAt])
 }
 
 // npx prisma db push

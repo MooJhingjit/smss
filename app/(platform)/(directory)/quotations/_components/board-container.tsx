@@ -40,6 +40,16 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { DotsVerticalIcon } from "@radix-ui/react-icons";
+import { useRouter } from "next/navigation";
 
 interface Props { }
 
@@ -54,6 +64,7 @@ type QuotationWithCounts = QuotationWithRelations & {
 export default function BoardContainer(props: Props) {
   const allQuotationStatus = Object.values(QuotationStatus);
   const { onOpen } = useQuotationModal();
+  const router = useRouter();
 
   const [searchParams, setSearchParams] = useState({
     code: "",
@@ -196,6 +207,7 @@ export default function BoardContainer(props: Props) {
 
       invalidateQuotationQueries();
       toast.success("Updated successfully");
+      router.refresh();
     },
   });
 
@@ -376,7 +388,7 @@ export default function BoardContainer(props: Props) {
                   onToggleCollapse={() => toggleColumnCollapse(QuotationStatus.delivered)}
                 />
 
-                 <BoardColumn
+                <BoardColumn
                   color="yellow"
                   items={getItemsForColumn(QuotationStatus.installment, queries[11].data ?? [])}
                   columnKey={QuotationStatus.installment}
@@ -630,9 +642,12 @@ const BoardCard = ({
                   )} */}
                 <span>{item.code}</span>
               </Link>
-              <span className="inline-flex items-center capitalize rounded bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-600">
-                {productTypeMapping[item.type]}
-              </span>
+              <div className="flex items-center">
+                <span className="inline-flex items-center capitalize rounded bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-600">
+                  {productTypeMapping[item.type]}
+                </span>
+                <MoreAction id={item.id} status={item.status} />
+              </div>
             </div>
             {/* <p className=" text-slate-700 capitalize">{item.paymentType}</p> */}
 
@@ -744,3 +759,43 @@ const BoardCard = ({
     </Draggable>
   );
 };
+
+
+const MoreAction = ({ id, status }: { id: number; status: QuotationStatus; }) => {
+  const router = useRouter();
+  const { mutate: archive, isPending: isArchiving } = useMutation<MutationResponseType, Error, void>({
+    mutationFn: async () => {
+      return QT_SERVICES.put(id, { status: QuotationStatus.archived });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        predicate: (query) => query.queryKey.every((key: any) => key.includes('quotationKeys')),
+      });
+      toast.success('Archived');
+      router.refresh();
+    },
+    onError: () => {
+      toast.error('Archive failed');
+    }
+  });
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger disabled={isArchiving}>
+        <DotsVerticalIcon className="w-4 h-4  ml-1 cursor-pointer" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        {status !== QuotationStatus.archived ? (
+          <DropdownMenuItem
+            onSelect={(e) => { e.preventDefault(); archive(); }}
+            disabled={isArchiving}
+          >
+            {isArchiving ? 'Archiving...' : 'Archive'}
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuLabel className="text-xs text-gray-400">Archived</DropdownMenuLabel>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}

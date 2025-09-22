@@ -5,13 +5,16 @@ import { InputType, ReturnType } from "./types";
 import { schema } from "./schema";
 import { revalidatePath } from "next/cache";
 import { updatePurchaseOrderSummary } from "@/app/services/service.purchase-order";
+import { updateAndLog } from "@/lib/log-service";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
   const { id, price, unitPrice, unit, quantity, description } = data;
 
   let purchaseOrderItem;
   try {
-    purchaseOrderItem = await db.purchaseOrderItem.update({
+    // purchaseOrderItem = await db.purchaseOrderItem.update({
+      purchaseOrderItem = await updateAndLog({
+      model: "purchaseOrderItem",
       where: {
         id,
       },

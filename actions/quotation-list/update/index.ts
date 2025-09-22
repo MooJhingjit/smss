@@ -4,6 +4,7 @@ import { createSafeAction } from "@/lib/create-safe-action";
 import { InputType, ReturnType } from "./types";
 import { schema } from "./schema";
 import { revalidatePath } from "next/cache";
+import { updateAndLog } from "@/lib/log-service";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
   const {
@@ -29,7 +30,9 @@ const handler = async (data: InputType): Promise<ReturnType> => {
 
   let quotationList;
   try {
-    quotationList = await db.quotationList.update({
+    // quotationList = await db.quotationList.update({
+    quotationList = await updateAndLog({
+      model: "quotationList",
       where: {
         id,
       },
