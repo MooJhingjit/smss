@@ -21,19 +21,19 @@ export function LogTable({ logs }: LogTableProps) {
       <Table className="w-full">
         <TableHeader>
           <TableRow className="bg-gray-50 hover:bg-gray-50/80">
-            <TableHead className="font-semibold text-gray-700">
+            <TableCell className="whitespace-nowrap pr-4 font-semibold text-gray-700 ">
               Timestamp
-            </TableHead>
-            <TableHead className="font-semibold text-gray-700">User</TableHead>
-            <TableHead className="font-semibold text-gray-700">
+            </TableCell>
+            <TableCell className="whitespace-nowrap pr-4 font-semibold text-gray-700 ">User</TableCell>
+            <TableCell className="whitespace-nowrap pr-4 font-semibold text-gray-700">
               Action
-            </TableHead>
-            <TableHead className="font-semibold text-gray-700">
+            </TableCell>
+            <TableCell className="whitespace-nowrap pr-4 font-semibold text-gray-700">
               Record ID
-            </TableHead>
-            <TableHead className="font-semibold text-gray-700">
+            </TableCell>
+            <TableCell className="whitespace-nowrap pr-4 font-semibold text-gray-700">
               Changes
-            </TableHead>
+            </TableCell>
           </TableRow>
         </TableHeader>
         <TableBody>

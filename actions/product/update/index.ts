@@ -7,12 +7,15 @@ import { db } from "@/lib/db";
 import { createSafeAction } from "@/lib/create-safe-action";
 import { InputType, ReturnType } from "./types";
 import { ProductSchema } from "./schema";
+import { updateAndLog } from "@/lib/log-service";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-  const { id, cost, percentage, description,unit, type, name} = data;
+  const { id, cost, percentage, description, unit, type, name } = data;
   let product;
   try {
-    product = await db.product.update({
+    // product = await db.product.update({
+    product = await updateAndLog({
+      model: "product",
       where: {
         id,
       },
