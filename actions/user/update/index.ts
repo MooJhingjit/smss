@@ -8,6 +8,7 @@ import { createSafeAction } from "@/lib/create-safe-action";
 import { InputType, ReturnType } from "./types";
 import { UserSchema } from "./schema";
 import bcrypt from "bcrypt";
+import { updateAndLog } from "@/lib/log-service";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
   const {
@@ -42,7 +43,9 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     console.log("payload id", id);
     console.log("payload", payload);
 
-    user = await db.user.update({
+    // user = await db.user.update({
+    user = await updateAndLog({
+      model: "user",
       where: {
         id,
       },
