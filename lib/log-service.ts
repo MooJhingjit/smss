@@ -28,30 +28,10 @@ export const updateAndLog = async <T extends ModelName>({ model, where, data }: 
 
     const getDiff = (before: any, after: any) => {
       const diff: any = {};
-      const excludedFields = ["createdAt", "updatedAt"];
-      
-      const isEqual = (val1: any, val2: any) => {
-        // Handle null/undefined cases
-        if (val1 === val2) return true;
-        if (val1 == null || val2 == null) return false;
-        
-        // Handle Date objects and date strings
-        if (val1 instanceof Date && val2 instanceof Date) {
-          return val1.getTime() === val2.getTime();
-        }
-        if (val1 instanceof Date || val2 instanceof Date) {
-          const date1 = new Date(val1);
-          const date2 = new Date(val2);
-          return date1.getTime() === date2.getTime();
-        }
-        
-        // Handle regular values
-        return val1 === val2;
-      };
-      
+      const excludedFields = ["createdAt", "updatedAt", "offeredAt", "paymentDue"];
       for (const key in after) {
         if (Object.prototype.hasOwnProperty.call(after, key) && !excludedFields.includes(key)) {
-          if (!Object.prototype.hasOwnProperty.call(before, key) || !isEqual(before[key], after[key])) {
+          if (!Object.prototype.hasOwnProperty.call(before, key) || before[key] !== after[key]) {
             diff[key] = { before: before ? before[key] : null, after: after[key] };
           }
         }
