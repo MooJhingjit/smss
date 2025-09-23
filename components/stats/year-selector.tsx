@@ -21,6 +21,9 @@ export default function YearSelector({ currentYear }: YearSelectorProps) {
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedYear, setSelectedYear] = useState<string>(currentYear.toString());
+  
+  // Check if year mode is active (no date range parameters)
+  const isYearMode = !searchParams.get("from") && !searchParams.get("to");
 
   // Generate year options from 5 years ago to current year
   const currentFullYear = new Date().getFullYear();
@@ -29,6 +32,7 @@ export default function YearSelector({ currentYear }: YearSelectorProps) {
   const handleYearChange = (newYear: string) => {
     setIsLoading(true);
     setSelectedYear(newYear);
+    // Clear any existing date range parameters and set year
     router.push(`${pathname}?year=${newYear}`);
   };
 
@@ -45,7 +49,7 @@ export default function YearSelector({ currentYear }: YearSelectorProps) {
     <div className="">
       {/* <span className="text-sm font-medium">เลือกปี:</span> */}
       {isLoading ? (
-        <div className="flex items-center gap-2 h-10 px-3 py-2 w-[140px] border rounded-md">
+        <div className="flex items-center gap-2 h-10 px-3 py-2 w-full max-w-[200px] border rounded-md">
           <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
           <span className="text-sm text-muted-foreground">กำลังโหลด...</span>
         </div>
@@ -55,7 +59,7 @@ export default function YearSelector({ currentYear }: YearSelectorProps) {
           onValueChange={handleYearChange}
           disabled={isLoading}
         >
-          <SelectTrigger className="w-[150px] text-xl">
+          <SelectTrigger className={`w-full max-w-[200px] text-sm sm:text-base ${isYearMode ? 'ring-2 ring-primary border-primary' : ''}`}>
             <SelectValue placeholder="เลือกปี"/>
           </SelectTrigger>
           <SelectContent>

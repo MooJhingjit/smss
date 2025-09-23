@@ -21,6 +21,10 @@ export interface StatsFilters {
   year?: number;
   sellerId?: number;
   includePurchaseOrders?: boolean;
+  dateRange?: {
+    from: Date;
+    to: Date;
+  };
 }
 
 // Shared: unpaid status set used across stats views
@@ -39,6 +43,171 @@ export function getMonthRangeUTC(year: number, month: number) {
   const endDate = new Date(Date.UTC(year, month + 1, 1));
   return { startDate, endDate };
 }
+
+// Date range statistics for custom date ranges
+export const getDateRangeStats = async (
+  filters: StatsFilters = {}
+): Promise<MonthlyStatsData[]> => {
+  const {
+    dateRange,
+    sellerId,
+    includePurchaseOrders = true,
+  } = filters;
+
+  if (!dateRange) {
+    throw new Error('Date range is required for date range stats');
+  }
+
+  // Create monthly buckets based on the date range
+  const startDate = new Date(dateRange.from);
+  const endDate = new Date(dateRange.to);
+  
+  const monthlyData: MonthlyStatsData[] = [];
+  const currentDate = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+  
+  while (currentDate <= endDate) {
+    const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+    
+    // Adjust for the actual date range boundaries
+    const actualStart = monthStart < startDate ? startDate : monthStart;
+    const actualEnd = monthEnd > endDate ? endDate : monthEnd;
+    
+    const quotationWhere: Prisma.QuotationWhereInput = {
+      approvedAt: { gte: actualStart, lte: actualEnd },
+    };
+    
+    if (sellerId) {
+      quotationWhere.sellerId = sellerId;
+    }
+
+    // Paid transactions
+    const paidWithVAT = await db.quotation.aggregate({
+      _sum: { grandTotal: true },
+      where: { ...quotationWhere, status: "paid" },
+    });
+
+    const paidWithoutVAT = await db.quotation.aggregate({
+      _sum: { totalPrice: true },
+      where: { ...quotationWhere, status: "paid" },
+    });
+
+    // Unpaid transactions
+    const unpaidWithVAT = await db.quotation.aggregate({
+      _sum: { grandTotal: true },
+      where: { ...quotationWhere, status: { in: UNPAID_STATUSES } },
+    });
+
+    const unpaidWithoutVAT = await db.quotation.aggregate({
+      _sum: { totalPrice: true },
+      where: { ...quotationWhere, status: { in: UNPAID_STATUSES } },
+    });
+
+    // Installment transactions
+    const installmentWithVAT = await db.quotation.aggregate({
+      _sum: { grandTotal: true },
+      where: { ...quotationWhere, status: "installment" },
+    });
+
+    const installmentWithoutVAT = await db.quotation.aggregate({
+      _sum: { totalPrice: true },
+      where: { ...quotationWhere, status: "installment" },
+    });
+
+    // Purchase Order data
+    let purchaseOrder = 0;
+    if (includePurchaseOrders) {
+      const purchaseOrderWhere: any = {
+        quotation: { isNot: null },
+        createdAt: { gte: actualStart, lte: actualEnd },
+      };
+
+      if (sellerId) {
+        purchaseOrderWhere.quotation.sellerId = sellerId;
+      }
+
+      const purchaseOrderResult = await db.purchaseOrder.aggregate({
+        _sum: { totalPrice: true },
+        where: purchaseOrderWhere,
+      });
+      purchaseOrder = Number(purchaseOrderResult._sum?.totalPrice) || 0;
+    }
+
+    const result: MonthlyStatsData = {
+      paid: {
+        withVAT: Number(paidWithVAT._sum.grandTotal) || 0,
+        withoutVAT: Number(paidWithoutVAT._sum.totalPrice) || 0,
+      },
+      unpaid: {
+        withVAT: Number(unpaidWithVAT._sum.grandTotal) || 0,
+        withoutVAT: Number(unpaidWithoutVAT._sum.totalPrice) || 0,
+      },
+      installment: {
+        withVAT: Number(installmentWithVAT._sum.grandTotal) || 0,
+        withoutVAT: Number(installmentWithoutVAT._sum.totalPrice) || 0,
+      },
+    };
+
+    if (includePurchaseOrders) {
+      result.purchaseOrder = purchaseOrder;
+    }
+
+    monthlyData.push(result);
+    
+    // Move to next month
+    currentDate.setMonth(currentDate.getMonth() + 1);
+  }
+
+  return monthlyData;
+};
+
+export const getDateRangeTotalCounts = async (filters: StatsFilters = {}) => {
+  const {
+    dateRange,
+    sellerId,
+    includePurchaseOrders = true,
+  } = filters;
+
+  if (!dateRange) {
+    throw new Error('Date range is required for date range total counts');
+  }
+
+  const quotationWhere = {
+    createdAt: {
+      gte: dateRange.from,
+      lte: dateRange.to,
+    },
+    ...(sellerId && { sellerId }),
+  };
+
+  const quotationCount = await db.quotation.count({
+    where: quotationWhere,
+  });
+
+  let purchaseOrderCount = 0;
+  if (includePurchaseOrders) {
+    const purchaseOrderWhere: any = {
+      quotation: { isNot: null },
+      createdAt: {
+        gte: dateRange.from,
+        lte: dateRange.to,
+      },
+    };
+
+    if (sellerId) {
+      purchaseOrderWhere.quotation.sellerId = sellerId;
+    }
+
+    purchaseOrderCount = await db.purchaseOrder.count({
+      where: purchaseOrderWhere,
+    });
+  }
+
+  return {
+    quotationCount,
+    purchaseOrderCount,
+  };
+};
 
 // Shared: base where for quotations grouped by approvedAt month
 export function getApprovedAtMonthlyWhere(
