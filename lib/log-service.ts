@@ -36,7 +36,6 @@ export const updateAndLog = async <T extends ModelName>({ model, where, data }: 
           }
         }
       }
-      // aasa
       return Object.keys(diff).length > 0 ? diff : null;
     };
 
