@@ -57,9 +57,6 @@ export const updateAndLog = async <T extends ModelName>({ model, where, data }: 
     return after;
   } catch (error) {
     console.error("Failed to update and log:", error);
-    // To avoid breaking the main flow, we can re-throw or just return null/undefined
-    // For now, re-throwing to make it visible something went wrong.
-    // In production, you might want to just log the error and not re-throw.
     throw error;
   }
 };
