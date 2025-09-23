@@ -29,7 +29,7 @@ export function LogTable({ logs }: LogTableProps) {
               Action
             </TableCell>
             <TableCell className="whitespace-nowrap pr-4 font-semibold text-gray-700">
-              Record ID
+              Model Record ID
             </TableCell>
             <TableCell className="whitespace-nowrap pr-4 font-semibold text-gray-700">
               Changes
