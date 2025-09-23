@@ -28,7 +28,7 @@ export const updateAndLog = async <T extends ModelName>({ model, where, data }: 
 
     const getDiff = (before: any, after: any) => {
       const diff: any = {};
-      const excludedFields = ["createdAt", "updatedAt", "offeredAt", "paymentDue"];
+      const excludedFields = ["createdAt", "updatedAt", "offeredAt", "paymentDue", "approvedAt"];
       for (const key in after) {
         if (Object.prototype.hasOwnProperty.call(after, key) && !excludedFields.includes(key)) {
           if (!Object.prototype.hasOwnProperty.call(before, key) || before[key] !== after[key]) {
