@@ -56,7 +56,8 @@ export const updateAndLog = async <T extends ModelName>({ model, where, data }: 
 
     return after;
   } catch (error) {
-    console.error("Failed to update and log:", error);
+
+    // console.error("Failed to update and log:", error);
     throw error;
   }
 };
