@@ -25,9 +25,9 @@ export function LogTable({ logs }: LogTableProps) {
               Timestamp
             </TableCell>
             <TableCell className="whitespace-nowrap pr-4 font-semibold text-gray-700 ">User</TableCell>
-            <TableCell className="whitespace-nowrap pr-4 font-semibold text-gray-700">
+            {/* <TableCell className="whitespace-nowrap pr-4 font-semibold text-gray-700">
               Action
-            </TableCell>
+            </TableCell> */}
             <TableCell className="whitespace-nowrap pr-4 font-semibold text-gray-700">
               Model Record ID
             </TableCell>
@@ -43,7 +43,7 @@ export function LogTable({ logs }: LogTableProps) {
                 {format(new Date(log.createdAt), "yyyy-MM-dd HH:mm:ss")}
               </TableCell>
               <TableCell>{log.user?.name ?? "System"}</TableCell>
-              <TableCell>{log.action}</TableCell>
+              {/* <TableCell>{log.action}</TableCell> */}
               <TableCell>{log.recordId}</TableCell>
               <TableCell>
                 <DiffViewer diff={log.diff} />
