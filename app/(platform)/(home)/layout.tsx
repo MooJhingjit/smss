@@ -9,7 +9,7 @@ export default function HomeLayout(props: Props) {
   return (
     <div className="h-screen bg-gray-50">
       <div className="relative">
-        <MainNavbar />
+        <MainNavbar withNavigation/>
       </div>
       <div className="pt-24">{children}</div>
     </div>
