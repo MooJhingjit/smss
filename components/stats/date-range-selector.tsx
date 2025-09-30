@@ -52,7 +52,7 @@ export default function DateRangeSelector({
         to: newDate.to,
       });
 
-      const fromDate = format(newDate.from, "yyyy-MM-dd");
+      const fromDate = format(date.from!, "yyyy-MM-dd");
       const toDate = format(newDate.to, "yyyy-MM-dd");
 
       // Clear any existing year parameter and set date range
@@ -72,16 +72,15 @@ export default function DateRangeSelector({
     const to = searchParams.get("to");
 
     if (from && to) {
-      const currentFrom = format(currentRange.from, "yyyy-MM-dd");
-      const currentTo = format(currentRange.to, "yyyy-MM-dd");
-
-      if (from === currentFrom && to === currentTo) {
-        setIsLoading(false);
-      }
+      // Update date state from URL
+      const fromDate = new Date(from);
+      const toDate = new Date(to);
+      setDate({ from: fromDate, to: toDate });
+      setIsLoading(false);
     } else {
       setIsLoading(false);
     }
-  }, [searchParams, currentRange]);
+  }, [searchParams]);
 
   const formatDateRange = () => {
     if (date?.from) {
