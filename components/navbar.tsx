@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { handleSignOut } from "@/actions/auth";
+import { HistoryIcon } from "lucide-react";
 
 export default function MainNavbar(props: { withNavigation?: boolean }) {
   const { withNavigation = false } = props;
@@ -79,11 +80,26 @@ export default function MainNavbar(props: { withNavigation?: boolean }) {
                 <Button variant="outline" className="rounded-full">{name ? name.charAt(0).toUpperCase() : "U"}</Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="start">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuLabel>{info?.name}</DropdownMenuLabel>
                 <DropdownMenuGroup>
-                  <DropdownMenuItem disabled>
-                    {info?.name}
-                  </DropdownMenuItem>
+                  {
+                    isAdmin && (
+                      <DropdownMenuItem asChild >
+                        <Link
+                          href="/logs"
+                          className="flex justify-start gap-1 items-center cursor-pointer"
+                        >
+                          <HistoryIcon
+                            className="w-6 h-6 lg:w-12 lg:h-12  "
+                            strokeWidth={1.5}
+                          />
+                          <p>ประวัติการแก้ไข</p>
+                        </Link>
+
+                      </DropdownMenuItem>
+                    )
+                  }
+
                 </DropdownMenuGroup>
                 {/* <DropdownMenuSeparator />
                 <DropdownMenuGroup>
