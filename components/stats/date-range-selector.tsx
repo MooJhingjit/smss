@@ -28,6 +28,7 @@ export default function DateRangeSelector({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [date, setDate] = useState<DateRange | undefined>({
     from: currentRange.from,
     to: currentRange.to,
@@ -37,15 +38,31 @@ export default function DateRangeSelector({
   const isDateRangeMode = searchParams.get("from") && searchParams.get("to");
 
   const handleDateChange = (newDate: DateRange | undefined) => {
-    if (newDate?.from && newDate?.to) {
+    
+    // If user clicks on a date when there's already a range selected, reset to new start date
+    if (date?.from && date?.to && newDate?.from && newDate?.to) {
+      setDate({ from: newDate.to, to: undefined });
+      return;
+    }
+
+    if (date && newDate?.from && newDate?.to) {
       setIsLoading(true);
-      setDate(newDate);
+      setDate({
+        from: date.from,
+        to: newDate.to,
+      });
 
       const fromDate = format(newDate.from, "yyyy-MM-dd");
       const toDate = format(newDate.to, "yyyy-MM-dd");
 
       // Clear any existing year parameter and set date range
       router.push(`${pathname}?from=${fromDate}&to=${toDate}`);
+      
+      // Close popover only when both dates are selected
+      setIsOpen(false);
+    } else {
+      // Update the date state but keep popover open
+      setDate(newDate);
     }
   };
 
@@ -89,7 +106,7 @@ export default function DateRangeSelector({
           <span className="text-sm text-muted-foreground">กำลังโหลด...</span>
         </div>
       ) : (
-        <Popover>
+        <Popover open={isOpen} onOpenChange={setIsOpen}>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
@@ -102,7 +119,6 @@ export default function DateRangeSelector({
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
             <Calendar
-              initialFocus
               mode="range"
               defaultMonth={date?.from}
               numberOfMonths={2}
@@ -111,6 +127,7 @@ export default function DateRangeSelector({
               disabled={(date: Date) =>
                 date > new Date() || date < new Date("1900-01-01")
               }
+              required
             />
           </PopoverContent>
         </Popover>

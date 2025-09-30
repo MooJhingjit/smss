@@ -15,9 +15,14 @@ export default async function StatPage({
   
   if (hasDateRange) {
     // Use date range filtering
+    // Parse dates and set to end of day for 'to' date to include the entire day
+    const fromDate = new Date(searchParams.from!);
+    const toDate = new Date(searchParams.to!);
+    toDate.setHours(23, 59, 59, 999); // Set to end of day
+    
     dateRange = {
-      from: new Date(searchParams.from!),
-      to: new Date(searchParams.to!),
+      from: fromDate,
+      to: toDate,
     };
     
     data = await getDateRangeStats({
@@ -40,7 +45,7 @@ export default async function StatPage({
     
     dateRange = {
       from: new Date(year, 0, 1),
-      to: new Date(year, 11, 31),
+      to: new Date(year, 11, 31, 23, 59, 59, 999), // End of Dec 31st
     };
     
     data = await getMonthlyStats({

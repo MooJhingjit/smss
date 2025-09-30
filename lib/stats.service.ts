@@ -58,23 +58,24 @@ export const getDateRangeStats = async (
     throw new Error('Date range is required for date range stats');
   }
 
-  // Create monthly buckets based on the date range
+  // Create monthly buckets based on the date range using UTC
   const startDate = new Date(dateRange.from);
   const endDate = new Date(dateRange.to);
   
   const monthlyData: MonthlyStatsData[] = [];
-  const currentDate = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+  const currentDate = new Date(Date.UTC(startDate.getUTCFullYear(), startDate.getUTCMonth(), 1));
+  const endDateUTC = new Date(Date.UTC(endDate.getUTCFullYear(), endDate.getUTCMonth(), endDate.getUTCDate()));
   
-  while (currentDate <= endDate) {
-    const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-    const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+  while (currentDate <= endDateUTC) {
+    const monthStart = new Date(Date.UTC(currentDate.getUTCFullYear(), currentDate.getUTCMonth(), 1));
+    const monthEnd = new Date(Date.UTC(currentDate.getUTCFullYear(), currentDate.getUTCMonth() + 1, 1));
     
     // Adjust for the actual date range boundaries
     const actualStart = monthStart < startDate ? startDate : monthStart;
     const actualEnd = monthEnd > endDate ? endDate : monthEnd;
     
     const quotationWhere: Prisma.QuotationWhereInput = {
-      approvedAt: { gte: actualStart, lte: actualEnd },
+      approvedAt: { gte: actualStart, lt: actualEnd },
     };
     
     if (sellerId) {
@@ -119,7 +120,7 @@ export const getDateRangeStats = async (
     if (includePurchaseOrders) {
       const purchaseOrderWhere: any = {
         quotation: { isNot: null },
-        createdAt: { gte: actualStart, lte: actualEnd },
+        createdAt: { gte: actualStart, lt: actualEnd },
       };
 
       if (sellerId) {
@@ -154,8 +155,8 @@ export const getDateRangeStats = async (
 
     monthlyData.push(result);
     
-    // Move to next month
-    currentDate.setMonth(currentDate.getMonth() + 1);
+    // Move to next month using UTC
+    currentDate.setUTCMonth(currentDate.getUTCMonth() + 1);
   }
 
   return monthlyData;
@@ -173,7 +174,7 @@ export const getDateRangeTotalCounts = async (filters: StatsFilters = {}) => {
   }
 
   const quotationWhere = {
-    createdAt: {
+    approvedAt: {
       gte: dateRange.from,
       lte: dateRange.to,
     },
@@ -356,12 +357,12 @@ export const getTotalCounts = async (filters: StatsFilters = {}) => {
   } = filters;
 
   const startDate = new Date(Date.UTC(year, 0, 1)); // January 1st of the year
-  const endDate = new Date(Date.UTC(year + 1, 0, 1)); // January 1st of next year
+  const endDate = new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999)); // End of December 31st
 
   const quotationWhere = {
-    createdAt: {
+    approvedAt: {
       gte: startDate,
-      lt: endDate,
+      lte: endDate,
     },
     ...(sellerId && { sellerId }),
   };
@@ -378,7 +379,7 @@ export const getTotalCounts = async (filters: StatsFilters = {}) => {
       },
       createdAt: {
         gte: startDate,
-        lt: endDate,
+        lte: endDate,
       },
     };
 
