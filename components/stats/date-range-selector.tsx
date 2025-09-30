@@ -33,12 +33,11 @@ export default function DateRangeSelector({
     from: currentRange.from,
     to: currentRange.to,
   });
-  
+
   // Check if date range mode is active
   const isDateRangeMode = searchParams.get("from") && searchParams.get("to");
 
   const handleDateChange = (newDate: DateRange | undefined) => {
-    
     // If user clicks on a date when there's already a range selected, reset to new start date
     if (date?.from && date?.to && newDate?.from && newDate?.to) {
       setDate({ from: newDate.to, to: undefined });
@@ -56,8 +55,14 @@ export default function DateRangeSelector({
       const toDate = format(newDate.to, "yyyy-MM-dd");
 
       // Clear any existing year parameter and set date range
-      router.push(`${pathname}?from=${fromDate}&to=${toDate}`);
-      
+      // router.push(`${pathname}?from=${fromDate}&to=${toDate}`);
+      // reload the page with new query params
+      const url = new URL(window.location.href);
+      url.searchParams.delete("year");
+      url.searchParams.set("from", fromDate);
+      url.searchParams.set("to", toDate);
+      window.location.href = url.toString();
+
       // Close popover only when both dates are selected
       setIsOpen(false);
     } else {
@@ -109,7 +114,9 @@ export default function DateRangeSelector({
           <PopoverTrigger asChild>
             <Button
               variant="outline"
-              className={`w-full max-w-[300px] justify-start text-left font-normal text-sm sm:text-base ${isDateRangeMode ? 'ring-2 ring-primary border-primary' : ''}`}
+              className={`w-full max-w-[300px] justify-start text-left font-normal text-sm sm:text-base ${
+                isDateRangeMode ? "ring-2 ring-primary border-primary" : ""
+              }`}
               disabled={isLoading}
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
