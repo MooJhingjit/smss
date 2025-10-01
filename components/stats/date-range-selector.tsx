@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
@@ -10,9 +9,10 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { CalendarIcon, Loader2 } from "lucide-react";
-import { DateRange } from "react-day-picker";
+import { DateRange, DayPicker } from "react-day-picker";
 import { format } from "date-fns";
 import { th } from "date-fns/locale";
+import "react-day-picker/style.css";
 
 interface DateRangeSelectorProps {
   readonly currentRange: {
@@ -38,36 +38,30 @@ export default function DateRangeSelector({
   const isDateRangeMode = searchParams.get("from") && searchParams.get("to");
 
   const handleDateChange = (newDate: DateRange | undefined) => {
-    // If user clicks on a date when there's already a range selected, reset to new start date
-    if (date?.from && date?.to && newDate?.from && newDate?.to) {
-      setDate({ from: newDate.to, to: undefined });
-      return;
-    }
+    console.log("🚀 ~ handleDateChange ~ newDate:", newDate);
 
-    if (date && newDate?.from && newDate?.to) {
+    // Update date state
+    setDate(newDate);
+  };
+
+  const handleConfirm = () => {
+    if (date?.from && date?.to) {
       setIsLoading(true);
-      setDate({
-        from: date.from,
-        to: newDate.to,
-      });
 
-      const fromDate = format(date.from!, "yyyy-MM-dd");
-      const toDate = format(newDate.to, "yyyy-MM-dd");
+      const fromDate = format(date.from, "yyyy-MM-dd");
+      const toDate = format(date.to, "yyyy-MM-dd");
 
       // Clear any existing year parameter and set date range
-      // router.push(`${pathname}?from=${fromDate}&to=${toDate}`);
-      // reload the page with new query params
       const url = new URL(window.location.href);
       url.searchParams.delete("year");
       url.searchParams.set("from", fromDate);
       url.searchParams.set("to", toDate);
-      window.location.href = url.toString();
 
-      // Close popover only when both dates are selected
+      // Close popover before reload
       setIsOpen(false);
-    } else {
-      // Update the date state but keep popover open
-      setDate(newDate);
+
+      // Reload page with new params
+      window.location.href = url.toString();
     }
   };
 
@@ -124,17 +118,39 @@ export default function DateRangeSelector({
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="range"
-              defaultMonth={date?.from}
-              numberOfMonths={2}
-              selected={date}
-              onSelect={handleDateChange}
-              disabled={(date: Date) =>
-                date > new Date() || date < new Date("1900-01-01")
-              }
-              required
-            />
+            <div className="px-2">
+              <DayPicker
+                mode="range"
+                required
+                defaultMonth={date?.from}
+                numberOfMonths={2}
+                selected={date}
+                onSelect={handleDateChange}
+                disabled={(date: Date) =>
+                  date > new Date() || date < new Date("1900-01-01")
+                }
+                locale={th}
+              />
+            </div>
+            <div className="p-3 border-t flex items-center justify-between gap-2">
+              <div className="text-sm text-muted-foreground">
+                {date?.from && date?.to ? (
+                  <span>
+                    {format(date.from, "dd MMM yyyy", { locale: th })} -{" "}
+                    {format(date.to, "dd MMM yyyy", { locale: th })}
+                  </span>
+                ) : (
+                  <span>กรุณาเลือกช่วงวันที่</span>
+                )}
+              </div>
+              <Button
+                onClick={handleConfirm}
+                disabled={!date?.from || !date?.to}
+                size="sm"
+              >
+                ยืนยัน
+              </Button>
+            </div>
           </PopoverContent>
         </Popover>
       )}
