@@ -73,6 +73,24 @@ export default function BoardContainer(props: Props) {
     type: "all",
   });
 
+  // Pagination state - track page for each column
+  const [columnPages, setColumnPages] = useState<Record<QuotationStatus, number>>(() => {
+    return allQuotationStatus.reduce((acc, status) => {
+      acc[status] = 0;
+      return acc;
+    }, {} as Record<QuotationStatus, number>);
+  });
+
+  // Store accumulated data for each column
+  const [accumulatedData, setAccumulatedData] = useState<Record<QuotationStatus, QuotationWithCounts[]>>(() => {
+    return allQuotationStatus.reduce((acc, status) => {
+      acc[status] = [];
+      return acc;
+    }, {} as Record<QuotationStatus, QuotationWithCounts[]>);
+  });
+
+  const ITEMS_PER_PAGE = 50;
+
   // Collapsed columns state with localStorage persistence
   const [collapsedColumns, setCollapsedColumns] = useState<Set<QuotationStatus>>(() => {
     if (typeof window !== 'undefined') {
@@ -102,9 +120,16 @@ export default function BoardContainer(props: Props) {
   }>({});
 
   // Function to get items for each column with optimistic updates applied
-  const getItemsForColumn = (columnStatus: QuotationStatus, originalItems: QuotationWithCounts[]): QuotationWithCounts[] => {
-    // Start with original items, remove any that have been optimistically moved out
-    let filteredItems = originalItems.filter(item => {
+  const getItemsForColumn = (columnStatus: QuotationStatus, queryIndex: number): { items: QuotationWithCounts[], hasMore: boolean, total: number } => {
+    const query = queries[queryIndex];
+    const hasMore = query?.data?.pagination?.hasMore || false;
+    const total = query?.data?.pagination?.total || 0;
+    
+    // Use accumulated data instead of just current query data
+    const baseItems = accumulatedData[columnStatus] || [];
+
+    // Start with accumulated items, remove any that have been optimistically moved out
+    let filteredItems = baseItems.filter((item: QuotationWithCounts) => {
       const optimisticStatus = optimisticUpdates[item.id.toString()];
       return !optimisticStatus || optimisticStatus === columnStatus;
     });
@@ -112,16 +137,28 @@ export default function BoardContainer(props: Props) {
     // Add items that have been optimistically moved into this column
     Object.entries(optimisticUpdates).forEach(([itemId, newStatus]) => {
       if (newStatus === columnStatus) {
-        // Find the item in any of the original query results
-        const allItems = queries.flatMap(q => q.data || []);
-        const movedItem = allItems.find(item => item.id.toString() === itemId);
-        if (movedItem && !filteredItems.find(item => item.id.toString() === itemId)) {
+        // Find the item in any of the accumulated data
+        const allItems = Object.values(accumulatedData).flat();
+        const movedItem = allItems.find((item: QuotationWithCounts) => item.id.toString() === itemId);
+        if (movedItem && !filteredItems.find((item: QuotationWithCounts) => item.id.toString() === itemId)) {
           filteredItems.push(movedItem);
         }
       }
     });
 
-    return filteredItems;
+    return { items: filteredItems, hasMore, total };
+  };
+
+  // Track which columns are currently loading more data
+  const [loadingColumns, setLoadingColumns] = useState<Set<QuotationStatus>>(new Set());
+
+  // Load more function for a specific column
+  const loadMore = (columnStatus: QuotationStatus) => {
+    setLoadingColumns(prev => new Set(prev).add(columnStatus));
+    setColumnPages(prev => ({
+      ...prev,
+      [columnStatus]: prev[columnStatus] + 1,
+    }));
   };
 
   const toggleColumnCollapse = (columnKey: QuotationStatus) => {
@@ -135,8 +172,10 @@ export default function BoardContainer(props: Props) {
       return newSet;
     });
   };
+  
   const queries = useQueries({
     queries: allQuotationStatus.map((quotationStatus) => {
+      const currentPage = columnPages[quotationStatus];
       // combine quotationStatus and searchParams to create a unique queryKey
       const params = [
         "quotationKeys",
@@ -145,6 +184,7 @@ export default function BoardContainer(props: Props) {
         searchParams.buyer,
         searchParams.vendor,
         searchParams.type,
+        currentPage,
       ].join("-");
       return {
         queryKey: [params],
@@ -157,10 +197,47 @@ export default function BoardContainer(props: Props) {
             buyer: searchParams.buyer,
             vendor: searchParams.vendor,
             type: searchParams.type,
+            skip: currentPage * ITEMS_PER_PAGE,
+            take: ITEMS_PER_PAGE,
           }),
+        staleTime: 1000 * 60 * 5, // 5 minutes
       };
     }),
   });
+
+  // Update accumulated data when queries succeed
+  useEffect(() => {
+    queries.forEach((query, index) => {
+      const status = allQuotationStatus[index];
+      const currentPage = columnPages[status];
+      
+      if (query.data?.data && !query.isLoading) {
+        setAccumulatedData(prev => {
+          const newData = { ...prev };
+          
+          // If page is 0, replace data; otherwise, append
+          if (currentPage === 0) {
+            newData[status] = query.data.data;
+          } else {
+            // Append new data, avoiding duplicates
+            const existingIds = new Set(prev[status].map((item: QuotationWithCounts) => item.id));
+            const newItems = query.data.data.filter((item: QuotationWithCounts) => !existingIds.has(item.id));
+            newData[status] = [...prev[status], ...newItems];
+          }
+          
+          return newData;
+        });
+        
+        // Remove from loading set when data is loaded
+        setLoadingColumns(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(status);
+          return newSet;
+        });
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queries.map(q => q.data).join(',')]);
 
   const invalidateQuotationQueries = () => {
     queryClient.invalidateQueries({
@@ -172,7 +249,13 @@ export default function BoardContainer(props: Props) {
   useEffect(() => {
     // This function will invalidate queries related to quotations
     // whenever searchParams change
+    // Also reset pagination when search params change
+    setColumnPages(allQuotationStatus.reduce((acc, status) => {
+      acc[status] = 0;
+      return acc;
+    }, {} as Record<QuotationStatus, number>));
     invalidateQuotationQueries();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]); // Dependency array includes searchParams to trigger effect when it changes
 
   const { mutate } = useMutation<
@@ -285,16 +368,20 @@ export default function BoardContainer(props: Props) {
               >
                 <BoardColumn
                   color="gray"
-                  items={getItemsForColumn(QuotationStatus.open, queries[0].data ?? [])}
+                  items={getItemsForColumn(QuotationStatus.open, 0).items}
                   columnKey={QuotationStatus.open}
                   label={quotationStatusMapping[QuotationStatus.open].label}
                   progress={quotationStatusMapping[QuotationStatus.open].progress}
                   isCollapsed={collapsedColumns.has(QuotationStatus.open)}
                   onToggleCollapse={() => toggleColumnCollapse(QuotationStatus.open)}
+                  hasMore={getItemsForColumn(QuotationStatus.open, 0).hasMore}
+                  onLoadMore={() => loadMore(QuotationStatus.open)}
+                  isLoading={loadingColumns.has(QuotationStatus.open)}
+                  totalCount={getItemsForColumn(QuotationStatus.open, 0).total}
                 />
                 <BoardColumn
                   color="yellow"
-                  items={getItemsForColumn(QuotationStatus.pending_approval, queries[1].data ?? [])}
+                  items={getItemsForColumn(QuotationStatus.pending_approval, 1).items}
                   columnKey={QuotationStatus.pending_approval}
                   label={
                     quotationStatusMapping[QuotationStatus.pending_approval].label
@@ -305,10 +392,14 @@ export default function BoardContainer(props: Props) {
                   }
                   isCollapsed={collapsedColumns.has(QuotationStatus.pending_approval)}
                   onToggleCollapse={() => toggleColumnCollapse(QuotationStatus.pending_approval)}
+                  hasMore={getItemsForColumn(QuotationStatus.pending_approval, 1).hasMore}
+                  onLoadMore={() => loadMore(QuotationStatus.pending_approval)}
+                  isLoading={loadingColumns.has(QuotationStatus.pending_approval)}
+                  totalCount={getItemsForColumn(QuotationStatus.pending_approval, 1).total}
                 />
                 <BoardColumn
                   color="gray"
-                  items={getItemsForColumn(QuotationStatus.offer, queries[2].data ?? [])}
+                  items={getItemsForColumn(QuotationStatus.offer, 2).items}
                   columnKey={QuotationStatus.offer}
                   label={quotationStatusMapping[QuotationStatus.offer].label}
                   progress={
@@ -316,10 +407,14 @@ export default function BoardContainer(props: Props) {
                   }
                   isCollapsed={collapsedColumns.has(QuotationStatus.offer)}
                   onToggleCollapse={() => toggleColumnCollapse(QuotationStatus.offer)}
+                  hasMore={getItemsForColumn(QuotationStatus.offer, 2).hasMore}
+                  onLoadMore={() => loadMore(QuotationStatus.offer)}
+                  isLoading={loadingColumns.has(QuotationStatus.offer)}
+                  totalCount={getItemsForColumn(QuotationStatus.offer, 2).total}
                 />
                 <BoardColumn
                   color="yellow"
-                  items={getItemsForColumn(QuotationStatus.approved, queries[3].data ?? [])}
+                  items={getItemsForColumn(QuotationStatus.approved, 3).items}
                   columnKey={QuotationStatus.approved}
                   label={quotationStatusMapping[QuotationStatus.approved].label}
                   progress={
@@ -327,9 +422,13 @@ export default function BoardContainer(props: Props) {
                   }
                   isCollapsed={collapsedColumns.has(QuotationStatus.approved)}
                   onToggleCollapse={() => toggleColumnCollapse(QuotationStatus.approved)}
+                  hasMore={getItemsForColumn(QuotationStatus.approved, 3).hasMore}
+                  onLoadMore={() => loadMore(QuotationStatus.approved)}
+                  isLoading={loadingColumns.has(QuotationStatus.approved)}
+                  totalCount={getItemsForColumn(QuotationStatus.approved, 3).total}
                 />
                 <BoardColumn
-                  items={getItemsForColumn(QuotationStatus.po_preparing, queries[4].data ?? [])}
+                  items={getItemsForColumn(QuotationStatus.po_preparing, 4).items}
                   columnKey={QuotationStatus.po_preparing}
                   label={
                     quotationStatusMapping[QuotationStatus.po_preparing].label
@@ -339,9 +438,13 @@ export default function BoardContainer(props: Props) {
                   }
                   isCollapsed={collapsedColumns.has(QuotationStatus.po_preparing)}
                   onToggleCollapse={() => toggleColumnCollapse(QuotationStatus.po_preparing)}
+                  hasMore={getItemsForColumn(QuotationStatus.po_preparing, 4).hasMore}
+                  onLoadMore={() => loadMore(QuotationStatus.po_preparing)}
+                  isLoading={loadingColumns.has(QuotationStatus.po_preparing)}
+                  totalCount={getItemsForColumn(QuotationStatus.po_preparing, 4).total}
                 />
                 <BoardColumn
-                  items={getItemsForColumn(QuotationStatus.po_sent, queries[5].data ?? [])}
+                  items={getItemsForColumn(QuotationStatus.po_sent, 5).items}
                   columnKey={QuotationStatus.po_sent}
                   label={quotationStatusMapping[QuotationStatus.po_sent].label}
                   progress={
@@ -349,9 +452,13 @@ export default function BoardContainer(props: Props) {
                   }
                   isCollapsed={collapsedColumns.has(QuotationStatus.po_sent)}
                   onToggleCollapse={() => toggleColumnCollapse(QuotationStatus.po_sent)}
+                  hasMore={getItemsForColumn(QuotationStatus.po_sent, 5).hasMore}
+                  onLoadMore={() => loadMore(QuotationStatus.po_sent)}
+                  isLoading={loadingColumns.has(QuotationStatus.po_sent)}
+                  totalCount={getItemsForColumn(QuotationStatus.po_sent, 5).total}
                 />
                 <BoardColumn
-                  items={getItemsForColumn(QuotationStatus.product_received, queries[6].data ?? [])}
+                  items={getItemsForColumn(QuotationStatus.product_received, 6).items}
                   columnKey={QuotationStatus.product_received}
                   label={
                     quotationStatusMapping[QuotationStatus.product_received].label
@@ -362,9 +469,13 @@ export default function BoardContainer(props: Props) {
                   }
                   isCollapsed={collapsedColumns.has(QuotationStatus.product_received)}
                   onToggleCollapse={() => toggleColumnCollapse(QuotationStatus.product_received)}
+                  hasMore={getItemsForColumn(QuotationStatus.product_received, 6).hasMore}
+                  onLoadMore={() => loadMore(QuotationStatus.product_received)}
+                  isLoading={loadingColumns.has(QuotationStatus.product_received)}
+                  totalCount={getItemsForColumn(QuotationStatus.product_received, 6).total}
                 />
                 <BoardColumn
-                  items={getItemsForColumn(QuotationStatus.order_preparing, queries[7].data ?? [])}
+                  items={getItemsForColumn(QuotationStatus.order_preparing, 7).items}
                   columnKey={QuotationStatus.order_preparing}
                   label={
                     quotationStatusMapping[QuotationStatus.order_preparing].label
@@ -375,10 +486,14 @@ export default function BoardContainer(props: Props) {
                   }
                   isCollapsed={collapsedColumns.has(QuotationStatus.order_preparing)}
                   onToggleCollapse={() => toggleColumnCollapse(QuotationStatus.order_preparing)}
+                  hasMore={getItemsForColumn(QuotationStatus.order_preparing, 7).hasMore}
+                  onLoadMore={() => loadMore(QuotationStatus.order_preparing)}
+                  isLoading={loadingColumns.has(QuotationStatus.order_preparing)}
+                  totalCount={getItemsForColumn(QuotationStatus.order_preparing, 7).total}
                 />
                 <BoardColumn
                   color="yellow"
-                  items={getItemsForColumn(QuotationStatus.delivered, queries[8].data ?? [])}
+                  items={getItemsForColumn(QuotationStatus.delivered, 8).items}
                   columnKey={QuotationStatus.delivered}
                   label={quotationStatusMapping[QuotationStatus.delivered].label}
                   progress={
@@ -386,29 +501,41 @@ export default function BoardContainer(props: Props) {
                   }
                   isCollapsed={collapsedColumns.has(QuotationStatus.delivered)}
                   onToggleCollapse={() => toggleColumnCollapse(QuotationStatus.delivered)}
+                  hasMore={getItemsForColumn(QuotationStatus.delivered, 8).hasMore}
+                  onLoadMore={() => loadMore(QuotationStatus.delivered)}
+                  isLoading={loadingColumns.has(QuotationStatus.delivered)}
+                  totalCount={getItemsForColumn(QuotationStatus.delivered, 8).total}
                 />
 
                 <BoardColumn
                   color="yellow"
-                  items={getItemsForColumn(QuotationStatus.installment, queries[11].data ?? [])}
+                  items={getItemsForColumn(QuotationStatus.installment, 11).items}
                   columnKey={QuotationStatus.installment}
                   label={quotationStatusMapping[QuotationStatus.installment].label}
                   progress={quotationStatusMapping[QuotationStatus.installment].progress}
                   isCollapsed={collapsedColumns.has(QuotationStatus.installment)}
                   onToggleCollapse={() => toggleColumnCollapse(QuotationStatus.installment)}
+                  hasMore={getItemsForColumn(QuotationStatus.installment, 11).hasMore}
+                  onLoadMore={() => loadMore(QuotationStatus.installment)}
+                  isLoading={loadingColumns.has(QuotationStatus.installment)}
+                  totalCount={getItemsForColumn(QuotationStatus.installment, 11).total}
                 />
                 <BoardColumn
                   color="green"
-                  items={getItemsForColumn(QuotationStatus.paid, queries[9].data ?? [])}
+                  items={getItemsForColumn(QuotationStatus.paid, 9).items}
                   columnKey={QuotationStatus.paid}
                   label={quotationStatusMapping[QuotationStatus.paid].label}
                   progress={quotationStatusMapping[QuotationStatus.paid].progress}
                   isCollapsed={collapsedColumns.has(QuotationStatus.paid)}
                   onToggleCollapse={() => toggleColumnCollapse(QuotationStatus.paid)}
+                  hasMore={getItemsForColumn(QuotationStatus.paid, 9).hasMore}
+                  onLoadMore={() => loadMore(QuotationStatus.paid)}
+                  isLoading={loadingColumns.has(QuotationStatus.paid)}
+                  totalCount={getItemsForColumn(QuotationStatus.paid, 9).total}
                 />
                 <BoardColumn
                   color="gray"
-                  items={getItemsForColumn(QuotationStatus.archived, queries[10].data ?? [])}
+                  items={getItemsForColumn(QuotationStatus.archived, 10).items}
                   columnKey={QuotationStatus.archived}
                   label={quotationStatusMapping[QuotationStatus.archived].label}
                   progress={
@@ -416,6 +543,10 @@ export default function BoardContainer(props: Props) {
                   }
                   isCollapsed={collapsedColumns.has(QuotationStatus.archived)}
                   onToggleCollapse={() => toggleColumnCollapse(QuotationStatus.archived)}
+                  hasMore={getItemsForColumn(QuotationStatus.archived, 10).hasMore}
+                  onLoadMore={() => loadMore(QuotationStatus.archived)}
+                  isLoading={loadingColumns.has(QuotationStatus.archived)}
+                  totalCount={getItemsForColumn(QuotationStatus.archived, 10).total}
                 />
                 {provided.placeholder}
                 <div className="flex-shrink-0 w-1" />
@@ -488,6 +619,10 @@ const BoardColumn = ({
   color,
   isCollapsed,
   onToggleCollapse,
+  hasMore,
+  onLoadMore,
+  isLoading,
+  totalCount,
 }: {
   columnKey: QuotationStatus;
   label: string;
@@ -496,6 +631,10 @@ const BoardColumn = ({
   color?: "yellow" | "green" | "gray";
   isCollapsed: boolean;
   onToggleCollapse: () => void;
+  hasMore: boolean;
+  onLoadMore: () => void;
+  isLoading?: boolean;
+  totalCount: number;
 }) => {
   if (isCollapsed) {
     return (
@@ -526,14 +665,15 @@ const BoardColumn = ({
                     ></div>
                     <div className="flex flex-col items-center justify-center h-full p-2">
                       <div className="transform -rotate-90 whitespace-nowrap text-sm font-semibold text-[#4a4a4a] mb-4">
-                        {label} ({items.length})
+                        {/* {label} ({items.length}/{totalCount}) */}
+                        {label} ({totalCount})
                       </div>
                       <ChevronRightIcon className="w-4 h-4 text-gray-500" />
                     </div>
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{label} ({items.length} items)</p>
+                  <p>{label} ({items.length}/{totalCount} items)</p>
                 </TooltipContent>
               </Tooltip>
               {provided.placeholder}
@@ -574,7 +714,8 @@ const BoardColumn = ({
           </div>
           <div className="flex items-center gap-2">
             <div className="text-xs font-semibold text-[#4a4a4a]">
-              ({items.length})
+              ({totalCount})
+              {/* ({items.length}/{totalCount}) */}
             </div>
             <button
               onClick={onToggleCollapse}
@@ -588,17 +729,32 @@ const BoardColumn = ({
         <div className=" h-[calc(100%-70px)] p-3 overflow-auto">
           <Droppable droppableId={columnKey} type="card">
             {(provided) => (
-              <ul
+              <div
                 {...provided.droppableProps}
                 ref={provided.innerRef}
-                className="h-full"
+                className="h-full flex flex-col"
               >
-                {items.map((i: QuotationWithCounts, cardIdx) => {
-                  return <BoardCard idx={`QT-${i.id}`} key={i.id} item={i} />;
-                })}
+                <ul className="flex-1">
+                  {items.map((i: QuotationWithCounts, cardIdx) => {
+                    return <BoardCard idx={`QT-${i.id}`} key={i.id} item={i} />;
+                  })}
 
-                {provided.placeholder}
-              </ul>
+                  {provided.placeholder}
+                </ul>
+                {hasMore && (
+                  <div className="mt-2 flex justify-center">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={onLoadMore}
+                      disabled={isLoading}
+                      className="w-full text-xs"
+                    >
+                      {isLoading ? "กำลังโหลด..." : "โหลดเพิ่มเติม"}
+                    </Button>
+                  </div>
+                )}
+              </div>
             )}
           </Droppable>
         </div>

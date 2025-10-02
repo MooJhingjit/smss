@@ -10,6 +10,8 @@ export async function GET(req: NextRequest) {
     const buyerName = req.nextUrl.searchParams.get("buyer") as string;
     const vendorName = req.nextUrl.searchParams.get("vendor") as string;
     const type = req.nextUrl.searchParams.get("type") as string;
+    const skip = parseInt(req.nextUrl.searchParams.get("skip") || "0");
+    const take = parseInt(req.nextUrl.searchParams.get("take") || "50");
 
     if (!status) {
       return new NextResponse("Missing status", { status: 400 });
@@ -73,8 +75,24 @@ export async function GET(req: NextRequest) {
         // { invoice: { receiptDate: { sort: "desc", nulls: "last" } } },
         { createdAt: "desc" },
       ],
+      skip,
+      take,
     });
-    return NextResponse.json(quotations);
+
+    // Get total count for pagination
+    const totalCount = await db.quotation.count({
+      where: conditions,
+    });
+
+    return NextResponse.json({
+      data: quotations,
+      pagination: {
+        total: totalCount,
+        skip,
+        take,
+        hasMore: skip + quotations.length < totalCount,
+      },
+    });
   } catch (error) {
     console.log("error", error);
     return new NextResponse("Internal Error", { status: 500 });
