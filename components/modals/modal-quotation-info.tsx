@@ -769,13 +769,13 @@ const ReceiptInvoice = ({
   );
 };
 
-const PrintQuotation = ({
+export const PrintQuotation = ({
   quotationId,
   hasList,
   defaultDate = new Date(),
 }: {
   quotationId: number;
-  hasList: boolean;
+  hasList?: boolean;
   defaultDate?: Date;
 }) => {
   const onPrintClick = (date: Date) => {
@@ -829,7 +829,7 @@ const PrintQuotation = ({
         name="date"
         type="date"
         placeholder="วันที่"
-        defaultValue={defaultDate.toISOString().split("T")[0]}
+        defaultValue={defaultDate?.toISOString().split("T")[0]}
       />
       <Button size={"sm"} variant={"secondary"} type="submit">
         <PrinterIcon className="w-4 h-4" />
@@ -1046,7 +1046,7 @@ const VersionUpdate = ({
   );
 };
 
-const CloneComponent = ({
+export const CloneComponent = ({
   quotation,
   onCloned,
 }: {
