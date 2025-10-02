@@ -10,7 +10,13 @@ import {
 import { toast } from "sonner";
 import { useQuotationInfoModal } from "@/hooks/use-quotation-info-modal";
 import React, { useRef, useState, useCallback } from "react";
-import { ArrowLeftRight, ArrowRightIcon, ChevronsUpDown, ClipboardCheckIcon, User } from "lucide-react";
+import {
+  ArrowLeftRight,
+  ArrowRightIcon,
+  ChevronsUpDown,
+  ClipboardCheckIcon,
+  User,
+} from "lucide-react";
 
 import {
   Collapsible,
@@ -53,14 +59,10 @@ import { useRouter } from "next/navigation";
 import { useCloneQuotationModal } from "@/hooks/use-clone-quotation-modal";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { getCurrentDateTime, updateCodeVersion } from "@/lib/utils";
-import { CheckCircle2Icon } from "lucide-react"
+import { CheckCircle2Icon } from "lucide-react";
 
 import { Input } from "../ui/custom-input";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/components/ui/alert"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useAssignSellerModal } from "@/hooks/use-assign-seller-modal";
 
@@ -92,59 +94,57 @@ export const QuotationInfoModal = () => {
           originalData={data}
           hasList={data.lists ? data.lists.length > 0 : false}
         />
-        {
-          isAdmin && (
-            <DialogFooter className="border-t pt-6">
-              <Collapsible
-                open={isActionAreaOpen}
-                onOpenChange={setIsOpenActionArea}
-                className="w-full space-y-2"
-              >
-                <CollapsibleTrigger asChild>
-                  <div className="flex items-center space-x-1 justify-center cursor-pointer">
-                    <h4 className="text-sm font-semibold">ดำเนินการเพิ่มเติม</h4>
-                    <Button variant="ghost" size="sm" className="w-9 p-0">
-                      <ChevronsUpDown className="h-4 w-4" />
-                      <span className="sr-only">Toggle</span>
-                    </Button>
+        {isAdmin && (
+          <DialogFooter className="border-t pt-6">
+            <Collapsible
+              open={isActionAreaOpen}
+              onOpenChange={setIsOpenActionArea}
+              className="w-full space-y-2"
+            >
+              <CollapsibleTrigger asChild>
+                <div className="flex items-center space-x-1 justify-center cursor-pointer">
+                  <h4 className="text-sm font-semibold">ดำเนินการเพิ่มเติม</h4>
+                  <Button variant="ghost" size="sm" className="w-9 p-0">
+                    <ChevronsUpDown className="h-4 w-4" />
+                    <span className="sr-only">Toggle</span>
+                  </Button>
+                </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-2">
+                <div className="w-full grid grid-cols-2 gap-3">
+                  <div className="bg-gray-50 p-2 flex items-center justify-center">
+                    <DeleteComponent
+                      onDeleted={modal.onClose}
+                      quotationId={data?.id}
+                      hasList={data?.lists ? data.lists.length > 0 : false}
+                    />
                   </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="space-y-2">
-                  <div className="w-full grid grid-cols-2 gap-3">
-                    <div className="bg-gray-50 p-2 flex items-center justify-center">
-                      <DeleteComponent
-                        onDeleted={modal.onClose}
-                        quotationId={data?.id}
-                        hasList={data?.lists ? data.lists.length > 0 : false}
-                      />
-                    </div>
-                    <div className="bg-gray-50 p-2 flex items-center justify-center">
-                      <VersionUpdate
-                        hasPo={!!data?.purchaseOrders?.length}
-                        currentVersion={data?.code}
-                        quotationId={data?.id}
-                      />
-                    </div>
-                    <div className="bg-gray-50 p-2 flex items-center justify-center">
-                      <CloneComponent
-                        quotation={data}
-                        onCloned={modal.onClose}
-                      />
-                    </div>
-                    <div className="bg-gray-50 p-2 flex items-center justify-center">
-                      <AssignedSeller
-                        quotation={data}
-                        onCloseINfoModal={modal.onClose}
-                      />
-                    </div>
-
+                  <div className="bg-gray-50 p-2 flex items-center justify-center">
+                    <VersionUpdate
+                      hasPo={!!data?.purchaseOrders?.length}
+                      currentVersion={data?.code}
+                      quotationId={data?.id}
+                    />
                   </div>
-                </CollapsibleContent>
-              </Collapsible>
-            </DialogFooter>
-          )
-        }
+                  <div className="bg-gray-50 p-2 flex items-center justify-center">
+                    <CloneComponent quotation={data} onCloned={modal.onClose} />
+                  </div>
+                  <div className="bg-gray-50 p-2 flex items-center justify-center">
+                    <AssignedSeller
+                      quotation={data}
+                      onCloseINfoModal={modal.onClose}
+                    />
+                  </div>
 
+                  <DeletePurchaseOrders
+                    quotationId={data.id}
+                    hasPurchaseOrders={!!data?.purchaseOrders?.length}
+                  />
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          </DialogFooter>
+        )}
       </DialogContent>
     </Dialog>
   );
@@ -303,8 +303,7 @@ const MainForm = (props: {
     [handleItemChange]
   );
 
-  const quotationInvoice = data?.invoices ? data.invoices[0] : null
-
+  const quotationInvoice = data?.invoices ? data.invoices[0] : null;
 
   return (
     <div className="space-y-2">
@@ -438,7 +437,11 @@ const MainForm = (props: {
           )} */}
         <ItemList label="พิมพ์ใบเสนอราคา">
           <div className="flex space-x-3 items-center">
-            <PrintQuotation quotationId={quotationId} hasList={hasList} defaultDate={data.approvedAt ?? new Date()} />
+            <PrintQuotation
+              quotationId={quotationId}
+              hasList={hasList}
+              defaultDate={data.approvedAt ?? new Date()}
+            />
           </div>
         </ItemList>
         {isAdmin && (
@@ -605,7 +608,7 @@ const QuotationStatusForSeller = ({
       <Alert>
         <CheckCircle2Icon className="size-4 -mt-1" />
         <AlertTitle className="">ได้รับการอนุมัติแล้ว</AlertTitle>
-        <AlertDescription >
+        <AlertDescription>
           <div className="text-sm">
             <p>สามารถนำส่งให้ลูกค้าได้</p>
             <div className=" border-t pt-2 mt-2 space-y-3">
@@ -638,7 +641,6 @@ const QuotationStatusForSeller = ({
                 </ConfirmActionButton>
               </div>
             </div>
-
           </div>
         </AlertDescription>
       </Alert>
@@ -971,8 +973,8 @@ const DeleteComponent = ({
       onConfirm={handleDelete}
       disabled={isPending}
       warningMessage={[
-        'ทุกอย่างที่เกี่ยวข้องกับใบเสนอราคานี้จะถูกลบ',
-        'รวมถึงรายการสินค้า, ใบสั่งซื้อ, และใบแจ้งหนี้',
+        "ทุกอย่างที่เกี่ยวข้องกับใบเสนอราคานี้จะถูกลบ",
+        "รวมถึงรายการสินค้า, ใบสั่งซื้อ, และใบแจ้งหนี้",
       ]}
     >
       <Button
@@ -1084,7 +1086,6 @@ const AssignedSeller = ({
       onClick={() => {
         assignModal.onOpen(quotation);
         onCloseINfoModal(); // close info modal
-
       }}
       className="inline-flex items-center px-2 py-1 rounded-md text-xs h-full"
     >
@@ -1092,4 +1093,78 @@ const AssignedSeller = ({
       เปลี่ยนผู้ขาย
     </Button>
   );
-}
+};
+
+const DeletePurchaseOrders = ({
+  quotationId,
+  hasPurchaseOrders,
+}: {
+  quotationId: number;
+  hasPurchaseOrders: boolean;
+}) => {
+  const { mutate, isPending } = useMutation<
+    { message: string; deletedPurchaseOrders: number },
+    Error,
+    { quotationId: number }
+  >({
+    mutationFn: async (fields) => {
+      const res = await fetch(
+        `/api/purchase-orders/quotation/${fields.quotationId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to delete purchase orders");
+      }
+
+      return res.json();
+    },
+    onSuccess: async (data) => {
+      toast.success(
+        `ลบใบสั่งซื้อสำเร็จ (${data.deletedPurchaseOrders} รายการ)`
+      );
+      // customRevalidatePath(`/quotations/${quotationId}`);
+      // reload the page
+      window.location.reload();
+    },
+    onError: (error) => {
+      console.error(error);
+      toast.error("เกิดข้อผิดพลาดในการลบใบสั่งซื้อ");
+    },
+  });
+
+  const handleDelete = () => {
+    mutate({ quotationId });
+  };
+
+  if (!hasPurchaseOrders) {
+    return null;
+  }
+
+  return (
+    <div className="bg-gray-50 p-2 flex items-center justify-center">
+      <ConfirmActionButton
+        onConfirm={handleDelete}
+        disabled={isPending}
+        warningMessage={[
+          "ใบสั่งซื้อทั้งหมดที่เกี่ยวข้องกับใบเสนอราคานี้จะถูกลบ"
+        ]}
+      >
+        <Button
+          variant="link"
+          disabled={isPending}
+          className="inline-flex items-center px-2 py-1 rounded-md text-xs h-full  hover:text-red-700"
+          asChild
+        >
+          <span>
+            <Delete className="w-4 h-4 mr-1" />
+            {isPending ? "กำลังลบ..." : "ลบใบสั่งซื้อทั้งหมด (PO)"}
+          </span>
+        </Button>
+      </ConfirmActionButton>
+    </div>
+  );
+};
