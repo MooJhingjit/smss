@@ -43,6 +43,7 @@ const FormSchema = z.object({
       status: z.enum(["draft", "pending", "paid", "overdue"]),
       paidDate: z.date().nullable().optional(),
       billGroupId: z.number().nullable().optional(),
+      remarks: z.string().optional(),
     })
   ),
 });
@@ -79,6 +80,7 @@ export default function InstallmentTable({
         status: installment.status,
         paidDate: installment.paidDate,
         billGroupId: installment.billGroupId,
+        remarks: installment.remarks || "",
       })),
     },
   });
@@ -220,7 +222,8 @@ export default function InstallmentTable({
           (original.status !== current.status ||
             original.amount !== current.amount ||
             new Date(original.dueDate).toISOString().split("T")[0] !==
-              current.dueDate)
+              current.dueDate ||
+            (original.remarks || "") !== (current.remarks || ""))
         );
       })
       .map((installment) => ({
@@ -232,10 +235,11 @@ export default function InstallmentTable({
           installment.status === "paid"
             ? installment.paidDate || new Date()
             : null,
+        remarks: installment.remarks || null,
       }));
 
     if (installmentUpdates.length === 0) {
-      toast.info("ไม่มีการเปลี่ยนแปลงสถานะการชำระ จำนวนเงิน หรือวันครบกำหนด");
+      toast.info("ไม่มีการเปลี่ยนแปลงสถานะการชำระ จำนวนเงิน วันครบกำหนด หรือหมายเหตุ");
       return;
     }
 
@@ -284,6 +288,9 @@ export default function InstallmentTable({
                     )}
                     <TableHead className="font-semibold text-gray-700 text-center">
                       สถานะการชำระ
+                    </TableHead>
+                    <TableHead className="font-semibold text-gray-700">
+                      หมายเหตุ
                     </TableHead>
                   </TableRow>
                 </TableHeader>
@@ -410,6 +417,26 @@ export default function InstallmentTable({
                         form={form}
                         initialInstallment={initialInstallments[index]}
                       />
+
+                      <TableCell>
+                        <FormField
+                          control={form.control}
+                          name={`installments.${index}.remarks`}
+                          render={({ field: formField }) => (
+                            <FormItem>
+                              <FormControl>
+                                <Input
+                                  type="text"
+                                  placeholder="หมายเหตุ"
+                                  className="w-full min-w-[200px]"
+                                  {...formField}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -465,6 +492,7 @@ export default function InstallmentTable({
                       status: installment.status,
                       paidDate: installment.paidDate,
                       billGroupId: installment.billGroupId,
+                      remarks: installment.remarks || "",
                     })),
                   });
                 }}

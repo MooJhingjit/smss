@@ -295,6 +295,7 @@ export const formatInstallmentText = (
   installmentData: {
     period: string;
     dueDate: Date;
+    remarks?: string | null;
   },
   contractNumber?: string | null
 ): string => {
@@ -303,11 +304,12 @@ export const formatInstallmentText = (
     "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
   ];
   
-  const dueDate = new Date(installmentData.dueDate);
-  const dueDateMonth = thaiMonths[dueDate.getMonth()];
-  const dueDateYear = (dueDate.getFullYear() + 543).toString(); // Convert to Buddhist year
+  // const dueDate = new Date(installmentData.dueDate);
+  const remarks = installmentData.remarks || "";
+  // const dueDateMonth = thaiMonths[dueDate.getMonth()];
+  // const dueDateYear = (dueDate.getFullYear() + 543).toString(); // Convert to Buddhist year
   
-  const installmentLine = `- งวดที่ ${installmentData.period} ${dueDateMonth} ${dueDateYear}`;
+  const installmentLine = `- งวดที่ ${installmentData.period} ${remarks}`;
   
   if (contractNumber) {
     return `- สัญญาเลขที่ ${contractNumber}\n${installmentLine}`;
