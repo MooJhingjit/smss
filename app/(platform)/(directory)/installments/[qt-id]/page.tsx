@@ -158,10 +158,10 @@ export default async function InstallmentDetailPage(
               </div> */}
               <div>
                 <p className="text-sm font-medium text-gray-500">
-                  ยอดรวม
+                  ยอดรวม (หักส่วนลด)
                 </p>
                 <p className="font-semibold">
-                  {formatCurrency(quotation.totalPrice || 0)}
+                  {formatCurrency((quotation.totalPrice || 0) - (quotation.discount || 0))}
                 </p>
               </div>
               <div>
