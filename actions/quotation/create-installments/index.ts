@@ -50,7 +50,8 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     }
 
     // Calculate installment amounts (use totalPrice which is without VAT)
-    const totalAmount = quotation.totalPrice;
+    const totalDiscount = quotation.discount || 0;
+    const totalAmount = quotation.totalPrice - totalDiscount;
     const baseAmount = Math.floor((totalAmount / periodCount) * 100) / 100; // Round down to 2 decimal places
     const remainder = totalAmount - (baseAmount * (periodCount - 1));
 
@@ -97,7 +98,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       await tx.quotation.update({
         where: { id: quotationId },
         data: {
-          outstandingBalance: quotation.totalPrice,
+          outstandingBalance: totalAmount,
           outstandingGrandTotal: quotation.grandTotal,
           installmentContractNumber: installmentContractNumber,
         },
