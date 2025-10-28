@@ -40,6 +40,7 @@ type QuotationWithRelations = Quotation & {
 // };
 
 let _BILL_DATE = "";
+let _BILL_CODE = "";
 let _DATA: QuotationWithRelations | null = null;
 let _FONT: PDFFont | null = null;
 let _INSTALLMENT_DATA: QuotationInstallmentWithRelations | null = null;
@@ -92,6 +93,7 @@ const getData = async (
 
   const quotationInvoice = quotation?.invoices?.[0] || null;
   _BILL_DATE = PDFDateFormat(new Date(quotationInvoice?.date ?? defaultDate));
+  _BILL_CODE = quotationInvoice?.code || "";
 
   // If installment ID is provided, fetch installment data
   if (installmentId && quotation) {
@@ -107,6 +109,10 @@ const getData = async (
 
       if (installment.invoice?.date) {
         _BILL_DATE = PDFDateFormat(new Date(installment.invoice?.date));
+      }
+
+      if (installment.invoice?.code) {
+        _BILL_CODE = installment.invoice?.code;
       }
     }
   }
@@ -545,7 +551,7 @@ const drawCustomerInfo = (page: PDFPage) => {
 
   const rightXStart = 500;
   // code
-  page.drawText(quotation?.invoices?.[0]?.code ?? "", {
+  page.drawText(_BILL_CODE, {
     x: rightXStart,
     y: Y_Start,
     maxWidth: 100,

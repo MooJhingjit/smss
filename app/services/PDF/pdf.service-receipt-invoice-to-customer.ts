@@ -19,6 +19,7 @@ type QuotationWithRelations = Quotation & {
 };
 
 let _BILL_DATE = ""
+let _BILL_CODE = ""
 let _DATA: QuotationWithRelations | null = null
 let _INSTALLMENT_DATA: QuotationInstallmentWithRelations | null = null;
 let _FONT: PDFFont | null = null;
@@ -74,6 +75,7 @@ const getData = async (
   const invoice = quotation?.invoices?.[0] || null;
   const invoiceDate = invoice?.receiptDate ?? defaultDate;
   _BILL_DATE = PDFDateFormat(new Date(invoiceDate));
+  _BILL_CODE = invoice?.receiptCode || "";
 
   // If installment ID is provided, fetch installment data
   if (installmentId && quotation) {
@@ -90,6 +92,10 @@ const getData = async (
       // Use installment invoice receipt date if available
       if (installment.invoice?.receiptDate) {
         _BILL_DATE = PDFDateFormat(new Date(installment.invoice?.receiptDate));
+      }
+
+      if (installment.invoice?.receiptCode) {
+        _BILL_CODE = installment.invoice?.receiptCode;
       }
     }
   }
@@ -499,14 +505,14 @@ const drawCustomerInfo = (page: PDFPage) => {
 
   const rightXStart = 500;
 
-  let receiptCode = quotation?.invoices?.[0]?.receiptCode ?? "";
+  // let receiptCode = quotation?.invoices?.[0]?.receiptCode ?? "";
 
-  if (_INSTALLMENT_DATA) {
-    // Use installment receipt code if available
-    receiptCode = _INSTALLMENT_DATA.invoice?.receiptCode ?? receiptCode;
-  }
+  // if (_INSTALLMENT_DATA) {
+  //   // Use installment receipt code if available
+  //   receiptCode = _INSTALLMENT_DATA.invoice?.receiptCode ?? receiptCode;
+  // }
   // code
-  page.drawText(receiptCode, {
+  page.drawText(_BILL_CODE, {
     x: rightXStart,
     y: Y_Start,
     maxWidth: 100,
