@@ -442,7 +442,7 @@ const drawRemarkInfo = (page: PDFPage) => {
 
   if (withholdingTaxSummary) {
 
-    const withholdingTaxTotal = (_DATA?.totalPrice ?? 0) * 0.03
+    const withholdingTaxTotal = withholdingTaxSummary // (_DATA?.totalPrice ?? 0) * 0.03
     const priceAfterTax = (_DATA?.grandTotal ?? 0) - withholdingTaxTotal
 
     const items = [
