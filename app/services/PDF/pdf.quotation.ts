@@ -254,7 +254,7 @@ const generate = async (id: number) => {
       y: lineStart,
       maxWidth: 300,
       ...config,
-      color: rgb(1, 0.549, 0), 
+      color: rgb(1, 0.549, 0),
     });
 
     return config.lineHeight + 5; // Return height used including some spacing
@@ -889,7 +889,7 @@ const drawStaticInfo = (page: PDFPage, currentPageNumber: number) => {
     sellerName: _DATA.seller?.name ?? "",
     paymentDue:
       _DATA.paymentType === "credit"
-        ? "ไม่เกิน " + _DATA.paymentCondition + "วัน"
+        ? _DATA.paymentCondition + "วัน"
         : "เงินสด",
     deliveryPeriod: _DATA.deliveryPeriod
       ? _DATA.deliveryPeriod?.toString() + " วัน"
