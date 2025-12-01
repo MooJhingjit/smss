@@ -9,7 +9,9 @@ interface ReceiptBillOptions {
   installmentId?: number;
 }
 
-export async function generateReceiptBill(options: ReceiptBillOptions): Promise<Uint8Array> {
+export async function generateReceiptBill(
+  options: ReceiptBillOptions
+): Promise<Uint8Array> {
   const { receiptDate, quotationId, installmentId } = options;
 
   if (!quotationId && !installmentId) {
@@ -17,7 +19,9 @@ export async function generateReceiptBill(options: ReceiptBillOptions): Promise<
   }
 
   if (quotationId && installmentId) {
-    throw new Error("Cannot process both quotationId and installmentId at the same time");
+    throw new Error(
+      "Cannot process both quotationId and installmentId at the same time"
+    );
   }
 
   try {
@@ -26,7 +30,7 @@ export async function generateReceiptBill(options: ReceiptBillOptions): Promise<
     } else if (quotationId) {
       return await generateQuotationReceiptBill(quotationId, receiptDate);
     }
-    
+
     throw new Error("Either quotationId or installmentId must be provided");
   } catch (error) {
     if (error instanceof Error) {
@@ -38,7 +42,10 @@ export async function generateReceiptBill(options: ReceiptBillOptions): Promise<
 }
 
 // Generate receipt bill for quotation (existing logic)
-async function generateQuotationReceiptBill(quotationId: number, receiptDate: string) {
+async function generateQuotationReceiptBill(
+  quotationId: number,
+  receiptDate: string
+) {
   const quotation = await getQuotationById(quotationId);
 
   if (!quotation?.billGroupId) {
@@ -68,7 +75,10 @@ async function generateQuotationReceiptBill(quotationId: number, receiptDate: st
 }
 
 // Generate receipt bill for installment (new logic)
-async function generateInstallmentReceiptBill(installmentId: number, receiptDate: string) {
+async function generateInstallmentReceiptBill(
+  installmentId: number,
+  receiptDate: string
+) {
   // Get the installment with its quotation
   const installment = await db.quotationInstallment.findUnique({
     where: { id: installmentId },
@@ -78,10 +88,10 @@ async function generateInstallmentReceiptBill(installmentId: number, receiptDate
           contact: true,
           seller: true,
           lists: true,
-        }
+        },
       },
       invoice: true,
-    }
+    },
   });
 
   if (!installment) {
@@ -93,7 +103,7 @@ async function generateInstallmentReceiptBill(installmentId: number, receiptDate
   }
 
   const quotation = installment.quotation;
-  
+
   if (quotation.type !== QuotationType.service) {
     throw new Error("Receipt bills are only available for service quotations");
   }
@@ -104,7 +114,12 @@ async function generateInstallmentReceiptBill(installmentId: number, receiptDate
   }
 
   const mergedPdf = await PDFDocument.create();
-  await updateReceiptInvoice(installment.invoice, receiptDate, quotation, installment);
+  await updateReceiptInvoice(
+    installment.invoice,
+    receiptDate,
+    quotation,
+    installment
+  );
   await printInvoices(quotation.id, receiptDate, mergedPdf, installment);
   return await mergedPdf.save();
 }
@@ -115,9 +130,11 @@ type QuotationInvoice = {
   grandTotal: number | null;
   purchaseOrderRef: string | null;
   type: QuotationType;
-}
+};
 
-async function getQuotationById(quotationId: number): Promise<QuotationInvoice | null> {
+async function getQuotationById(
+  quotationId: number
+): Promise<QuotationInvoice | null> {
   return await db.quotation.findFirst({
     select: {
       id: true,
@@ -139,8 +156,8 @@ async function printInvoices(
   installment: QuotationInstallment | null
 ) {
   const results = await generateServiceReceiptInvoiceToCustomer(
-    quotationId, 
-    receiptDate, 
+    quotationId,
+    receiptDate,
     installment?.id
   );
 
@@ -185,8 +202,11 @@ async function updateReceiptInvoice(
 
   // Generate receipt code if not exists
   if (!invoice.receiptCode) {
-    const receiptCode = await generateReceiptCode(newReceiptDate, installment !== null);
-    
+    const receiptCode = await generateReceiptCode(
+      newReceiptDate,
+      installment !== null
+    );
+
     await db.invoice.update({
       where: {
         id: invoice.id,
@@ -211,34 +231,44 @@ async function updateReceiptInvoice(
       },
     });
   }
-  
+
   return invoice;
 }
 
-async function generateReceiptCode(receiptDate: Date, isInstallment: boolean): Promise<string> {
+async function generateReceiptCode(
+  receiptDate: Date,
+  isInstallment: boolean
+): Promise<string> {
   // Different prefixes for regular service receipts vs installment receipts
-  const prefix = "S"; 
-  
+  const prefix = "S";
+
   const year = receiptDate.getFullYear();
   const month = (receiptDate.getMonth() + 1).toString().padStart(2, "0");
   const datePrefix = `${year}-${month}`;
 
-  const whereClause = isInstallment 
-    ? {
-        receiptCode: {
-          startsWith: `${prefix}${year}-${month}`,
-        },
-        quotationInstallmentId: {
-          not: null,
-        },
-      }
-    : {
-        receiptCode: {
-          startsWith: `${prefix}${year}-${month}`,
-        },
-        quotationInstallmentId: null,
-      };
+  // const whereClause = isInstallment
+  //   ? {
+  //       receiptCode: {
+  //         startsWith: `${prefix}${year}-${month}`,
+  //       },
+  //       quotationInstallmentId: {
+  //         not: null,
+  //       },
+  //     }
+  //   : {
+  //       receiptCode: {
+  //         startsWith: `${prefix}${year}-${month}`,
+  //       },
+  //       quotationInstallmentId: null,
+  //     };
 
+  // Find the last receipt code with the same prefix and date
+  const whereClause = {
+    receiptCode: {
+      startsWith: `${prefix}${datePrefix}`,
+    },
+  };
+  
   const lastReceipt = await db.invoice.findFirst({
     where: whereClause,
     orderBy: {
