@@ -29,7 +29,13 @@ import { updateInstallmentStatus } from "@/actions/quotation/update-installment-
 import { useAction } from "@/hooks/use-action";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { CheckIcon, InfoIcon, PrinterIcon } from "lucide-react";
+import {
+  CheckIcon,
+  EyeIcon,
+  EyeOffIcon,
+  InfoIcon,
+  PrinterIcon,
+} from "lucide-react";
 import ConfirmActionButton from "@/components/confirm-action";
 import { useState } from "react";
 
@@ -44,6 +50,7 @@ const FormSchema = z.object({
       paidDate: z.date().nullable().optional(),
       billGroupId: z.number().nullable().optional(),
       remarks: z.string().optional(),
+      showPrice: z.boolean().optional(),
     })
   ),
 });
@@ -53,7 +60,7 @@ type FormData = z.infer<typeof FormSchema>;
 interface InstallmentTableProps {
   installments: QuotationInstallmentWithRelations[];
   quotationId: number;
-  quotationType: QuotationType
+  quotationType: QuotationType;
 }
 
 export default function InstallmentTable({
@@ -65,9 +72,9 @@ export default function InstallmentTable({
   const [generatingBillFor, setGeneratingBillFor] = useState<number | null>(
     null
   );
-  const [generatingReceiptFor, setGeneratingReceiptFor] = useState<number | null>(
-    null
-  );
+  const [generatingReceiptFor, setGeneratingReceiptFor] = useState<
+    number | null
+  >(null);
 
   const form = useForm<FormData>({
     resolver: zodResolver(FormSchema),
@@ -81,6 +88,7 @@ export default function InstallmentTable({
         paidDate: installment.paidDate,
         billGroupId: installment.billGroupId,
         remarks: installment.remarks || "",
+        showPrice: installment.showPrice ?? true,
       })),
     },
   });
@@ -117,7 +125,7 @@ export default function InstallmentTable({
         // Send billGroupDate only for new bill groups
         requestBody.billGroupDate = dueDate;
       }
-      
+
       // For existing bill groups, send empty body
 
       const response = await fetch(`/api/installments/${installmentId}`, {
@@ -146,7 +154,7 @@ export default function InstallmentTable({
       document.body.removeChild(a);
 
       toast.success("สร้างและดาวน์โหลดใบวางบิลสำเร็จ");
-      
+
       router.refresh();
     } catch (error) {
       console.error("Error generating bill:", error);
@@ -160,18 +168,23 @@ export default function InstallmentTable({
     }
   };
 
-  const handleGenerateReceipt = async (installmentId: number, receiptDate: string) => {
-
+  const handleGenerateReceipt = async (
+    installmentId: number,
+    receiptDate: string
+  ) => {
     try {
       setGeneratingReceiptFor(installmentId);
 
-      const response = await fetch(`/api/installments/${installmentId}/receipt`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ receiptDate }),
-      });
+      const response = await fetch(
+        `/api/installments/${installmentId}/receipt`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ receiptDate }),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -191,7 +204,6 @@ export default function InstallmentTable({
       document.body.removeChild(a);
 
       toast.success("สร้างและดาวน์โหลดใบเสร็จสำเร็จ");
-      
     } catch (error) {
       console.error("Error generating receipt:", error);
       toast.error(
@@ -223,7 +235,8 @@ export default function InstallmentTable({
             original.amount !== current.amount ||
             new Date(original.dueDate).toISOString().split("T")[0] !==
               current.dueDate ||
-            (original.remarks || "") !== (current.remarks || ""))
+            (original.remarks || "") !== (current.remarks || "") ||
+            (original.showPrice ?? true) !== (current.showPrice ?? true))
         );
       })
       .map((installment) => ({
@@ -236,10 +249,13 @@ export default function InstallmentTable({
             ? installment.paidDate || new Date()
             : null,
         remarks: installment.remarks || null,
+        showPrice: installment.showPrice ?? true,
       }));
 
     if (installmentUpdates.length === 0) {
-      toast.info("ไม่มีการเปลี่ยนแปลงสถานะการชำระ จำนวนเงิน วันครบกำหนด หรือหมายเหตุ");
+      toast.info(
+        "ไม่มีการเปลี่ยนแปลงสถานะการชำระ จำนวนเงิน วันครบกำหนด หรือหมายเหตุ"
+      );
       return;
     }
 
@@ -275,9 +291,13 @@ export default function InstallmentTable({
                     <TableHead className="font-semibold text-gray-700">
                       งวดที่
                     </TableHead>
+                    <TableHead className="font-semibold text-gray-700 text-center w-[80px]">
+                      แสดงราคา
+                    </TableHead>
                     <TableHead className="font-semibold text-gray-700 w-[150px]">
                       จำนวนเงิน (บาท)
                     </TableHead>
+
                     <TableHead className="font-semibold text-gray-700">
                       วันครบกำหนด / พิมพ์ใบวางบิล
                     </TableHead>
@@ -307,7 +327,34 @@ export default function InstallmentTable({
                       <TableCell className="font-medium text-gray-700 text-center">
                         <Badge variant="outline">{field.period}</Badge>
                       </TableCell>
-
+                      <TableCell className="text-center">
+                        <FormField
+                          control={form.control}
+                          name={`installments.${index}.showPrice`}
+                          render={({ field: formField }) => (
+                            <FormItem>
+                              <FormControl>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 w-8 p-0"
+                                  onClick={() =>
+                                    formField.onChange(!formField.value)
+                                  }
+                                >
+                                  {formField.value ? (
+                                    <EyeIcon className="h-4 w-4 text-gray-600" />
+                                  ) : (
+                                    <EyeOffIcon className="h-4 w-4 text-red-400" />
+                                  )}
+                                </Button>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </TableCell>
                       <TableCell className="text-right">
                         <FormField
                           control={form.control}
@@ -380,11 +427,13 @@ export default function InstallmentTable({
                               size="sm"
                               className="h-8 w-8 p-0"
                               disabled={
-                                generatingBillFor === form.getValues(`installments.${index}.id`) ||
+                                generatingBillFor ===
+                                  form.getValues(`installments.${index}.id`) ||
                                 form.formState.isDirty
                               }
                             >
-                              {generatingBillFor === form.getValues(`installments.${index}.id`) ? (
+                              {generatingBillFor ===
+                              form.getValues(`installments.${index}.id`) ? (
                                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600" />
                               ) : (
                                 <PrinterIcon className="h-4 w-4" />
@@ -493,6 +542,7 @@ export default function InstallmentTable({
                       paidDate: installment.paidDate,
                       billGroupId: installment.billGroupId,
                       remarks: installment.remarks || "",
+                      showPrice: installment.showPrice ?? true,
                     })),
                   });
                 }}
@@ -553,7 +603,11 @@ const InstallmentStatusCell = ({
   }
 
   if (noInvoice) {
-    return <TableCell className="text-center"><span className="text-gray-400 text-sm">-</span></TableCell>;
+    return (
+      <TableCell className="text-center">
+        <span className="text-gray-400 text-sm">-</span>
+      </TableCell>
+    );
   }
 
   return (
@@ -609,13 +663,18 @@ const ReceiptPrintCell = ({
   index: number;
   form: any;
   generatingReceiptFor: number | null;
-  handleGenerateReceipt: (installmentId: number, receiptDate: string) => Promise<void>;
+  handleGenerateReceipt: (
+    installmentId: number,
+    receiptDate: string
+  ) => Promise<void>;
   initialInstallment: QuotationInstallmentWithRelations;
 }) => {
   // Initialize with existing receiptDate from invoice, or current date
   const [receiptDate, setReceiptDate] = useState(() => {
     if (initialInstallment.invoice?.receiptDate) {
-      return new Date(initialInstallment.invoice.receiptDate).toISOString().split("T")[0];
+      return new Date(initialInstallment.invoice.receiptDate)
+        .toISOString()
+        .split("T")[0];
     }
     return new Date().toISOString().split("T")[0];
   });

@@ -165,14 +165,22 @@ const main = async () => {
   };
 
   // loop through all pages
+  let currentPageNumber = 1; // Track page number across all templates
   for (let i = 0; i < totalPages; i++) {
     const templatePage = await pdfDoc.embedPage(template.getPages()[i]);
     let page = pdfDoc.addPage();
     page.drawPage(templatePage);
 
-    drawStaticInfo(page, i + 1);
+    drawStaticInfo(page, currentPageNumber);
 
-    drawItemLists(page, pdfDoc, templatePage, config);
+    const result = drawItemLists(page, pdfDoc, templatePage, config, currentPageNumber);
+    // Update page reference and page number in case new pages were added
+    if (result) {
+      page = result.page;
+      currentPageNumber = result.pageNumber + 1; // Continue from the last page number + 1
+    } else {
+      currentPageNumber++; // Increment if no overflow occurred
+    }
   }
 
   const modifiedPdfBytes = await pdfDoc.save();
@@ -190,11 +198,13 @@ const drawItemLists = (
     font: PDFFont;
     size: number;
     lineHeight: number;
-  }
+  },
+  currentPageNumber: number
 ) => {
-  if (!_DATA || !_FONT) return;
+  if (!_DATA || !_FONT) return { page, pageNumber: currentPageNumber };
 
   let lineStart = ITEM_Y_Start;
+  let pageNumber = currentPageNumber;
 
   // write item list
   _DATA?.lists?.forEach((list, index) => {
@@ -202,6 +212,7 @@ const drawItemLists = (
       lineStart -= config.lineHeight; // space between main items
     }
 
+    const previousPage = page;
     const mainItemRes = validatePageArea(
       page,
       pdfDoc,
@@ -222,7 +233,14 @@ const drawItemLists = (
     lineStart = mainItemRes.lineStart;
     page = mainItemRes.page;
 
+    // Check if a new page was created
+    if (page !== previousPage) {
+      pageNumber++;
+      drawStaticInfo(page, pageNumber);
+    }
+
     if (list.description) {
+      const previousPageDesc = page;
       const mainDescriptionRes = validatePageArea(
         page,
         pdfDoc,
@@ -242,8 +260,16 @@ const drawItemLists = (
 
       lineStart = mainDescriptionRes.lineStart;
       page = mainDescriptionRes.page;
+
+      // Check if a new page was created
+      if (page !== previousPageDesc) {
+        pageNumber++;
+        drawStaticInfo(page, pageNumber);
+      }
     }
   });
+
+  return { page, pageNumber };
 };
 
 const writeMainItem = (
@@ -295,22 +321,27 @@ const writeMainItem = (
     amount = data.price ?? 0;
   }
 
-  const unitPriceText = unitPrice.toLocaleString("th-TH", CURRENCY_FORMAT);
+  // Show price only if showPrice is true for installment or if it's not an installment
+  const shouldShowPrice = _INSTALLMENT_DATA?.showPrice || !_INSTALLMENT_DATA;
 
-  currentPage.drawText(unitPriceText, {
-    x: columnPosition.unitPrice + 44 - getTextWidth(unitPriceText, config),
-    y: lineStart,
-    maxWidth: 20,
-    ...config,
-  });
+  if (shouldShowPrice) {
+    const unitPriceText = unitPrice.toLocaleString("th-TH", CURRENCY_FORMAT);
 
-  const amountText = amount.toLocaleString("th-TH", CURRENCY_FORMAT);
-  currentPage.drawText(amountText, {
-    x: columnPosition.amount + 44 - getTextWidth(amountText, config),
-    y: lineStart,
-    maxWidth: 50,
-    ...config,
-  });
+    currentPage.drawText(unitPriceText, {
+      x: columnPosition.unitPrice + 44 - getTextWidth(unitPriceText, config),
+      y: lineStart,
+      maxWidth: 20,
+      ...config,
+    });
+
+    const amountText = amount.toLocaleString("th-TH", CURRENCY_FORMAT);
+    currentPage.drawText(amountText, {
+      x: columnPosition.amount + 44 - getTextWidth(amountText, config),
+      y: lineStart,
+      maxWidth: 50,
+      ...config,
+    });
+  }
 
   const bounding = getBoundingBox(
     itemName,
@@ -389,7 +420,7 @@ const writeMainDescription = (
   return totalHeight;
 };
 
-const drawHeaderInfo = (page: PDFPage) => {
+const drawHeaderInfo = (page: PDFPage, pageNumber: number) => {
   if (!_FONT) return;
   const X_Start = 480;
   const Y_Start = 790;
@@ -399,7 +430,7 @@ const drawHeaderInfo = (page: PDFPage) => {
     lineHeight: 16,
   };
 
-  page.drawText("1", {
+  page.drawText(pageNumber.toString(), {
     x: 530,
     y: 790,
     maxWidth: 100,
@@ -593,7 +624,7 @@ const drawPriceInfo = (
 const drawStaticInfo = (page: PDFPage, currentPageNumber: number) => {
   if (!_DATA) return;
 
-  drawHeaderInfo(page);
+  drawHeaderInfo(page, currentPageNumber);
 
   drawCustomerInfo(page);
 

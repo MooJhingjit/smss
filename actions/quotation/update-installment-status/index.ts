@@ -48,6 +48,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
           amount?: number;
           dueDate?: Date;
           remarks?: string | null;
+          showPrice?: boolean;
         } = {
           status: update.status,
           paidDate: update.status === "paid" ? (update.paidDate || new Date()) : null,
@@ -67,6 +68,11 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         // If remarks is provided, update it
         if (update.remarks !== undefined) {
           updateData.remarks = update.remarks;
+        }
+
+        // If showPrice is provided, update it
+        if (update.showPrice !== undefined) {
+          updateData.showPrice = update.showPrice;
         }
 
         const updatedInstallment = await tx.quotationInstallment.update({

@@ -349,23 +349,28 @@ const writeMainItem = (
     amount = data.price ?? 0;
   }
 
-  const unitPriceText = unitPrice.toLocaleString("th-TH", CURRENCY_FORMAT);
+  // Show price only if showPrice is true for installment or if it's not an installment
+  const shouldShowPrice = _INSTALLMENT_DATA?.showPrice || !_INSTALLMENT_DATA;
 
-  currentPage.drawText(unitPriceText, {
-    x: columnPosition.unitPrice + 44 - getTextWidth(unitPriceText, config),
-    y: lineStart,
-    maxWidth: 20,
-    ...config,
-  });
+  if (shouldShowPrice) {
+    const unitPriceText = unitPrice.toLocaleString("th-TH", CURRENCY_FORMAT);
 
-  const amountText = amount.toLocaleString("th-TH", CURRENCY_FORMAT);
+    currentPage.drawText(unitPriceText, {
+      x: columnPosition.unitPrice + 44 - getTextWidth(unitPriceText, config),
+      y: lineStart,
+      maxWidth: 20,
+      ...config,
+    });
 
-  currentPage.drawText(amountText, {
-    x: columnPosition.amount + 44 - getTextWidth(amountText, config),
-    y: lineStart,
-    maxWidth: 50,
-    ...config,
-  });
+    const amountText = amount.toLocaleString("th-TH", CURRENCY_FORMAT);
+
+    currentPage.drawText(amountText, {
+      x: columnPosition.amount + 44 - getTextWidth(amountText, config),
+      y: lineStart,
+      maxWidth: 50,
+      ...config,
+    });
+  }
 
   const bounding = getBoundingBox(
     data.name,

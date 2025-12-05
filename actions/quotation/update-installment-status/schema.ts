@@ -9,5 +9,6 @@ export const schema = z.object({
     dueDate: z.date().optional(),
     paidDate: z.date().optional().nullable(),
     remarks: z.string().optional().nullable(),
+    showPrice: z.boolean().optional(),
   })),
 });

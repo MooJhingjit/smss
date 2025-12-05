@@ -7,7 +7,18 @@ import {
   User,
 } from "@prisma/client";
 import { PDFDocument, PDFEmbeddedPage, PDFFont, PDFPage } from "pdf-lib";
-import { getBoundingBox, PDFDateFormat, loadPdfAssets, validatePageArea, getTextWidth, getPaymentCondition, getBillDueDate, convertToThaiBahtText, getCustomerNameWithBranch, formatInstallmentText } from "./pdf.helpers";
+import {
+  getBoundingBox,
+  PDFDateFormat,
+  loadPdfAssets,
+  validatePageArea,
+  getTextWidth,
+  getPaymentCondition,
+  getBillDueDate,
+  convertToThaiBahtText,
+  getCustomerNameWithBranch,
+  formatInstallmentText,
+} from "./pdf.helpers";
 import { QuotationInstallmentWithRelations } from "@/types";
 
 type QuotationWithRelations = Quotation & {
@@ -18,9 +29,9 @@ type QuotationWithRelations = Quotation & {
   installmentData?: QuotationInstallmentWithRelations | null;
 };
 
-let _BILL_DATE = ""
-let _BILL_CODE = ""
-let _DATA: QuotationWithRelations | null = null
+let _BILL_DATE = "";
+let _BILL_CODE = "";
+let _DATA: QuotationWithRelations | null = null;
 let _INSTALLMENT_DATA: QuotationInstallmentWithRelations | null = null;
 let _FONT: PDFFont | null = null;
 
@@ -40,12 +51,10 @@ const columnPosition = {
   amount: ITEM_X_Start + 465,
 };
 
-
 const CURRENCY_FORMAT = {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 };
-
 
 const getData = async (
   id: number,
@@ -103,7 +112,11 @@ const getData = async (
   return quotation;
 };
 
-export const generateInvoice = async (id: number, defaultDate: string, installmentId?: number) => {
+export const generateInvoice = async (
+  id: number,
+  defaultDate: string,
+  installmentId?: number
+) => {
   try {
     if (!id) {
       throw new Error("Invalid quotation ID");
@@ -130,11 +143,9 @@ const main = async () => {
   if (!_DATA) return;
   // list start position
 
-  const templates = [
-    "pdf/service-receipt-invoice-to-customer-template.pdf"
-  ];
+  const templates = ["pdf/service-receipt-invoice-to-customer-template.pdf"];
 
-  let results = []
+  let results = [];
 
   for (const templatePath of templates) {
     const { pdfDoc, font, template } = await loadPdfAssets(templatePath);
@@ -146,22 +157,25 @@ const main = async () => {
       font: _FONT,
     };
 
-    const totalPages = 3
+    const totalPages = 3;
 
     // loop through all pages
+    let currentPageNumber = 1; // Track page number across all templates
     for (let i = 0; i < totalPages; i++) {
       const templatePage = await pdfDoc.embedPage(template.getPages()[i]);
       let page = pdfDoc.addPage();
       page.drawPage(templatePage);
 
-      drawStaticInfo(page, i + 1);
+      drawStaticInfo(page, currentPageNumber);
 
-      drawItemLists(
-        page,
-        pdfDoc,
-        templatePage,
-        config
-      )
+      const result = drawItemLists(page, pdfDoc, templatePage, config, currentPageNumber);
+      // Update page reference and page number in case new pages were added
+      if (result) {
+        page = result.page;
+        currentPageNumber = result.pageNumber + 1; // Continue from the last page number + 1
+      } else {
+        currentPageNumber++; // Increment if no overflow occurred
+      }
     }
 
     const modifiedPdfBytes = await pdfDoc.save();
@@ -183,11 +197,13 @@ const drawItemLists = (
     font: PDFFont;
     size: number;
     lineHeight: number;
-  }
+  },
+  currentPageNumber: number
 ) => {
-  if (!_DATA || !_FONT) return;
+  if (!_DATA || !_FONT) return { page, pageNumber: currentPageNumber };
 
   let lineStart = ITEM_Y_Start;
+  let pageNumber = currentPageNumber;
 
   // write item list
   _DATA?.lists?.forEach((list, index) => {
@@ -195,6 +211,7 @@ const drawItemLists = (
       lineStart -= config.lineHeight; // space between main items
     }
 
+    const previousPage = page;
     const mainItemRes = validatePageArea(
       page,
       pdfDoc,
@@ -203,12 +220,26 @@ const drawItemLists = (
       LIST_END_AT,
       ITEM_Y_Start,
       (currentPage: PDFPage, currentLineStart: number) =>
-        writeMainItem(currentPage, index, list, currentLineStart, config, pdfDoc)
+        writeMainItem(
+          currentPage,
+          index,
+          list,
+          currentLineStart,
+          config,
+          pdfDoc
+        )
     );
     lineStart = mainItemRes.lineStart;
     page = mainItemRes.page;
 
+    // Check if a new page was created
+    if (page !== previousPage) {
+      pageNumber++;
+      drawStaticInfo(page, pageNumber);
+    }
+
     if (list.description) {
+      const previousPageDesc = page;
       const mainDescriptionRes = validatePageArea(
         page,
         pdfDoc,
@@ -228,6 +259,12 @@ const drawItemLists = (
 
       lineStart = mainDescriptionRes.lineStart;
       page = mainDescriptionRes.page;
+
+      // Check if a new page was created
+      if (page !== previousPageDesc) {
+        pageNumber++;
+        drawStaticInfo(page, pageNumber);
+      }
     }
   });
 
@@ -235,6 +272,7 @@ const drawItemLists = (
   if (_INSTALLMENT_DATA) {
     lineStart -= config.lineHeight; // Add spacing before installment info
 
+    const previousPageInstallment = page;
     const installmentRes = validatePageArea(
       page,
       pdfDoc,
@@ -243,19 +281,21 @@ const drawItemLists = (
       LIST_END_AT,
       ITEM_Y_Start,
       (currentPage: PDFPage, currentLineStart: number) =>
-        writeInstallmentInfo(
-          currentPage,
-          currentLineStart,
-          config,
-          pdfDoc
-        )
+        writeInstallmentInfo(currentPage, currentLineStart, config, pdfDoc)
     );
 
     lineStart = installmentRes.lineStart;
     page = installmentRes.page;
+
+    // Check if a new page was created
+    if (page !== previousPageInstallment) {
+      pageNumber++;
+      drawStaticInfo(page, pageNumber);
+    }
   }
 
-}
+  return { page, pageNumber };
+};
 
 const writeMainItem = (
   currentPage: PDFPage,
@@ -294,31 +334,35 @@ const writeMainItem = (
     ...config,
   });
 
-
   // Use installment amounts if available, otherwise use original list data
-  const unitPriceValue = _INSTALLMENT_DATA ? 
-    _INSTALLMENT_DATA.amount :
-    (data.unitPrice || 0);
-  const unitPrice = unitPriceValue.toLocaleString("th-TH", CURRENCY_FORMAT);
+  const unitPriceValue = _INSTALLMENT_DATA
+    ? _INSTALLMENT_DATA.amount
+    : data.unitPrice || 0;
+  // Show price only if showPrice is true for installment or if it's not an installment
+  const shouldShowPrice = _INSTALLMENT_DATA?.showPrice || !_INSTALLMENT_DATA;
 
-  currentPage.drawText(unitPrice, {
-    x: columnPosition.unitPrice + 44 - getTextWidth(unitPrice, config),
-    y: lineStart,
-    maxWidth: 20,
-    ...config,
-  });
+  if (shouldShowPrice) {
+    const unitPrice = unitPriceValue.toLocaleString("th-TH", CURRENCY_FORMAT);
 
-  const amountValue = _INSTALLMENT_DATA ?
-    _INSTALLMENT_DATA.amount :
-    (data.price || 0);
-  const amountText = amountValue.toLocaleString("th-TH", CURRENCY_FORMAT);
-    
-  currentPage.drawText(amountText, {
-    x: columnPosition.amount + 44 - getTextWidth(amountText, config),
-    y: lineStart,
-    maxWidth: 50,
-    ...config,
-  });
+    currentPage.drawText(unitPrice, {
+      x: columnPosition.unitPrice + 44 - getTextWidth(unitPrice, config),
+      y: lineStart,
+      maxWidth: 20,
+      ...config,
+    });
+
+    const amountValue = _INSTALLMENT_DATA
+      ? _INSTALLMENT_DATA.amount
+      : data.price || 0;
+    const amountText = amountValue.toLocaleString("th-TH", CURRENCY_FORMAT);
+
+    currentPage.drawText(amountText, {
+      x: columnPosition.amount + 44 - getTextWidth(amountText, config),
+      y: lineStart,
+      maxWidth: 50,
+      ...config,
+    });
+  }
 
   const bounding = getBoundingBox(
     data.name,
@@ -405,9 +449,7 @@ const writeInstallmentInfo = (
   return installmentBounding.height / 10;
 };
 
-const drawHeaderInfo = (
-  page: PDFPage,
-) => {
+const drawHeaderInfo = (page: PDFPage, pageNumber: number) => {
   if (!_FONT) return;
   const config = {
     font: _FONT,
@@ -415,7 +457,7 @@ const drawHeaderInfo = (
     lineHeight: 16,
   };
 
-  page.drawText("1", {
+  page.drawText(pageNumber.toString(), {
     x: 530,
     y: 790,
     maxWidth: 100,
@@ -438,9 +480,9 @@ const drawCustomerInfo = (page: PDFPage) => {
     contact: _DATA?.overrideContactName ?? _DATA?.contact?.contact,
     email: _DATA?.overrideContactEmail ?? _DATA?.contact?.email,
     phone: _DATA?.overrideContactPhone ?? _DATA?.contact?.phone,
-  }
-    if (!customer) {
-    return
+  };
+  if (!customer) {
+    return;
   }
 
   const Y_Start = 702;
@@ -474,7 +516,6 @@ const drawCustomerInfo = (page: PDFPage) => {
   //   .filter((item) => item)
   //   .join(", ");
 
-
   page.drawText(customer.taxId ?? "", {
     x: X_Start,
     y: Y_Start - config.lineHeight * 4,
@@ -499,9 +540,8 @@ const drawCustomerInfo = (page: PDFPage) => {
     ...config,
   });
 
-
   // right side
-  const quotation = _DATA
+  const quotation = _DATA;
 
   const rightXStart = 500;
 
@@ -527,7 +567,6 @@ const drawCustomerInfo = (page: PDFPage) => {
     ...config,
   });
 
-
   const seller = quotation?.seller;
   page.drawText(seller?.name ?? "", {
     x: rightXStart,
@@ -543,7 +582,9 @@ const drawCustomerInfo = (page: PDFPage) => {
     ...config,
   });
 
-  const paymentCondition = getPaymentCondition(quotation?.paymentCondition ?? "");
+  const paymentCondition = getPaymentCondition(
+    quotation?.paymentCondition ?? ""
+  );
   page.drawText(paymentCondition, {
     x: rightXStart,
     y: Y_Start - config.lineHeight * 3,
@@ -551,15 +592,16 @@ const drawCustomerInfo = (page: PDFPage) => {
     ...config,
   });
 
-  const dueDate = getBillDueDate(new Date(_BILL_DATE), quotation?.paymentCondition ?? "");
+  const dueDate = getBillDueDate(
+    new Date(_BILL_DATE),
+    quotation?.paymentCondition ?? ""
+  );
   page.drawText(PDFDateFormat(dueDate), {
     x: rightXStart,
     y: Y_Start - config.lineHeight * 4,
     maxWidth: 100,
     ...config,
   });
-
-
 };
 
 const drawPriceInfo = (
@@ -608,10 +650,10 @@ const drawPriceInfo = (
   });
 
   // Price text - use installment amount if available, otherwise use grandTotal
-  const amountForThaiBaht = _INSTALLMENT_DATA ? 
-    _INSTALLMENT_DATA.amountWithVat : 
-    parseFloat(grandTotal.replace(/,/g, ""));
-    
+  const amountForThaiBaht = _INSTALLMENT_DATA
+    ? _INSTALLMENT_DATA.amountWithVat
+    : parseFloat(grandTotal.replace(/,/g, ""));
+
   const thaiBahtText = convertToThaiBahtText(amountForThaiBaht);
   page.drawText(thaiBahtText, {
     x: ITEM_X_Start + 30,
@@ -621,27 +663,25 @@ const drawPriceInfo = (
   });
 };
 
-const drawStaticInfo = (
-  page: PDFPage,
-  currentPageNumber: number
-) => {
+const drawStaticInfo = (page: PDFPage, currentPageNumber: number) => {
   if (!_DATA) return;
 
-  drawHeaderInfo(page);
+  drawHeaderInfo(page, currentPageNumber);
 
   drawCustomerInfo(page);
 
   drawPriceInfo(page, {
     discount: _DATA?.discount?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
-    tax: _INSTALLMENT_DATA ? 
-      (_INSTALLMENT_DATA.amountWithVat - _INSTALLMENT_DATA.amount).toLocaleString("th-TH", CURRENCY_FORMAT) :
-      (_DATA?.tax?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? ""),
-    totalPrice: _INSTALLMENT_DATA ?
-      _INSTALLMENT_DATA.amount.toLocaleString("th-TH", CURRENCY_FORMAT) :
-      (_DATA?.totalPrice?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? ""),
-    grandTotal: _INSTALLMENT_DATA ?
-      _INSTALLMENT_DATA.amountWithVat.toLocaleString("th-TH", CURRENCY_FORMAT) :
-      (_DATA?.grandTotal?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? ""),
+    tax: _INSTALLMENT_DATA
+      ? (
+          _INSTALLMENT_DATA.amountWithVat - _INSTALLMENT_DATA.amount
+        ).toLocaleString("th-TH", CURRENCY_FORMAT)
+      : _DATA?.tax?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
+    totalPrice: _INSTALLMENT_DATA
+      ? _INSTALLMENT_DATA.amount.toLocaleString("th-TH", CURRENCY_FORMAT)
+      : _DATA?.totalPrice?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
+    grandTotal: _INSTALLMENT_DATA
+      ? _INSTALLMENT_DATA.amountWithVat.toLocaleString("th-TH", CURRENCY_FORMAT)
+      : _DATA?.grandTotal?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
   });
-
 };

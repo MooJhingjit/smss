@@ -42,7 +42,15 @@ export const PurchasePreviewModal = () => {
       queryClient.invalidateQueries({ queryKey });
       toast.success("สร้างใบสั่งซื้อ(PO) สำเร็จ");
       onClose();
+      window.location.reload();
     },
+    // failed, wait 2 seconds and reload
+    onError: (error: any) => {
+      setTimeout(() => {
+        // reload the page after 2 seconds 
+        window.location.reload();
+      }, 1000);
+    }
   });
 
   const execute = () => {
@@ -59,6 +67,7 @@ export const PurchasePreviewModal = () => {
     <ResponsiveDialog 
       open={isOpen} 
       onOpenChange={onClose}
+      classNames="lg:max-w-2xl"
       title="สร้างใบสั่งซื้อ(PO)"
       description=""
       
