@@ -48,7 +48,11 @@ const getData = async (
 ): Promise<PurchaseOrderWithRelations | null> => {
   const purchaseOrder = await db.purchaseOrder.findUnique({
     include: {
-      purchaseOrderItems: true,
+      purchaseOrderItems: {
+        orderBy: {
+          order: "asc",
+        },
+      },
       vendor: true,
     },
     where: {

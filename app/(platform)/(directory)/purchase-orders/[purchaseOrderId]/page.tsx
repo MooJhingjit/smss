@@ -20,6 +20,9 @@ const getData = async (id: string) => {
         include: {
           items: true,
         },
+        orderBy: {
+          order: "asc",
+        },
       },
     },
   });

@@ -111,6 +111,7 @@ export async function POST(req: NextRequest) {
                     (quotationList.cost ?? 0) * (quotationList.quantity ?? 1),
                   unitPrice: quotationList.cost,
                   type: quotationList.productType as ProductType,
+                  order: quotationList.order,
                   status: "pending",
                 },
               });
