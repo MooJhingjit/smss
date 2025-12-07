@@ -7,5 +7,7 @@ export const schema = z.object({
   unitPrice: z.number().positive(),
   unit: z.string(),
   quantity: z.number().positive(),
+  discount: z.number(),
+  extraCost: z.number(),
   description: z.string().optional(),
 });

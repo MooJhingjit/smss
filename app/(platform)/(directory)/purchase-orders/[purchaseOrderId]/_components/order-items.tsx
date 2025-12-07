@@ -102,9 +102,33 @@ export default function PurchaseOrderItems({
       key: "quantity",
       render: (item: PurchaseOrderItemWithRelations) => {
         const total = item.items.length;
+        return <p>{total}</p>;
+      },
+    },
+    {
+      name: "ส่วนลด",
+      key: "discount",
+      render: (item: PurchaseOrderItemWithRelations) => {
         return (
           <p>
-            {total}
+            {item.discount?.toLocaleString("th-TH", {
+              style: "currency",
+              currency: "THB",
+            })}
+          </p>
+        );
+      },
+    },
+     {
+      name: "ต้นทุนเพิ่ม",
+      key: "extraCost",
+      render: (item: PurchaseOrderItemWithRelations) => {
+        return (
+          <p>
+            {item.extraCost?.toLocaleString("th-TH", {
+              style: "currency",
+              currency: "THB",
+            })}
           </p>
         );
       },

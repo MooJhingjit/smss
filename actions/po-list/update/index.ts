@@ -8,10 +8,23 @@ import { updatePurchaseOrderSummary } from "@/app/services/service.purchase-orde
 import { updateAndLog } from "@/lib/log-service";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-  const { id, price, unitPrice, unit, quantity, description } = data;
+  const { id, price, unitPrice, unit, quantity, description, discount = 0, extraCost = 0 } = data;
 
   let purchaseOrderItem;
   try {
+    // Get the current item to check if withholdingTaxEnabled
+    const currentItem = await db.purchaseOrderItem.findUnique({
+      where: { id },
+    });
+
+    if (!currentItem) {
+      return { error: "Item not found." };
+    }
+
+    // Calculate net price and withholding tax if enabled
+    const netPrice = price - discount + extraCost;
+    const withholdingTax = currentItem.withholdingTaxEnabled ? netPrice * 0.03 : 0;
+
     // purchaseOrderItem = await db.purchaseOrderItem.update({
       purchaseOrderItem = await updateAndLog({
       model: "purchaseOrderItem",
@@ -25,6 +38,9 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         unit,
         // quantity,
         description,
+        discount,
+        extraCost,
+        withholdingTax,
       },
     });
 

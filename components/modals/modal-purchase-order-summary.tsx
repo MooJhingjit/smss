@@ -22,13 +22,13 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
+} from "@/components/ui/tooltip";
 import { InfoIcon } from "lucide-react";
 
 export const PurchaseOrderSummaryModal = () => {
   const modal = usePurchaseOrderSummaryModal();
   const data = modal.data;
-  console.log(data)
+  console.log(data);
 
   if (!data) {
     return null;
@@ -39,7 +39,6 @@ export const PurchaseOrderSummaryModal = () => {
       <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
           <DialogTitle>
-
             <div className="flex space-x-1 items-center">
               <span> สรุปรายการสั่งซื้อ {data?.code}</span>
             </div>
@@ -51,7 +50,6 @@ export const PurchaseOrderSummaryModal = () => {
   );
 };
 
-
 type FormInput = {
   discount: number;
   extraCost: number;
@@ -61,29 +59,24 @@ type FormInput = {
   grandTotal: number;
   totalPrice: number;
 };
-function MainForm({
-  data,
-}: {
-  data: PurchaseOrderWithRelations;
-}) {
+function MainForm({ data }: { data: PurchaseOrderWithRelations }) {
   const {
     register,
     handleSubmit,
     isDirty,
     price,
+    discount,
+    extraCost,
     vat,
     grandTotal,
     onReset,
     onSubmit,
     priceBeforeVat,
-    isManual
+    isManual,
   } = useBillingInfo({ data });
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className=""
-    >
+    <form onSubmit={handleSubmit(onSubmit)} className="">
       <div className="grid grid-cols-12   gap-6">
         <ItemList label="ราคา">
           {isManual ? (
@@ -102,25 +95,31 @@ function MainForm({
             }) ?? 0
           )}
         </ItemList>
-        <ItemList label="ส่วนลด">
-          <Input
-            id="discount"
-            {...register("discount")}
-            step={0.01}
-            type="number"
-            className=" border border-gray-300 text-right px-2 text-xs focus:ring-0"
-            defaultValue={0}
-          />
+        <ItemList label="ส่วนลด" info="คำนวณจากรายการสินค้า">
+          {discount ? (
+            <div className="font-medium text-green-600">
+              -{" "}
+              {discount.toLocaleString("th-TH", {
+                style: "currency",
+                currency: "THB",
+              })}
+            </div>
+          ) : (
+            <div className="font-medium text-gray-600">0</div>
+          )}
         </ItemList>
-        <ItemList label="ต้นทุนเพิ่ม">
-          <Input
-            id="extraCost"
-            {...register("extraCost")}
-            type="number"
-            step={0.01}
-            className=" border border-gray-300 text-right px-2 text-xs focus:ring-0"
-            defaultValue={0}
-          />
+        <ItemList label="ต้นทุนเพิ่ม" info="คำนวณจากรายการสินค้า">
+          {extraCost ? (
+            <div className="font-medium text-red-600">
+              +{" "}
+              {extraCost.toLocaleString("th-TH", {
+                style: "currency",
+                currency: "THB",
+              })}
+            </div>
+          ) : (
+            <div className="font-medium text-gray-600">0</div>
+          )}
         </ItemList>
         <ItemList label="ราคาก่อนหักภาษี">
           <div className="font-medium text-gray-900">
@@ -183,8 +182,6 @@ function MainForm({
   );
 }
 
-
-
 const ItemList = ({
   label,
   info,
@@ -198,10 +195,16 @@ const ItemList = ({
     <div className="col-span-12 pt-2">
       <div className=" flex justify-between items-center px-6 h-full">
         <div className="flex space-x-2 items-center">
-          {label && <p className="text-sm leading-6 text-gray-600 max-w-[150px] whitespace-nowrap">{label}</p>}
+          {label && (
+            <p className="text-sm leading-6 text-gray-600 max-w-[150px] whitespace-nowrap">
+              {label}
+            </p>
+          )}
           {info && <HoverInfo message={info} />}
         </div>
-        <div className="w-[220px] flex justify-end items-center">{children}</div>
+        <div className="w-[220px] flex justify-end items-center">
+          {children}
+        </div>
       </div>
     </div>
   );
@@ -219,5 +222,5 @@ const HoverInfo = ({ message }: { message: string }) => {
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
-  )
-}
+  );
+};

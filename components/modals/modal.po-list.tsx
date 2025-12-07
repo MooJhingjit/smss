@@ -65,6 +65,8 @@ export const PurchaseOrderListModal = () => {
     unitPrice: z.string().min(1, { message: "Unit price is required" }),
     unit: z.string().min(1, { message: "Unit is required" }),
     quantity: z.string().min(1, { message: "Quantity is required" }),
+    discount: z.string().optional(),
+    extraCost: z.string().optional(),
     description: z.string().optional(),
     type: z.enum(["product", "service"]),
   });
@@ -78,6 +80,8 @@ export const PurchaseOrderListModal = () => {
       unit: defaultData?.unit ?? "",
       price: defaultData?.price ? defaultData.price.toString() : "",
       quantity: defaultData?.quantity ? defaultData.quantity.toString() : "",
+      discount: defaultData?.discount ? defaultData.discount.toString() : "0",
+      extraCost: defaultData?.extraCost ? defaultData.extraCost.toString() : "0",
       description: defaultData?.description ?? "",
       type: defaultData?.type ?? "product",
     },
@@ -101,6 +105,8 @@ export const PurchaseOrderListModal = () => {
       unit: defaultData?.unit ?? "",
       price: defaultData?.price ? defaultData.price.toString() : "",
       quantity: defaultData?.quantity ? defaultData.quantity.toString() : "",
+      discount: defaultData?.discount ? defaultData.discount.toString() : "0",
+      extraCost: defaultData?.extraCost ? defaultData.extraCost.toString() : "0",
       description: defaultData?.description ?? "",
       type: defaultData?.type ?? ("product" as const),
     };
@@ -151,6 +157,8 @@ export const PurchaseOrderListModal = () => {
         unitPrice: unitPrice,
         unit: data.unit,
         quantity,
+        discount: Number(data.discount ?? 0),
+        extraCost: Number(data.extraCost ?? 0),
         description: data.description ?? "",
         price: totalPrice,
       });
@@ -169,6 +177,8 @@ export const PurchaseOrderListModal = () => {
       unitPrice: unitPrice,
       unit: data.unit,
       quantity,
+      discount: Number(data.discount ?? 0),
+      extraCost: Number(data.extraCost ?? 0),
       description: data.description ?? "",
       type: data.type,
       purchaseOrderId: purchaseOrderRelations.id,
@@ -383,6 +393,36 @@ export const PurchaseOrderListModal = () => {
                         <FormLabel>ราคารวม</FormLabel>
                         <FormControl>
                           <Input type="number" readOnly {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Discount */}
+                  <FormField
+                    control={form.control}
+                    name="discount"
+                    render={({ field }) => (
+                      <FormItem className="col-span-1">
+                        <FormLabel>ส่วนลด</FormLabel>
+                        <FormControl>
+                          <Input type="number" step="0.01" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Extra Cost */}
+                  <FormField
+                    control={form.control}
+                    name="extraCost"
+                    render={({ field }) => (
+                      <FormItem className="col-span-1">
+                        <FormLabel>ต้นทุนเพิ่ม</FormLabel>
+                        <FormControl>
+                          <Input type="number" step="0.01" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

@@ -434,29 +434,38 @@ const drawRemarkInfo = (page: PDFPage) => {
     ...config,
   });
 
-  // withholdingTax summary
-  const withholdingTaxSummary = _DATA.purchaseOrderItems?.filter(item => item.withholdingTaxEnabled)
+  // Calculate totals dynamically from items
+  const items = _DATA.purchaseOrderItems ?? [];
+  
+  const totalPrice = items.reduce((acc, item) => acc + (item.price ?? 0), 0);
+  const totalDiscount = items.reduce((acc, item) => acc + (item.discount ?? 0), 0);
+  const totalExtraCost = items.reduce((acc, item) => acc + (item.extraCost ?? 0), 0);
+  const priceAfterAdjustments = totalPrice - totalDiscount + totalExtraCost;
+
+  // withholdingTax summary - calculate from each item's net price
+  const withholdingTaxSummary = items
+    .filter(item => item.withholdingTaxEnabled)
     .reduce((acc, item) => {
-      return acc + (item.withholdingTax ?? 0)
-    }, 0) ?? 0
+      // Calculate net price for each item (price - discount + extraCost)
+      const itemNetPrice = (item.price ?? 0) - (item.discount ?? 0) + (item.extraCost ?? 0);
+      return acc + (itemNetPrice * 0.03);
+    }, 0);
 
   if (withholdingTaxSummary) {
 
-    const withholdingTaxTotal = withholdingTaxSummary // (_DATA?.totalPrice ?? 0) * 0.03
-    const priceAfterTax = (_DATA?.grandTotal ?? 0) - withholdingTaxTotal
+    const withholdingTaxTotal = withholdingTaxSummary;
+    const vat = priceAfterAdjustments * 0.07;
+    const grandTotal = priceAfterAdjustments + vat;
+    const priceAfterTax = grandTotal - withholdingTaxTotal;
 
-    const items = [
+    const remarkItems = [
       {
         label: 'ราคาก่อนภาษี',
-        value: _DATA.totalPrice?.toLocaleString("th-TH", CURRENCY_FORMAT) + ' บาท'
+        value: priceAfterAdjustments.toLocaleString("th-TH", CURRENCY_FORMAT) + ' บาท'
       },
-      // {
-      //   label: 'หัก ณ ที่จ่าย 3%',
-      //   value: withholdingTaxSummary?.toLocaleString("th-TH", CURRENCY_FORMAT) + ' บาท'
-      // },
       {
         label: 'หัก ณ ที่จ่าย 3%',
-        value: withholdingTaxTotal?.toLocaleString("th-TH", CURRENCY_FORMAT) + ' บาท'
+        value: withholdingTaxTotal.toLocaleString("th-TH", CURRENCY_FORMAT) + ' บาท'
       },
       {
         label: 'ราคาหลังจากหัก ณ ที่จ่าย',
@@ -464,10 +473,10 @@ const drawRemarkInfo = (page: PDFPage) => {
       },
     ];
 
-    if (_DATA.extraCost) {
-      items.push({
+    if (totalExtraCost) {
+      remarkItems.push({
         label: '*ต้นทุนเพิ่ม',
-        value: _DATA.extraCost?.toLocaleString("th-TH", CURRENCY_FORMAT) + ' บาท'
+        value: totalExtraCost.toLocaleString("th-TH", CURRENCY_FORMAT) + ' บาท'
       })
     }
 
@@ -479,7 +488,7 @@ const drawRemarkInfo = (page: PDFPage) => {
 
       ...config,
     });
-    items.forEach((item, index) => {
+    remarkItems.forEach((item, index) => {
       page.drawText(`${item.label}: ${item.value}`, {
         x: 270,
         y: 190 - (index * 15),
@@ -501,37 +510,46 @@ const drawPriceInfo = (page: PDFPage) => {
 
   const columnPosition = 520;
 
+  // Calculate totals dynamically from items
+  const items = _DATA.purchaseOrderItems ?? [];
+  
+  const totalPrice = items.reduce((acc, item) => acc + (item.price ?? 0), 0);
+  const totalDiscount = items.reduce((acc, item) => acc + (item.discount ?? 0), 0);
+  const totalExtraCost = items.reduce((acc, item) => acc + (item.extraCost ?? 0), 0);
+  const priceAfterAdjustments = totalPrice - totalDiscount + totalExtraCost;
+  const vat = priceAfterAdjustments * 0.07;
+  const grandTotal = priceAfterAdjustments + vat;
 
-  page.drawText(_DATA.price?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "", {
-    x: columnPosition + 48 - getTextWidth(_DATA.price?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "", config),
+  page.drawText(totalPrice.toLocaleString("th-TH", CURRENCY_FORMAT), {
+    x: columnPosition + 48 - getTextWidth(totalPrice.toLocaleString("th-TH", CURRENCY_FORMAT), config),
     y: 187,
     maxWidth: 100,
     ...config,
   });
 
-  page.drawText(_DATA.discount?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "", {
-    x: columnPosition + 48 - getTextWidth(_DATA.discount?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "", config),
+  page.drawText(totalDiscount.toLocaleString("th-TH", CURRENCY_FORMAT), {
+    x: columnPosition + 48 - getTextWidth(totalDiscount.toLocaleString("th-TH", CURRENCY_FORMAT), config),
     y: 167,
     maxWidth: 100,
     ...config,
   });
 
-  page.drawText(_DATA.totalPrice?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "", {
-    x: columnPosition + 48 - getTextWidth(_DATA.totalPrice?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "", config),
+  page.drawText(priceAfterAdjustments.toLocaleString("th-TH", CURRENCY_FORMAT), {
+    x: columnPosition + 48 - getTextWidth(priceAfterAdjustments.toLocaleString("th-TH", CURRENCY_FORMAT), config),
     y: 144,
     maxWidth: 100,
     ...config,
   });
 
-  page.drawText(_DATA.vat?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "", {
-    x: columnPosition + 48 - getTextWidth(_DATA.vat?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "", config),
+  page.drawText(vat.toLocaleString("th-TH", CURRENCY_FORMAT), {
+    x: columnPosition + 48 - getTextWidth(vat.toLocaleString("th-TH", CURRENCY_FORMAT), config),
     y: 125,
     maxWidth: 100,
     ...config,
   });
 
-  page.drawText(_DATA.grandTotal?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "", {
-    x: columnPosition + 48 - getTextWidth(_DATA.grandTotal?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "", config),
+  page.drawText(grandTotal.toLocaleString("th-TH", CURRENCY_FORMAT), {
+    x: columnPosition + 48 - getTextWidth(grandTotal.toLocaleString("th-TH", CURRENCY_FORMAT), config),
     y: 106,
     maxWidth: 100,
     ...config,

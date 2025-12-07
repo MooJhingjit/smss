@@ -18,6 +18,8 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     type,
     description,
     productId,
+    discount,
+    extraCost,
   } = data;
 
   let purchaseOrderItem: PurchaseOrderItem;
@@ -32,6 +34,8 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         description,
         quantity,
         type,
+        discount,
+        extraCost,
       },
     });
 

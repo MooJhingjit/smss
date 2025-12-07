@@ -31,21 +31,31 @@ export default function BillingInfo({
         </div>
         <div className="flex items-center justify-between py-1">
           <dt className="text-gray-600">ส่วนลด</dt>
-          <dd className="font-medium text-gray-900">
-            {discount?.toLocaleString("th-TH", {
-              style: "currency",
-              currency: "THB",
-            }) ?? 0}
-          </dd>
+          {discount ? (
+            <dd className="font-medium text-green-600">
+              -{" "}
+              {discount.toLocaleString("th-TH", {
+                style: "currency",
+                currency: "THB",
+              })}
+            </dd>
+          ) : (
+            <dd className="font-medium text-gray-600">0</dd>
+          )}
         </div>
         <div className="flex items-center justify-between py-1">
           <dt className="text-gray-600">ต้นทุนเพิ่ม</dt>
-          <dd className="font-medium text-gray-900">
-            {extraCost?.toLocaleString("th-TH", {
-              style: "currency",
-              currency: "THB",
-            }) ?? 0}
-          </dd>
+          {extraCost ? (
+            <dd className="font-medium text-red-600">
+              +{" "}
+              {extraCost.toLocaleString("th-TH", {
+                style: "currency",
+                currency: "THB",
+              })}
+            </dd>
+          ) : (
+            <dd className="font-medium text-gray-600">0</dd>
+          )}
         </div>
         <div className="flex items-center justify-between py-1">
           <dt className="text-gray-600">ราคาก่อนหักภาษี</dt>

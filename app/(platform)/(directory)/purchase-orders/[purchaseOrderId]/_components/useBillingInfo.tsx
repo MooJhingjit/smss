@@ -6,8 +6,6 @@ import { updatePurchaseOrder } from "@/actions/po/update";
 import { toast } from "sonner";
 
 type FormInput = {
-    discount: number;
-    extraCost: number;
     price: number;
     tax: number;
     vat: number;
@@ -32,8 +30,6 @@ export default function useBillingInfo({ data }: UseBillingInfoProps) {
     } = useForm<FormInput>({
         mode: 'onChange',
         defaultValues: {
-            discount: data.discount ?? 0,
-            extraCost: data.extraCost ?? 0,
             price: data.price ?? 0,
             totalPrice: data.totalPrice ?? 0,
             tax: data.tax ?? 0,
@@ -42,10 +38,12 @@ export default function useBillingInfo({ data }: UseBillingInfoProps) {
         },
     });
 
+    // discount and extraCost are now calculated from PurchaseOrderItem, so they are read-only
+    const discount = data.discount ?? 0;
+    const extraCost = data.extraCost ?? 0;
+
     useEffect(() => {
         reset({
-            discount: data.discount ?? 0,
-            extraCost: data.extraCost ?? 0,
             price: data.price ?? 0,
             totalPrice: data.totalPrice ?? 0,
             tax: data.tax ?? 0,
@@ -55,31 +53,21 @@ export default function useBillingInfo({ data }: UseBillingInfoProps) {
     }, [data, reset]);
 
     const onChange = useCallback(() => {
-        const { discount, extraCost } = getValues();
-
-        const discountNum = Number(discount);
-        const extraCostNum = Number(extraCost);
-
         let tPrice = data.price ?? 0;
 
         if (isManual) {
             tPrice = Number(getValues('price'));
         }
 
-        const totalPrice = tPrice - discountNum + extraCostNum;
+        const totalPrice = tPrice - discount + extraCost;
         const vat = totalPrice * 0.07;
-        // const tax = totalPrice * 0.03;
 
         setValue('totalPrice', totalPrice);
         setValue('grandTotal', totalPrice + vat);
         setValue('vat', vat);
-        // setValue('tax', tax);
-    }, [getValues, setValue, data.price, isManual]);
+    }, [getValues, setValue, data.price, isManual, discount, extraCost]);
 
-    const discount = useWatch({ name: 'discount', control });
-    const extraCost = useWatch({ name: 'extraCost', control });
     const price = useWatch({ name: 'price', control });
-    // const tax = useWatch({ name: 'tax', control });
     const vat = useWatch({ name: 'vat', control });
     const grandTotal = useWatch({ name: 'grandTotal', control });
 
@@ -97,9 +85,6 @@ export default function useBillingInfo({ data }: UseBillingInfoProps) {
             ...formData,
             totalPrice: Number(formData.totalPrice),
             price: Number(formData.price),
-            discount: Number(formData.discount),
-            extraCost: Number(formData.extraCost),
-            // tax: Number(formData.tax),
             id: data.id,
             formType: 'billing',
         });
@@ -113,17 +98,7 @@ export default function useBillingInfo({ data }: UseBillingInfoProps) {
         if (isDirty) {
             onChange();
         }
-    }, [price, discount, extraCost, isDirty, onChange]);
-
-    // useEffect(() => {
-    //     if (!isDirty) return;
-
-    //     const { totalPrice } = getValues();
-    //     const vat = Number(totalPrice) * 0.07;
-    //     const grandTotal = Number(totalPrice) + vat
-
-    //     setValue('grandTotal', grandTotal);
-    // }, [isDirty, getValues, setValue]);
+    }, [price, isDirty, onChange]);
 
     const priceBeforeVat = getValues('totalPrice');
 

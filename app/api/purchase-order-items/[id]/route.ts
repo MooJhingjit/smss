@@ -37,8 +37,13 @@ export async function PUT(
     }
 
     if (body.withholdingTaxEnabled !== undefined) {
+      // Calculate net price (price - discount + extraCost) for withholding tax
+      const netPrice = (currentPurchaseOrderItem.price ?? 0) 
+        - (currentPurchaseOrderItem.discount ?? 0) 
+        + (currentPurchaseOrderItem.extraCost ?? 0);
+      
       const withholdingTax = calculateWithholdingTax(
-        currentPurchaseOrderItem.price ?? 0,
+        netPrice,
         payload.withholdingTaxEnabled
       );
       payload = {
@@ -53,9 +58,9 @@ export async function PUT(
         data: payload,
       });
 
-      // to deduct or add
+      // to deduct or add - use net price for calculation
       const withholdingTaxNumber = calculateWithholdingTax(
-        currentPurchaseOrderItem.price ?? 0,
+        netPrice,
         true
       );
 

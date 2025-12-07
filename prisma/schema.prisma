@@ -313,6 +313,8 @@ model PurchaseOrderItem {
   unitPrice                Float?
   unit                     String?
   quantity                 Int?
+  discount                 Float?                    @default(0)
+  extraCost                Float?                    @default(0)
   description              String?                   @db.Text
   type                     ProductType               @default(product)
   status                   PurchaseOrderItemStatus   @default(pending)
