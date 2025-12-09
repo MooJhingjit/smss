@@ -359,7 +359,7 @@ export const PurchaseOrderListModal = () => {
                           <Input
                             type="number"
                             {...field}
-                            readOnly={!isNewItem}
+                            // readOnly={!isNewItem}
                           />
                         </FormControl>
                         <FormMessage />

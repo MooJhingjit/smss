@@ -36,7 +36,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         price,
         unitPrice,
         unit,
-        // quantity,
+        quantity,
         description,
         discount,
         extraCost,
