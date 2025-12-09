@@ -15,7 +15,8 @@ import {
   ArrowRightIcon,
   ChevronsUpDown,
   ClipboardCheckIcon,
-  User,
+  HistoryIcon,
+  XIcon,
 } from "lucide-react";
 
 import {
@@ -24,14 +25,10 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import {
-  LockIcon,
   PrinterIcon,
   Send,
   Clock,
-  CheckCircle,
-  PenBoxIcon,
   InfoIcon,
-  Delete,
   Copy,
 } from "lucide-react";
 import { PurchaseOrderPaymentType, QuotationStatus } from "@prisma/client";
@@ -136,10 +133,7 @@ export const QuotationInfoModal = () => {
                     />
                   </div>
 
-                  <DeletePurchaseOrders
-                    quotationId={data.id}
-                    hasPurchaseOrders={!!data?.purchaseOrders?.length}
-                  />
+                  {/* <RollbackQuotation quotationId={data.id} quotation={data} /> */}
                 </div>
               </CollapsibleContent>
             </Collapsible>
@@ -1095,73 +1089,128 @@ const AssignedSeller = ({
   );
 };
 
-const DeletePurchaseOrders = ({
+const RollbackQuotation = ({
   quotationId,
-  hasPurchaseOrders,
+  quotation,
 }: {
   quotationId: number;
-  hasPurchaseOrders: boolean;
+  quotation: QuotationWithRelations;
 }) => {
+  // Check if rollback should be disabled
+  const hasInvoiceOrBillGroup =
+    (quotation.invoices && quotation.invoices.length > 0) ||
+    quotation.billGroupId !== null;
+
+  const hasInstallmentWithInvoiceOrBillGroup = quotation.installments?.some(
+    (installment) =>
+      (installment as any).invoice !== null || installment.billGroupId !== null
+  );
+
+  const canRollback =
+    !hasInvoiceOrBillGroup &&
+    !hasInstallmentWithInvoiceOrBillGroup &&
+    ((quotation.purchaseOrders && quotation.purchaseOrders.length > 0) ||
+      quotation.isLocked);
+
+  let disabledReason: string | null = null;
+  if (hasInvoiceOrBillGroup) {
+    disabledReason = "ใบเสนอราคานี้มีใบแจ้งหนี้หรืออยู่ในกลุ่มบิลแล้ว";
+  } else if (hasInstallmentWithInvoiceOrBillGroup) {
+    disabledReason = "มีงวดผ่อนชำระที่มีใบแจ้งหนี้หรืออยู่ในกลุ่มบิลแล้ว";
+  }
+
   const { mutate, isPending } = useMutation<
-    { message: string; deletedPurchaseOrders: number },
+    {
+      message: string;
+      deletedPurchaseOrders: number;
+      deletedInstallments: number;
+      deletedItems: number;
+    },
     Error,
     { quotationId: number }
   >({
     mutationFn: async (fields) => {
       const res = await fetch(
-        `/api/purchase-orders/quotation/${fields.quotationId}`,
+        `/api/quotations/rollback/${fields.quotationId}`,
         {
-          method: "DELETE",
+          method: "POST",
         }
       );
 
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(error.error || "Failed to delete purchase orders");
+        throw new Error(error.error || "Failed to rollback quotation");
       }
 
       return res.json();
     },
     onSuccess: async (data) => {
       toast.success(
-        `ลบใบสั่งซื้อสำเร็จ (${data.deletedPurchaseOrders} รายการ)`
+        `Rollback สำเร็จ (PO: ${data.deletedPurchaseOrders}, งวด: ${data.deletedInstallments})`
       );
-      // customRevalidatePath(`/quotations/${quotationId}`);
-      // reload the page
       window.location.reload();
     },
     onError: (error) => {
       console.error(error);
-      toast.error("เกิดข้อผิดพลาดในการลบใบสั่งซื้อ");
+      toast.error(error.message || "เกิดข้อผิดพลาดในการ rollback");
     },
   });
 
-  const handleDelete = () => {
+  const handleRollback = () => {
     mutate({ quotationId });
   };
 
-  if (!hasPurchaseOrders) {
-    return null;
+  if (!canRollback) {
+    if (!disabledReason) {
+      return null;
+    }
+    return (
+      <div className="bg-gray-50 p-2 text-center text-orange-500 text-xs">
+        <div className="flex items-center justify-center mb-1">
+          <XIcon className="w-4 h-4 inline-block mr-1" />
+          <p>ไม่สามารถ rollback ได้</p>
+        </div>
+        <p className="">{disabledReason}</p>
+        {/* <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="link"
+                disabled
+                className="inline-flex items-center px-2 py-1 rounded-md text-xs h-full text-gray-400"
+              >
+                <Delete className="w-4 h-4 mr-1" />
+                Rollback Quotation
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{disabledReason}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider> */}
+      </div>
+    );
   }
 
   return (
     <div className="bg-gray-50 p-2 flex items-center justify-center">
       <ConfirmActionButton
-        onConfirm={handleDelete}
+        onConfirm={handleRollback}
         disabled={isPending}
         warningMessage={[
-          "ใบสั่งซื้อทั้งหมดที่เกี่ยวข้องกับใบเสนอราคานี้จะถูกลบ"
+          "การ rollback จะลบใบสั่งซื้อ, รายการสินค้า, และงวดผ่อนชำระทั้งหมด",
+          "และจะรีเซ็ตสถานะใบเสนอราคากลับไปเป็นสถานะก่อนอนุมัติ",
         ]}
       >
         <Button
           variant="link"
           disabled={isPending}
-          className="inline-flex items-center px-2 py-1 rounded-md text-xs h-full  hover:text-red-700"
+          className="inline-flex items-center px-2 py-1 rounded-md text-xs h-full hover:text-red-700"
           asChild
         >
           <span>
-            <Delete className="w-4 h-4 mr-1" />
-            {isPending ? "กำลังลบ..." : "ลบใบสั่งซื้อทั้งหมด (PO)"}
+            <HistoryIcon className="w-4 h-4 inline-block mr-1" />
+            {isPending ? "กำลัง Rollback..." : "Rollback"}
           </span>
         </Button>
       </ConfirmActionButton>
