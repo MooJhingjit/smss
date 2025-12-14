@@ -7,4 +7,5 @@ export const schema = z.object({
   overrideContactName: z.string().optional(),
   overrideContactEmail: z.string().optional(),
   overrideContactPhone: z.string().optional(),
+  vatIncluded: z.boolean().optional(),
 });

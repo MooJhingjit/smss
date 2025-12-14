@@ -25,6 +25,7 @@ export async function PUT(
       "validPricePeriod",
       "type",
       "code",
+      "vatIncluded",
       "paymentCondition",
       "createdAt", // updage version
       "sellerId", // allow changing assigned seller

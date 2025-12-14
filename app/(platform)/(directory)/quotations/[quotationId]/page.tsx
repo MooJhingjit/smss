@@ -183,6 +183,7 @@ export default async function QuotationDetails(
         <div className="col-span-5">
           <QuotationLists
             isLocked={data.isLocked || (!isAdmin && isReadonly)}
+            vatIncluded={data.vatIncluded}
             quotationId={data.id}
             grandTotal={data.grandTotal}
             quotationType={data.type}

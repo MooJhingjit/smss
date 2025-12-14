@@ -17,7 +17,8 @@ export const groupQuotationByVendor = (
 };
 
 export const calculateQuotationItemPrice = (
-  items: QuotationList[]
+  items: QuotationList[],
+  vatIncluded: boolean = true
 ) => {
 
   // get total price and discount for each vendor
@@ -42,31 +43,7 @@ export const calculateQuotationItemPrice = (
   );
 
   const total = summary.totalPrice - summary.discount
-  const vat = total * 0.07
+  const vat = vatIncluded ? total * 0.07 : 0
   const grandTotal = total + vat
   return { ...summary, vat, grandTotal}
 };
-
-// export const summarizeQuotationTotalPrice = (quotationListsByVendor: {
-//   [key: number]: QuotationListWithRelations[];
-// }) => {
-//   let sumTotalPrice: number = 0;
-//   let sumDiscount: number = 0;
-//   let sumTotalTax: number = 0;
-
-//   Object.keys(quotationListsByVendor).map((vendorId) => {
-//     // loop through each vendor
-
-//     const lists = quotationListsByVendor[Number(vendorId)];
-//     const { totalPrice, discount, tax } =
-//       calculateQuotationItemPrice(lists);
-
-//     // summary for all quotations (all vendors)
-//     sumTotalPrice += totalPrice;
-//     sumDiscount += discount;
-//     sumTotalTax += tax;
-//   });
-
-//   const grandTotal = sumTotalPrice - sumDiscount + sumTotalTax
-//   return { sumTotalPrice, sumDiscount, sumTotalTax, grandTotal };
-// };

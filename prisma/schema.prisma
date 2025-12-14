@@ -160,6 +160,7 @@ model Quotation {
   deliveryPeriod        Int?
   validPricePeriod      Int?
   isLocked              Boolean                  @default(false)
+  vatIncluded           Boolean                  @default(true)
   billGroupId           Int?
   billGroup             BillGroup?               @relation(fields: [billGroupId], references: [id])
   approvedAt            DateTime?

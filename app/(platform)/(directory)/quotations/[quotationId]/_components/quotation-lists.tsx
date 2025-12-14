@@ -45,10 +45,11 @@ type Props = {
   remark: string;
   isLocked: boolean;
   grandTotal: number | null;
+  vatIncluded: boolean;
 };
 
 export default function QuotationLists(props: Props) {
-  const { quotationId, quotationType, remark, isLocked, grandTotal } = props;
+  const { quotationId, quotationType, remark, isLocked, grandTotal, vatIncluded} = props;
   const [quotationItems, setQuotationItems] = useState<
     QuotationListWithRelations[]
   >(props.data);
@@ -332,6 +333,7 @@ export default function QuotationLists(props: Props) {
           <div className="col-span-5 md:col-span-2">
             <BillingSummary
               isAdmin={isAdmin}
+              vatIncluded={vatIncluded}
               quotationType={quotationType}
               grandTotal={grandTotal}
               data={quotationItems}
@@ -345,12 +347,13 @@ export default function QuotationLists(props: Props) {
 
 const BillingSummary = (props: {
   isAdmin: boolean;
+  vatIncluded: boolean;
   quotationType: QuotationType;
   grandTotal: number | null;
   data: QuotationListWithRelations[];
 }) => {
-  const { isAdmin, data, quotationType, grandTotal } = props;
-  const summary = calculateQuotationItemPrice(data);
+  const { isAdmin, data, quotationType, grandTotal, vatIncluded } = props;
+  const summary = calculateQuotationItemPrice(data, vatIncluded);
 
   const { execute, isLoading } = useAction(updateServiceQuotationSummary, {
     onSuccess: (data) => {},
@@ -409,7 +412,9 @@ const BillingSummary = (props: {
             })}
           </dd>
         </div>
-        <div className="flex items-center justify-between py-4">
+        <div className={cn("flex items-center justify-between py-4", {
+          "line-through": !vatIncluded,
+        })}>
           <dt className="text-gray-600">7% Vat</dt>
           <dd className="font-medium text-gray-900">
             {summary.vat.toLocaleString("th-TH", {

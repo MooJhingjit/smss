@@ -23,6 +23,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import { ArrowDown, ChevronsUpDown, UserRoundCog } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const QuotationFormSchema = z.object({
   type: z.enum(["product", "service"]),
@@ -30,6 +31,7 @@ const QuotationFormSchema = z.object({
   overrideContactName: z.string().optional(),
   overrideContactEmail: z.string().optional(),
   overrideContactPhone: z.string().optional(),
+  vatIncluded: z.boolean(),
 });
 
 export const NewQuotationModal = () => {
@@ -45,6 +47,7 @@ export const NewQuotationModal = () => {
       overrideContactName: "",
       overrideContactEmail: "",
       overrideContactPhone: "",
+      vatIncluded: true,
     },
   });
 
@@ -68,6 +71,7 @@ export const NewQuotationModal = () => {
       overrideContactName: data.overrideContactName || undefined,
       overrideContactEmail: data.overrideContactEmail || undefined,
       overrideContactPhone: data.overrideContactPhone || undefined,
+      vatIncluded: data.vatIncluded,
     });
   }
 
@@ -140,6 +144,7 @@ export const NewQuotationModal = () => {
                     data={customerDetails}
                     form={form}
                   />
+                  
                 </div>
 
 
@@ -148,7 +153,26 @@ export const NewQuotationModal = () => {
             )}
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="flex items-center justify-end gap-4">
+            <FormField
+              control={form.control}
+              name="vatIncluded"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>
+                      รวม Vat
+                    </FormLabel>
+                  </div>
+                </FormItem>
+              )}
+            />
             <Button type="submit" disabled={handleCreate.isLoading}>
               {handleCreate.isLoading ? "กำลังสร้าง..." : "สร้าง"}
             </Button>

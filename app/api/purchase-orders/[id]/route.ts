@@ -156,7 +156,7 @@ export async function DELETE(
 
           if (updatedQuotation?.lists && updatedQuotation.lists.length > 0) {
             const { calculateQuotationItemPrice } = require("@/app/services/service.quotation");
-            const quotationSummary = calculateQuotationItemPrice(updatedQuotation.lists);
+            const quotationSummary = calculateQuotationItemPrice(updatedQuotation.lists, updatedQuotation.vatIncluded);
 
             await tx.quotation.update({
               where: { id: quotation.id },

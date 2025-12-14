@@ -10,7 +10,7 @@ import { generateQuotationCode } from "@/lib/generate-code.service";
 const handler = async (data: InputType): Promise<ReturnType> => {
   const userSession = await currentUser();
 
-  const { buyerId, type, overrideContactName, overrideContactEmail, overrideContactPhone } = data;
+  const { buyerId, type, overrideContactName, overrideContactEmail, overrideContactPhone, vatIncluded } = data;
   let quotation;
   try {
     if (!buyerId || !type) {
@@ -29,6 +29,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         overrideContactName: overrideContactName || null,
         overrideContactEmail: overrideContactEmail || null,
         overrideContactPhone: overrideContactPhone || null,
+        vatIncluded: vatIncluded ?? true,
         createdAt: today,
         updatedAt: today,
       },
@@ -44,7 +45,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
   } catch (error) {
     console.log("error", error);
     return {
-      error: "Failed to create.",
+      error: error instanceof Error ? error.message : "Failed to create.",
     };
   }
 

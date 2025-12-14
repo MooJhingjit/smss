@@ -85,7 +85,7 @@ export const generateQuotationPaper = async (id: number, date: string) => {
     // check if total price is not yet calculated
     if (!quotation.grandTotal) {
       const { totalPrice, discount, vat, grandTotal } =
-        calculateQuotationItemPrice(quotation.lists);
+        calculateQuotationItemPrice(quotation.lists, quotation.vatIncluded);
 
       temporaryQuotationTotalPrice = {
         totalPrice,

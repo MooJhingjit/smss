@@ -77,7 +77,17 @@ export async function POST(req: NextRequest) {
       })
     );
 
-    const quotationSummary = calculateQuotationItemPrice(quotationLists);
+    // get quotation
+    const quotation = await db.quotation.findUnique({
+      select: {
+        vatIncluded: true,
+      },
+      where: {
+        id: body.quotationId,
+      },
+    });
+
+    const quotationSummary = calculateQuotationItemPrice(quotationLists, quotation?.vatIncluded);
 
     // update total price, tax and total discount for quotation
     await db.quotation.update({

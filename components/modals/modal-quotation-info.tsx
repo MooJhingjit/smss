@@ -62,6 +62,7 @@ import { Input } from "../ui/custom-input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useAssignSellerModal } from "@/hooks/use-assign-seller-modal";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export const QuotationInfoModal = () => {
   const modal = useQuotationInfoModal();
@@ -133,7 +134,7 @@ export const QuotationInfoModal = () => {
                     />
                   </div>
 
-                  {/* <RollbackQuotation quotationId={data.id} quotation={data} /> */}
+                  <RollbackQuotation quotationId={data.id} quotation={data} />
                 </div>
               </CollapsibleContent>
             </Collapsible>
@@ -162,6 +163,7 @@ const MainForm = (props: {
     deliveryPeriod,
     validPricePeriod,
     type,
+    vatIncluded,
   } = data;
 
   const shouldCloseModal = React.useRef(false);
@@ -205,6 +207,7 @@ const MainForm = (props: {
         paymentCondition?: string;
         validPricePeriod?: string;
         type?: "product" | "service";
+        vatIncluded?: boolean;
       },
       fieldKey?: string
     ) => {
@@ -231,6 +234,7 @@ const MainForm = (props: {
             ? newValue !== oldValue
             : newValue && newValue !== oldValue)
         ) {
+          console.log("🚀 ~ will update");
           payloadBody[key] = transform(newValue);
 
           // Update local state
@@ -280,6 +284,7 @@ const MainForm = (props: {
         payload.paymentCondition || "",
         data.paymentCondition || ""
       );
+      updateField("vatIncluded", payload.vatIncluded, data.vatIncluded, (v) => !!v, true);
 
       if (Object.keys(payloadBody).length === 0) {
         return;
@@ -396,6 +401,7 @@ const MainForm = (props: {
             />
           </div>
         </ItemList>
+       
         <ItemList label="อ้างอิงใบสั่งซื้อ">
           <div className="-mt-1 ">
             <PurchaseOrderRefInput
@@ -471,6 +477,27 @@ const MainForm = (props: {
                 />
               </div>
             </ItemList>
+
+             <ItemList label="สถานะ VAT"
+          info="เมื่อ QT นี้ได้รับการยืนยันแล้ว จะไม่สามารถเปลี่ยนแปลงได้"
+        >
+          <div className="flex space-x-3 items-center h-9">
+             <Checkbox
+                id="vatIncluded"
+                disabled={isLocked}
+                checked={vatIncluded}
+                onCheckedChange={(c) => {
+                  handleItemChange({ vatIncluded: !!c }, "vatIncluded");
+                }}
+              />
+            <label
+              htmlFor="vatIncluded"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              รวม Vat
+            </label>
+          </div>
+        </ItemList>
 
             {data.type === "service" && (
               <ItemList

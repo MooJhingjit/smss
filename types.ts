@@ -30,6 +30,7 @@ export type ProductWithRelations = Product & { items?: Item[]; vendor?: User };
 export type QuotationWithBuyer = Quotation & { contact: Contact };
 
 export type QuotationWithRelations = Quotation & {
+  vatIncluded?: boolean;
   contact?: Contact;
   seller?: User;
   purchaseOrders?: PurchaseOrder[];
