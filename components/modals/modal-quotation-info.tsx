@@ -133,7 +133,7 @@ export const QuotationInfoModal = () => {
                     />
                   </div>
 
-                  {/* <RollbackQuotation quotationId={data.id} quotation={data} /> */}
+                  <RollbackQuotation quotationId={data.id} quotation={data} />
                 </div>
               </CollapsibleContent>
             </Collapsible>
