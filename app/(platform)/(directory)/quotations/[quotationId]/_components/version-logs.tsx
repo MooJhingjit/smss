@@ -11,7 +11,11 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { History, AlertTriangle } from "lucide-react";
 import PageComponentWrapper from "@/components/page-component-wrapper";
-
+import { calculateQuotationItemPrice } from "@/app/services/service.quotation";
+import {
+  quotationStatusMapping,
+} from "@/app/config";
+import { QuotationStatus } from "@prisma/client";
 const formatDate = (date: string) => {
   return new Date(date).toLocaleDateString("th-TH", {
     year: "numeric",
@@ -180,6 +184,7 @@ interface SnapshotContent {
   totalPrice: number | null;
   discount: number | null;
   tax: number | null;
+  vatIncluded: boolean;
   status: string;
   remark: string | null;
   contact?: ContactInfo;
@@ -199,77 +204,63 @@ const SnapshotContentRenderer = ({ content, code }: { content: any; code: string
     // Validate that content has expected structure
     const typedContent = content as SnapshotContent;
 
+    // Calculate summary values from lists if not already present
+    const calculatedSummary = typedContent.lists && typedContent.lists.length > 0
+      ? calculateQuotationItemPrice(typedContent.lists as any, typedContent.vatIncluded ?? true)
+      : null;
+
+    // Use calculated values if the stored values are null/undefined
+    const grandTotal = typedContent.grandTotal ?? calculatedSummary?.grandTotal ?? 0;
+    const discount = typedContent.discount ?? calculatedSummary?.discount ?? 0;
+    const tax = typedContent.tax ?? calculatedSummary?.vat ?? 0;
+
     return (
       <div className="space-y-4 pt-2">
-        {/* Contact Info */}
-        {typedContent.contact && (
-          <div>
-            <p className="text-sm font-medium text-gray-700 mb-2">ข้อมูลลูกค้า</p>
-            <div className="bg-gray-50 rounded-md p-3">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-                {CONTACT_FIELDS.map((field) => (
-                  <div key={field.key}>
-                    <span className="text-gray-500">{field.label}:</span>{" "}
-                    <span className="font-medium">
-                      {field.format
-                        ? field.format(typedContent.contact?.[field.key])
-                        : typedContent.contact?.[field.key]?.toString() || "-"}
-                    </span>
-                  </div>
-                ))}
+        <div className="grid  grid-cols-2 gap-4">
+
+          {/* Contact Info */}
+          {typedContent.contact && (
+            <div className="col-span-2 md:col-span-1">
+              <p className="text-sm font-medium text-gray-700 mb-2">ข้อมูลลูกค้า</p>
+              <div className="rounded-md p-3 bg-yellow-50 border border-yellow-400 text-yellow-800">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
+                  {CONTACT_FIELDS.map((field) => (
+                    <div key={field.key}>
+                      <span className="text-gray-500">{field.label}:</span>{" "}
+                      <span className="font-medium">
+                        {field.format
+                          ? field.format(typedContent.contact?.[field.key])
+                          : typedContent.contact?.[field.key]?.toString() || "-"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Seller Info */}
-        {typedContent.seller && (
-          <div>
-            <p className="text-sm font-medium text-gray-700 mb-2">ข้อมูลผู้ขาย</p>
-            <div className="bg-gray-50 rounded-md p-3">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-                {SELLER_FIELDS.map((field) => (
-                  <div key={field.key}>
-                    <span className="text-gray-500">{field.label}:</span>{" "}
-                    <span className="font-medium">
-                      {field.format
-                        ? field.format(typedContent.seller?.[field.key])
-                        : typedContent.seller?.[field.key]?.toString() || "-"}
-                    </span>
-                  </div>
-                ))}
+          {/* Seller Info */}
+          {typedContent.seller && (
+            <div className="col-span-2 md:col-span-1">
+              <p className="text-sm font-medium text-gray-700 mb-2">ข้อมูลผู้ขาย</p>
+              <div className="rounded-md p-3 bg-gray-50 border border-gray-300 text-gray-800">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
+                  {SELLER_FIELDS.map((field) => (
+                    <div key={field.key}>
+                      <span className="text-gray-500">{field.label}:</span>{" "}
+                      <span className="font-medium">
+                        {field.format
+                          ? field.format(typedContent.seller?.[field.key])
+                          : typedContent.seller?.[field.key]?.toString() || "-"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        )}
-
-        {/* Summary Info */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-          <div>
-            <span className="text-gray-500">ยอดรวม:</span>{" "}
-            <span className="font-medium">
-              {typedContent.grandTotal?.toLocaleString() || "0"} ฿
-            </span>
-          </div>
-          <div>
-            <span className="text-gray-500">ส่วนลด:</span>{" "}
-            <span className="font-medium">
-              {typedContent.discount?.toLocaleString() || "0"} ฿
-            </span>
-          </div>
-          <div>
-            <span className="text-gray-500">ภาษี:</span>{" "}
-            <span className="font-medium">
-              {typedContent.tax?.toLocaleString() || "0"} ฿
-            </span>
-          </div>
-          <div>
-            <span className="text-gray-500">สถานะ:</span>{" "}
-            <Badge variant="secondary" className="text-xs">
-              {typedContent.status || "-"}
-            </Badge>
-          </div>
+          )}
         </div>
+
 
         {/* Product List - Table Format */}
         {typedContent.lists && typedContent.lists.length > 0 && (
@@ -317,10 +308,48 @@ const SnapshotContentRenderer = ({ content, code }: { content: any; code: string
           </div>
         )}
 
+        {/* Summary Info */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+          <div>
+            <span className="text-gray-500">ยอดรวม:</span>{" "}
+            <span className="font-medium">
+              {grandTotal.toLocaleString("th-TH", {
+                style: "currency",
+                currency: "THB",
+              })}
+            </span>
+          </div>
+          <div>
+            <span className="text-gray-500">ส่วนลด:</span>{" "}
+            <span className="font-medium">
+              {discount.toLocaleString("th-TH", {
+                style: "currency",
+                currency: "THB",
+              })}
+            </span>
+          </div>
+          <div>
+            <span className="text-gray-500">VAT:</span>{" "}
+            <span className="font-medium">
+              {tax.toLocaleString("th-TH", {
+                style: "currency",
+                currency: "THB",
+              })}
+            </span>
+          </div>
+          <div>
+            <span className="text-gray-500">สถานะ:</span>{" "}
+            <Badge variant="secondary" className="text-xs">
+              {quotationStatusMapping[typedContent.status as QuotationStatus].label || "-"}
+            </Badge>
+          </div>
+        </div>
+
+
         {/* Remark */}
         {typedContent.remark && (
           <div className="mt-2">
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 text-red-500">
               หมายเหตุ: {typedContent.remark}
             </p>
           </div>
