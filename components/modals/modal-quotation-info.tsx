@@ -119,6 +119,7 @@ export const QuotationInfoModal = () => {
                   </div>
                   <div className="bg-gray-50 p-2 flex items-center justify-center">
                     <VersionUpdate
+                      isLocked={data.isLocked}
                       hasPo={!!data?.purchaseOrders?.length}
                       currentVersion={data?.code}
                       quotationId={data?.id}
@@ -401,7 +402,7 @@ const MainForm = (props: {
             />
           </div>
         </ItemList>
-       
+
         <ItemList label="อ้างอิงใบสั่งซื้อ">
           <div className="-mt-1 ">
             <PurchaseOrderRefInput
@@ -478,26 +479,26 @@ const MainForm = (props: {
               </div>
             </ItemList>
 
-             <ItemList label="สถานะ VAT"
-          info="เมื่อ QT นี้ได้รับการยืนยันแล้ว จะไม่สามารถเปลี่ยนแปลงได้"
-        >
-          <div className="flex space-x-3 items-center h-9">
-             <Checkbox
-                id="vatIncluded"
-                disabled={isLocked}
-                checked={vatIncluded}
-                onCheckedChange={(c) => {
-                  handleItemChange({ vatIncluded: !!c }, "vatIncluded");
-                }}
-              />
-            <label
-              htmlFor="vatIncluded"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            <ItemList label="สถานะ VAT"
+              info="เมื่อ QT นี้ได้รับการยืนยันแล้ว จะไม่สามารถเปลี่ยนแปลงได้"
             >
-              รวม Vat
-            </label>
-          </div>
-        </ItemList>
+              <div className="flex space-x-3 items-center h-9">
+                <Checkbox
+                  id="vatIncluded"
+                  disabled={isLocked}
+                  checked={vatIncluded}
+                  onCheckedChange={(c) => {
+                    handleItemChange({ vatIncluded: !!c }, "vatIncluded");
+                  }}
+                />
+                <label
+                  htmlFor="vatIncluded"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  รวม Vat
+                </label>
+              </div>
+            </ItemList>
 
             {data.type === "service" && (
               <ItemList
@@ -1011,10 +1012,12 @@ const DeleteComponent = ({
 };
 
 const VersionUpdate = ({
+  isLocked,
   quotationId,
   hasPo,
   currentVersion,
 }: {
+  isLocked: boolean;
   quotationId: number;
   hasPo: boolean;
   currentVersion: string;
@@ -1047,10 +1050,10 @@ const VersionUpdate = ({
     mutate({ quotationId, code: newVersion });
   };
 
-  if (hasPo) {
+  if (isLocked) {
     return (
       <span className="text-orange-500 text-xs">
-        ไม่สามารถอัพเดทเวอร์ชั่นได้ เนื่องจากมีใบสั่งซื้อแล้ว
+        ไม่สามารถอัพเดทเวอร์ชั่นได้ เนื่องจากได้รับการยืนยันแล้ว
       </span>
     );
   }

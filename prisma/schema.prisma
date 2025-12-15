@@ -175,6 +175,7 @@ model Quotation {
   installmentContractNumber String?              // Contract number for installment payments
   outstandingBalance    Float?                   @default(0) // Outstanding balance without vat
   outstandingGrandTotal Float?                   @default(0) // Outstanding balance with vat
+  snapshots             QuotationSnapshot[]
 
   @@index([contactId])
   @@index([sellerId])
@@ -403,6 +404,17 @@ model AuditLog {
   @@index([model, recordId])
   @@index([userId])
   @@index([createdAt])
+}
+
+model QuotationSnapshot {
+  id          Int       @id @default(autoincrement())
+  quotationId Int
+  quotation   Quotation @relation(fields: [quotationId], references: [id])
+  code        String    // Code at time of snapshot
+  content     Json      // Full quotation data with relations
+  createdAt   DateTime  @default(now())
+
+  @@index([quotationId])
 }
 
 // npx prisma db push
