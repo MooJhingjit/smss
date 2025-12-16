@@ -15,7 +15,7 @@ import { updateQuotationList } from "@/actions/quotation-list/update";
 import { FormInput } from "../form/form-input";
 import { useQuotationListModal } from "@/hooks/use-quotation-list";
 import { useProductModal } from "@/hooks/use-product-modal";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { ProductType, QuotationType } from "@prisma/client";
 import { useForm } from "react-hook-form";
 import { FormTextarea } from "../form/form-textarea";
@@ -69,6 +69,8 @@ export const QuotationListModal = () => {
   const [isHidden, setIsHidden] = useState(false);
   // Track which field triggered the current update to prevent cascading effects
   const [updatingField, setUpdatingField] = useState<string | null>(null);
+  // Track if the form was just reset to skip initial calculations (use ref for synchronous check)
+  const isFormResettingRef = useRef(false);
 
   const handleOpenProductModal = () => {
     // Hide the quotation list modal visually instead of closing it
@@ -110,6 +112,7 @@ export const QuotationListModal = () => {
   const isLocked = refs?.quotationRef?.isLocked;
 
   useEffect(() => {
+    isFormResettingRef.current = true;
     const formData = {
       name: defaultData?.name ?? "",
       price: defaultData?.price ? defaultData.price.toString() : "0",
@@ -139,6 +142,8 @@ export const QuotationListModal = () => {
       subItems: defaultData?.subItems ? defaultData.subItems : "[]",
     };
     reset(formData);
+    // Allow calculations after a short delay to let the form settle
+    setTimeout(() => { isFormResettingRef.current = false; }, 100);
   }, [refs?.timestamps]);
 
   const handleCreate = useAction(createQuotationList, {
@@ -278,9 +283,10 @@ export const QuotationListModal = () => {
 
     // case: unitPrice => calculate interestRate, tax, totalPrice
     if (caseUpdate === "unitPrice") {
-      const interestRate = unitPriceValue > 0
+      // Calculate interestRate even when unitPrice is 0 (will be negative or -100%)
+      const interestRate = costValue > 0
         ? (((unitPriceValue - costValue) / costValue) * 100)
-        : "";
+        : 0;
       const totalPrice = unitPriceValue * quantityValue;
       const tax = (totalPrice * 7) / 100;
       return {
@@ -327,7 +333,8 @@ export const QuotationListModal = () => {
 
   // interestRate update
   useEffect(() => {
-    // Skip if this update was triggered by another field
+    // Skip if form is resetting or this update was triggered by another field
+    if (isFormResettingRef.current) return;
     if (updatingField && updatingField !== "percentage") return;
     
     setUpdatingField("percentage");
@@ -339,9 +346,9 @@ export const QuotationListModal = () => {
       discount: getValues("discount") ?? "0",
     });
     
-    if (results?.unitPrice) setValue("unitPrice", results.unitPrice.toString());
-    if (results?.tax) setValue("withholdingTax", results.tax.toString());
-    if (results?.totalPrice) setValue("totalPrice", results.totalPrice.toString());
+    if (results?.unitPrice !== undefined) setValue("unitPrice", results.unitPrice.toString());
+    if (results?.tax !== undefined) setValue("withholdingTax", results.tax.toString());
+    if (results?.totalPrice !== undefined) setValue("totalPrice", results.totalPrice.toString());
     
     // Reset the updating field after a short delay to allow rendering to complete
     setTimeout(() => setUpdatingField(null), 0);
@@ -350,7 +357,8 @@ export const QuotationListModal = () => {
 
   // unitPrice update
   useEffect(() => {
-    // Skip if this update was triggered by another field
+    // Skip if form is resetting or this update was triggered by another field
+    if (isFormResettingRef.current) return;
     if (updatingField && updatingField !== "unitPrice") return;
     
     setUpdatingField("unitPrice");
@@ -361,9 +369,10 @@ export const QuotationListModal = () => {
       quantity: getValues("quantity") ?? "1",
       discount: getValues("discount") ?? "0",
     });
-    if (results?.interestRate) setValue("percentage", results.interestRate.toString());
-    if (results?.tax) setValue("withholdingTax", results.tax.toString());
-    if (results?.totalPrice) setValue("totalPrice", results.totalPrice.toString());
+    // Always update percentage (interestRate), even when it's 0 or negative
+    if (results?.interestRate !== undefined) setValue("percentage", results.interestRate.toString());
+    if (results?.tax !== undefined) setValue("withholdingTax", results.tax.toString());
+    if (results?.totalPrice !== undefined) setValue("totalPrice", results.totalPrice.toString());
     
     // Reset the updating field after a short delay to allow rendering to complete
     setTimeout(() => setUpdatingField(null), 0);
@@ -372,7 +381,8 @@ export const QuotationListModal = () => {
 
   // cost update
   useEffect(() => {
-    // Skip if this update was triggered by another field
+    // Skip if form is resetting or this update was triggered by another field
+    if (isFormResettingRef.current) return;
     if (updatingField && updatingField !== "cost") return;
     
     setUpdatingField("cost");
@@ -383,9 +393,9 @@ export const QuotationListModal = () => {
       quantity: getValues("quantity") ?? "1",
       discount: getValues("discount") ?? "0",
     });
-    if (results?.unitPrice) setValue("unitPrice", results.unitPrice.toString());
-    if (results?.tax) setValue("withholdingTax", results.tax.toString());
-    if (results?.totalPrice) setValue("totalPrice", results.totalPrice.toString());
+    if (results?.unitPrice !== undefined) setValue("unitPrice", results.unitPrice.toString());
+    if (results?.tax !== undefined) setValue("withholdingTax", results.tax.toString());
+    if (results?.totalPrice !== undefined) setValue("totalPrice", results.totalPrice.toString());
     
     // Reset the updating field after a short delay to allow rendering to complete
     setTimeout(() => setUpdatingField(null), 0);
@@ -394,7 +404,8 @@ export const QuotationListModal = () => {
 
   // quantity update
   useEffect(() => {
-    // Skip if this update was triggered by another field
+    // Skip if form is resetting or this update was triggered by another field
+    if (isFormResettingRef.current) return;
     if (updatingField && updatingField !== "quantity") return;
     
     setUpdatingField("quantity");
@@ -405,8 +416,8 @@ export const QuotationListModal = () => {
       quantity: getValues("quantity") ?? "1",
       discount: getValues("discount") ?? "0",
     });
-    if (results?.tax) setValue("withholdingTax", results.tax.toString());
-    if (results?.totalPrice) setValue("totalPrice", results.totalPrice.toString());
+    if (results?.tax !== undefined) setValue("withholdingTax", results.tax.toString());
+    if (results?.totalPrice !== undefined) setValue("totalPrice", results.totalPrice.toString());
     
     // Reset the updating field after a short delay to allow rendering to complete
     setTimeout(() => setUpdatingField(null), 0);
@@ -415,7 +426,8 @@ export const QuotationListModal = () => {
 
   // discount update
   useEffect(() => {
-    // Skip if this update was triggered by another field
+    // Skip if form is resetting or this update was triggered by another field
+    if (isFormResettingRef.current) return;
     if (updatingField && updatingField !== "discount") return;
     
     setUpdatingField("discount");
@@ -426,8 +438,8 @@ export const QuotationListModal = () => {
       quantity: getValues("quantity") ?? "1",
       discount: getValues("discount") ?? "0",
     });
-    if (results?.tax) setValue("withholdingTax", results.tax.toString());
-    if (results?.totalPrice) setValue("totalPrice", results.totalPrice.toString());
+    if (results?.tax !== undefined) setValue("withholdingTax", results.tax.toString());
+    if (results?.totalPrice !== undefined) setValue("totalPrice", results.totalPrice.toString());
     
     // Reset the updating field after a short delay to allow rendering to complete
     setTimeout(() => setUpdatingField(null), 0);
