@@ -320,7 +320,7 @@ const writeMainItem = (
     ...config,
   });
 
-  const discountText = data.discount ? ` - ส่วนลด ${data.discount.toLocaleString("th-TH", CURRENCY_FORMAT)}` : "";
+  const discountText = data.discount ? `(ส่วนลด ${data.discount.toLocaleString("th-TH", CURRENCY_FORMAT)})` : "";
   const itemName = `${!!data.allowedWithholdingTax ? "(**)" : ""} ${data.name} ${discountText}`;
 
   currentPage.drawText(itemName, {
