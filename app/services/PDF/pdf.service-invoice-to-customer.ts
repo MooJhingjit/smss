@@ -291,7 +291,9 @@ const writeMainItem = (
     ...config,
   });
 
-  const itemName = `${!!data.allowedWithholdingTax ? "(**)" : ""} ${data.name}`;
+  const discountText = data.discount ? ` - ส่วนลด ${data.discount.toLocaleString("th-TH", CURRENCY_FORMAT)}` : "";
+
+  const itemName = `${!!data.allowedWithholdingTax ? "(**)" : ""} ${data.name} ${discountText}`;
 
   currentPage.drawText(itemName, {
     x: columnPosition.description,
@@ -316,9 +318,10 @@ const writeMainItem = (
     unitPrice = _INSTALLMENT_DATA.amount;
     amount = _INSTALLMENT_DATA.amount;
   } else {
-    // For regular quotations: use original data
+    // For regular quotations: use original data, deduct discount from price only
+    const itemDiscount = data.discount ?? 0;
     unitPrice = data.unitPrice ?? 0;
-    amount = data.price ?? 0;
+    amount = (data.price ?? 0) - itemDiscount;
   }
 
   // Show price only if showPrice is true for installment or if it's not an installment
@@ -649,7 +652,7 @@ const drawStaticInfo = (page: PDFPage, currentPageNumber: number) => {
           _DATA?.discount?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
         tax: _DATA?.tax?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
         totalPrice:
-          _DATA?.totalPrice?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
+          ((_DATA?.totalPrice ?? 0) - (_DATA?.discount ?? 0)).toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
         grandTotal:
           _DATA?.grandTotal?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
       };
