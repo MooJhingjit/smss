@@ -316,7 +316,9 @@ const writeMainItem = (
     ...config,
   });
 
-  const itemName = `${data.allowedWithholdingTax ? "(**)" : ""} ${data.name}`;
+  const discountText = data.discount ? `(ส่วนลด ${data.discount.toLocaleString("th-TH", CURRENCY_FORMAT)})` : "";
+
+  const itemName = `${data.allowedWithholdingTax ? "(**)" : ""} ${data.name} ${discountText}`;
 
   currentPage.drawText(itemName, {
     x: columnPosition.description,
@@ -334,7 +336,8 @@ const writeMainItem = (
     ...config,
   });
 
-  // Use installment amounts if available, otherwise use original list data
+  // Use installment amounts if available, otherwise use original list data (deduct discount from price only)
+  const itemDiscount = data.discount ?? 0;
   const unitPriceValue = _INSTALLMENT_DATA
     ? _INSTALLMENT_DATA.amount
     : data.unitPrice || 0;
@@ -353,7 +356,7 @@ const writeMainItem = (
 
     const amountValue = _INSTALLMENT_DATA
       ? _INSTALLMENT_DATA.amount
-      : data.price || 0;
+      : (data.price || 0) - itemDiscount;
     const amountText = amountValue.toLocaleString("th-TH", CURRENCY_FORMAT);
 
     currentPage.drawText(amountText, {
@@ -679,7 +682,7 @@ const drawStaticInfo = (page: PDFPage, currentPageNumber: number) => {
       : _DATA?.tax?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
     totalPrice: _INSTALLMENT_DATA
       ? _INSTALLMENT_DATA.amount.toLocaleString("th-TH", CURRENCY_FORMAT)
-      : _DATA?.totalPrice?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
+      : ((_DATA?.totalPrice ?? 0) - (_DATA?.discount ?? 0)).toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
     grandTotal: _INSTALLMENT_DATA
       ? _INSTALLMENT_DATA.amountWithVat.toLocaleString("th-TH", CURRENCY_FORMAT)
       : _DATA?.grandTotal?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
