@@ -48,6 +48,36 @@ export async function PUT(
       data.offeredAt = new Date();
     }
 
+    // If code is being updated (version update), save a snapshot first
+    if (body.code) {
+      const currentQuotation = await db.quotation.findUnique({
+        where: { id: Number(id) },
+        include: {
+          contact: true,
+          seller: true,
+          lists: {
+            include: {
+              product: true,
+            },
+            orderBy: { order: "asc" },
+          },
+          purchaseOrders: true,
+          invoices: true,
+          installments: true,
+        },
+      });
+
+      if (currentQuotation) {
+        await db.quotationSnapshot.create({
+          data: {
+            quotationId: Number(id),
+            code: currentQuotation.code,
+            content: currentQuotation as any,
+          },
+        });
+      }
+    }
+
     // const quotation = await db.quotation.update({
     const quotation = await updateAndLog({
       model: "quotation",
@@ -62,6 +92,7 @@ export async function PUT(
     return new NextResponse("Internal Error", { status: 500 });
   }
 }
+
 
 // delete
 export async function DELETE(

@@ -13,7 +13,9 @@ import { quotationTypeMapping } from "@/app/config";
 import { useUser } from "@/hooks/use-user";
 import DataNotfound from "@/components/data-notfound";
 import QuotationInfo from "./_components/quotation-info";
+import VersionLogs from "./_components/version-logs";
 import { Badge } from "@/components/ui/badge";
+
 
 const getData = async (
   quotationId: string,
@@ -225,6 +227,10 @@ export default async function QuotationDetails(
         <div className="col-span-5 md:col-span-3   mb-6">
           <DocumentItems refType="quotation" refId={data.id} />
         </div>
+
+        {isAdmin && (
+          <VersionLogs quotationId={data.id}/>
+        )}
       </div>
     </>
   );
