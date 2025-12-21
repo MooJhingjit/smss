@@ -277,7 +277,7 @@ export const QuotationListModal = () => {
         unitPrice: unitPrice,
         tax: tax,
         totalPrice: (totalPrice + tax - discountValue),
-        
+
       };
     }
 
@@ -327,7 +327,7 @@ export const QuotationListModal = () => {
         totalPrice: (totalPrice + tax - discountValue),
       };
     }
-    
+
 
   };
 
@@ -336,7 +336,7 @@ export const QuotationListModal = () => {
     // Skip if form is resetting or this update was triggered by another field
     if (isFormResettingRef.current) return;
     if (updatingField && updatingField !== "percentage") return;
-    
+
     setUpdatingField("percentage");
     const results = summarizeResults("interestRate", {
       cost: getValues("cost") ?? "0",
@@ -345,11 +345,11 @@ export const QuotationListModal = () => {
       quantity: getValues("quantity") ?? "1",
       discount: getValues("discount") ?? "0",
     });
-    
+
     if (results?.unitPrice !== undefined) setValue("unitPrice", results.unitPrice.toString());
     if (results?.tax !== undefined) setValue("withholdingTax", results.tax.toString());
     if (results?.totalPrice !== undefined) setValue("totalPrice", results.totalPrice.toString());
-    
+
     // Reset the updating field after a short delay to allow rendering to complete
     setTimeout(() => setUpdatingField(null), 0);
 
@@ -360,7 +360,7 @@ export const QuotationListModal = () => {
     // Skip if form is resetting or this update was triggered by another field
     if (isFormResettingRef.current) return;
     if (updatingField && updatingField !== "unitPrice") return;
-    
+
     setUpdatingField("unitPrice");
     const results = summarizeResults("unitPrice", {
       cost: getValues("cost") ?? "0",
@@ -373,7 +373,7 @@ export const QuotationListModal = () => {
     if (results?.interestRate !== undefined) setValue("percentage", results.interestRate.toString());
     if (results?.tax !== undefined) setValue("withholdingTax", results.tax.toString());
     if (results?.totalPrice !== undefined) setValue("totalPrice", results.totalPrice.toString());
-    
+
     // Reset the updating field after a short delay to allow rendering to complete
     setTimeout(() => setUpdatingField(null), 0);
 
@@ -384,30 +384,43 @@ export const QuotationListModal = () => {
     // Skip if form is resetting or this update was triggered by another field
     if (isFormResettingRef.current) return;
     if (updatingField && updatingField !== "cost") return;
-    
+
     setUpdatingField("cost");
-    const results = summarizeResults("cost", {
-      cost: getValues("cost") ?? "0",
-      unitPrice: getValues("unitPrice") || "0",
-      interestRate: getValues("percentage") || "0",
-      quantity: getValues("quantity") ?? "1",
-      discount: getValues("discount") ?? "0",
-    });
-    if (results?.unitPrice !== undefined) setValue("unitPrice", results.unitPrice.toString());
-    if (results?.tax !== undefined) setValue("withholdingTax", results.tax.toString());
-    if (results?.totalPrice !== undefined) setValue("totalPrice", results.totalPrice.toString());
-    
+
+    const costValue = parseFloat(getValues("cost") ?? "0") || 0;
+    const unitPriceValue = parseFloat(getValues("unitPrice") || "0") || 0;
+
+    // If locked, only update percentage to match the unitPrice (do not recalculate other fields)
+    if (isLocked) {
+      const newPercentage = costValue > 0
+        ? (((unitPriceValue - costValue) / costValue) * 100)
+        : 0;
+      setValue("percentage", newPercentage.toString());
+    } else {
+      // Normal behavior: recalculate unitPrice, tax, totalPrice based on cost and percentage
+      const results = summarizeResults("cost", {
+        cost: getValues("cost") ?? "0",
+        unitPrice: getValues("unitPrice") || "0",
+        interestRate: getValues("percentage") || "0",
+        quantity: getValues("quantity") ?? "1",
+        discount: getValues("discount") ?? "0",
+      });
+      if (results?.unitPrice !== undefined) setValue("unitPrice", results.unitPrice.toString());
+      if (results?.tax !== undefined) setValue("withholdingTax", results.tax.toString());
+      if (results?.totalPrice !== undefined) setValue("totalPrice", results.totalPrice.toString());
+    }
+
     // Reset the updating field after a short delay to allow rendering to complete
     setTimeout(() => setUpdatingField(null), 0);
 
-  }, [watch("cost")]);
+  }, [watch("cost"), isLocked]);
 
   // quantity update
   useEffect(() => {
     // Skip if form is resetting or this update was triggered by another field
     if (isFormResettingRef.current) return;
     if (updatingField && updatingField !== "quantity") return;
-    
+
     setUpdatingField("quantity");
     const results = summarizeResults("quantity", {
       cost: getValues("cost") ?? "0",
@@ -418,7 +431,7 @@ export const QuotationListModal = () => {
     });
     if (results?.tax !== undefined) setValue("withholdingTax", results.tax.toString());
     if (results?.totalPrice !== undefined) setValue("totalPrice", results.totalPrice.toString());
-    
+
     // Reset the updating field after a short delay to allow rendering to complete
     setTimeout(() => setUpdatingField(null), 0);
 
@@ -429,7 +442,7 @@ export const QuotationListModal = () => {
     // Skip if form is resetting or this update was triggered by another field
     if (isFormResettingRef.current) return;
     if (updatingField && updatingField !== "discount") return;
-    
+
     setUpdatingField("discount");
     const results = summarizeResults("discount", {
       cost: getValues("cost") ?? "0",
@@ -440,7 +453,7 @@ export const QuotationListModal = () => {
     });
     if (results?.tax !== undefined) setValue("withholdingTax", results.tax.toString());
     if (results?.totalPrice !== undefined) setValue("totalPrice", results.totalPrice.toString());
-    
+
     // Reset the updating field after a short delay to allow rendering to complete
     setTimeout(() => setUpdatingField(null), 0);
 
@@ -449,7 +462,7 @@ export const QuotationListModal = () => {
   // useEffect(() => {
   //   const cost = watch("cost");
   //   const unitPrice = parseFloat(watch("unitPrice") || "0");
- 
+
   //   // multiply by quantity
   //   const quantity = watch("quantity");
   //   let totalPrice = unitPrice;
@@ -574,7 +587,6 @@ export const QuotationListModal = () => {
             id="cost"
             label="ต้นทุน"
             required
-            readOnly={!!isLocked}
             step="0.01"
             register={register}
             type="number"
@@ -725,9 +737,8 @@ export const QuotationListModal = () => {
   return (
     <Dialog open={modal.isOpen} onOpenChange={modal.onClose}>
       <DialogContent
-        className={`sm:max-w-[425px] md:max-w-[600px] ${
-          isHidden ? "opacity-0 pointer-events-none" : "opacity-100"
-        } transition-opacity duration-200`}
+        className={`sm:max-w-[425px] md:max-w-[600px] ${isHidden ? "opacity-0 pointer-events-none" : "opacity-100"
+          } transition-opacity duration-200`}
       >
         <DialogHeader>
           <DialogTitle className="space-x-2">
@@ -767,9 +778,9 @@ const SubItems = ({
 }) => {
   const [subItems, setSubItems] = useState<
     | {
-        label: string;
-        quantity: string;
-      }[]
+      label: string;
+      quantity: string;
+    }[]
     | null
   >(null);
 
