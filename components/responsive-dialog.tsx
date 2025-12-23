@@ -18,7 +18,7 @@ import {
 import { cn } from "@/lib/utils";
 
 interface ResponsiveDialogProps {
-  title: string;
+  title: React.ReactNode;
   description: string;
   children: React.ReactNode;
   open: boolean;
@@ -55,7 +55,7 @@ export const ResponsiveDialog = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className={classNames}>
-        <DialogHeader className={ "bg-muted -mx-6 px-6 -my-6 pb-4 pt-5 mb-0 min-w-[500px]"}>
+        <DialogHeader className={"bg-muted -mx-6 px-6 -my-6 pb-4 pt-5 mb-0 min-w-[500px]"}>
           <DialogTitle >{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>

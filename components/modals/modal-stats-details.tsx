@@ -79,11 +79,11 @@ const List = ({ items }: { items: QuotationRow[] }) => {
                 >
                   {q.code}
                 </Link>
-                  <p> {q.contact?.name ?? "-"}</p>
+                <p> {q.contact?.name ?? "-"}</p>
               </td>
               <td className="px-2 py-2">
                 <p>{q.seller?.name ?? "-"}</p>
-              
+
               </td>
               <td className="px-2 py-2 text-right">
                 {formatTHB(q.totalPrice)}
@@ -180,7 +180,16 @@ export const StatsDetailsModal = () => {
     <ResponsiveDialog
       open={modal.isOpen}
       onOpenChange={modal.onClose}
-      title={`รายละเอียดยอดขาย ${payload.monthLabel} ${payload.year}`}
+      title={
+        <div className="flex flex-col gap-1">
+          <span>{`รายละเอียดยอดขาย ${payload.monthLabel} ${payload.year}`}</span>
+          {payload.profit !== undefined && (
+            <span className={`text-sm font-normal ${payload.profit < 0 ? 'text-red-600' : 'text-cyan-600'}`}>
+              กำไร(ที่ชำระแล้ว): {formatTHBStrict(payload.profit)}
+            </span>
+          )}
+        </div>
+      }
       description=""
       classNames="sm:min-w-[700px] "
     >

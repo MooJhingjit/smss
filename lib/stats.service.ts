@@ -15,6 +15,7 @@ export interface MonthlyStatsData {
     withoutVAT: number;
   };
   purchaseOrder?: number;
+  profit?: number;
 }
 
 export interface StatsFilters {
@@ -42,6 +43,34 @@ export function getMonthRangeUTC(year: number, month: number) {
   const startDate = new Date(Date.UTC(year, month, 1));
   const endDate = new Date(Date.UTC(year, month + 1, 1));
   return { startDate, endDate };
+}
+
+// Helper: Calculate profit from paid quotations
+async function calculateProfit(where: Prisma.QuotationWhereInput): Promise<number> {
+  const quotationsWithCost = await db.quotation.findMany({
+    where: { ...where, status: "paid" },
+    select: {
+      totalPrice: true,
+      lists: {
+        select: {
+          cost: true,
+          quantity: true,
+        },
+      },
+    },
+  });
+
+  let totalProfit = 0;
+  for (const quotation of quotationsWithCost) {
+    const totalCost = quotation.lists.reduce((sum, item) => {
+      const cost = item.cost || 0;
+      const quantity = item.quantity || 1;
+      return sum + cost * quantity;
+    }, 0);
+    const profit = (quotation.totalPrice || 0) - totalCost;
+    totalProfit += profit;
+  }
+  return totalProfit;
 }
 
 // Date range statistics for custom date ranges
@@ -134,6 +163,9 @@ export const getDateRangeStats = async (
       purchaseOrder = Number(purchaseOrderResult._sum?.totalPrice) || 0;
     }
 
+    // Calculate profit from paid quotations
+    const totalProfit = await calculateProfit(quotationWhere);
+
     const result: MonthlyStatsData = {
       paid: {
         withVAT: Number(paidWithVAT._sum.grandTotal) || 0,
@@ -147,6 +179,7 @@ export const getDateRangeStats = async (
         withVAT: Number(installmentWithVAT._sum.grandTotal) || 0,
         withoutVAT: Number(installmentWithoutVAT._sum.totalPrice) || 0,
       },
+      profit: totalProfit,
     };
 
     if (includePurchaseOrders) {
@@ -323,6 +356,9 @@ export const getMonthlyStats = async (
         purchaseOrder = Number(purchaseOrderResult._sum?.totalPrice) || 0;
       }
 
+      // Calculate profit from paid quotations
+      const totalProfit = await calculateProfit(quotationWhere);
+
       const result: MonthlyStatsData = {
         paid: {
           withVAT: Number(paidWithVAT._sum.grandTotal) || 0,
@@ -336,6 +372,7 @@ export const getMonthlyStats = async (
           withVAT: Number(installmentWithVAT._sum.grandTotal) || 0,
           withoutVAT: Number(installmentWithoutVAT._sum.totalPrice) || 0,
         },
+        profit: totalProfit,
       };
 
       if (includePurchaseOrders) {

@@ -7,6 +7,7 @@ type Payload = {
   month: number; // 0-11
   monthLabel: string;
   initialTab?: StatsDetailsTab;
+  profit?: number;
 };
 
 type Store = {
