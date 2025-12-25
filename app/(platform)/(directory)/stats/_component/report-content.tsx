@@ -154,7 +154,7 @@ export default function ReportContent({ data, year, dateRange, hasDateRange, has
         {/* Sales by Status Pie Chart */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">สัดส่วนยอดขายตามสถานะ (ไม่รวม VAT)</CardTitle>
+            <CardTitle className="text-base">สัดส่วนยอดขาย (ไม่รวม VAT)</CardTitle>
           </CardHeader>
           <CardContent className="!px-0">
             {salesByStatusData.length > 0 ? (
