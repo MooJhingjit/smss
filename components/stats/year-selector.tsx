@@ -21,13 +21,14 @@ export default function YearSelector({ currentYear }: YearSelectorProps) {
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedYear, setSelectedYear] = useState<string>(currentYear.toString());
-  
-  // Check if year mode is active (no date range parameters)
-  const isYearMode = !searchParams.get("from") && !searchParams.get("to");
 
-  // Generate year options from 5 years ago to current year
+  // Check if year mode is active (no date range parameters and no quarter)
+  const isYearMode = !searchParams.get("from") && !searchParams.get("to") && !searchParams.get("quarter");
+
+  // Generate year options from 2025 to current year
   const currentFullYear = new Date().getFullYear();
-  const yearOptions = Array.from({ length: 6 }, (_, i) => currentFullYear - 5 + i);
+  const startYear = 2025;
+  const yearOptions = Array.from({ length: Math.max(1, currentFullYear - startYear + 1) }, (_, i) => startYear + i);
 
   const handleYearChange = (newYear: string) => {
     setIsLoading(true);
@@ -55,12 +56,12 @@ export default function YearSelector({ currentYear }: YearSelectorProps) {
         </div>
       ) : (
         <Select
-          value={currentYear.toString()}
+          value={isYearMode ? currentYear.toString() : ""}
           onValueChange={handleYearChange}
           disabled={isLoading}
         >
           <SelectTrigger className={`w-full max-w-[200px] text-sm sm:text-base ${isYearMode ? 'ring-2 ring-primary border-primary' : ''}`}>
-            <SelectValue placeholder="เลือกปี"/>
+            <SelectValue placeholder={currentYear.toString()} />
           </SelectTrigger>
           <SelectContent>
             {yearOptions.map((year) => (

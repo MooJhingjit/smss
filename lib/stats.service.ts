@@ -15,6 +15,7 @@ export interface MonthlyStatsData {
     withoutVAT: number;
   };
   purchaseOrder?: number;
+  profit?: number;
 }
 
 export interface StatsFilters {
@@ -44,6 +45,34 @@ export function getMonthRangeUTC(year: number, month: number) {
   return { startDate, endDate };
 }
 
+// Helper: Calculate profit from paid quotations
+async function calculateProfit(where: Prisma.QuotationWhereInput): Promise<number> {
+  const quotationsWithCost = await db.quotation.findMany({
+    where: { ...where, status: "paid" },
+    select: {
+      totalPrice: true,
+      lists: {
+        select: {
+          cost: true,
+          quantity: true,
+        },
+      },
+    },
+  });
+
+  let totalProfit = 0;
+  for (const quotation of quotationsWithCost) {
+    const totalCost = quotation.lists.reduce((sum, item) => {
+      const cost = item.cost || 0;
+      const quantity = item.quantity || 1;
+      return sum + cost * quantity;
+    }, 0);
+    const profit = (quotation.totalPrice || 0) - totalCost;
+    totalProfit += profit;
+  }
+  return totalProfit;
+}
+
 // Date range statistics for custom date ranges
 export const getDateRangeStats = async (
   filters: StatsFilters = {}
@@ -61,23 +90,23 @@ export const getDateRangeStats = async (
   // Create monthly buckets based on the date range using UTC
   const startDate = new Date(dateRange.from);
   const endDate = new Date(dateRange.to);
-  
+
   const monthlyData: MonthlyStatsData[] = [];
   const currentDate = new Date(Date.UTC(startDate.getUTCFullYear(), startDate.getUTCMonth(), 1));
   const endDateUTC = new Date(Date.UTC(endDate.getUTCFullYear(), endDate.getUTCMonth(), endDate.getUTCDate()));
-  
+
   while (currentDate <= endDateUTC) {
     const monthStart = new Date(Date.UTC(currentDate.getUTCFullYear(), currentDate.getUTCMonth(), 1));
     const monthEnd = new Date(Date.UTC(currentDate.getUTCFullYear(), currentDate.getUTCMonth() + 1, 1));
-    
+
     // Adjust for the actual date range boundaries
     const actualStart = monthStart < startDate ? startDate : monthStart;
     const actualEnd = monthEnd > endDate ? endDate : monthEnd;
-    
+
     const quotationWhere: Prisma.QuotationWhereInput = {
       approvedAt: { gte: actualStart, lt: actualEnd },
     };
-    
+
     if (sellerId) {
       quotationWhere.sellerId = sellerId;
     }
@@ -134,6 +163,9 @@ export const getDateRangeStats = async (
       purchaseOrder = Number(purchaseOrderResult._sum?.totalPrice) || 0;
     }
 
+    // Calculate profit from paid quotations
+    const totalProfit = await calculateProfit(quotationWhere);
+
     const result: MonthlyStatsData = {
       paid: {
         withVAT: Number(paidWithVAT._sum.grandTotal) || 0,
@@ -147,6 +179,7 @@ export const getDateRangeStats = async (
         withVAT: Number(installmentWithVAT._sum.grandTotal) || 0,
         withoutVAT: Number(installmentWithoutVAT._sum.totalPrice) || 0,
       },
+      profit: totalProfit,
     };
 
     if (includePurchaseOrders) {
@@ -154,7 +187,7 @@ export const getDateRangeStats = async (
     }
 
     monthlyData.push(result);
-    
+
     // Move to next month using UTC
     currentDate.setUTCMonth(currentDate.getUTCMonth() + 1);
   }
@@ -323,6 +356,9 @@ export const getMonthlyStats = async (
         purchaseOrder = Number(purchaseOrderResult._sum?.totalPrice) || 0;
       }
 
+      // Calculate profit from paid quotations
+      const totalProfit = await calculateProfit(quotationWhere);
+
       const result: MonthlyStatsData = {
         paid: {
           withVAT: Number(paidWithVAT._sum.grandTotal) || 0,
@@ -336,6 +372,7 @@ export const getMonthlyStats = async (
           withVAT: Number(installmentWithVAT._sum.grandTotal) || 0,
           withoutVAT: Number(installmentWithoutVAT._sum.totalPrice) || 0,
         },
+        profit: totalProfit,
       };
 
       if (includePurchaseOrders) {
@@ -395,5 +432,103 @@ export const getTotalCounts = async (filters: StatsFilters = {}) => {
   return {
     quotationCount,
     purchaseOrderCount,
+  };
+};
+
+export interface InstallmentStats {
+  paid: {
+    withVAT: number;
+    withoutVAT: number;
+  };
+  pending: {
+    withVAT: number;
+    withoutVAT: number;
+  };
+}
+
+export const getInstallmentStats = async (
+  filters: StatsFilters = {}
+): Promise<InstallmentStats> => {
+  const {
+    year = new Date().getUTCFullYear(),
+    sellerId,
+    dateRange,
+  } = filters;
+
+  let quotationWhere: Prisma.QuotationWhereInput = {};
+
+  if (dateRange) {
+    const startDate = new Date(dateRange.from);
+    const endDate = new Date(dateRange.to);
+
+    quotationWhere = {
+      approvedAt: {
+        gte: startDate,
+        lte: endDate,
+      },
+      status: "installment",
+    };
+  } else {
+    const startDate = new Date(Date.UTC(year, 0, 1));
+    const endDate = new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999));
+
+    quotationWhere = {
+      approvedAt: {
+        gte: startDate,
+        lte: endDate,
+      },
+      status: "installment",
+    };
+  }
+
+  if (sellerId) {
+    quotationWhere.sellerId = sellerId;
+  }
+
+  const installmentWhere: Prisma.QuotationInstallmentWhereInput = {
+    quotation: quotationWhere,
+  };
+
+  const paidWithVAT = await db.quotationInstallment.aggregate({
+    _sum: { amountWithVat: true },
+    where: {
+      ...installmentWhere,
+      status: "paid",
+    },
+  });
+
+  const paidWithoutVAT = await db.quotationInstallment.aggregate({
+    _sum: { amount: true },
+    where: {
+      ...installmentWhere,
+      status: "paid",
+    },
+  });
+
+  const pendingWithVAT = await db.quotationInstallment.aggregate({
+    _sum: { amountWithVat: true },
+    where: {
+      ...installmentWhere,
+      status: { in: ["draft", "pending", "overdue"] },
+    },
+  });
+
+  const pendingWithoutVAT = await db.quotationInstallment.aggregate({
+    _sum: { amount: true },
+    where: {
+      ...installmentWhere,
+      status: { in: ["draft", "pending", "overdue"] },
+    },
+  });
+
+  return {
+    paid: {
+      withVAT: Number(paidWithVAT._sum.amountWithVat) || 0,
+      withoutVAT: Number(paidWithoutVAT._sum.amount) || 0,
+    },
+    pending: {
+      withVAT: Number(pendingWithVAT._sum.amountWithVat) || 0,
+      withoutVAT: Number(pendingWithoutVAT._sum.amount) || 0,
+    },
   };
 };
