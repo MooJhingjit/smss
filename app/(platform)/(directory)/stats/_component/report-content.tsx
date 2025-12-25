@@ -5,8 +5,9 @@ import { Bar, ComposedChart, CartesianGrid, XAxis, YAxis, Line, Pie, PieChart, C
 import { ChartConfig, ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { MonthlyStatsData } from "@/lib/stats.service";
 import { useStatsDetailsModal } from "@/hooks/use-stats-details-modal";
+import { QUARTER_LABELS } from "@/lib/quarter-utils";
 
-interface MonthlyStatisticsProps {
+interface ReportContentProps {
   readonly data: MonthlyStatsData[];
   readonly year: number;
   readonly dateRange?: {
@@ -14,9 +15,11 @@ interface MonthlyStatisticsProps {
     to: Date;
   };
   readonly hasDateRange?: boolean;
+  readonly hasQuarter?: boolean;
+  readonly quarter?: number;
 }
 
-export default function MonthlyStatistics({ data, year, dateRange, hasDateRange }: MonthlyStatisticsProps) {
+export default function ReportContent({ data, year, dateRange, hasDateRange, hasQuarter, quarter }: ReportContentProps) {
   const statsModal = useStatsDetailsModal();
 
   const allMonthNames = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
@@ -107,9 +110,9 @@ export default function MonthlyStatistics({ data, year, dateRange, hasDateRange 
 
   // Pie chart data - Sales by Status
   const salesByStatusData = [
-    { name: "ชำระแล้ว", value: totals.paid.withVAT, color: "#15803d" },
-    { name: "ยังไม่ชำระ", value: totals.unpaid.withVAT, color: "#f97316" },
-    { name: "ผ่อนชำระ", value: totals.installment.withVAT, color: "#dc2626" },
+    { name: "ชำระแล้ว", value: totals.paid.withoutVAT, color: "#15803d" },
+    { name: "ยังไม่ชำระ", value: totals.unpaid.withoutVAT, color: "#f97316" },
+    { name: "ผ่อนชำระ", value: totals.installment.withoutVAT, color: "#dc2626" },
   ].filter(item => item.value > 0);
 
   // Pie chart data - Profit vs Cost (from paid sales only)
@@ -122,25 +125,95 @@ export default function MonthlyStatistics({ data, year, dateRange, hasDateRange 
   ].filter(item => item.value > 0);
 
   return (
-    <>
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            {hasDateRange && dateRange ? (
-              `สถิติรายเดือน (${new Intl.DateTimeFormat('th-TH', {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric'
-              }).format(dateRange.from)} - ${new Intl.DateTimeFormat('th-TH', {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric'
-              }).format(dateRange.to)})`
+    <div className="space-y-6">
+
+      {/* Pie Charts Section */}
+      < div className="grid grid-cols-1 md:grid-cols-2 gap-6" >
+        {/* Sales by Status Pie Chart */}
+        < Card >
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">สัดส่วนยอดขายตามสถานะ (ไม่รวม VAT)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {salesByStatusData.length > 0 ? (
+              <div className="w-full h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={salesByStatusData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={100}
+                      paddingAngle={2}
+                      dataKey="value"
+                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      labelLine={true}
+                    >
+                      {salesByStatusData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
             ) : (
-              `สถิติรายเดือน ${year}`
+              <p className="text-center text-muted-foreground py-8">ไม่มีข้อมูล</p>
             )}
-          </CardTitle>
-        </CardHeader>
+            <div className="flex flex-wrap justify-center gap-4 mt-4">
+              {salesByStatusData.map((item, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                  <span className="text-sm">{item.name}: {formatCurrency(item.value)}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card >
+
+        {/* Profit vs Cost Pie Chart */}
+        < Card >
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base "> <span className="text-green-600">ชำระแล้วไม่รวม VAT {formatCurrency(totals.paid.withoutVAT)}</span> (กำไร vs ต้นทุน)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {profitVsCostData.length > 0 ? (
+              <div className="w-full h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={profitVsCostData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={100}
+                      paddingAngle={2}
+                      dataKey="value"
+                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      labelLine={true}
+                    >
+                      {profitVsCostData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <p className="text-center text-muted-foreground py-8">ไม่มีข้อมูล</p>
+            )}
+            <div className="flex flex-wrap justify-center gap-4 mt-4">
+              {profitVsCostData.map((item, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                  <span className="text-sm">{item.name}: {formatCurrency(item.value)}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card >
+      </div >
+      <Card>
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -277,93 +350,7 @@ export default function MonthlyStatistics({ data, year, dateRange, hasDateRange 
         </CardContent>
       </Card >
 
-      {/* Pie Charts Section */}
-      < div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6" >
-        {/* Sales by Status Pie Chart */}
-        < Card >
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">สัดส่วนยอดขายตามสถานะ</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {salesByStatusData.length > 0 ? (
-              <div className="w-full h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={salesByStatusData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={100}
-                      paddingAngle={2}
-                      dataKey="value"
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                      labelLine={true}
-                    >
-                      {salesByStatusData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <p className="text-center text-muted-foreground py-8">ไม่มีข้อมูล</p>
-            )}
-            <div className="flex flex-wrap justify-center gap-4 mt-4">
-              {salesByStatusData.map((item, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                  <span className="text-sm">{item.name}: {formatCurrency(item.value)}</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card >
-
-        {/* Profit vs Cost Pie Chart */}
-        < Card >
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">กำไร vs ต้นทุน (จากยอดชำระแล้วไม่รวม VAT {formatCurrency(totals.paid.withoutVAT)})</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {profitVsCostData.length > 0 ? (
-              <div className="w-full h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={profitVsCostData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={100}
-                      paddingAngle={2}
-                      dataKey="value"
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                      labelLine={true}
-                    >
-                      {profitVsCostData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <p className="text-center text-muted-foreground py-8">ไม่มีข้อมูล</p>
-            )}
-            <div className="flex flex-wrap justify-center gap-4 mt-4">
-              {profitVsCostData.map((item, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                  <span className="text-sm">{item.name}: {formatCurrency(item.value)}</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card >
-      </div >
-    </>
+    </div>
   );
 }
 
