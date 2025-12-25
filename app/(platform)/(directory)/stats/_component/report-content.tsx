@@ -3,7 +3,7 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bar, ComposedChart, CartesianGrid, XAxis, YAxis, Line, Pie, PieChart, Cell, ResponsiveContainer } from "recharts";
 import { ChartConfig, ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { MonthlyStatsData } from "@/lib/stats.service";
+import { MonthlyStatsData, InstallmentStats } from "@/lib/stats.service";
 import { useStatsDetailsModal } from "@/hooks/use-stats-details-modal";
 import { QUARTER_LABELS } from "@/lib/quarter-utils";
 
@@ -17,9 +17,10 @@ interface ReportContentProps {
   readonly hasDateRange?: boolean;
   readonly hasQuarter?: boolean;
   readonly quarter?: number;
+  readonly installmentStats?: InstallmentStats;
 }
 
-export default function ReportContent({ data, year, dateRange, hasDateRange, hasQuarter, quarter }: ReportContentProps) {
+export default function ReportContent({ data, year, dateRange, hasDateRange, hasQuarter, quarter, installmentStats }: ReportContentProps) {
   const statsModal = useStatsDetailsModal();
 
   const allMonthNames = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
@@ -116,19 +117,40 @@ export default function ReportContent({ data, year, dateRange, hasDateRange, has
   ].filter(item => item.value > 0);
 
   // Pie chart data - Profit vs Cost (from paid sales only)
-  // Use Math.round to ensure exact match with table values
-  const profitAmount = Math.round(totals.profit);
-  const costAmount = Math.round(totals.paid.withoutVAT - totals.profit);
+  // Use Math.round to ensure exact match with table values and header
+  const displayPaidTotal = Math.round(totals.paid.withoutVAT);
+  const displayProfit = Math.round(totals.profit);
+  // Force cost to be the difference so the sum matches the total EXACTLY
+  const displayCost = Math.max(0, displayPaidTotal - displayProfit);
+
   const profitVsCostData = [
-    { name: "กำไร", value: Math.max(0, profitAmount), color: "#06b6d4" },
-    { name: "ต้นทุน", value: Math.max(0, costAmount), color: "#94a3b8" },
+    { name: "กำไร", value: displayProfit, color: "#06b6d4" },
+    { name: "ต้นทุน", value: displayCost, color: "#94a3b8" },
   ].filter(item => item.value > 0);
+
+  // Pie chart data - Installment Status (Paid vs Pending)
+  // Calculate displayed values to ensure consistency (Total = Paid + Pending)
+  const rawPaid = installmentStats?.paid.withoutVAT ?? 0;
+  const rawPending = installmentStats?.pending.withoutVAT ?? 0;
+  const rawTotal = rawPaid + rawPending;
+
+  const displayTotal = Math.round(rawTotal);
+  const displayPaid = Math.round(rawPaid);
+  // Force pending to be the difference so the sum matches the total exactly
+  const displayPending = Math.max(0, displayTotal - displayPaid);
+
+  const installmentStatusData = installmentStats ? [
+    { name: "ชำระแล้ว", value: displayPaid, color: "#15803d" },
+    { name: "รอชำระ", value: displayPending, color: "#dc2626" },
+  ].filter(item => item.value > 0) : [];
+
+  const totalInstallment = displayTotal;
 
   return (
     <div className="space-y-6">
 
       {/* Pie Charts Section */}
-      < div className="grid grid-cols-1 md:grid-cols-2 gap-6" >
+      < div className="grid grid-cols-1 md:grid-cols-3 gap-6" >
         {/* Sales by Status Pie Chart */}
         < Card >
           <CardHeader className="pb-2">
@@ -212,6 +234,49 @@ export default function ReportContent({ data, year, dateRange, hasDateRange, has
             </div>
           </CardContent>
         </Card >
+
+        {/* QuotationInstallment: Paid vs Pending Pie Chart  */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base"><span className="text-red-600">ผ่อนชำระไม่รวม VAT {formatCurrency(totalInstallment)}</span> (ชำระแล้ว vs รอชำระ)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {installmentStatusData.length > 0 ? (
+              <div className="w-full h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={installmentStatusData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={100}
+                      paddingAngle={2}
+                      dataKey="value"
+                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      labelLine={true}
+                    >
+                      {installmentStatusData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <p className="text-center text-muted-foreground py-8">ไม่มีข้อมูล</p>
+            )}
+            <div className="flex flex-wrap justify-center gap-4 mt-4">
+              {installmentStatusData.map((item, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                  <span className="text-sm">{item.name}: {formatCurrency(item.value)}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
       </div >
       <Card>
         <CardContent>

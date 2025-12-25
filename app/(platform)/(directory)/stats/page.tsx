@@ -1,5 +1,4 @@
-import React from "react";
-import { getMonthlyStats, getTotalCounts, getDateRangeStats, getDateRangeTotalCounts } from "@/lib/stats.service";
+import { getMonthlyStats, getTotalCounts, getDateRangeStats, getDateRangeTotalCounts, getInstallmentStats } from "@/lib/stats.service";
 import { getQuarterDateRange, getQuarterFromDate } from "@/lib/quarter-utils";
 import TotalNumber from "./_component/total-number";
 import ReportContent from "./_component/report-content";
@@ -13,7 +12,7 @@ export default async function StatPage({
   const hasDateRange = searchParams.from && searchParams.to;
   const hasQuarter = searchParams.quarter !== undefined;
 
-  let data, totals, dateRange, year, quarter;
+  let data, totals, dateRange, year, quarter, installmentStats;
 
   if (hasQuarter) {
     // Use quarter filtering
@@ -42,6 +41,10 @@ export default async function StatPage({
       dateRange,
       includePurchaseOrders: true,
     });
+
+    installmentStats = await getInstallmentStats({
+      dateRange,
+    });
   } else if (hasDateRange) {
     // Use date range filtering
     // Parse dates and set to end of day for 'to' date to include the entire day
@@ -67,6 +70,10 @@ export default async function StatPage({
     // For display purposes, use the year from the start date
     year = dateRange.from.getFullYear();
     quarter = getQuarterFromDate(dateRange.from);
+
+    installmentStats = await getInstallmentStats({
+      dateRange,
+    });
   } else {
     // Use year-based filtering (existing logic)
     year = searchParams.year
@@ -88,6 +95,10 @@ export default async function StatPage({
     totals = await getTotalCounts({
       year,
       includePurchaseOrders: true,
+    });
+
+    installmentStats = await getInstallmentStats({
+      year,
     });
   }
 
@@ -111,6 +122,7 @@ export default async function StatPage({
             hasDateRange={!!hasDateRange}
             hasQuarter={hasQuarter}
             quarter={quarter}
+            installmentStats={installmentStats}
           />
         </div>
       </div>
