@@ -287,10 +287,9 @@ export default function ReportContent({ data, year, dateRange, hasDateRange, has
                   <th className="text-left py-3 px-2">เดือน</th>
                   <th className="text-center py-3 px-2 border-l border-r">ยอดสั่งซื้อ</th>
                   <th className="text-center py-3 px-2 border-l border-r" colSpan={2}>ยอดขายที่ยังไม่ชำระ</th>
-                  <th className="text-center py-3 px-2 border-r" colSpan={2}>ยอดขายที่ชำระแล้ว</th>
+                  <th className="text-center py-3 px-2 border-r" colSpan={3}>ยอดขายที่ชำระแล้ว</th>
                   <th className="text-center py-3 px-2" colSpan={2}>ผ่อนชำระ</th>
-                  <th className="text-center py-3 px-2 border-l border-r" colSpan={2}>รวมยอดขาย</th>
-                  <th className="text-center py-3 px-2">กำไร(ที่ชำระแล้ว)</th>
+                  <th className="text-center py-3 px-2 border-l " colSpan={2}>รวมยอดขาย</th>
                 </tr>
                 <tr className="border-b bg-gray-50">
                   <th className="text-left py-2 px-2"></th>
@@ -298,12 +297,12 @@ export default function ReportContent({ data, year, dateRange, hasDateRange, has
                   <th className="text-right py-2 px-2 text-xs border-l">รวม VAT</th>
                   <th className="text-right py-2 px-2 text-xs border-r">ไม่รวม VAT</th>
                   <th className="text-right py-2 px-2 text-xs">รวม VAT</th>
-                  <th className="text-right py-2 px-2 text-xs border-r">ไม่รวม VAT</th>
+                  <th className="text-right py-2 px-2 text-xs">ไม่รวม VAT</th>
+                  <th className="text-right py-2 px-2 text-xs border-r">กำไร</th>
                   <th className="text-right py-2 px-2 text-xs">รวม VAT</th>
                   <th className="text-right py-2 px-2 text-xs border-r">ไม่รวม VAT</th>
                   <th className="text-right py-2 px-2 text-xs">รวม VAT</th>
-                  <th className="text-right py-2 px-2 text-xs border-r">ไม่รวม VAT</th>
-                  <th className="text-right py-2 px-2 text-xs"></th>
+                  <th className="text-right py-2 px-2 text-xs ">ไม่รวม VAT</th>
                 </tr>
               </thead>
               <tbody>
@@ -323,12 +322,19 @@ export default function ReportContent({ data, year, dateRange, hasDateRange, has
                       <td className="py-2 px-2 text-right text-orange-600 border-l">{formatCurrency(monthData?.unpaid.withVAT || 0)}</td>
                       <td className="py-2 px-2 text-right text-orange-500 border-r">{formatCurrency(monthData?.unpaid.withoutVAT || 0)}</td>
                       <td className="py-2 px-2 text-right text-green-700">{formatCurrency(monthData?.paid.withVAT || 0)}</td>
-                      <td className="py-2 px-2 text-right text-green-600 border-r">{formatCurrency(monthData?.paid.withoutVAT || 0)}</td>
+                      <td className="py-2 px-2 text-right text-green-600 ">{formatCurrency(monthData?.paid.withoutVAT || 0)}</td>
+                      <td className={`py-2 px-2 text-right font-medium border-r ${(monthData?.profit || 0) < 0 ? 'text-red-600' : 'text-cyan-600'}`}>
+                        <span> {formatCurrency(monthData?.profit || 0)}</span>
+                        <span className="ml-1">
+                          ({(monthData?.paid.withoutVAT || 0) > 0
+                            ? ((monthData?.profit || 0) / monthData!.paid.withoutVAT * 100).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })
+                            : '0'}%)
+                        </span>
+                      </td>
                       <td className="py-2 px-2 text-right text-red-700">{formatCurrency(monthData?.installment.withVAT || 0)}</td>
                       <td className="py-2 px-2 text-right text-red-600  border-r">{formatCurrency(monthData?.installment.withoutVAT || 0)}</td>
                       <td className="py-2 px-2 text-right text-purple-700 font-medium bg-gray-50">{formatCurrency((monthData?.unpaid.withVAT || 0) + (monthData?.paid.withVAT || 0) + (monthData?.installment.withVAT || 0))}</td>
-                      <td className="py-2 px-2 text-right text-purple-600 font-medium bg-gray-50 border-r">{formatCurrency((monthData?.unpaid.withoutVAT || 0) + (monthData?.paid.withoutVAT || 0) + (monthData?.installment.withoutVAT || 0))}</td>
-                      <td className={`py-2 px-2 text-right font-medium ${(monthData?.profit || 0) < 0 ? 'text-red-600' : 'text-cyan-600'}`}>{formatCurrency(monthData?.profit || 0)}</td>
+                      <td className="py-2 px-2 text-right text-purple-600 font-medium bg-gray-50 ">{formatCurrency((monthData?.unpaid.withoutVAT || 0) + (monthData?.paid.withoutVAT || 0) + (monthData?.installment.withoutVAT || 0))}</td>
                     </tr>
                   );
                 })}
@@ -340,12 +346,19 @@ export default function ReportContent({ data, year, dateRange, hasDateRange, has
                   <td className="py-3 px-2 text-right text-orange-600 border-l">{formatCurrency(totals.unpaid.withVAT)}</td>
                   <td className="py-3 px-2 text-right text-orange-500 border-r">{formatCurrency(totals.unpaid.withoutVAT)}</td>
                   <td className="py-3 px-2 text-right text-green-700">{formatCurrency(totals.paid.withVAT)}</td>
-                  <td className="py-3 px-2 text-right text-green-600 border-r">{formatCurrency(totals.paid.withoutVAT)}</td>
+                  <td className="py-3 px-2 text-right text-green-600 ">{formatCurrency(totals.paid.withoutVAT)}</td>
+                  <td className={`py-3 px-2 text-right font-bold border-r ${totals.profit < 0 ? 'text-red-600' : 'text-cyan-600'}`}>
+                    <span>{formatCurrency(totals.profit)}</span>
+                    <span className="ml-1">
+                      ({(totals.paid.withoutVAT || 0) > 0
+                        ? ((totals.profit || 0) / totals!.paid.withoutVAT * 100).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })
+                        : '0'}%)
+                    </span>
+                  </td>
                   <td className="py-3 px-2 text-right text-red-700 font-semibold">{formatCurrency(totals.installment.withVAT)}</td>
                   <td className="py-3 px-2 text-right text-red-600 font-semibold border-r">{formatCurrency(totals.installment.withoutVAT)}</td>
                   <td className="py-3 px-2 text-right text-purple-700 font-bold">{formatCurrency(totals.unpaid.withVAT + totals.paid.withVAT + totals.installment.withVAT)}</td>
-                  <td className="py-3 px-2 text-right text-purple-600 font-bold border-r">{formatCurrency(totals.unpaid.withoutVAT + totals.paid.withoutVAT + totals.installment.withoutVAT)}</td>
-                  <td className={`py-3 px-2 text-right font-bold ${totals.profit < 0 ? 'text-red-600' : 'text-cyan-600'}`}>{formatCurrency(totals.profit)}</td>
+                  <td className="py-3 px-2 text-right text-purple-600 font-bold ">{formatCurrency(totals.unpaid.withoutVAT + totals.paid.withoutVAT + totals.installment.withoutVAT)}</td>
                 </tr>
               </tfoot>
             </table>
