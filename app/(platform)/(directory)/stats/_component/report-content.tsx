@@ -30,7 +30,7 @@ export default function ReportContent({ data, year, dateRange, hasDateRange, has
 
   // Generate months based on date range or show all months for year view
   const getDisplayMonths = () => {
-    if (!hasDateRange || !dateRange) {
+    if ((!hasDateRange && !hasQuarter) || !dateRange) {
       // Show all 12 months for year view
       return allMonthNames.map((name, index) => ({
         name,
@@ -41,26 +41,26 @@ export default function ReportContent({ data, year, dateRange, hasDateRange, has
     }
 
     // For date range view, only show months within the range
-    const fromMonth = dateRange.from.getMonth();
-    const toMonth = dateRange.to.getMonth();
-    const fromYear = dateRange.from.getFullYear();
-    const toYear = dateRange.to.getFullYear();
+    const fromMonth = dateRange.from.getUTCMonth();
+    const toMonth = dateRange.to.getUTCMonth();
+    const fromYear = dateRange.from.getUTCFullYear();
+    const toYear = dateRange.to.getUTCFullYear();
 
     const months: Array<{ name: string; index: number; dataIndex: number; year: number }> = [];
-    let currentDate = new Date(fromYear, fromMonth, 1);
+    let currentDate = new Date(Date.UTC(fromYear, fromMonth, 1));
     let dataIndex = 0;
 
-    while (currentDate <= new Date(toYear, toMonth, 1)) {
-      const monthIndex = currentDate.getMonth();
+    while (currentDate <= new Date(Date.UTC(toYear, toMonth, 1))) {
+      const monthIndex = currentDate.getUTCMonth();
       months.push({
         name: allMonthNames[monthIndex],
         index: monthIndex,
         dataIndex: dataIndex,
-        year: currentDate.getFullYear()
+        year: currentDate.getUTCFullYear()
       });
 
       dataIndex++;
-      currentDate.setMonth(currentDate.getMonth() + 1);
+      currentDate.setUTCMonth(currentDate.getUTCMonth() + 1);
     }
 
     return months;
@@ -80,7 +80,7 @@ export default function ReportContent({ data, year, dateRange, hasDateRange, has
     unpaid: { label: " ยังไม่ชำระ", color: "#f97316" },
     paid: { label: " ชำระแล้ว", color: "#15803d" },
     installment: { label: " ผ่อนชำระ", color: "#dc2626" },
-    profit: { label: " กำไร(ที่ชำระแล้ว)", color: "#06b6d4" },
+    profit: { label: " กำไร", color: "#06b6d4" },
   } satisfies ChartConfig;
 
   // Calculate totals only for the displayed months
@@ -196,7 +196,7 @@ export default function ReportContent({ data, year, dateRange, hasDateRange, has
         {/* Profit vs Cost Pie Chart */}
         < Card >
           <CardHeader className="pb-2">
-            <CardTitle className="text-base "> <span className="text-green-600">ชำระแล้วไม่รวม VAT {formatCurrency(totals.paid.withoutVAT)}</span> (กำไร vs ต้นทุน)</CardTitle>
+            <CardTitle className="text-base "> <span className="text-green-600">ชำระแล้ว(ไม่รวม VAT) {formatCurrency(totals.paid.withoutVAT)}</span> กำไร vs ต้นทุน</CardTitle>
           </CardHeader>
           <CardContent>
             {profitVsCostData.length > 0 ? (
@@ -238,7 +238,7 @@ export default function ReportContent({ data, year, dateRange, hasDateRange, has
         {/* QuotationInstallment: Paid vs Pending Pie Chart  */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-base"><span className="text-red-600">ผ่อนชำระไม่รวม VAT {formatCurrency(totalInstallment)}</span> (ชำระแล้ว vs รอชำระ)</CardTitle>
+            <CardTitle className="text-base"><span className="text-red-600">ผ่อนชำระ(ไม่รวม VAT) {formatCurrency(totalInstallment)}</span> ชำระแล้ว vs รอชำระ</CardTitle>
           </CardHeader>
           <CardContent>
             {installmentStatusData.length > 0 ? (

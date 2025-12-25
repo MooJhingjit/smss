@@ -33,18 +33,37 @@ export default function TimePeriodSelector({
   const currentMode = hasQuarter ? "quarter" : hasDateRange ? "dateRange" : "year";
 
   const handleModeChange = (value: string) => {
-    if (value === "year" && (hasDateRange || hasQuarter)) {
+    if (value === "year") {
       // Switch to year mode - clear date range and quarter params
+      // We explicitly check if we need to switch to avoid redundant pushes if already on year mode with no extra params,
+      // but essentially we just want to go to ?year=X
       router.push(`${pathname}?year=${year}`);
-    } else if (value === "quarter" && !hasQuarter) {
-      // Switch to quarter mode - use current quarter
-      const currentQuarter = getQuarterFromDate(new Date());
-      router.push(`${pathname}?year=${year}&quarter=${currentQuarter}`);
-    } else if (value === "dateRange" && !hasDateRange) {
-      // Switch to date range mode - set current year as date range
-      const fromDate = `${year}-01-01`;
-      const toDate = `${year}-12-31`;
-      router.push(`${pathname}?from=${fromDate}&to=${toDate}`);
+    } else if (value === "quarter") {
+      // Switch to quarter mode
+      // If we are already in quarter mode, we might want to stay, but here we just ensure we have a quarter
+      // If query already has quarter, we might want to keep it? 
+      // The current logic forces current quarter on switch, which is acceptable defaults.
+      // Better: if we have a quarter in props, keep it, else default.
+      const targetQuarter = hasQuarter ? quarter : getQuarterFromDate(new Date());
+      router.push(`${pathname}?year=${year}&quarter=${targetQuarter}`);
+    } else if (value === "dateRange") {
+      // Switch to date range mode
+      // If we already have date range, keep it? 
+      // For now, defaulting to full year if switching IS acceptable or we can try to preserve if exists.
+      // But the logic below creates a default range.
+      if (hasDateRange) {
+        // If we already have a range, just staying is fine, but radio click implies "switch to".
+        // Use existing logic to force a range or keep?
+        // Let's stick to the previous default behavior for consistency unless user wants to keep state.
+        // Original logic: set current year as range.
+        const fromDate = `${year}-01-01`;
+        const toDate = `${year}-12-31`;
+        router.push(`${pathname}?from=${fromDate}&to=${toDate}`);
+      } else {
+        const fromDate = `${year}-01-01`;
+        const toDate = `${year}-12-31`;
+        router.push(`${pathname}?from=${fromDate}&to=${toDate}`);
+      }
     }
   };
 
@@ -59,7 +78,7 @@ export default function TimePeriodSelector({
             className="grid grid-cols-1 sm:grid-cols-3 gap-6 "
           >
             {/* Year Selection Option */}
-            <div className={cn("flex flex-col space-y-4", currentMode === "year" && "bg-yellow-50 p-2")}>
+            <div className={cn("flex flex-col space-y-4 p-1", currentMode === "year" && "bg-yellow-50")}>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="year" id="year-option" />
                 <Label
@@ -81,7 +100,7 @@ export default function TimePeriodSelector({
             </div>
 
             {/* Quarter Selection Option */}
-            <div className={cn("flex flex-col space-y-4", currentMode === "quarter" && "bg-yellow-50 p-2")}>
+            <div className={cn("flex flex-col space-y-4 p-1", currentMode === "quarter" && "bg-yellow-50 ")}>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="quarter" id="quarter-option" />
                 <Label
@@ -103,7 +122,7 @@ export default function TimePeriodSelector({
             </div>
 
             {/* Date Range Selection Option */}
-            <div className={cn("flex flex-col space-y-4", currentMode === "dateRange" && "bg-yellow-50 p-2")}>
+            <div className={cn("flex flex-col space-y-4 p-1", currentMode === "dateRange" && "bg-yellow-50 ")}>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="dateRange" id="dateRange-option" />
                 <Label

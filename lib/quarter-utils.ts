@@ -17,8 +17,8 @@ export const QUARTER_LABELS: Record<number, string> = {
 
 export function getQuarterDateRange(year: number, quarter: number) {
     const quarterDef = QUARTERS.find((q) => q.value === quarter) || QUARTERS[0];
-    const fromDate = new Date(year, quarterDef.months.start, 1);
-    const toDate = new Date(year, quarterDef.months.end + 1, 0, 23, 59, 59, 999); // Last day of end month
+    const fromDate = new Date(Date.UTC(year, quarterDef.months.start, 1));
+    const toDate = new Date(Date.UTC(year, quarterDef.months.end + 1, 0, 23, 59, 59, 999)); // Last day of end month
     return { fromDate, toDate };
 }
 

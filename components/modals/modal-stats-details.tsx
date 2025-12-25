@@ -185,7 +185,7 @@ export const StatsDetailsModal = () => {
           <span>{`รายละเอียดยอดขาย ${payload.monthLabel} ${payload.year}`}</span>
           {payload.profit !== undefined && (
             <span className={`text-sm font-normal ${payload.profit < 0 ? 'text-red-600' : 'text-cyan-600'}`}>
-              กำไร(ที่ชำระแล้ว): {formatTHBStrict(payload.profit)}
+              กำไร: {formatTHBStrict(payload.profit)}
             </span>
           )}
         </div>

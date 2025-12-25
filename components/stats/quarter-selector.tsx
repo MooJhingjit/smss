@@ -32,11 +32,12 @@ export default function QuarterSelector({
     // Check if quarter mode is active
     const isQuarterMode = searchParams.get("quarter") !== null;
 
-    // Generate year options from 5 years ago to current year
+    // Generate year options from 2025 to current year
     const currentFullYear = new Date().getFullYear();
+    const startYear = 2025;
     const yearOptions = Array.from(
-        { length: 6 },
-        (_, i) => currentFullYear - 5 + i
+        { length: Math.max(1, currentFullYear - startYear + 1) },
+        (_, i) => startYear + i
     );
 
     // Generate combined year-quarter options
@@ -67,6 +68,8 @@ export default function QuarterSelector({
         }
     }, [searchParams, selectedValue]);
 
+    const placeholderLabel = options.find(o => o.value === `${currentYear}-${currentQuarter}`)?.label || "เลือกไตรมาส";
+
     return (
         <div className="">
             {isLoading ? (
@@ -76,7 +79,7 @@ export default function QuarterSelector({
                 </div>
             ) : (
                 <Select
-                    value={`${currentYear}-${currentQuarter}`}
+                    value={isQuarterMode ? `${currentYear}-${currentQuarter}` : ""}
                     onValueChange={handleChange}
                     disabled={isLoading}
                 >
@@ -84,7 +87,7 @@ export default function QuarterSelector({
                         className={`w-full max-w-[280px] text-sm sm:text-base ${isQuarterMode ? "ring-2 ring-primary border-primary" : ""
                             }`}
                     >
-                        <SelectValue placeholder="เลือกไตรมาส" />
+                        <SelectValue placeholder={placeholderLabel} />
                     </SelectTrigger>
                     <SelectContent className="max-h-[300px]">
                         {options.map((option) => (

@@ -51,9 +51,10 @@ export default function DateRangeSelector({
       const fromDate = format(date.from, "yyyy-MM-dd");
       const toDate = format(date.to, "yyyy-MM-dd");
 
-      // Clear any existing year parameter and set date range
+      // Clear any existing year and quarter parameters and set date range
       const url = new URL(window.location.href);
       url.searchParams.delete("year");
+      url.searchParams.delete("quarter");
       url.searchParams.set("from", fromDate);
       url.searchParams.set("to", toDate);
 
@@ -108,9 +109,8 @@ export default function DateRangeSelector({
           <PopoverTrigger asChild>
             <Button
               variant="outline"
-              className={`w-full max-w-[300px] justify-start text-left font-normal text-sm sm:text-base ${
-                isDateRangeMode ? "ring-2 ring-primary border-primary" : ""
-              }`}
+              className={`w-full max-w-[300px] justify-start text-left font-normal text-sm sm:text-base ${isDateRangeMode ? "ring-2 ring-primary border-primary" : ""
+                }`}
               disabled={isLoading}
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
