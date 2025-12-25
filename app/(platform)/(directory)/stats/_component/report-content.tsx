@@ -152,11 +152,11 @@ export default function ReportContent({ data, year, dateRange, hasDateRange, has
       {/* Pie Charts Section */}
       < div className="grid grid-cols-1 md:grid-cols-3 gap-6" >
         {/* Sales by Status Pie Chart */}
-        < Card >
+        <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base">สัดส่วนยอดขายตามสถานะ (ไม่รวม VAT)</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="!px-0">
             {salesByStatusData.length > 0 ? (
               <div className="w-full h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
@@ -194,11 +194,11 @@ export default function ReportContent({ data, year, dateRange, hasDateRange, has
         </Card >
 
         {/* Profit vs Cost Pie Chart */}
-        < Card >
+        <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base "> <span className="text-green-600">ชำระแล้ว(ไม่รวม VAT) {formatCurrency(totals.paid.withoutVAT)}</span> กำไร vs ต้นทุน</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="!px-0">
             {profitVsCostData.length > 0 ? (
               <div className="w-full h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
@@ -240,7 +240,7 @@ export default function ReportContent({ data, year, dateRange, hasDateRange, has
           <CardHeader className="pb-2">
             <CardTitle className="text-base"><span className="text-red-600">ผ่อนชำระ(ไม่รวม VAT) {formatCurrency(totalInstallment)}</span> ชำระแล้ว vs รอชำระ</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="!px-0">
             {installmentStatusData.length > 0 ? (
               <div className="w-full h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
