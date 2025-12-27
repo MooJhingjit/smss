@@ -12,7 +12,7 @@ export default function ShortcutMenus(props: Props) {
   const { saleTotal } = props;
   return (
     <div className="">
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         <MenuItem
           icon={
             <KanbanSquare
@@ -45,6 +45,28 @@ export default function ShortcutMenus(props: Props) {
           label="ลูกค้า"
           link="/contacts"
         />
+        <MenuItem
+          icon={
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-4 h-4 lg:w-8 lg:h-8"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M13 17V9" />
+              <path d="M18 17V5" />
+              <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+              <path d="M8 17v-3" />
+            </svg>
+          }
+          label="รายงาน"
+          link="/stats"
+          isNewTab
+        />
       </div>
       <div className="mt-4">
         <Stats saleTotal={saleTotal} />
@@ -58,11 +80,13 @@ const MenuItem = (props: {
   link: string;
   icon: React.ReactNode;
   label: string;
+  isNewTab?: boolean;
 }) => {
-  const { link, icon, label } = props;
+  const { link, icon, label, isNewTab } = props;
   return (
     <Link
       href={link}
+      target={isNewTab ? "_blank" : "_self"}
       className="col-span-1 flex flex-col items-center justify-center relative rounded-lg p-2 lg:py-4 px-2 group cursor-pointer shadow-lg hover:shadow-sm "
     >
       <div className="absolute inset-0 bg-gray-700  rounded-lg opacity-10 z-10 h-full"></div>
@@ -86,7 +110,7 @@ const Stats = ({ saleTotal }: { saleTotal: number }) => {
     <div className="col-span-3 lg:flex  relative py-2">
       <div className=" lg:border-gray-900/5 lg:border-t-0 lg:mb-0 text-center lg:text-left">
         <dt className="leading-6 flex items-center space-x-2 justify-center lg:justify-start">
-          <p>ยอดขายรวม</p>
+          <p>ยอดขายเดือนนี้ (ไม่รวมVAT)</p>
           <p>{`${getDateFormat(firstDay)} - ${getDateFormat(lastDay)}`}</p>
         </dt>
         <dd className="w-full flex-none text-3xl font-medium leading-10 tracking-tight ">

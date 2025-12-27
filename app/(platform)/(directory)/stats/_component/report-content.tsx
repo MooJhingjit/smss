@@ -297,14 +297,21 @@ export default function ReportContent({ data, year, dateRange, hasDateRange, has
                 </tr>
                 <tr className="border-b bg-gray-50">
                   <th className="text-left py-2 px-2"></th>
-                  <th className="text-right py-2 px-2 text-xs border-l border-r">รวม</th>
+                  {
+                    includePurchaseOrders && (
+                      <th className="text-right py-2 px-2 text-xs border-l border-r">รวม</th>
+                    )
+                  }
                   <th className="text-right py-2 px-2 text-xs border-l">รวม VAT</th>
                   <th className="text-right py-2 px-2 text-xs border-r">ไม่รวม VAT</th>
                   <th className="text-right py-2 px-2 text-xs">รวม VAT</th>
                   <th className="text-right py-2 px-2 text-xs">ไม่รวม VAT</th>
                   <th className="text-right py-2 px-2 text-xs border-r">กำไร</th>
-                  <th className="text-right py-2 px-2 text-xs">รวม VAT</th>
-                  <th className="text-right py-2 px-2 text-xs border-r">ไม่รวม VAT</th>
+                  {includeInstallments && (
+                    <>
+                      <th className="text-right py-2 px-2 text-xs">รวม VAT</th>
+                      <th className="text-right py-2 px-2 text-xs border-r">ไม่รวม VAT</th></>
+                  )}
                   <th className="text-right py-2 px-2 text-xs">รวม VAT</th>
                   <th className="text-right py-2 px-2 text-xs ">ไม่รวม VAT</th>
                 </tr>

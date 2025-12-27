@@ -131,6 +131,7 @@ export default async function StatPage({
         quarter={quarter}
         quotationCount={totals.quotationCount}
         purchaseOrderCount={totals.purchaseOrderCount}
+        isSeller={isSeller}
       />
       <div className="grid grid-cols-3 gap-6">
         <div className="col-span-3 ">

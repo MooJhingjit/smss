@@ -50,7 +50,8 @@ async function GetData(): Promise<[QuotationWithBuyer[], QuotationWithBuyer[], {
     },
     where: {
       sellerId: sellerId,
-      updatedAt: {
+      status: "paid",
+      approvedAt: {
         gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
       },
     },
@@ -67,7 +68,7 @@ export default async function SellerHomePage({
   const year = searchParams.year
     ? parseInt(searchParams.year)
     : new Date().getFullYear();
-  
+
   const [tasks, quotations, stats, sellerId] = await GetData();
 
   return (
@@ -88,9 +89,6 @@ export default async function SellerHomePage({
           <Quotations data={quotations} />
         </div>
 
-        <div className="col-span-12">
-          <SellerStats sellerId={sellerId} year={year} />
-        </div>
       </div>
     </div>
   );
