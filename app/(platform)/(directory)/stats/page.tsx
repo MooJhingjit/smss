@@ -2,12 +2,22 @@ import { getMonthlyStats, getTotalCounts, getDateRangeStats, getDateRangeTotalCo
 import { getQuarterDateRange, getQuarterFromDate } from "@/lib/quarter-utils";
 import TotalNumber from "./_component/total-number";
 import ReportContent from "./_component/report-content";
+import { currentUser } from "@/lib/auth";
 
 export default async function StatPage({
   searchParams,
 }: {
   searchParams: { year?: string; from?: string; to?: string; quarter?: string };
 }) {
+  const user = await currentUser();
+  const isSeller = user?.role === "seller";
+
+  // If seller, scope to their ID and hide POs. Admin sees all.
+  // Note: if user is undefined (not logged in), they might see nothing or public data depending on downstream logic,
+  // but this page is likely protected by middleware/layout.
+  const sellerId = isSeller && user?.id ? parseInt(user.id) : undefined;
+  const includePurchaseOrders = !isSeller;
+
   // Handle date range, quarter, or year-based filtering
   const hasDateRange = searchParams.from && searchParams.to;
   const hasQuarter = searchParams.quarter !== undefined;
@@ -34,16 +44,19 @@ export default async function StatPage({
 
     data = await getDateRangeStats({
       dateRange,
-      includePurchaseOrders: true,
+      includePurchaseOrders,
+      sellerId,
     });
 
     totals = await getDateRangeTotalCounts({
       dateRange,
-      includePurchaseOrders: true,
+      includePurchaseOrders,
+      sellerId,
     });
 
     installmentStats = await getInstallmentStats({
       dateRange,
+      sellerId,
     });
   } else if (hasDateRange) {
     // Use date range filtering
@@ -59,12 +72,14 @@ export default async function StatPage({
 
     data = await getDateRangeStats({
       dateRange,
-      includePurchaseOrders: true,
+      includePurchaseOrders,
+      sellerId,
     });
 
     totals = await getDateRangeTotalCounts({
       dateRange,
-      includePurchaseOrders: true,
+      includePurchaseOrders,
+      sellerId,
     });
 
     // For display purposes, use the year from the start date
@@ -73,6 +88,7 @@ export default async function StatPage({
 
     installmentStats = await getInstallmentStats({
       dateRange,
+      sellerId,
     });
   } else {
     // Use year-based filtering (existing logic)
@@ -89,16 +105,19 @@ export default async function StatPage({
 
     data = await getMonthlyStats({
       year,
-      includePurchaseOrders: true,
+      includePurchaseOrders,
+      sellerId,
     });
 
     totals = await getTotalCounts({
       year,
-      includePurchaseOrders: true,
+      includePurchaseOrders,
+      sellerId,
     });
 
     installmentStats = await getInstallmentStats({
       year,
+      sellerId,
     });
   }
 
@@ -123,6 +142,8 @@ export default async function StatPage({
             hasQuarter={hasQuarter}
             quarter={quarter}
             installmentStats={installmentStats}
+            includePurchaseOrders={includePurchaseOrders}
+            includeInstallments={!isSeller}
           />
         </div>
       </div>
