@@ -18,9 +18,11 @@ interface ReportContentProps {
   readonly hasQuarter?: boolean;
   readonly quarter?: number;
   readonly installmentStats?: InstallmentStats;
+  readonly includePurchaseOrders?: boolean;
+  readonly includeInstallments?: boolean;
 }
 
-export default function ReportContent({ data, year, dateRange, hasDateRange, hasQuarter, quarter, installmentStats }: ReportContentProps) {
+export default function ReportContent({ data, year, dateRange, hasDateRange, hasQuarter, quarter, installmentStats, includePurchaseOrders = true, includeInstallments = true }: ReportContentProps) {
   const statsModal = useStatsDetailsModal();
 
   const allMonthNames = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
@@ -113,7 +115,7 @@ export default function ReportContent({ data, year, dateRange, hasDateRange, has
   const salesByStatusData = [
     { name: "ชำระแล้ว", value: totals.paid.withoutVAT, color: "#15803d" },
     { name: "ยังไม่ชำระ", value: totals.unpaid.withoutVAT, color: "#f97316" },
-    { name: "ผ่อนชำระ", value: totals.installment.withoutVAT, color: "#dc2626" },
+    ...(includeInstallments ? [{ name: "ผ่อนชำระ", value: totals.installment.withoutVAT, color: "#dc2626" }] : []),
   ].filter(item => item.value > 0);
 
   // Pie chart data - Profit vs Cost (from paid sales only)
@@ -150,7 +152,7 @@ export default function ReportContent({ data, year, dateRange, hasDateRange, has
     <div className="space-y-6">
 
       {/* Pie Charts Section */}
-      < div className="grid grid-cols-1 md:grid-cols-3 gap-6" >
+      < div className={`grid grid-cols-1 ${includeInstallments ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-6`} >
         {/* Sales by Status Pie Chart */}
         <Card>
           <CardHeader className="pb-2">
@@ -236,46 +238,48 @@ export default function ReportContent({ data, year, dateRange, hasDateRange, has
         </Card >
 
         {/* QuotationInstallment: Paid vs Pending Pie Chart  */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base"><span className="text-red-600">ผ่อนชำระ(ไม่รวม VAT) {formatCurrency(totalInstallment)}</span> ชำระแล้ว vs รอชำระ</CardTitle>
-          </CardHeader>
-          <CardContent className="!px-0">
-            {installmentStatusData.length > 0 ? (
-              <div className="w-full h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={installmentStatusData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={100}
-                      paddingAngle={2}
-                      dataKey="value"
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                      labelLine={true}
-                    >
-                      {installmentStatusData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <p className="text-center text-muted-foreground py-8">ไม่มีข้อมูล</p>
-            )}
-            <div className="flex flex-wrap justify-center gap-4 mt-4">
-              {installmentStatusData.map((item, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                  <span className="text-sm">{item.name}: {formatCurrency(item.value)}</span>
+        {includeInstallments && (
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base"><span className="text-red-600">ผ่อนชำระ(ไม่รวม VAT) {formatCurrency(totalInstallment)}</span> ชำระแล้ว vs รอชำระ</CardTitle>
+            </CardHeader>
+            <CardContent className="!px-0">
+              {installmentStatusData.length > 0 ? (
+                <div className="w-full h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={installmentStatusData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={100}
+                        paddingAngle={2}
+                        dataKey="value"
+                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        labelLine={true}
+                      >
+                        {installmentStatusData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                    </PieChart>
+                  </ResponsiveContainer>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+              ) : (
+                <p className="text-center text-muted-foreground py-8">ไม่มีข้อมูล</p>
+              )}
+              <div className="flex flex-wrap justify-center gap-4 mt-4">
+                {installmentStatusData.map((item, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                    <span className="text-sm">{item.name}: {formatCurrency(item.value)}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
       </div >
       <Card>
@@ -285,22 +289,29 @@ export default function ReportContent({ data, year, dateRange, hasDateRange, has
               <thead>
                 <tr className="border-b">
                   <th className="text-left py-3 px-2">เดือน</th>
-                  <th className="text-center py-3 px-2 border-l border-r">ยอดสั่งซื้อ</th>
+                  {includePurchaseOrders && <th className="text-center py-3 px-2 border-l border-r">ยอดสั่งซื้อ</th>}
                   <th className="text-center py-3 px-2 border-l border-r" colSpan={2}>ยอดขายที่ยังไม่ชำระ</th>
                   <th className="text-center py-3 px-2 border-r" colSpan={3}>ยอดขายที่ชำระแล้ว</th>
-                  <th className="text-center py-3 px-2" colSpan={2}>ผ่อนชำระ</th>
+                  {includeInstallments && <th className="text-center py-3 px-2" colSpan={2}>ผ่อนชำระ</th>}
                   <th className="text-center py-3 px-2 border-l " colSpan={2}>รวมยอดขาย</th>
                 </tr>
                 <tr className="border-b bg-gray-50">
                   <th className="text-left py-2 px-2"></th>
-                  <th className="text-right py-2 px-2 text-xs border-l border-r">รวม</th>
+                  {
+                    includePurchaseOrders && (
+                      <th className="text-right py-2 px-2 text-xs border-l border-r">รวม</th>
+                    )
+                  }
                   <th className="text-right py-2 px-2 text-xs border-l">รวม VAT</th>
                   <th className="text-right py-2 px-2 text-xs border-r">ไม่รวม VAT</th>
                   <th className="text-right py-2 px-2 text-xs">รวม VAT</th>
                   <th className="text-right py-2 px-2 text-xs">ไม่รวม VAT</th>
                   <th className="text-right py-2 px-2 text-xs border-r">กำไร</th>
-                  <th className="text-right py-2 px-2 text-xs">รวม VAT</th>
-                  <th className="text-right py-2 px-2 text-xs border-r">ไม่รวม VAT</th>
+                  {includeInstallments && (
+                    <>
+                      <th className="text-right py-2 px-2 text-xs">รวม VAT</th>
+                      <th className="text-right py-2 px-2 text-xs border-r">ไม่รวม VAT</th></>
+                  )}
                   <th className="text-right py-2 px-2 text-xs">รวม VAT</th>
                   <th className="text-right py-2 px-2 text-xs ">ไม่รวม VAT</th>
                 </tr>
@@ -318,7 +329,7 @@ export default function ReportContent({ data, year, dateRange, hasDateRange, has
                           <span className="text-xs text-gray-500 ml-1">({monthInfo.year})</span>
                         )}
                       </td>
-                      <td className="py-2 px-2 text-right text-blue-600 border-l border-r">{formatCurrency(monthData?.purchaseOrder ?? 0)}</td>
+                      {includePurchaseOrders && <td className="py-2 px-2 text-right text-blue-600 border-l border-r">{formatCurrency(monthData?.purchaseOrder ?? 0)}</td>}
                       <td className="py-2 px-2 text-right text-orange-600 border-l">{formatCurrency(monthData?.unpaid.withVAT || 0)}</td>
                       <td className="py-2 px-2 text-right text-orange-500 border-r">{formatCurrency(monthData?.unpaid.withoutVAT || 0)}</td>
                       <td className="py-2 px-2 text-right text-green-700">{formatCurrency(monthData?.paid.withVAT || 0)}</td>
@@ -331,10 +342,15 @@ export default function ReportContent({ data, year, dateRange, hasDateRange, has
                             : '0'}%)
                         </span>
                       </td>
-                      <td className="py-2 px-2 text-right text-red-700">{formatCurrency(monthData?.installment.withVAT || 0)}</td>
-                      <td className="py-2 px-2 text-right text-red-600  border-r">{formatCurrency(monthData?.installment.withoutVAT || 0)}</td>
-                      <td className="py-2 px-2 text-right text-purple-700 font-medium bg-gray-50">{formatCurrency((monthData?.unpaid.withVAT || 0) + (monthData?.paid.withVAT || 0) + (monthData?.installment.withVAT || 0))}</td>
-                      <td className="py-2 px-2 text-right text-purple-600 font-medium bg-gray-50 ">{formatCurrency((monthData?.unpaid.withoutVAT || 0) + (monthData?.paid.withoutVAT || 0) + (monthData?.installment.withoutVAT || 0))}</td>
+
+                      {includeInstallments && (
+                        <>
+                          <td className="py-2 px-2 text-right text-red-700">{formatCurrency(monthData?.installment.withVAT || 0)}</td>
+                          <td className="py-2 px-2 text-right text-red-600  border-r">{formatCurrency(monthData?.installment.withoutVAT || 0)}</td>
+                        </>
+                      )}
+                      <td className="py-2 px-2 text-right text-purple-700 font-medium bg-gray-50">{formatCurrency((monthData?.unpaid.withVAT || 0) + (monthData?.paid.withVAT || 0) + (includeInstallments ? (monthData?.installment.withVAT || 0) : 0))}</td>
+                      <td className="py-2 px-2 text-right text-purple-600 font-medium bg-gray-50 ">{formatCurrency((monthData?.unpaid.withoutVAT || 0) + (monthData?.paid.withoutVAT || 0) + (includeInstallments ? (monthData?.installment.withoutVAT || 0) : 0))}</td>
                     </tr>
                   );
                 })}
@@ -342,7 +358,7 @@ export default function ReportContent({ data, year, dateRange, hasDateRange, has
               <tfoot>
                 <tr className="border-t-2 font-semibold bg-gray-50">
                   <td className="py-3 px-2">รวม</td>
-                  <td className="py-3 px-2 text-right text-blue-600 border-l border-r">{formatCurrency(totals.purchaseOrder ?? 0)}</td>
+                  {includePurchaseOrders && <td className="py-3 px-2 text-right text-blue-600 border-l border-r">{formatCurrency(totals.purchaseOrder ?? 0)}</td>}
                   <td className="py-3 px-2 text-right text-orange-600 border-l">{formatCurrency(totals.unpaid.withVAT)}</td>
                   <td className="py-3 px-2 text-right text-orange-500 border-r">{formatCurrency(totals.unpaid.withoutVAT)}</td>
                   <td className="py-3 px-2 text-right text-green-700">{formatCurrency(totals.paid.withVAT)}</td>
@@ -355,14 +371,19 @@ export default function ReportContent({ data, year, dateRange, hasDateRange, has
                         : '0'}%)
                     </span>
                   </td>
-                  <td className="py-3 px-2 text-right text-red-700 font-semibold">{formatCurrency(totals.installment.withVAT)}</td>
-                  <td className="py-3 px-2 text-right text-red-600 font-semibold border-r">{formatCurrency(totals.installment.withoutVAT)}</td>
-                  <td className="py-3 px-2 text-right text-purple-700 font-bold">{formatCurrency(totals.unpaid.withVAT + totals.paid.withVAT + totals.installment.withVAT)}</td>
-                  <td className="py-3 px-2 text-right text-purple-600 font-bold ">{formatCurrency(totals.unpaid.withoutVAT + totals.paid.withoutVAT + totals.installment.withoutVAT)}</td>
+
+                  {includeInstallments && (
+                    <>
+                      <td className="py-3 px-2 text-right text-red-700 font-semibold">{formatCurrency(totals.installment.withVAT)}</td>
+                      <td className="py-3 px-2 text-right text-red-600 font-semibold border-r">{formatCurrency(totals.installment.withoutVAT)}</td>
+                    </>
+                  )}
+                  <td className="py-3 px-2 text-right text-purple-700 font-bold">{formatCurrency(totals.unpaid.withVAT + totals.paid.withVAT + (includeInstallments ? totals.installment.withVAT : 0))}</td>
+                  <td className="py-3 px-2 text-right text-purple-600 font-bold ">{formatCurrency(totals.unpaid.withoutVAT + totals.paid.withoutVAT + (includeInstallments ? totals.installment.withoutVAT : 0))}</td>
                 </tr>
               </tfoot>
-            </table>
-          </div>
+            </table >
+          </div >
 
           <div className="mt-6">
             <div className="mb-4">
@@ -406,29 +427,32 @@ export default function ReportContent({ data, year, dateRange, hasDateRange, has
                     }
                   }}
                 />
-                <Bar yAxisId="left" dataKey="installment" stackId="a" fill="var(--color-installment)" radius={[4, 4, 0, 0]}
-                  onClick={(_, index) => {
-                    const monthInfo = displayMonths[index];
-                    const monthData = data[monthInfo?.dataIndex];
-                    if (monthInfo) {
-                      statsModal.onOpen({
-                        year: monthInfo.year || year,
-                        month: monthInfo.index,
-                        monthLabel: monthInfo.name,
-                        initialTab: "installment",
-                        profit: monthData?.profit ?? 0,
-                      });
-                    }
-                  }}
-                />
+
+                {includeInstallments && (
+                  <Bar yAxisId="left" dataKey="installment" stackId="a" fill="var(--color-installment)" radius={[4, 4, 0, 0]}
+                    onClick={(_, index) => {
+                      const monthInfo = displayMonths[index];
+                      const monthData = data[monthInfo?.dataIndex];
+                      if (monthInfo) {
+                        statsModal.onOpen({
+                          year: monthInfo.year || year,
+                          month: monthInfo.index,
+                          monthLabel: monthInfo.name,
+                          initialTab: "installment",
+                          profit: monthData?.profit ?? 0,
+                        });
+                      }
+                    }}
+                  />
+                )}
                 <Line yAxisId="right" type="monotone" dataKey="profit" stroke="var(--color-profit)" strokeWidth={3} dot={{ fill: "var(--color-profit)", r: 4 }} />
               </ComposedChart>
             </ChartContainer>
           </div>
-        </CardContent>
+        </CardContent >
       </Card >
 
-    </div>
+    </div >
   );
 }
 

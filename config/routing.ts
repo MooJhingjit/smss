@@ -6,8 +6,7 @@ export const protectedRoutes = [
     "/items",
     "/users",
     "/invoices",
-    "/installments",
-    "/stats"
+    "/installments"
 ]
 
 // Type for navigation link permissions
@@ -38,6 +37,7 @@ export const navigationLinks: NavigationLink[] = [
     { href: "/items", label: "Stock", permission: ["admin"] },
     { href: "/contacts", label: "Customers", permission: ["*"] },
     { href: "/users", label: "Users", permission: ["admin"] },
+    { href: "/stats", label: "Report", permission: ["*"] },
 ];
 
 // helper function to filter links based on user role

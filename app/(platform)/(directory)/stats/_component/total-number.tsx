@@ -10,6 +10,7 @@ export default function TotalNumber({
   quarter,
   quotationCount,
   purchaseOrderCount,
+  isSeller
 }: {
   year: number;
   dateRange: { from: Date; to: Date };
@@ -18,6 +19,7 @@ export default function TotalNumber({
   quarter: number;
   quotationCount: number;
   purchaseOrderCount: number;
+  isSeller: boolean;
 }) {
   // Generate dynamic labels based on the time period mode
   // const getLabel = (type: string) => {
@@ -32,8 +34,13 @@ export default function TotalNumber({
 
   const stats = [
     { name: "ใบเสนอราคา", value: quotationCount.toString() },
-    { name: "ใบสั่งซื้อ", value: purchaseOrderCount.toString() },
+    // { name: "ใบสั่งซื้อ", value: purchaseOrderCount.toString() },
   ];
+
+  // add purchase order count if is seller
+  if (!isSeller) {
+    stats.push({ name: "ใบสั่งซื้อ", value: purchaseOrderCount.toString() });
+  }
   return (
     <div>
       {/* Time Period Selector */}
