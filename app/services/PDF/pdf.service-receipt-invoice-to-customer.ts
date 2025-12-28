@@ -595,11 +595,11 @@ const drawCustomerInfo = (page: PDFPage) => {
     ...config,
   });
 
-  const dueDate = getBillDueDate(
-    new Date(_BILL_DATE),
-    quotation?.paymentCondition ?? ""
-  );
-  page.drawText(PDFDateFormat(dueDate), {
+  // const dueDate = getBillDueDate(
+  //   new Date(_BILL_DATE),
+  //   quotation?.paymentCondition ?? ""
+  // );
+  page.drawText(_BILL_DATE, {
     x: rightXStart,
     y: Y_Start - config.lineHeight * 4,
     maxWidth: 100,
