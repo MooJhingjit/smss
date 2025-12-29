@@ -49,10 +49,13 @@ export function getBoundingBox(
   // font refers to an instance of PDFFont
   const measureWidth = (s: any) => font?.widthOfTextAtSize(s, fontSize) || 0;
 
+  // Ensure text is a string
+  const safeText = text || "";
+  
   // We split the text into an array of lines
   // doc refers to an instance of PDFDocument
   const lines = breakTextIntoLines(
-    text,
+    safeText,
     doc.defaultWordBreaks,
     maxWidth,
     measureWidth
@@ -64,7 +67,14 @@ export function getBoundingBox(
     0
   );
   // The width of our bounding box will be the width of the longest line of text
+  // console.log("🚀 ~ getBoundingBox ~ lines:", lines)
+
+
+  // return { width: 0, height: 0 };
+  if (!lines.length) return { width: 0, height: 0 };
+
   const textWidth = measureWidth(lines[longestLine]);
+  
   // The height of our bounding box will be the number of lines * the font size * line height
   const textHeight = lines.length * fontSize * lineHeight;
 

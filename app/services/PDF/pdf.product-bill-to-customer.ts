@@ -401,7 +401,7 @@ const writeMainDescription = (
   let totalHeight = 0;
 
   // Draw the original description
-  currentPage.drawText(description, {
+  currentPage.drawText(description ?? "", {
     x: columnPosition.description + 12, // indent
     y: currentY,
     maxWidth: 300,
