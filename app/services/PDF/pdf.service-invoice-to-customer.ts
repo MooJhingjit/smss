@@ -269,6 +269,34 @@ const drawItemLists = (
     }
   });
 
+  // Add discount row if there's any discount in the lists
+  const totalDiscount = _DATA?.lists?.reduce((sum, list) => sum + (list.discount ?? 0), 0) ?? 0;
+  if (totalDiscount > 0 && !_INSTALLMENT_DATA) {
+    lineStart -= config.lineHeight; // space before discount row
+    const listCount = _DATA?.lists?.length ?? 0;
+
+    const previousPageDiscount = page;
+    const discountRes = validatePageArea(
+      page,
+      pdfDoc,
+      templatePage,
+      lineStart,
+      LIST_END_AT,
+      ITEM_Y_Start,
+      (currentPage: PDFPage, currentLineStart: number) =>
+        writeDiscountRow(currentPage, listCount, totalDiscount, currentLineStart, config)
+    );
+
+    lineStart = discountRes.lineStart;
+    page = discountRes.page;
+
+    // Check if a new page was created
+    if (page !== previousPageDiscount) {
+      pageNumber++;
+      drawStaticInfo(page, pageNumber);
+    }
+  }
+
   return { page, pageNumber };
 };
 
@@ -291,9 +319,7 @@ const writeMainItem = (
     ...config,
   });
 
-  const discountText = data.discount ? `(ส่วนลด ${data.discount.toLocaleString("th-TH", CURRENCY_FORMAT)})` : "";
-
-  const itemName = `${!!data.allowedWithholdingTax ? "(**)" : ""} ${data.name} ${discountText}`;
+  const itemName = `${!!data.allowedWithholdingTax ? "(**)" : ""} ${data.name}`;
 
   currentPage.drawText(itemName, {
     x: columnPosition.description,
@@ -319,7 +345,7 @@ const writeMainItem = (
     amount = _INSTALLMENT_DATA.amount;
   } else {
     // For regular quotations: use original data, deduct discount from price only
-    const itemDiscount = data.discount ?? 0;
+    const itemDiscount = 0 //data.discount ?? 0;
     unitPrice = data.unitPrice ?? 0;
     amount = (data.price ?? 0) - itemDiscount;
   }
@@ -356,6 +382,61 @@ const writeMainItem = (
   );
 
   return bounding.height / 10;
+};
+
+const writeDiscountRow = (
+  currentPage: PDFPage,
+  lastIndex: number,
+  totalDiscount: number,
+  lineStart: number,
+  config: {
+    font: PDFFont;
+    size: number;
+    lineHeight: number;
+  }
+) => {
+  // Index = last index + 1
+  currentPage.drawText((lastIndex + 1).toString(), {
+    x: columnPosition.index,
+    y: lineStart,
+    maxWidth: 20,
+    ...config,
+  });
+
+  // Item name = "ส่วนลด"
+  currentPage.drawText("ส่วนลด", {
+    x: columnPosition.description,
+    y: lineStart,
+    maxWidth: 300,
+    ...config,
+  });
+
+  // Quantity = 1
+  currentPage.drawText("1", {
+    x: columnPosition.quantity,
+    y: lineStart,
+    maxWidth: 20,
+    ...config,
+  });
+
+  // Unit price and amount = negative total discount
+  const discountText = `-${totalDiscount.toLocaleString("th-TH", CURRENCY_FORMAT)}`;
+
+  currentPage.drawText(discountText, {
+    x: columnPosition.unitPrice + 44 - getTextWidth(discountText, config),
+    y: lineStart,
+    maxWidth: 50,
+    ...config,
+  });
+
+  currentPage.drawText(discountText, {
+    x: columnPosition.amount + 44 - getTextWidth(discountText, config),
+    y: lineStart,
+    maxWidth: 50,
+    ...config,
+  });
+
+  return config.lineHeight;
 };
 
 const writeMainDescription = (
