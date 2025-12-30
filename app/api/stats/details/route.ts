@@ -1,17 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { UNPAID_STATUSES, getApprovedAtMonthlyWhere } from "@/lib/stats.service";
+import { currentUser } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
   try {
     const year = Number(req.nextUrl.searchParams.get("year"));
     const month = Number(req.nextUrl.searchParams.get("month")); // 0-11
-    const sellerIdParam = req.nextUrl.searchParams.get("sellerId");
-    const sellerId = sellerIdParam ? Number(sellerIdParam) : undefined;
+    // const sellerIdParam = req.nextUrl.searchParams.get("sellerId");
+    // const sellerId = sellerIdParam ? Number(sellerIdParam) : undefined;
 
     if (Number.isNaN(year) || Number.isNaN(month)) {
       return new NextResponse("Missing year or month", { status: 400 });
     }
+
+    const user = await currentUser();
+    const isSeller = user?.role === "seller";
+    const sellerId = isSeller && user?.id ? parseInt(user.id) : undefined;
 
     const baseWhere = getApprovedAtMonthlyWhere(year, month, sellerId);
 
