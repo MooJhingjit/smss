@@ -449,7 +449,7 @@ const writeDiscountRow = (
   });
 
   // Unit price and amount = negative total discount
-  const discountText = `-${totalDiscount.toLocaleString("th-TH", CURRENCY_FORMAT)}`;
+  const discountText = `${totalDiscount.toLocaleString("th-TH", CURRENCY_FORMAT)}`;
 
   currentPage.drawText(discountText, {
     x: columnPosition.unitPrice + 44 - getTextWidth(discountText, config),
@@ -761,28 +761,28 @@ const drawStaticInfo = (page: PDFPage, currentPageNumber: number) => {
   // Use installment amounts if available, otherwise use quotation amounts
   const priceData = _INSTALLMENT_DATA
     ? {
-        discount: "0.00", // Installments typically don't have separate discount
-        tax: (
-          _INSTALLMENT_DATA.amountWithVat - _INSTALLMENT_DATA.amount
-        ).toLocaleString("th-TH", CURRENCY_FORMAT),
-        totalPrice: _INSTALLMENT_DATA.amount.toLocaleString(
-          "th-TH",
-          CURRENCY_FORMAT
-        ),
-        grandTotal: _INSTALLMENT_DATA.amountWithVat.toLocaleString(
-          "th-TH",
-          CURRENCY_FORMAT
-        ),
-      }
+      discount: "0.00", // Installments typically don't have separate discount
+      tax: (
+        _INSTALLMENT_DATA.amountWithVat - _INSTALLMENT_DATA.amount
+      ).toLocaleString("th-TH", CURRENCY_FORMAT),
+      totalPrice: _INSTALLMENT_DATA.amount.toLocaleString(
+        "th-TH",
+        CURRENCY_FORMAT
+      ),
+      grandTotal: _INSTALLMENT_DATA.amountWithVat.toLocaleString(
+        "th-TH",
+        CURRENCY_FORMAT
+      ),
+    }
     : {
-        discount:
-          _DATA?.discount?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
-        tax: _DATA?.tax?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
-        totalPrice:
-          ((_DATA?.totalPrice ?? 0) - (_DATA?.discount ?? 0)).toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
-        grandTotal:
-          _DATA?.grandTotal?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
-      };
+      discount:
+        _DATA?.discount?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
+      tax: _DATA?.tax?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
+      totalPrice:
+        ((_DATA?.totalPrice ?? 0) - (_DATA?.discount ?? 0)).toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
+      grandTotal:
+        _DATA?.grandTotal?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
+    };
 
   drawPriceInfo(page, priceData);
 };

@@ -426,7 +426,7 @@ const writeDiscountRow = (
 
   // Item name = "ส่วนลด"
   currentPage.drawText("ส่วนลด", {
-    x: columnPosition.description,
+    x: columnPosition.description + 12,
     y: lineStart,
     maxWidth: 300,
     ...config,
@@ -441,7 +441,7 @@ const writeDiscountRow = (
   });
 
   // Unit price and amount = negative total discount
-  const discountText = `-${totalDiscount.toLocaleString("th-TH", CURRENCY_FORMAT)}`;
+  const discountText = `${totalDiscount.toLocaleString("th-TH", CURRENCY_FORMAT)}`;
 
   currentPage.drawText(discountText, {
     x: columnPosition.unitPrice + 44 - getTextWidth(discountText, config),
@@ -758,8 +758,8 @@ const drawStaticInfo = (page: PDFPage, currentPageNumber: number) => {
     discount: _DATA?.discount?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
     tax: _INSTALLMENT_DATA
       ? (
-          _INSTALLMENT_DATA.amountWithVat - _INSTALLMENT_DATA.amount
-        ).toLocaleString("th-TH", CURRENCY_FORMAT)
+        _INSTALLMENT_DATA.amountWithVat - _INSTALLMENT_DATA.amount
+      ).toLocaleString("th-TH", CURRENCY_FORMAT)
       : _DATA?.tax?.toLocaleString("th-TH", CURRENCY_FORMAT) ?? "",
     totalPrice: _INSTALLMENT_DATA
       ? _INSTALLMENT_DATA.amount.toLocaleString("th-TH", CURRENCY_FORMAT)
