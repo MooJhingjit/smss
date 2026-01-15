@@ -37,10 +37,12 @@ const handler = async (data: InputType): Promise<ReturnType> => {
 export const updateQuotation = createSafeAction(schema, handler);
 
 const handlerServiceQuotationSummary = async (data: ServiceQuotationInputType): Promise<ReturnServiceQuotationType> => {
-  const { id, totalPrice, discount, tax, grandTotal } = data;
+  const { id, totalPrice, discount, tax, grandTotal, customDate } = data;
   let quotation;
   try {
-    const today = getCurrentDateTime();
+    // Use custom date if provided, otherwise use current date
+    // customDate allows confirming quotation with the original date after rollback
+    const approvedAt = customDate ? new Date(customDate) : getCurrentDateTime();
     quotation = await updateAndLog({
       model: "quotation",
       where: { id },
@@ -50,7 +52,7 @@ const handlerServiceQuotationSummary = async (data: ServiceQuotationInputType): 
         tax,
         grandTotal,
         isLocked: true,
-        approvedAt: today,
+        approvedAt,
       },
     });
   } catch (error) {

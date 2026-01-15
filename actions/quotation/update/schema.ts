@@ -13,4 +13,5 @@ export const serviceQuotationSummarySchema = z.object({
   discount: z.number(),
   tax: z.number(),
   grandTotal: z.number(),
+  customDate: z.string().optional(), // Optional custom date for approvedAt (ISO string)
 });

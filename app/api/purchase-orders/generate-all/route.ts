@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentDateTime } from "@/lib/utils";
-import { getNextPurchaseOrderSequence, generateCode } from "@/lib/generate-code.service";
+import { findAvailablePOSequences, generateCode } from "@/lib/generate-code.service";
 import {
   groupQuotationByVendor,
   calculateQuotationItemPrice,
@@ -29,12 +29,28 @@ export async function POST(req: NextRequest) {
       quotationLists as QuotationListWithRelations[]
     );
 
-    // const today = new Date(Date.UTC(2025, 1, 1));
-    // const today = new Date();
-    const today = getCurrentDateTime();
+    // Use custom date if provided, otherwise use current date
+    // customDate allows regenerating POs with the original date after rollback
+    const targetDate = body.customDate 
+      ? new Date(body.customDate) 
+      : getCurrentDateTime();
 
-    // Get the next sequence number for PO code generation
-    let nextSequence = await getNextPurchaseOrderSequence(today);
+    // Get the number of POs we need to create
+    const vendorCount = Object.keys(quotationListsByVendor).length;
+
+    // Find available sequence slots for all POs (handles gaps from deleted POs)
+    const availableSlots = await findAvailablePOSequences(targetDate, vendorCount);
+
+    // Validate we have enough slots available
+    if (availableSlots.length < vendorCount) {
+      return NextResponse.json(
+        { 
+          error: "ไม่สามารถสร้างใบสั่งซื้อได้ เนื่องจากไม่มีเลขที่เอกสารว่างในระบบ กรุณาติดต่อผู้ดูแลระบบ",
+          details: `Required ${vendorCount} slots, found ${availableSlots.length}`
+        },
+        { status: 400 }
+      );
+    }
 
     // create purchase orders for each vendor
     const purchaseOrders = await Promise.all(
@@ -47,14 +63,16 @@ export async function POST(req: NextRequest) {
         const PO_tax = 0;
         const PO_vat = totalPrice * 0.07;
         
-        // Generate a unique code for this purchase order
-        // Use the current sequence number + index to ensure uniqueness across vendors
-        const currentSequence = nextSequence + index;
+        // Use the pre-calculated available slot for this PO
+        // This ensures no duplicate codes even when regenerating with custom date
+        // Note: slot.codeDate is used ONLY for generating the code (year/month)
+        //       targetDate is used for createdAt/updatedAt to maintain consistency
+        const slot = availableSlots[index];
         const code = generateCode(
           0, // ID parameter is unused in the function
           "PO",
-          today,
-          currentSequence
+          slot.codeDate,
+          slot.sequence
         );
 
         const purchaseOrder = await db.purchaseOrder.create({
@@ -68,8 +86,8 @@ export async function POST(req: NextRequest) {
             tax: PO_tax,
             vat: PO_vat,
             status: "draft",
-            createdAt: today,
-            updatedAt: today,
+            createdAt: targetDate,
+            updatedAt: targetDate,
           },
         });
 
@@ -97,7 +115,7 @@ export async function POST(req: NextRequest) {
         discount: quotationSummary.discount,
         tax: quotationSummary.vat,
         grandTotal: quotationSummary.grandTotal,
-        approvedAt: today,
+        approvedAt: targetDate,
       },
     });
 

@@ -35,8 +35,10 @@ import {
 } from "@/components/ui/tooltip";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 
-import { AlertCircleIcon, CheckCircle2Icon, PopcornIcon } from "lucide-react";
+import { AlertCircleIcon, CalendarIcon, CheckCircle2Icon, PopcornIcon } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 type Props = {
   quotationId: number;
@@ -354,6 +356,7 @@ const BillingSummary = (props: {
 }) => {
   const { isAdmin, data, quotationType, grandTotal, vatIncluded } = props;
   const summary = calculateQuotationItemPrice(data, vatIncluded);
+  const [customDate, setCustomDate] = useState<string>("");
 
   const { execute, isLoading } = useAction(updateServiceQuotationSummary, {
     onSuccess: (data) => {},
@@ -449,6 +452,23 @@ const BillingSummary = (props: {
                   </AlertTitle>
                 </div>
                 <AlertDescription>
+                  {/* Optional custom date for approvedAt */}
+                  <div className="mt-4 space-y-2">
+                    <Label htmlFor="customDate" className="text-sm font-medium flex items-center gap-2">
+                      <CalendarIcon className="w-4 h-4" />
+                      วันที่ยืนยัน (ไม่บังคับ)
+                    </Label>
+                    <Input
+                      id="customDate"
+                      type="datetime-local"
+                      value={customDate}
+                      onChange={(e) => setCustomDate(e.target.value)}
+                      className="max-w-xs mx-auto"
+                    />
+                    <p className="text-xs text-muted-foreground text-center">
+                      ใช้สำหรับยืนยันใบเสนอราคาหลังจาก Rollback โดยใช้วันที่เดิม
+                    </p>
+                  </div>
                   <div className="flex justify-center w-full mt-3 ">
                     <ConfirmActionButton
                       onConfirm={() => {
@@ -458,6 +478,8 @@ const BillingSummary = (props: {
                           discount: summary.discount,
                           tax: summary.vat,
                           grandTotal: summary.grandTotal,
+                          // Only send customDate if user provided one
+                          ...(customDate && { customDate }),
                         });
                       }}
                     >
