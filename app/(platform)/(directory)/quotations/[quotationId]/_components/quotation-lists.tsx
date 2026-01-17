@@ -241,9 +241,9 @@ export default function QuotationLists(props: Props) {
     },
     {
       name: "ยอดรวม",
-      key: "totalPrice",
+      key: "price",
       render: (item: QuotationListWithRelations) => {
-        return item.totalPrice?.toLocaleString();
+        return item.price?.toLocaleString();
       },
     },
     {
