@@ -297,6 +297,37 @@ const drawItemLists = (
     }
   }
 
+  // Add installment_period_info at the end of all item lists
+  if (_INSTALLMENT_DATA) {
+    lineStart -= config.lineHeight; // Add spacing before installment info
+
+    const previousPageInstallment = page;
+    const installmentRes = validatePageArea(
+      page,
+      pdfDoc,
+      templatePage,
+      lineStart,
+      LIST_END_AT,
+      ITEM_Y_Start,
+      (currentPage: PDFPage, currentLineStart: number) =>
+        writeInstallmentInfo(
+          currentPage,
+          currentLineStart,
+          config,
+          pdfDoc
+        )
+    );
+
+    lineStart = installmentRes.lineStart;
+    page = installmentRes.page;
+
+    // Check if a new page was created
+    if (page !== previousPageInstallment) {
+      pageNumber++;
+      drawStaticInfo(page, pageNumber);
+    }
+  }
+
   return { page, pageNumber };
 };
 
@@ -471,37 +502,45 @@ const writeMainDescription = (
     300
   );
   totalHeight += descriptionBounding.height / 10;
-  currentY -= descriptionBounding.height / 10;
-
-  // Add installment period if installment data exists
-  if (_INSTALLMENT_DATA) {
-    const installmentText = formatInstallmentText(
-      _INSTALLMENT_DATA,
-      _DATA?.installmentContractNumber
-    );
-
-    currentY -= config.lineHeight; // Add some spacing
-
-    currentPage.drawText(installmentText, {
-      x: columnPosition.description + 12, // indent same as description
-      y: currentY,
-      maxWidth: 300,
-      ...config,
-      opacity: 0.7,
-    });
-
-    const installmentBounding = getBoundingBox(
-      installmentText,
-      pdfDoc,
-      _FONT,
-      PAGE_FONT_SIZE,
-      config.lineHeight + 4,
-      300
-    );
-    totalHeight += config.lineHeight + installmentBounding.height / 10;
-  }
 
   return totalHeight;
+};
+
+const writeInstallmentInfo = (
+  currentPage: PDFPage,
+  lineStart: number,
+  config: {
+    font: PDFFont;
+    size: number;
+    lineHeight: number;
+  },
+  pdfDoc: PDFDocument
+) => {
+  if (!_INSTALLMENT_DATA) return 0;
+
+  const installmentText = formatInstallmentText(
+    _INSTALLMENT_DATA,
+    _DATA?.installmentContractNumber
+  );
+
+  currentPage.drawText(installmentText, {
+    x: columnPosition.description + 12, // indent same as description
+    y: lineStart,
+    maxWidth: 300,
+    ...config,
+    opacity: 0.7,
+  });
+
+  const installmentBounding = getBoundingBox(
+    installmentText,
+    pdfDoc,
+    _FONT,
+    PAGE_FONT_SIZE,
+    config.lineHeight + 4,
+    300
+  );
+
+  return installmentBounding.height / 10;
 };
 
 const drawHeaderInfo = (page: PDFPage, pageNumber: number) => {
