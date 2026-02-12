@@ -6,7 +6,7 @@ import {
   QuotationList,
   User,
 } from "@prisma/client";
-import { PDFDocument, PDFEmbeddedPage, PDFFont, PDFPage } from "pdf-lib";
+import { PDFDocument, PDFEmbeddedPage, PDFFont, PDFPage, rgb } from "pdf-lib";
 import {
   getBoundingBox,
   PDFDateFormat,
@@ -516,6 +516,47 @@ const writeInstallmentInfo = (
 ) => {
   if (!_INSTALLMENT_DATA) return 0;
 
+  let totalHeight = 0;
+  let currentY = lineStart;
+
+  // Draw description first if available (orange/yellow color)
+  if (_INSTALLMENT_DATA.description) {
+    // Split by newlines to respect textarea line breaks
+    const descriptionLines = _INSTALLMENT_DATA.description.split('\n');
+    
+    for (const line of descriptionLines) {
+      if (line.trim()) {
+        currentPage.drawText(line, {
+          x: columnPosition.description + 12,
+          y: currentY,
+          maxWidth: 300,
+          ...config,
+          color: rgb(0.85, 0.55, 0), // Orange/yellow color
+        });
+
+        const lineBounding = getBoundingBox(
+          line,
+          pdfDoc,
+          _FONT,
+          PAGE_FONT_SIZE,
+          config.lineHeight + 4,
+          300
+        );
+        const lineHeight = lineBounding.height / 10;
+        totalHeight += lineHeight;
+        currentY -= lineHeight;
+      } else {
+        // Empty line - add spacing
+        totalHeight += config.lineHeight;
+        currentY -= config.lineHeight;
+      }
+    }
+
+    // Add spacing between description and installment text
+    totalHeight += config.lineHeight;
+    currentY -= config.lineHeight;
+  }
+
   const installmentText = formatInstallmentText(
     _INSTALLMENT_DATA,
     _DATA?.installmentContractNumber
@@ -523,7 +564,7 @@ const writeInstallmentInfo = (
 
   currentPage.drawText(installmentText, {
     x: columnPosition.description + 12, // indent same as description
-    y: lineStart,
+    y: currentY,
     maxWidth: 300,
     ...config,
     opacity: 0.7,
@@ -537,8 +578,9 @@ const writeInstallmentInfo = (
     config.lineHeight + 4,
     300
   );
+  totalHeight += installmentBounding.height / 10;
 
-  return installmentBounding.height / 10;
+  return totalHeight;
 };
 
 const drawHeaderInfo = (page: PDFPage, pageNumber: number) => {

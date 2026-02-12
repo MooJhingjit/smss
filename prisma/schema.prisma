@@ -245,6 +245,7 @@ model QuotationInstallment {
   paidDate      DateTime? // When it was paid (null if not paid)
   status        InstallmentStatus @default(draft)
   showPrice     Boolean           @default(true) // Show price in PDF/display
+  description   String?           @db.Text // Description shown in PDF (above remarks, yellow/orange color)
   remarks       String?           @db.Text
   invoice       Invoice? // Relation to invoice for this installment
   billGroupId   Int?

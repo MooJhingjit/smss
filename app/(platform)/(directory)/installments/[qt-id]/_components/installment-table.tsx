@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Form,
   FormControl,
@@ -49,6 +50,7 @@ const FormSchema = z.object({
       status: z.enum(["draft", "pending", "paid", "overdue"]),
       paidDate: z.date().nullable().optional(),
       billGroupId: z.number().nullable().optional(),
+      description: z.string().optional(),
       remarks: z.string().optional(),
       showPrice: z.boolean().optional(),
     })
@@ -87,6 +89,7 @@ export default function InstallmentTable({
         status: installment.status,
         paidDate: installment.paidDate,
         billGroupId: installment.billGroupId,
+        description: installment.description || "",
         remarks: installment.remarks || "",
         showPrice: installment.showPrice ?? true,
       })),
@@ -235,6 +238,7 @@ export default function InstallmentTable({
             original.amount !== current.amount ||
             new Date(original.dueDate).toISOString().split("T")[0] !==
               current.dueDate ||
+            (original.description || "") !== (current.description || "") ||
             (original.remarks || "") !== (current.remarks || "") ||
             (original.showPrice ?? true) !== (current.showPrice ?? true))
         );
@@ -248,6 +252,7 @@ export default function InstallmentTable({
           installment.status === "paid"
             ? installment.paidDate || new Date()
             : null,
+        description: installment.description || null,
         remarks: installment.remarks || null,
         showPrice: installment.showPrice ?? true,
       }));
@@ -308,6 +313,9 @@ export default function InstallmentTable({
                     )}
                     <TableHead className="font-semibold text-gray-700 text-center">
                       สถานะการชำระ
+                    </TableHead>
+                    <TableHead className="font-semibold text-gray-700">
+                      รายละเอียด 
                     </TableHead>
                     <TableHead className="font-semibold text-gray-700">
                       หมายเหตุ
@@ -467,6 +475,26 @@ export default function InstallmentTable({
                         initialInstallment={initialInstallments[index]}
                       />
 
+                      <TableCell className="pr-3 py-1">
+                        <FormField
+                          control={form.control}
+                          name={`installments.${index}.description`}
+                          render={({ field: formField }) => (
+                            <FormItem>
+                              <FormControl>
+                                <Textarea
+                                  id={`installments.${index}.description`}
+                                  className="w-full min-w-[200px] min-h-[60px] resize-y"
+                                  rows={3}
+                                  {...formField}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </TableCell>
+
                       <TableCell>
                         <FormField
                           control={form.control}
@@ -541,6 +569,7 @@ export default function InstallmentTable({
                       status: installment.status,
                       paidDate: installment.paidDate,
                       billGroupId: installment.billGroupId,
+                      description: installment.description || "",
                       remarks: installment.remarks || "",
                       showPrice: installment.showPrice ?? true,
                     })),

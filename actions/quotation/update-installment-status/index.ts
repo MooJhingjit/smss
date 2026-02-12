@@ -47,6 +47,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
           amountWithVat?: number;
           amount?: number;
           dueDate?: Date;
+          description?: string | null;
           remarks?: string | null;
           showPrice?: boolean;
         } = {
@@ -63,6 +64,11 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         // If dueDate is provided, update it
         if (update.dueDate !== undefined) {
           updateData.dueDate = update.dueDate;
+        }
+
+        // If description is provided, update it
+        if (update.description !== undefined) {
+          updateData.description = update.description;
         }
 
         // If remarks is provided, update it
