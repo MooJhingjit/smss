@@ -354,14 +354,6 @@ const writeMainItem = (
     // lineHeight: breakLineHeight,
   });
 
-  // Quantity
-  currentPage.drawText(data.quantity ? data.quantity.toString() : "", {
-    x: columnPosition.quantity,
-    y: lineStart,
-    maxWidth: 20,
-    ...config,
-  });
-
   // Use installment amounts if available, otherwise use original list data (deduct discount from price only)
   const itemDiscount = 0 // data.discount ?? 0;
   const unitPriceValue = _INSTALLMENT_DATA
@@ -371,6 +363,14 @@ const writeMainItem = (
   const shouldShowPrice = _INSTALLMENT_DATA?.showPrice || !_INSTALLMENT_DATA;
 
   if (shouldShowPrice) {
+    // Quantity
+    currentPage.drawText(data.quantity ? data.quantity.toString() : "", {
+      x: columnPosition.quantity,
+      y: lineStart,
+      maxWidth: 20,
+      ...config,
+    });
+
     const unitPrice = unitPriceValue.toLocaleString("th-TH", CURRENCY_FORMAT);
 
     currentPage.drawText(unitPrice, {

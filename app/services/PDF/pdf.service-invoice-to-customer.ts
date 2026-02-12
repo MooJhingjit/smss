@@ -360,14 +360,6 @@ const writeMainItem = (
     // lineHeight: breakLineHeight,
   });
 
-  // Quantity
-  currentPage.drawText(data.quantity ? data.quantity.toString() : "", {
-    x: columnPosition.quantity,
-    y: lineStart,
-    maxWidth: 20,
-    ...config,
-  });
-
   // Use installment amount if available, otherwise use quotation list data
   let unitPrice, amount;
   if (_INSTALLMENT_DATA) {
@@ -385,6 +377,14 @@ const writeMainItem = (
   const shouldShowPrice = _INSTALLMENT_DATA?.showPrice || !_INSTALLMENT_DATA;
 
   if (shouldShowPrice) {
+    // Quantity
+    currentPage.drawText(data.quantity ? data.quantity.toString() : "", {
+      x: columnPosition.quantity,
+      y: lineStart,
+      maxWidth: 20,
+      ...config,
+    });
+
     const unitPriceText = unitPrice.toLocaleString("th-TH", CURRENCY_FORMAT);
 
     currentPage.drawText(unitPriceText, {
