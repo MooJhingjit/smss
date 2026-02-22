@@ -105,7 +105,7 @@ async function getData(): Promise<
       totalPrice: true,
     },
     where: {
-      createdAt: {
+      approvedAt: {
         gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
       },
     },
@@ -116,7 +116,7 @@ async function getData(): Promise<
       grandTotal: true,
     },
     where: {
-      createdAt: {
+      approvedAt: {
         gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
       },
     },
