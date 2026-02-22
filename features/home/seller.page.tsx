@@ -50,7 +50,7 @@ async function GetData(): Promise<[QuotationWithBuyer[], QuotationWithBuyer[], {
     },
     where: {
       sellerId: sellerId,
-      status: "paid",
+      // status: "paid",
       approvedAt: {
         gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
       },
