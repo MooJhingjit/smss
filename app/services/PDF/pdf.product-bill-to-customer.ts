@@ -570,6 +570,33 @@ const writeInstallmentInfo = (
     opacity: 0.7,
   });
 
+  // Draw quantity, unit price, and amount on the installment row
+  // Quantity
+  currentPage.drawText("1", {
+    x: columnPosition.quantity,
+    y: currentY,
+    maxWidth: 20,
+    ...config,
+  });
+
+  // Unit price
+  const unitPriceText = _INSTALLMENT_DATA.amount.toLocaleString("th-TH", CURRENCY_FORMAT);
+  currentPage.drawText(unitPriceText, {
+    x: columnPosition.unitPrice + 44 - getTextWidth(unitPriceText, config),
+    y: currentY,
+    maxWidth: 20,
+    ...config,
+  });
+
+  // Amount
+  const amountText = _INSTALLMENT_DATA.amount.toLocaleString("th-TH", CURRENCY_FORMAT);
+  currentPage.drawText(amountText, {
+    x: columnPosition.amount + 44 - getTextWidth(amountText, config),
+    y: currentY,
+    maxWidth: 50,
+    ...config,
+  });
+
   const installmentBounding = getBoundingBox(
     installmentText,
     pdfDoc,
