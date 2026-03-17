@@ -133,6 +133,8 @@ export async function DELETE(
             billGroup: true,
           },
         },
+        installments: true,
+        snapshots: true,
       },
     });
 
@@ -219,48 +221,69 @@ export async function DELETE(
         });
       }
 
-      // 5. Delete invoice and handle bill group
+      // 5. Delete all invoices
       if (quotation.invoices && quotation.invoices.length > 0) {
-        const invoice = quotation.invoices[0]; // Get the first invoice
-        const billGroupId = invoice.billGroupId;
-
-        // Delete the invoice first
-        await tx.invoice.delete({
+        await tx.invoice.deleteMany({
           where: {
-            id: invoice.id,
+            quotationId: quotationId,
           },
         });
-
-        // Check if the bill group has any other invoices or quotations
-        const billGroupUsage = await tx.billGroup.findUnique({
-          where: { id: billGroupId },
-          include: {
-            invoices: true,
-            quotations: true,
-          },
-        });
-
-        // If the bill group is empty, delete it
-        if (
-          billGroupUsage &&
-          billGroupUsage.invoices.length === 0 &&
-          billGroupUsage.quotations.length === 1 && // This quotation will be deleted next
-          billGroupUsage.quotations[0].id === quotationId
-        ) {
-          await tx.billGroup.delete({
-            where: {
-              id: billGroupId,
-            },
-          });
-        }
       }
 
-      // 6. Finally, delete the quotation itself
+      // 6. Delete installments
+      if (quotation.installments.length > 0) {
+        await tx.quotationInstallment.deleteMany({
+          where: {
+            quotationId: quotationId,
+          },
+        });
+      }
+
+      // 7. Delete snapshots
+      if (quotation.snapshots.length > 0) {
+        await tx.quotationSnapshot.deleteMany({
+          where: {
+            quotationId: quotationId,
+          },
+        });
+      }
+
+      // 8. Delete the quotation itself
       await tx.quotation.delete({
         where: {
           id: quotationId,
         },
       });
+
+      // 9. Clean up orphaned bill groups (after quotation is deleted)
+      if (quotation.invoices && quotation.invoices.length > 0) {
+        const billGroupIds = Array.from(
+          new Set(quotation.invoices.map((inv) => inv.billGroupId))
+        );
+
+        for (const billGroupId of billGroupIds) {
+          const billGroupUsage = await tx.billGroup.findUnique({
+            where: { id: billGroupId },
+            include: {
+              invoices: true,
+              quotations: true,
+            },
+          });
+
+          // Delete bill group if no remaining invoices or quotations reference it
+          if (
+            billGroupUsage &&
+            billGroupUsage.invoices.length === 0 &&
+            billGroupUsage.quotations.length === 0
+          ) {
+            await tx.billGroup.delete({
+              where: {
+                id: billGroupId,
+              },
+            });
+          }
+        }
+      }
     });
 
     return NextResponse.json({
