@@ -14,6 +14,17 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
+    const existingPO = await db.purchaseOrder.findFirst({
+      where: { quotationId: body.quotationId },
+      select: { id: true },
+    });
+    if (existingPO) {
+      return NextResponse.json(
+        { error: "ใบสั่งซื้อ(PO) ถูกสร้างไว้แล้ว กำลังรีเฟรชหน้าเว็บ" },
+        { status: 409 }
+      );
+    }
+
     // get all quotation items
     const quotationLists = await db.quotationList.findMany({
       where: {

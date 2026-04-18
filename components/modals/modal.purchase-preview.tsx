@@ -34,9 +34,13 @@ export const PurchasePreviewModal = () => {
 
   const mutation = useMutation({
     mutationFn: async () => {
-      return await PURCHASE_ORDER_SERVICES.generatePOs({
+      const res = await PURCHASE_ORDER_SERVICES.generatePOs({
         quotationId,
       });
+      if (res && !Array.isArray(res) && res.error) {
+        throw new Error(res.error);
+      }
+      return res;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
@@ -46,10 +50,11 @@ export const PurchasePreviewModal = () => {
     },
     // failed, wait 2 seconds and reload
     onError: (error: any) => {
+      toast.error(error?.message || "เกิดข้อผิดพลาด กรุณารีเฟรชหน้าเว็บ");
       setTimeout(() => {
-        // reload the page after 2 seconds 
+        // reload the page after 2 seconds
         window.location.reload();
-      }, 1000);
+      }, 2000);
     }
   });
 
